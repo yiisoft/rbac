@@ -11,13 +11,15 @@ use yii\caching\FileCache;
 use yii\rbac\DbManager;
 
 /**
- * MySQLManagerCacheTest.
- * @group rbac
+ * PgSQLManagerTest.
  * @group db
- * @group mysql
+ * @group rbac
+ * @group pgsql
  */
-class MySQLManagerCacheTest extends MySQLManagerTest
+class PgSQLManagerCacheTest extends DbManagerTestCase
 {
+    protected static $driverName = 'pgsql';
+
     /**
      * @return \yii\rbac\ManagerInterface
      */
