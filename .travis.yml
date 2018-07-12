@@ -1,0 +1,79 @@
+language: php
+
+env:
+  global:
+    - DEFAULT_COMPOSER_FLAGS="--prefer-dist --no-interaction --no-progress --optimize-autoloader"
+    - TASK_STATIC_ANALYSIS=0
+    - TASK_TESTS_COVERAGE=0
+
+matrix:
+  include:
+    - php: "7.4"
+      env:
+        - TASK_STATIC_ANALYSIS=0 # set to 1 to enable static analysis
+        - TASK_TESTS_COVERAGE=1
+
+# faster builds on new travis setup not using sudo
+sudo: false
+
+# cache vendor dirs
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+before_install:
+  - phpenv config-rm xdebug.ini || echo "xdebug is not installed"
+
+install:
+  - travis_retry composer self-update && composer --version
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - travis_retry composer install $DEFAULT_COMPOSER_FLAGS
+  - |
+    if [ $TASK_STATIC_ANALYSIS == 1 ]; then
+      pecl install ast
+    fi
+
+before_script:
+  - php --version
+  - composer --version
+  # enable code coverage
+  - |
+    if [ $TASK_TESTS_COVERAGE == 1 ]; then
+        PHPUNIT_COVERAGE_FLAG="--coverage-clover=coverage.clover"
+    fi
+
+script:
+  - phpdbg -qrr vendor/bin/phpunit --verbose $PHPUNIT_COVERAGE_FLAG
+  - |
+    if [ $TASK_STATIC_ANALYSIS == 1 ]; then
+      composer phan
+    fi
+  - |
+    if [ $TASK_STATIC_ANALYSIS == 1 ]; then
+      cat analysis.txt
+    fi
+
+after_script:
+  - |
+    if [ $TASK_TESTS_COVERAGE == 1 ]; then
+      travis_retry wget https://scrutinizer-ci.com/ocular.phar
+      php ocular.phar code-coverage:upload --format=php-clover coverage.clover
+    fi
+
+
+notifications:
+  slack:
+    -
+      rooms:
+        -
+          secure: uFG0hYqDGM7foti07bOseqfy1beoY4ZoayLg7dnH4rlyfmtuWGL172V4yz7rbdjDQiKqY0oNXMvJUGHMbiiiJbVlLnMwiCvn2tSkzKz8b3s+/tL2m4KYsirtxxN0ixuuQjQ33CI41cXigS2kW30arH7BHhL+OckTpgHdUV0Vvy3DNO8cIOMPXoo76ODj1gaEYjh8mSJ7265zlh6bCFuaBPWk4i4L9JjMT5tZNOS8yYJqF7jFaOoTITC6twTjGtqLFbFx1KWiJcjHsIcIsUhSJRFKiSwWPjH4HgPnDeAfnG4Hl/m8hqi1g30yKQV/JHJaXtR1FD+ZUOXnM7t7XzfVvlopL/sHRR1zRgtTplJ3T7daXZd2WqaL5ZgP3lyTXC/8aIF1QUmD4UovK+wyy9gQzaxQ9eKKeRyGbwOyME+yvPtFAGai4e3sqWtR2qwr+/6Wy3bJMj2egksb+d925BZTx769FJVwtgHwspOHB5GEIfiekC/uWyhjlF6kYrZJbedNAI27KcTH67baCbzsqtIdEqkeM5TEq3imbU3E4YIRSaMifm1QrXqQGbW5TPur7WWuQ9nVkT7UcaehweFthfbnYHInql1iFm3jxbewwrsiiI2oBVIy9ncNmPuWKyVg/aOuYj8266MFU09g9EcUaUaInWzwWmj2dEGwhSTEE6dSfxQ=
+      on_success: always
+      on_failure: never
+      on_pull_requests: false
+    -
+      rooms:
+        -
+          secure: rHnus2XaK+t5nDD6Us55uFSxy/eWFLmtXQpmfZwPRZggikllSKD3wF1yGGnQKcXSNzV1KDxfGvN+kfngeXDMGbBEpjH/DLlHFvcMazXulxZYQ7WgR7fxpqjC0qOf2SpO1Lf8E+lJx2uiYNBKbIr0S3cQHI4E+yBNM9s7ulCghgn+cCYV0ojIXAZrBtBsDsfbR3j6ftGRRb0+Ki0VFSkrAEzgFGDFVGYXoYCKrhLxiLHnKGVXmmQA6tq1wKaGq8rtBfeBWFGNYRyw35h/MRNuSaDWng07ejCX/P2widjF8IuSUy74N18U7+k4IW1ReT88MAk0j/YqxRQbHDNNGZon9tG8Sg5WiOZ39MU2j86qjQX0LKX+mx+5scnMHMXXZTwyUE2363bafrLya5G0sQwOJ+TTJWOgq2ydMphZcb4urpfSScjZpEIHhhV47hb/K0gQVT1orxxH2veBhcPQe0WxNqJ9mEhgmyjeykdz2iNXHTgSd/3jCh80hicGyoKcIyqN0c28OslXs4dSJy8VU1JWPvRqhnH3umeKKo32kiBw2T/a474+BETLW5i5qWATbUr7bGpXV8+WedAbRydvtlaxA0mL7e4NJhwfDZP0V4SmeolF6QtqfeTbA8AYTj19zYuucisnYZdMwi/0v9j4Or+HxmTZUPy+k7eTPjClfCs/15s=
+      on_success: never
+      on_failure: always
+      on_pull_requests: false
