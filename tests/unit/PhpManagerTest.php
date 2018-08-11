@@ -14,7 +14,7 @@ namespace yii\rbac;
  */
 function filemtime($file)
 {
-    return \yiiunit\framework\rbac\PhpManagerTest::$filemtime ?: \filemtime($file);
+    return \yii\rbac\tests\unit\PhpManagerTest::$filemtime ?: \filemtime($file);
 }
 
 /**
@@ -23,10 +23,10 @@ function filemtime($file)
  */
 function time()
 {
-    return \yiiunit\framework\rbac\PhpManagerTest::$time ?: \time();
+    return \yii\rbac\tests\unit\PhpManagerTest::$time ?: \time();
 }
 
-namespace yiiunit\framework\rbac;
+namespace yii\rbac\tests\unit;
 
 use Yii;
 

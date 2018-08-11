@@ -5,7 +5,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yiiunit\framework\rbac;
+namespace yii\rbac\tests\unit;
 
 /**
  * PgSQLManagerTest.

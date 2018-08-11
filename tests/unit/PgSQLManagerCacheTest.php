@@ -5,20 +5,22 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yiiunit\framework\rbac;
+namespace yii\rbac\tests\unit;
 
 use yii\caching\Cache;
 use yii\caching\FileCache;
 use yii\rbac\DbManager;
 
 /**
- * MySQLManagerCacheTest.
- * @group rbac
+ * PgSQLManagerTest.
  * @group db
- * @group mysql
+ * @group rbac
+ * @group pgsql
  */
-class MySQLManagerCacheTest extends MySQLManagerTest
+class PgSQLManagerCacheTest extends DbManagerTestCase
 {
+    protected static $driverName = 'pgsql';
+
     /**
      * @return \yii\rbac\ManagerInterface
      */
@@ -26,7 +28,7 @@ class MySQLManagerCacheTest extends MySQLManagerTest
     {
         return new DbManager([
             'db' => $this->getConnection(),
-            'cache' => new Cache(['handler' => new FileCache(['cachePath' => '@yiiunit/runtime/cache'])]),
+            'cache' => new Cache(['handler' => new FileCache(['cachePath' => '@yii/tests/runtime/cache'])]),
             'defaultRoles' => ['myDefaultRole'],
         ]);
     }
