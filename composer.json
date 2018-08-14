@@ -59,11 +59,7 @@
     },
     "autoload": {
         "psr-4": {
-            "yii\\rbac\\": "src"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
+            "yii\\rbac\\": "src",
             "yii\\rbac\\tests\\": "tests"
         }
     },
