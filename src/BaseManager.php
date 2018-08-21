@@ -8,9 +8,9 @@
 namespace yii\rbac;
 
 use yii\base\Component;
-use yii\base\InvalidArgumentException;
-use yii\base\InvalidConfigException;
-use yii\base\InvalidValueException;
+use yii\rbac\exceptions\InvalidArgumentException;
+use yii\rbac\exceptions\InvalidConfigException;
+use yii\rbac\exceptions\InvalidValueException;
 
 /**
  * BaseManager is a base class implementing [[ManagerInterface]] for RBAC management.
@@ -33,6 +33,18 @@ abstract class BaseManager extends Component implements ManagerInterface
      */
     protected $defaultRoles = [];
 
+    /**
+     * @var RuleFactoryInterface
+     */
+    protected $ruleFactory;
+
+    /**
+     * @param RuleFactoryInterface $ruleFactory
+     */
+    public function __construct(RuleFactoryInterface $ruleFactory)
+    {
+        $this->ruleFactory = $ruleFactory;
+    }
 
     /**
      * Returns the named auth item.
@@ -125,8 +137,7 @@ abstract class BaseManager extends Component implements ManagerInterface
     {
         if ($object instanceof Item) {
             if ($object->ruleName && $this->getRule($object->ruleName) === null) {
-                $rule = \Yii::createObject($object->ruleName);
-                $rule->name = $object->ruleName;
+                $rule = $this->createRule($object->ruleName);
                 $this->addRule($rule);
             }
 
@@ -136,6 +147,11 @@ abstract class BaseManager extends Component implements ManagerInterface
         }
 
         throw new InvalidArgumentException('Adding unsupported object type.');
+    }
+
+    protected function createRule($name): Rule
+    {
+        return $this->ruleFactory->create($name)->setName($name);
     }
 
     /**
@@ -159,8 +175,7 @@ abstract class BaseManager extends Component implements ManagerInterface
     {
         if ($object instanceof Item) {
             if ($object->ruleName && $this->getRule($object->ruleName) === null) {
-                $rule = \Yii::createObject($object->ruleName);
-                $rule->name = $object->ruleName;
+                $rule = $this->createRule($object->ruleName);
                 $this->addRule($rule);
             }
 
@@ -218,6 +233,8 @@ abstract class BaseManager extends Component implements ManagerInterface
         } else {
             throw new InvalidArgumentException('Default roles must be either an array or a callable');
         }
+
+        return $this;
     }
 
     /**
