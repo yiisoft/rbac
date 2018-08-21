@@ -28,7 +28,7 @@ function time()
 
 namespace yii\rbac\tests\unit;
 
-use Yii;
+use yii\rbac\DIRuleFactory;
 
 /**
  * @group rbac
@@ -56,9 +56,9 @@ class PhpManagerTest extends ManagerTestCase
 
     protected function removeDataFiles()
     {
-        @unlink($this->getItemFile());
-        @unlink($this->getAssignmentFile());
-        @unlink($this->getRuleFile());
+        #@unlink($this->getItemFile());
+        #@unlink($this->getAssignmentFile());
+        #@unlink($this->getRuleFile());
     }
 
     /**
@@ -70,7 +70,8 @@ class PhpManagerTest extends ManagerTestCase
             '',
             $this->getItemFile(),
             $this->getAssignmentFile(),
-            $this->getRuleFile()
+            $this->getRuleFile(),
+            $this->factory->get(DIRuleFactory::class)
         ))->setDefaultRoles(['myDefaultRole']);
     }
 
@@ -133,7 +134,7 @@ class PhpManagerTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \yii\base\InvalidArgumentException
+     * @expectedException \yii\rbac\exceptions\InvalidArgumentException
      */
     public function testOverwriteName()
     {

@@ -500,9 +500,9 @@ abstract class ManagerTestCase extends TestCase
         $this->assertFalse($auth->checkAccess($userId, 'Reader', ['action' => 'write']));
 
         // using DI
-        \Yii::$container->set('write_rule', ['__class' => 'yii\rbac\tests\unit\ActionRule', 'action' => 'write']);
-        \Yii::$container->set('delete_rule', ['__class' => 'yii\rbac\tests\unit\ActionRule', 'action' => 'delete']);
-        \Yii::$container->set('all_rule', ['__class' => 'yii\rbac\tests\unit\ActionRule', 'action' => 'all']);
+        $this->container->set('write_rule', ['__class' => 'yii\rbac\tests\unit\ActionRule', 'action' => 'write']);
+        $this->container->set('delete_rule', ['__class' => 'yii\rbac\tests\unit\ActionRule', 'action' => 'delete']);
+        $this->container->set('all_rule', ['__class' => 'yii\rbac\tests\unit\ActionRule', 'action' => 'all']);
 
         $item = $this->createRBACItem($RBACItemType, 'Writer');
         $item->ruleName = 'write_rule';
@@ -618,7 +618,7 @@ abstract class ManagerTestCase extends TestCase
 
     public function testDefaultRolesWithClosureReturningNonArrayValue()
     {
-        $this->expectException('yii\base\InvalidValueException');
+        $this->expectException('yii\rbac\exceptions\InvalidValueException');
         $this->expectExceptionMessage('Default roles closure must return an array');
         $this->auth->defaultRoles = function () {
             return 'test';
@@ -627,7 +627,7 @@ abstract class ManagerTestCase extends TestCase
 
     public function testDefaultRolesWithNonArrayValue()
     {
-        $this->expectException('yii\base\InvalidArgumentException');
+        $this->expectException('yii\rbac\exceptions\InvalidArgumentException');
         $this->expectExceptionMessage('Default roles must be either an array or a callable');
         $this->auth->defaultRoles = 'test';
     }

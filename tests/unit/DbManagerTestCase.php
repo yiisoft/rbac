@@ -8,12 +8,12 @@
 namespace yii\rbac\tests\unit;
 
 use Psr\Log\LogLevel;
-use Yii;
 use yii\caching\ArrayCache;
 use yii\caching\Cache;
 use yii\console\Application;
 use yii\console\ExitCode;
 use yii\db\Connection;
+use yii\helpers\Yii;
 use yii\rbac\Assignment;
 use yii\rbac\DbManager;
 use yii\rbac\Permission;
@@ -39,27 +39,21 @@ abstract class DbManagerTestCase extends ManagerTestCase
 
     protected static function runConsoleAction($route, $params = [])
     {
-        if (Yii::$app === null) {
-            new Application([
-                'id' => 'Migrator',
-                'basePath' => '@yii/tests',
+        if (Yii::getApp() === null) {
+            $this->mockApplication([
                 'controllerMap' => [
                     'migrate' => EchoMigrateController::class,
-                ],
-                'components' => [
-                    'db' => static::createConnection(),
-                    'authManager' => '\yii\rbac\DbManager',
                 ],
             ]);
         }
 
-        Yii::$app->setComponents([
+        Yii::getContainer()->setAll([
             'db' => static::createConnection(),
-            'authManager' => '\yii\rbac\DbManager',
+            'authManager' => DbManager::class,
         ]);
-        self::assertSame(static::$driverName, Yii::$app->db->getDriverName(), 'Connection represents the same DB driver, as is tested');
+        self::assertSame(static::$driverName, Yii::getApp()->db->getDriverName(), 'Connection represents the same DB driver, as is tested');
         ob_start();
-        $result = Yii::$app->runAction($route, $params);
+        $result = Yii::getApp()->runAction($route, $params);
         echo 'Result is ' . $result;
         if ($result !== ExitCode::OK) {
             ob_end_flush();
@@ -105,9 +99,9 @@ abstract class DbManagerTestCase extends ManagerTestCase
     }
 
     /**
-     * @throws \yii\base\InvalidArgumentException
+     * @throws \yii\rbac\exceptions\InvalidArgumentException
      * @throws \yii\db\Exception
-     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\rbac\exceptions\InvalidConfigException
      * @return \yii\db\Connection
      */
     public function getConnection()
@@ -306,7 +300,7 @@ abstract class DbManagerTestCase extends ManagerTestCase
 
         // track db queries
         /* @var $logger \yii\log\Logger */
-        $logger = Yii::$app->getLogger();
+        $logger = Yii::getApp()->getLogger();
 
         $logger->flushInterval = 1;
         $logger->messages = [];
