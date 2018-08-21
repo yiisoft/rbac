@@ -7,7 +7,7 @@
 
 namespace yii\rbac\tests\unit;
 
-use yii\base\InvalidArgumentException;
+use yii\rbac\exceptions\InvalidArgumentException;
 use yii\rbac\BaseManager;
 use yii\rbac\Item;
 use yii\rbac\Permission;

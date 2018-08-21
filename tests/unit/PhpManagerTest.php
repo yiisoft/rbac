@@ -41,17 +41,17 @@ class PhpManagerTest extends ManagerTestCase
 
     protected function getItemFile()
     {
-        return Yii::$app->getRuntimePath() . '/rbac-items.php';
+        return $this->app->getRuntimePath() . '/rbac-items.php';
     }
 
     protected function getAssignmentFile()
     {
-        return Yii::$app->getRuntimePath() . '/rbac-assignments.php';
+        return $this->app->getRuntimePath() . '/rbac-assignments.php';
     }
 
     protected function getRuleFile()
     {
-        return Yii::$app->getRuntimePath() . '/rbac-rules.php';
+        return $this->app->getRuntimePath() . '/rbac-rules.php';
     }
 
     protected function removeDataFiles()
@@ -66,12 +66,12 @@ class PhpManagerTest extends ManagerTestCase
      */
     protected function createManager()
     {
-        return new ExposedPhpManager([
-            'itemFile' => $this->getItemFile(),
-            'assignmentFile' => $this->getAssignmentFile(),
-            'ruleFile' => $this->getRuleFile(),
-            'defaultRoles' => ['myDefaultRole'],
-        ]);
+        return (new ExposedPhpManager(
+            '',
+            $this->getItemFile(),
+            $this->getAssignmentFile(),
+            $this->getRuleFile()
+        ))->setDefaultRoles(['myDefaultRole']);
     }
 
     protected function setUp()
