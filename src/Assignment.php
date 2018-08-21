@@ -7,9 +7,6 @@
 
 namespace yii\rbac;
 
-use Yii;
-use yii\base\BaseObject;
-
 /**
  * Assignment represents an assignment of a role to a user.
  *
@@ -19,7 +16,7 @@ use yii\base\BaseObject;
  * @author Alexander Kochetov <creocoder@gmail.com>
  * @since 2.0
  */
-class Assignment extends BaseObject
+class Assignment extends BaseItem
 {
     /**
      * @var string|int user ID (see [[\yii\web\User::id]])

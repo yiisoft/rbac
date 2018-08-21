@@ -7,15 +7,13 @@
 
 namespace yii\rbac;
 
-use yii\base\BaseObject;
-
 /**
  * For more details and usage information on Item, see the [guide article on security authorization](guide:security-authorization).
  *
  * @author Qiang Xue <qiang.xue@gmail.com>
  * @since 2.0
  */
-class Item extends BaseObject
+class Item extends BaseItem
 {
     const TYPE_ROLE = 1;
     const TYPE_PERMISSION = 2;

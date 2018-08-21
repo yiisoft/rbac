@@ -7,8 +7,6 @@
 
 namespace yii\rbac;
 
-use yii\base\BaseObject;
-
 /**
  * Rule represents a business constraint that may be associated with a role, permission or assignment.
  *
@@ -17,7 +15,7 @@ use yii\base\BaseObject;
  * @author Alexander Makarov <sam@rmcreative.ru>
  * @since 2.0
  */
-abstract class Rule extends BaseObject
+abstract class Rule extends BaseItem
 {
     /**
      * @var string name of the rule
@@ -43,4 +41,16 @@ abstract class Rule extends BaseObject
      * @return bool a value indicating whether the rule permits the auth item it is associated with.
      */
     abstract public function execute($user, $item, $params);
+
+    /**
+     * Setter for name.
+     * @param string $name
+     * @return self
+     */
+    public function setName($name): self
+    {
+        $this->name = $name;
+
+        return $this;
+    }
 }
