@@ -8,8 +8,8 @@
 namespace yii\rbac;
 
 use Yii;
-use yii\base\InvalidCallException;
-use yii\base\InvalidArgumentException;
+use yii\rbac\exceptions\InvalidCallException;
+use yii\rbac\exceptions\InvalidArgumentException;
 use yii\helpers\VarDumper;
 
 /**
@@ -40,7 +40,7 @@ class PhpManager extends BaseManager
      * @see loadFromFile()
      * @see saveToFile()
      */
-    public $itemFile = '@app/rbac/items.php';
+    protected $itemFile;
     /**
      * @var string the path of the PHP script that contains the authorization assignments.
      * This can be either a file path or a [path alias](guide:concept-aliases) to the file.
@@ -48,7 +48,7 @@ class PhpManager extends BaseManager
      * @see loadFromFile()
      * @see saveToFile()
      */
-    public $assignmentFile = '@app/rbac/assignments.php';
+    protected $assignmentFile;
     /**
      * @var string the path of the PHP script that contains the authorization rules.
      * This can be either a file path or a [path alias](guide:concept-aliases) to the file.
@@ -56,7 +56,7 @@ class PhpManager extends BaseManager
      * @see loadFromFile()
      * @see saveToFile()
      */
-    public $ruleFile = '@app/rbac/rules.php';
+    protected $ruleFile;
 
     /**
      * @var Item[]
@@ -77,17 +77,22 @@ class PhpManager extends BaseManager
 
 
     /**
-     * Initializes the application component.
-     * This method overrides parent implementation by loading the authorization data
-     * from PHP script.
+     * @param string $dir
+     * @param string $itemFile
+     * @param string $assignmentFile
+     * @param string $ruleFile
      */
-    public function init()
-    {
-        parent::init();
-        $this->itemFile = Yii::getAlias($this->itemFile);
-        $this->assignmentFile = Yii::getAlias($this->assignmentFile);
-        $this->ruleFile = Yii::getAlias($this->ruleFile);
-        $this->load();
+    public function __construct(
+        string $dir,
+        string $itemFile = 'items.php',
+        string $assignmentFile = 'assignments.php',
+        string $ruleFile = 'rules.php',
+        RuleFactoryInterface $ruleFactory
+    ) {
+        $this->itemFile         = $dir . DIRECTORY_SEPARATOR . $itemFile;
+        $this->assignmentFile   = $dir . DIRECTORY_SEPARATOR . $assignmentFile;
+        $this->ruleFile         = $dir . DIRECTORY_SEPARATOR . $ruleFile;
+        parent::__construct($ruleFactory);
     }
 
     /**
@@ -133,7 +138,7 @@ class PhpManager extends BaseManager
 
         /* @var $item Item */
         $item = $this->items[$itemName];
-        Yii::debug($item instanceof Role ? "Checking role: $itemName" : "Checking permission : $itemName", __METHOD__);
+        #Yii::debug($item instanceof Role ? "Checking role: $itemName" : "Checking permission : $itemName", __METHOD__);
 
         if (!$this->executeRule($user, $item, $params)) {
             return false;

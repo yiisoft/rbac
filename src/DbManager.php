@@ -7,14 +7,13 @@
 
 namespace yii\rbac;
 
-use Yii;
-use yii\base\InvalidCallException;
-use yii\base\InvalidArgumentException;
-use yii\caching\CacheInterface;
+use Psr\Log\LoggerInterface;
+use Psr\SimpleCache\CacheInterface;
+use yii\rbac\exceptions\InvalidCallException;
+use yii\rbac\exceptions\InvalidArgumentException;
 use yii\db\Connection;
 use yii\db\Expression;
 use yii\db\Query;
-use yii\di\Instance;
 
 /**
  * DbManager represents an authorization manager that stores authorization information in database.
@@ -103,16 +102,15 @@ class DbManager extends BaseManager
 
 
     /**
-     * Initializes the application component.
-     * This method overrides the parent implementation by establishing the database connection.
+     * @param ConnectionInterface $db
+     * @param CacheInterface|null $cache
+     * @param LoggerInterface|null $logger
      */
-    public function init()
+    public function __construct(ConnectionInterface $db, ?CacheInterface $cache, ?LoggerInterface $logger)
     {
-        parent::init();
-        $this->db = Instance::ensure($this->db, Connection::class);
-        if ($this->cache !== null) {
-            $this->cache = Instance::ensure($this->cache, CacheInterface::class);
-        }
+        $this->db = $db;
+        $this->cache = $cache;
+        $this->logger = $logger;
     }
 
     private $_checkAccessAssignments = [];
@@ -162,7 +160,7 @@ class DbManager extends BaseManager
 
         $item = $this->items[$itemName];
 
-        Yii::debug($item instanceof Role ? "Checking role: $itemName" : "Checking permission: $itemName", __METHOD__);
+        $this->debug($item instanceof Role ? "Checking role: $itemName" : "Checking permission: $itemName", __METHOD__);
 
         if (!$this->executeRule($user, $item, $params)) {
             return false;
@@ -201,7 +199,7 @@ class DbManager extends BaseManager
             return false;
         }
 
-        Yii::debug($item instanceof Role ? "Checking role: $itemName" : "Checking permission: $itemName", __METHOD__);
+        $this->debug($item instanceof Role ? "Checking role: $itemName" : "Checking permission: $itemName", __METHOD__);
 
         if (!$this->executeRule($user, $item, $params)) {
             return false;
@@ -223,6 +221,13 @@ class DbManager extends BaseManager
         }
 
         return false;
+    }
+
+    protected function debug(string $message, string $method)
+    {
+        if ($this->logger) {
+            $this->logger->debug($message, ['method' => $method]);
+        }
     }
 
     /**

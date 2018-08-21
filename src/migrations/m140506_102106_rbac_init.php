@@ -5,7 +5,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-use yii\base\InvalidConfigException;
+use yii\rbac\exceptions\InvalidConfigException;
 use yii\rbac\DbManager;
 
 /**
@@ -17,7 +17,7 @@ use yii\rbac\DbManager;
 class m140506_102106_rbac_init extends \yii\db\Migration
 {
     /**
-     * @throws yii\base\InvalidConfigException
+     * @throws yii\rbac\exceptions\InvalidConfigException
      * @return DbManager
      */
     protected function getAuthManager()
