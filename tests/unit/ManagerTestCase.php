@@ -366,6 +366,7 @@ abstract class ManagerTestCase extends TestCase
         $this->auth->assign($author, 'readingAuthor');
 
         $this->auth = $this->createManager();
+        $this->auth->load();
 
         $roles = $this->auth->getRolesByUser('readingAuthor');
         $roleNames = [];
@@ -388,6 +389,7 @@ abstract class ManagerTestCase extends TestCase
         $this->auth->assign($reader, 1337);
 
         $this->auth = $this->createManager();
+        $this->auth->load();
 
         $this->assertCount(0, $this->auth->getAssignments(0));
         $this->assertCount(1, $this->auth->getAssignments(42));
@@ -401,6 +403,7 @@ abstract class ManagerTestCase extends TestCase
         $this->auth->assign($reader, 123);
 
         $this->auth = $this->createManager();
+        $this->auth->load();
 
         $this->assertEquals([], $this->auth->getUserIdsByRole('nonexisting'));
         $this->assertEquals(['reader A', '123'], $this->auth->getUserIdsByRole('reader'), '', 0.0, 10, true);
