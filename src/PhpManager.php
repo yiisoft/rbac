@@ -78,16 +78,17 @@ class PhpManager extends BaseManager
 
     /**
      * @param string $dir
+     * @param RuleFactoryInterface $ruleFactory
      * @param string $itemFile
      * @param string $assignmentFile
      * @param string $ruleFile
      */
     public function __construct(
         string $dir,
+        RuleFactoryInterface $ruleFactory,
         string $itemFile = 'items.php',
         string $assignmentFile = 'assignments.php',
-        string $ruleFile = 'rules.php',
-        RuleFactoryInterface $ruleFactory
+        string $ruleFile = 'rules.php'
     ) {
         $this->itemFile         = $dir . DIRECTORY_SEPARATOR . $itemFile;
         $this->assignmentFile   = $dir . DIRECTORY_SEPARATOR . $assignmentFile;
