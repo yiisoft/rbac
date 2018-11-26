@@ -56,9 +56,9 @@ class PhpManagerTest extends ManagerTestCase
 
     protected function removeDataFiles()
     {
-        #@unlink($this->getItemFile());
-        #@unlink($this->getAssignmentFile());
-        #@unlink($this->getRuleFile());
+        @unlink($this->getItemFile());
+        @unlink($this->getAssignmentFile());
+        @unlink($this->getRuleFile());
     }
 
     /**
@@ -68,10 +68,10 @@ class PhpManagerTest extends ManagerTestCase
     {
         return (new ExposedPhpManager(
             '',
+            $this->factory->get(DIRuleFactory::class),
             $this->getItemFile(),
             $this->getAssignmentFile(),
-            $this->getRuleFile(),
-            $this->factory->get(DIRuleFactory::class)
+            $this->getRuleFile()
         ))->setDefaultRoles(['myDefaultRole']);
     }
 
