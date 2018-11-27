@@ -94,6 +94,7 @@ class PhpManager extends BaseManager
         $this->assignmentFile   = $dir . DIRECTORY_SEPARATOR . $assignmentFile;
         $this->ruleFile         = $dir . DIRECTORY_SEPARATOR . $ruleFile;
         parent::__construct($ruleFactory);
+        $this->load();
     }
 
     /**
