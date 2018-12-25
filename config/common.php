@@ -9,4 +9,7 @@ return [
     \yii\rbac\RuleFactoryInterface::class => [
         '__class' => \yii\rbac\RuleFactory::class,
     ],
+    \yii\rbac\CheckAccessInterface::class => [
+        '__class' => \yii\rbac\DenyAll::class,
+    ],
 ];
