@@ -11,7 +11,7 @@ use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use yii\rbac\exceptions\InvalidCallException;
 use yii\rbac\exceptions\InvalidArgumentException;
-use yii\db\Connection;
+use yii\db\ConnectionInterface;
 use yii\db\Expression;
 use yii\db\Query;
 
@@ -38,7 +38,7 @@ use yii\db\Query;
 class DbManager extends BaseManager
 {
     /**
-     * @var Connection|array|string the DB connection object or the application component ID of the DB connection.
+     * @var ConnectionInterface|array|string the DB connection object or the application component ID of the DB connection.
      * After the DbManager object is created, if you want to change this property, you should only assign it
      * with a DB connection object.
      * Starting from version 2.0.2, this can also be a configuration array for creating the object.
@@ -80,6 +80,10 @@ class DbManager extends BaseManager
      * @since 2.0.3
      */
     public $cache;
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
     /**
      * @var string the key used to store RBAC data in cache
      * @see cache

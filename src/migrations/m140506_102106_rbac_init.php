@@ -5,7 +5,9 @@
  * @license http://www.yiiframework.com/license/
  */
 
+use yii\helpers\Yii;
 use yii\rbac\exceptions\InvalidConfigException;
+use yii\rbac\BaseManager;
 use yii\rbac\DbManager;
 
 /**
@@ -16,18 +18,14 @@ use yii\rbac\DbManager;
  */
 class m140506_102106_rbac_init extends \yii\db\Migration
 {
-    /**
-     * @throws yii\rbac\exceptions\InvalidConfigException
-     * @return DbManager
-     */
-    protected function getAuthManager()
+    protected $authManager;
+
+    public function __construct(BaseManager $authManager)
     {
-        $authManager = Yii::$app->getAuthManager();
-        if (!$authManager instanceof DbManager) {
+        $this->authManager = $authManager;
+        if (!$this->authManager instanceof DbManager) {
             throw new InvalidConfigException('You should configure "authManager" component to use database before executing this migration.');
         }
-
-        return $authManager;
     }
 
     /**
@@ -48,7 +46,7 @@ class m140506_102106_rbac_init extends \yii\db\Migration
      */
     public function up()
     {
-        $authManager = $this->getAuthManager();
+        $authManager = $this->authManager;
         $this->db = $authManager->db;
 
         $tableOptions = null;
@@ -141,7 +139,7 @@ class m140506_102106_rbac_init extends \yii\db\Migration
      */
     public function down()
     {
-        $authManager = $this->getAuthManager();
+        $authManager = $this->authManager;
         $this->db = $authManager->db;
 
         if ($this->isMSSQL()) {
