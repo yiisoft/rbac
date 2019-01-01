@@ -7,8 +7,8 @@
 
 namespace yii\rbac\tests\unit;
 
-use yii\caching\Cache;
-use yii\caching\FileCache;
+use yii\cache\Cache;
+use yii\cache\FileCache;
 use yii\rbac\DbManager;
 
 /**

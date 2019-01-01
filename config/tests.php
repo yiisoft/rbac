@@ -9,4 +9,7 @@ return [
         'username' => 'rbac',
         'password' => 'rbac',
     ],
+    'cache' => [
+        '__class' => \yii\cache\ArrayCache::class,
+    ]
 ];

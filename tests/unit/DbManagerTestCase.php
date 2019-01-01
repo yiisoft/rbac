@@ -8,8 +8,8 @@
 namespace yii\rbac\tests\unit;
 
 use Psr\Log\LogLevel;
-use yii\caching\ArrayCache;
-use yii\caching\Cache;
+use yii\cache\ArrayCache;
+use yii\cache\Cache;
 use yii\console\Application;
 use yii\console\ExitCode;
 use yii\db\Connection;
@@ -20,7 +20,7 @@ use yii\rbac\Permission;
 use yii\rbac\Role;
 use yii\tests\data\rbac\UserID;
 use yii\console\tests\controllers\EchoMigrateController;
-use yii\log\tests\ArrayTarget;
+use yii\log\tests\unit\ArrayTarget;
 
 /**
  * DbManagerTestCase.
@@ -136,7 +136,12 @@ abstract class DbManagerTestCase extends ManagerTestCase
      */
     protected function createManager()
     {
-        return new DbManager(['db' => $this->getConnection(), 'defaultRoles' => ['myDefaultRole']]);
+        $this->container->set('db', $this->getConnection());
+
+        return Yii::createObject([
+            '__class' => DbManager::class,
+            'defaultRoles' => ['myDefaultRole']
+        ]);
     }
 
     private function prepareRoles($userId)
@@ -304,10 +309,11 @@ abstract class DbManagerTestCase extends ManagerTestCase
 
         $logger->flushInterval = 1;
         $logger->messages = [];
-        $logTarget = new ArrayTarget([
-            'categories' => ['yii\\db\\Command::query'],
-            'levels' => [LogLevel::INFO],
-        ]);
+
+        $logTarget = new ArrayTarget();
+        $logTarget->categories = ['yii\\db\\Command::query'];
+        $logTarget->levels = [LogLevel::INFO];
+
         $logger->addTarget($logTarget, 'rbacqueries');
         $this->assertCount(0, $logTarget->messages);
 
