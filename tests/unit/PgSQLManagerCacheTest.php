@@ -9,8 +9,6 @@ namespace yii\rbac\tests\unit;
 
 use yii\cache\Cache;
 use yii\cache\FileCache;
-use yii\rbac\DbManager;
-use yii\helpers\Yii;
 
 /**
  * PgSQLManagerTest.
@@ -18,7 +16,7 @@ use yii\helpers\Yii;
  * @group rbac
  * @group pgsql
  */
-class PgSQLManagerCacheTest extends DbManagerTestCase
+class PgSQLManagerCacheTest extends PgSQLManagerTest
 {
     protected static $driverName = 'pgsql';
 
@@ -27,12 +25,8 @@ class PgSQLManagerCacheTest extends DbManagerTestCase
      */
     protected function createManager()
     {
-        $manager = new DbManager(
-            $this->getConnection(),
-            new Cache(new FileCache('@yii/tests/runtime/cache')),
-            null
-        );
-        $manager->defaultRoles = ['myDefaultRole'];
+        $manager = parent::createManager();
+        $manager->cache = new Cache(new FileCache('@yii/tests/runtime/cache'));
         return $manager;
     }
 }

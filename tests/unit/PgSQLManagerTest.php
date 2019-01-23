@@ -7,6 +7,9 @@
 
 namespace yii\rbac\tests\unit;
 
+use yii\rbac\DbManager;
+use yii\rbac\DIRuleFactory;
+
 /**
  * PgSQLManagerTest.
  * @group db
@@ -16,4 +19,17 @@ namespace yii\rbac\tests\unit;
 class PgSQLManagerTest extends DbManagerTestCase
 {
     protected static $driverName = 'pgsql';
+
+    /**
+     * @return \yii\rbac\ManagerInterface
+     */
+    protected function createManager()
+    {
+        $manager = new DbManager(
+            $this->getConnection(),
+            $this->factory->get(DIRuleFactory::class)
+        );
+        $manager->defaultRoles = ['myDefaultRole'];
+        return $manager;        
+    }      
 }
