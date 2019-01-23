@@ -9,7 +9,6 @@ namespace yii\rbac\tests\unit;
 
 use yii\cache\Cache;
 use yii\cache\FileCache;
-use yii\rbac\DbManager;
 
 /**
  * MySQLManagerCacheTest.
@@ -24,10 +23,8 @@ class MySQLManagerCacheTest extends MySQLManagerTest
      */
     protected function createManager()
     {
-        return new DbManager([
-            'db' => $this->getConnection(),
-            'cache' => new Cache(['handler' => new FileCache(['cachePath' => '@yii/tests/runtime/cache'])]),
-            'defaultRoles' => ['myDefaultRole'],
-        ]);
+        $manager = parent::createManager();
+        $manager->cache = new Cache(new FileCache('@yii/tests/runtime/cache'));
+        return $manager;        
     }
 }

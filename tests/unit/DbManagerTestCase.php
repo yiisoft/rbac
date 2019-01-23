@@ -21,6 +21,7 @@ use yii\rbac\Role;
 use yii\tests\data\rbac\UserID;
 use yii\console\tests\controllers\EchoMigrateController;
 use yii\log\tests\unit\ArrayTarget;
+use yii\rbac\DIRuleFactory;
 
 /**
  * DbManagerTestCase.
@@ -40,17 +41,32 @@ abstract class DbManagerTestCase extends ManagerTestCase
     protected static function runConsoleAction($route, $params = [])
     {
         if (Yii::getApp() === null) {
-            $this->mockApplication([
-                'controllerMap' => [
-                    'migrate' => EchoMigrateController::class,
+            Yii::getContainer()->setAll([
+                'app' => [
+                    '__class' => \yii\console\Application::class,
+                    'id' => 'Migrator',
+                    'basePath' => '@yii/tests',
+                    'controllerMap' => [
+                        'migrate' => EchoMigrateController::class,
+                    ],
                 ],
             ]);
         }
 
+        $db = static::createConnection();
+        $manager = new DbManager($db, Yii::getContainer()->get('factory')->get(DIRuleFactory::class));
+
+        // We need to overwrite yii\rbac\BaseManager instance content because it is set in config/tests.php
+        // If we don't overwrite this values, inside src/migrations/m* files, will be used last db config
+        // Try to comment the third line ('yii\rbac\BaseManager' => $manager) and you see that launching all tests, when reaching pgsql tests will fail
+        // because migrations will never be done on postgres but on mysql, because in up() and down() method is used $db connection from $authManager
+        // that is the first connection established (mysql). 
         Yii::getContainer()->setAll([
-            'db' => static::createConnection(),
-            'authManager' => DbManager::class,
+            'db' => $db,
+            'authManager' => $manager,
+            'yii\rbac\BaseManager' => $manager, 
         ]);
+
         self::assertSame(static::$driverName, Yii::getApp()->db->getDriverName(), 'Connection represents the same DB driver, as is tested');
         ob_start();
         $result = Yii::getApp()->runAction($route, $params);
@@ -79,6 +95,7 @@ abstract class DbManagerTestCase extends ManagerTestCase
     public static function tearDownAfterClass()
     {
         static::runConsoleAction('migrate/down', ['all', 'migrationPath' => '@yii/rbac/migrations/', 'interactive' => false]);
+
         parent::tearDownAfterClass();
     }
 
@@ -138,10 +155,12 @@ abstract class DbManagerTestCase extends ManagerTestCase
     {
         $this->container->set('db', $this->getConnection());
 
-        return Yii::createObject([
-            '__class' => DbManager::class,
-            'defaultRoles' => ['myDefaultRole']
-        ]);
+        $manager = new DbManager(
+            $this->getConnection(),
+            $this->factory->get(DIRuleFactory::class)
+        );
+        $manager->defaultRoles = ['myDefaultRole'];
+        return $manager;
     }
 
     private function prepareRoles($userId)
@@ -299,7 +318,7 @@ abstract class DbManagerTestCase extends ManagerTestCase
         $this->prepareData();
 
         // warm up item cache, so only assignment queries are sent to DB
-        $this->auth->cache = new Cache(['handler' => new ArrayCache()]);
+        $this->auth->cache = new Cache(new ArrayCache());
         $this->auth->checkAccess('author B', 'readPost');
         $this->auth->checkAccess(new UserID('author B'), 'createPost');
 
