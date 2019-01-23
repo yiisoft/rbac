@@ -26,7 +26,9 @@ class MySQLManagerTest extends DbManagerTestCase
     {
         $manager = new DbManager(
             $this->getConnection(),
-            $this->factory->get(DIRuleFactory::class)
+            $this->factory->get(DIRuleFactory::class),
+            null,
+            null
         );
         $manager->defaultRoles = ['myDefaultRole'];
         return $manager;        

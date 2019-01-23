@@ -109,10 +109,12 @@ class DbManager extends BaseManager
      * @param ConnectionInterface $db
      * @param RuleFactoryInterface $ruleFactory
      */
-    public function __construct(ConnectionInterface $db, RuleFactoryInterface $ruleFactory)
+    public function __construct(ConnectionInterface $db, RuleFactoryInterface $ruleFactory, ?CacheInterface $cache, ?LoggerInterface $logger)
     {
-        $this->db = $db;
         parent::__construct($ruleFactory);
+        $this->db = $db;
+        $this->cache = $cache;
+        $this->logger = $logger;
     }
 
     private $_checkAccessAssignments = [];

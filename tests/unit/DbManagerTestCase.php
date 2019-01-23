@@ -40,21 +40,8 @@ abstract class DbManagerTestCase extends ManagerTestCase
 
     protected static function runConsoleAction($route, $params = [])
     {
-        if (Yii::getApp() === null) {
-            Yii::getContainer()->setAll([
-                'app' => [
-                    '__class' => \yii\console\Application::class,
-                    'id' => 'Migrator',
-                    'basePath' => '@yii/tests',
-                    'controllerMap' => [
-                        'migrate' => EchoMigrateController::class,
-                    ],
-                ],
-            ]);
-        }
-
         $db = static::createConnection();
-        $manager = new DbManager($db, Yii::getContainer()->get('factory')->get(DIRuleFactory::class));
+        $manager = new DbManager($db, Yii::getContainer()->get(DIRuleFactory::class), null, null);
 
         // We need to overwrite yii\rbac\BaseManager instance content because it is set in config/tests.php
         // If we don't overwrite this values, inside src/migrations/m* files, will be used last db config
@@ -157,7 +144,9 @@ abstract class DbManagerTestCase extends ManagerTestCase
 
         $manager = new DbManager(
             $this->getConnection(),
-            $this->factory->get(DIRuleFactory::class)
+            $this->factory->get(DIRuleFactory::class),
+            null,
+            null
         );
         $manager->defaultRoles = ['myDefaultRole'];
         return $manager;
@@ -324,7 +313,7 @@ abstract class DbManagerTestCase extends ManagerTestCase
 
         // track db queries
         /* @var $logger \yii\log\Logger */
-        $logger = Yii::getApp()->getLogger();
+        $logger = $this->app->getLogger();
 
         $logger->flushInterval = 1;
         $logger->messages = [];

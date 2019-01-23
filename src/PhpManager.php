@@ -7,7 +7,6 @@
 
 namespace yii\rbac;
 
-use Yii;
 use yii\rbac\exceptions\InvalidCallException;
 use yii\rbac\exceptions\InvalidArgumentException;
 use yii\helpers\VarDumper;

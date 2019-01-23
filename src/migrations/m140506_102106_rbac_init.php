@@ -5,7 +5,6 @@
  * @license http://www.yiiframework.com/license/
  */
 
-use yii\helpers\Yii;
 use yii\rbac\exceptions\InvalidConfigException;
 use yii\rbac\BaseManager;
 use yii\rbac\DbManager;
