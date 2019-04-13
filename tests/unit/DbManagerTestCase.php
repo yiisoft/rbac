@@ -20,7 +20,7 @@ use yii\rbac\Permission;
 use yii\rbac\Role;
 use yii\tests\data\rbac\UserID;
 use yii\console\tests\controllers\EchoMigrateController;
-use yii\log\tests\unit\ArrayTarget;
+use Yii\Log\Tests\Unit\ArrayTarget;
 use yii\rbac\DIRuleFactory;
 
 /**
@@ -312,7 +312,7 @@ abstract class DbManagerTestCase extends ManagerTestCase
         $this->auth->checkAccess(new UserID('author B'), 'createPost');
 
         // track db queries
-        /* @var $logger \yii\log\Logger */
+        /* @var $logger \Yii\Log\Logger */
         $logger = $this->app->getLogger();
 
         $logger->flushInterval = 1;
