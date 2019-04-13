@@ -1,6 +1,7 @@
 <?php
 /**
  * @link http://www.yiiframework.com/
+ *
  * @copyright Copyright (c) 2008 Yii Software LLC
  * @license http://www.yiiframework.com/license/
  */
@@ -12,6 +13,7 @@ use yii\rbac\DIRuleFactory;
 
 /**
  * PgSQLManagerTest.
+ *
  * @group db
  * @group rbac
  * @group pgsql
@@ -32,6 +34,7 @@ class PgSQLManagerTest extends DbManagerTestCase
             null
         );
         $manager->defaultRoles = ['myDefaultRole'];
-        return $manager;        
-    }      
+
+        return $manager;
+    }
 }

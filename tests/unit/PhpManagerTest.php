@@ -1,6 +1,7 @@
 <?php
 /**
  * @link http://www.yiiframework.com/
+ *
  * @copyright Copyright (c) 2008 Yii Software LLC
  * @license http://www.yiiframework.com/license/
  */
@@ -9,7 +10,9 @@ namespace yii\rbac;
 
 /**
  * Mock for the filemtime() function for rbac classes. Avoid random test fails.
+ *
  * @param string $file
+ *
  * @return int
  */
 function filemtime($file)
@@ -19,6 +22,7 @@ function filemtime($file)
 
 /**
  * Mock for the time() function for rbac classes. Avoid random test fails.
+ *
  * @return int
  */
 function time()
@@ -32,6 +36,7 @@ use yii\rbac\DIRuleFactory;
 
 /**
  * @group rbac
+ *
  * @property ExposedPhpManager $auth
  */
 class PhpManagerTest extends ManagerTestCase
@@ -41,17 +46,17 @@ class PhpManagerTest extends ManagerTestCase
 
     protected function getItemFile()
     {
-        return $this->app->getRuntimePath() . '/rbac-items.php';
+        return $this->app->getRuntimePath().'/rbac-items.php';
     }
 
     protected function getAssignmentFile()
     {
-        return $this->app->getRuntimePath() . '/rbac-assignments.php';
+        return $this->app->getRuntimePath().'/rbac-assignments.php';
     }
 
     protected function getRuleFile()
     {
-        return $this->app->getRuntimePath() . '/rbac-rules.php';
+        return $this->app->getRuntimePath().'/rbac-rules.php';
     }
 
     protected function removeDataFiles()

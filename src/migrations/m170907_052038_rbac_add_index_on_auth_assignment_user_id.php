@@ -1,14 +1,14 @@
 <?php
 /**
  * @link http://www.yiiframework.com/
+ *
  * @copyright Copyright (c) 2008 Yii Software LLC
  * @license http://www.yiiframework.com/license/
  */
-
-use yii\rbac\exceptions\InvalidConfigException;
 use yii\db\Migration;
 use yii\rbac\BaseManager;
 use yii\rbac\DbManager;
+use yii\rbac\exceptions\InvalidConfigException;
 
 /**
  * Adds index on `user_id` column in `auth_assignment` table for performance reasons.
@@ -16,6 +16,7 @@ use yii\rbac\DbManager;
  * @see https://github.com/yiisoft/yii2/pull/14765
  *
  * @author Ivan Buttinoni <ivan.buttinoni@cibi.it>
+ *
  * @since 2.0.13
  */
 class m170907_052038_rbac_add_index_on_auth_assignment_user_id extends Migration

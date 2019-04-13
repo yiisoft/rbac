@@ -1,15 +1,16 @@
 <?php
 /**
  * @link http://www.yiiframework.com/
+ *
  * @copyright Copyright (c) 2008 Yii Software LLC
  * @license http://www.yiiframework.com/license/
  */
 
 namespace yii\rbac;
 
-use yii\rbac\exceptions\InvalidCallException;
-use yii\rbac\exceptions\InvalidArgumentException;
 use yii\helpers\VarDumper;
+use yii\rbac\exceptions\InvalidArgumentException;
+use yii\rbac\exceptions\InvalidCallException;
 
 /**
  * PhpManager represents an authorization manager that stores authorization
@@ -28,30 +29,34 @@ use yii\helpers\VarDumper;
  * @author Alexander Kochetov <creocoder@gmail.com>
  * @author Christophe Boulain <christophe.boulain@gmail.com>
  * @author Alexander Makarov <sam@rmcreative.ru>
+ *
  * @since 2.0
  */
 class PhpManager extends BaseManager
 {
     /**
      * @var string the path of the PHP script that contains the authorization items.
-     * This can be either a file path or a [path alias](guide:concept-aliases) to the file.
-     * Make sure this file is writable by the Web server process if the authorization needs to be changed online.
+     *             This can be either a file path or a [path alias](guide:concept-aliases) to the file.
+     *             Make sure this file is writable by the Web server process if the authorization needs to be changed online.
+     *
      * @see loadFromFile()
      * @see saveToFile()
      */
     protected $itemFile;
     /**
      * @var string the path of the PHP script that contains the authorization assignments.
-     * This can be either a file path or a [path alias](guide:concept-aliases) to the file.
-     * Make sure this file is writable by the Web server process if the authorization needs to be changed online.
+     *             This can be either a file path or a [path alias](guide:concept-aliases) to the file.
+     *             Make sure this file is writable by the Web server process if the authorization needs to be changed online.
+     *
      * @see loadFromFile()
      * @see saveToFile()
      */
     protected $assignmentFile;
     /**
      * @var string the path of the PHP script that contains the authorization rules.
-     * This can be either a file path or a [path alias](guide:concept-aliases) to the file.
-     * Make sure this file is writable by the Web server process if the authorization needs to be changed online.
+     *             This can be either a file path or a [path alias](guide:concept-aliases) to the file.
+     *             Make sure this file is writable by the Web server process if the authorization needs to be changed online.
+     *
      * @see loadFromFile()
      * @see saveToFile()
      */
@@ -74,13 +79,12 @@ class PhpManager extends BaseManager
      */
     protected $rules = []; // ruleName => rule
 
-
     /**
-     * @param string $dir
+     * @param string               $dir
      * @param RuleFactoryInterface $ruleFactory
-     * @param string $itemFile
-     * @param string $assignmentFile
-     * @param string $ruleFile
+     * @param string               $itemFile
+     * @param string               $assignmentFile
+     * @param string               $ruleFile
      */
     public function __construct(
         string $dir,
@@ -89,9 +93,9 @@ class PhpManager extends BaseManager
         string $assignmentFile = 'assignments.php',
         string $ruleFile = 'rules.php'
     ) {
-        $this->itemFile         = $dir . DIRECTORY_SEPARATOR . $itemFile;
-        $this->assignmentFile   = $dir . DIRECTORY_SEPARATOR . $assignmentFile;
-        $this->ruleFile         = $dir . DIRECTORY_SEPARATOR . $ruleFile;
+        $this->itemFile = $dir.DIRECTORY_SEPARATOR.$itemFile;
+        $this->assignmentFile = $dir.DIRECTORY_SEPARATOR.$assignmentFile;
+        $this->ruleFile = $dir.DIRECTORY_SEPARATOR.$ruleFile;
         parent::__construct($ruleFactory);
         $this->load();
     }
@@ -122,13 +126,14 @@ class PhpManager extends BaseManager
      * Performs access check for the specified user.
      * This method is internally called by [[checkAccess()]].
      *
-     * @param string|int $user the user ID. This should can be either an integer or a string representing
-     * the unique identifier of a user. See [[\yii\web\User::id]].
-     * @param string $itemName the name of the operation that need access check
-     * @param array $params name-value pairs that would be passed to rules associated
-     * with the tasks and roles assigned to the user. A param with name 'user' is added to this array,
-     * which holds the value of `$userId`.
+     * @param string|int   $user        the user ID. This should can be either an integer or a string representing
+     *                                  the unique identifier of a user. See [[\yii\web\User::id]].
+     * @param string       $itemName    the name of the operation that need access check
+     * @param array        $params      name-value pairs that would be passed to rules associated
+     *                                  with the tasks and roles assigned to the user. A param with name 'user' is added to this array,
+     *                                  which holds the value of `$userId`.
      * @param Assignment[] $assignments the assignments to the specified user
+     *
      * @return bool whether the operations can be performed by the user.
      */
     protected function checkAccessRecursive($user, $itemName, $params, $assignments)
@@ -139,7 +144,7 @@ class PhpManager extends BaseManager
 
         /* @var $item Item */
         $item = $this->items[$itemName];
-        #Yii::debug($item instanceof Role ? "Checking role: $itemName" : "Checking permission : $itemName", __METHOD__);
+        //Yii::debug($item instanceof Role ? "Checking role: $itemName" : "Checking permission : $itemName", __METHOD__);
 
         if (!$this->executeRule($user, $item, $params)) {
             return false;
@@ -160,6 +165,7 @@ class PhpManager extends BaseManager
 
     /**
      * {@inheritdoc}
+     *
      * @since 2.0.8
      */
     public function canAddChild($parent, $child)
@@ -199,7 +205,8 @@ class PhpManager extends BaseManager
      * Checks whether there is a loop in the authorization item hierarchy.
      *
      * @param Item $parent parent item
-     * @param Item $child the child item that is to be added to the hierarchy
+     * @param Item $child  the child item that is to be added to the hierarchy
+     *
      * @return bool whether a loop exists
      */
     protected function detectLoop($parent, $child)
@@ -228,6 +235,7 @@ class PhpManager extends BaseManager
         if (isset($this->children[$parent->name][$child->name])) {
             unset($this->children[$parent->name][$child->name]);
             $this->saveItems();
+
             return true;
         }
 
@@ -242,6 +250,7 @@ class PhpManager extends BaseManager
         if (isset($this->children[$parent->name])) {
             unset($this->children[$parent->name]);
             $this->saveItems();
+
             return true;
         }
 
@@ -268,8 +277,8 @@ class PhpManager extends BaseManager
         }
 
         $this->assignments[$userId][$role->name] = new Assignment([
-            'userId' => $userId,
-            'roleName' => $role->name,
+            'userId'    => $userId,
+            'roleName'  => $role->name,
             'createdAt' => time(),
         ]);
         $this->saveAssignments();
@@ -285,6 +294,7 @@ class PhpManager extends BaseManager
         if (isset($this->assignments[$userId][$role->name])) {
             unset($this->assignments[$userId][$role->name]);
             $this->saveAssignments();
+
             return true;
         }
 
@@ -301,6 +311,7 @@ class PhpManager extends BaseManager
                 unset($this->assignments[$userId][$itemName]);
             }
             $this->saveAssignments();
+
             return true;
         }
 
@@ -332,7 +343,6 @@ class PhpManager extends BaseManager
         return $items;
     }
 
-
     /**
      * {@inheritdoc}
      */
@@ -348,6 +358,7 @@ class PhpManager extends BaseManager
             unset($this->items[$item->name]);
             $this->saveItems();
             $this->saveAssignments();
+
             return true;
         }
 
@@ -372,6 +383,7 @@ class PhpManager extends BaseManager
         }
         $this->rules[$rule->name] = $rule;
         $this->saveRules();
+
         return true;
     }
 
@@ -454,8 +466,8 @@ class PhpManager extends BaseManager
     /**
      * Recursively finds all children and grand children of the specified item.
      *
-     * @param string $name the name of the item whose children are to be looked for.
-     * @param array $result the children and grand children (in array keys)
+     * @param string $name   the name of the item whose children are to be looked for.
+     * @param array  $result the children and grand children (in array keys)
      */
     protected function getChildrenRecursive($name, &$result)
     {
@@ -480,8 +492,11 @@ class PhpManager extends BaseManager
 
     /**
      * Returns all permissions that are directly assigned to user.
+     *
      * @param string|int $userId the user ID (see [[\yii\web\User::id]])
+     *
      * @return Permission[] all direct permissions that the user has. The array is indexed by the permission names.
+     *
      * @since 2.0.7
      */
     protected function getDirectPermissionsByUser($userId)
@@ -499,8 +514,11 @@ class PhpManager extends BaseManager
 
     /**
      * Returns all permissions that the user inherits from the roles assigned to him.
+     *
      * @param string|int $userId the user ID (see [[\yii\web\User::id]])
+     *
      * @return Permission[] all inherited permissions that the user has. The array is indexed by the permission names.
+     *
      * @since 2.0.7
      */
     protected function getInheritedPermissionsByUser($userId)
@@ -563,6 +581,7 @@ class PhpManager extends BaseManager
 
     /**
      * Removes all auth items of the specified type.
+     *
      * @param int $type the auth item type (either Item::TYPE_PERMISSION or Item::TYPE_ROLE)
      */
     protected function removeAllItems($type)
@@ -635,6 +654,7 @@ class PhpManager extends BaseManager
                 }
             }
             $this->saveRules();
+
             return true;
         }
 
@@ -648,6 +668,7 @@ class PhpManager extends BaseManager
     {
         $this->rules[$rule->name] = $rule;
         $this->saveRules();
+
         return true;
     }
 
@@ -687,6 +708,7 @@ class PhpManager extends BaseManager
         $this->items[$item->name] = $item;
 
         $this->saveItems();
+
         return true;
     }
 
@@ -730,12 +752,12 @@ class PhpManager extends BaseManager
             $class = $item['type'] == Item::TYPE_PERMISSION ? Permission::class : Role::class;
 
             $this->items[$name] = new $class([
-                'name' => $name,
+                'name'        => $name,
                 'description' => $item['description'] ?? null,
-                'ruleName' => $item['ruleName'] ?? null,
-                'data' => $item['data'] ?? null,
-                'createdAt' => $itemsMtime,
-                'updatedAt' => $itemsMtime,
+                'ruleName'    => $item['ruleName'] ?? null,
+                'data'        => $item['data'] ?? null,
+                'createdAt'   => $itemsMtime,
+                'updatedAt'   => $itemsMtime,
             ]);
         }
 
@@ -752,8 +774,8 @@ class PhpManager extends BaseManager
         foreach ($assignments as $userId => $roles) {
             foreach ($roles as $role) {
                 $this->assignments[$userId][$role] = new Assignment([
-                    'userId' => $userId,
-                    'roleName' => $role,
+                    'userId'    => $userId,
+                    'roleName'  => $role,
                     'createdAt' => $assignmentsMtime,
                 ]);
             }
@@ -778,7 +800,9 @@ class PhpManager extends BaseManager
      * Loads the authorization data from a PHP script file.
      *
      * @param string $file the file path.
+     *
      * @return array the authorization data
+     *
      * @see saveToFile()
      */
     protected function loadFromFile($file)
@@ -793,19 +817,22 @@ class PhpManager extends BaseManager
     /**
      * Saves the authorization data to a PHP script file.
      *
-     * @param array $data the authorization data
+     * @param array  $data the authorization data
      * @param string $file the file path.
+     *
      * @see loadFromFile()
      */
     protected function saveToFile($data, $file)
     {
-        file_put_contents($file, "<?php\nreturn " . VarDumper::export($data) . ";\n", LOCK_EX);
+        file_put_contents($file, "<?php\nreturn ".VarDumper::export($data).";\n", LOCK_EX);
         $this->invalidateScriptCache($file);
     }
 
     /**
      * Invalidates precompiled script cache (such as OPCache) for the given file.
+     *
      * @param string $file the file path.
+     *
      * @since 2.0.9
      */
     protected function invalidateScriptCache($file)
@@ -825,10 +852,10 @@ class PhpManager extends BaseManager
             /* @var $item Item */
             $items[$name] = array_filter(
                 [
-                    'type' => $item->type,
+                    'type'        => $item->type,
                     'description' => $item->description,
-                    'ruleName' => $item->ruleName,
-                    'data' => $item->data,
+                    'ruleName'    => $item->ruleName,
+                    'data'        => $item->data,
                 ]
             );
             if (isset($this->children[$name])) {
@@ -870,6 +897,7 @@ class PhpManager extends BaseManager
 
     /**
      * {@inheritdoc}
+     *
      * @since 2.0.7
      */
     public function getUserIdsByRole($roleName)

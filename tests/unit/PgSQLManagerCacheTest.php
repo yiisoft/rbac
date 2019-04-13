@@ -1,6 +1,7 @@
 <?php
 /**
  * @link http://www.yiiframework.com/
+ *
  * @copyright Copyright (c) 2008 Yii Software LLC
  * @license http://www.yiiframework.com/license/
  */
@@ -12,6 +13,7 @@ use yii\cache\FileCache;
 
 /**
  * PgSQLManagerTest.
+ *
  * @group db
  * @group rbac
  * @group pgsql
@@ -27,6 +29,7 @@ class PgSQLManagerCacheTest extends PgSQLManagerTest
     {
         $manager = parent::createManager();
         $manager->cache = new Cache(new FileCache('@yii/tests/runtime/cache'));
+
         return $manager;
     }
 }
