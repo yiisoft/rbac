@@ -1,6 +1,7 @@
 <?php
 /**
  * @link http://www.yiiframework.com/
+ *
  * @copyright Copyright (c) 2008 Yii Software LLC
  * @license http://www.yiiframework.com/license/
  */
@@ -9,8 +10,10 @@ namespace yii\rbac\tests\unit;
 
 use yii\rbac\DbManager;
 use yii\rbac\DIRuleFactory;
+
 /**
  * MySQLManagerTest.
+ *
  * @group db
  * @group rbac
  * @group mysql
@@ -31,6 +34,7 @@ class MySQLManagerTest extends DbManagerTestCase
             null
         );
         $manager->defaultRoles = ['myDefaultRole'];
-        return $manager;        
-    }    
+
+        return $manager;
+    }
 }

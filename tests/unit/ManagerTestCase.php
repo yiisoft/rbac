@@ -1,13 +1,13 @@
 <?php
 /**
  * @link http://www.yiiframework.com/
+ *
  * @copyright Copyright (c) 2008 Yii Software LLC
  * @license http://www.yiiframework.com/license/
  */
 
 namespace yii\rbac\tests\unit;
 
-use yii\rbac\exceptions\InvalidArgumentException;
 use yii\rbac\BaseManager;
 use yii\rbac\Item;
 use yii\rbac\Permission;
@@ -169,35 +169,35 @@ abstract class ManagerTestCase extends TestCase
 
         $testSuites = [
             'reader A' => [
-                'createPost' => false,
-                'readPost' => true,
-                'updatePost' => false,
+                'createPost'    => false,
+                'readPost'      => true,
+                'updatePost'    => false,
                 'updateAnyPost' => false,
             ],
             'author B' => [
-                'createPost' => true,
-                'readPost' => true,
-                'updatePost' => true,
-                'deletePost' => true,
+                'createPost'    => true,
+                'readPost'      => true,
+                'updatePost'    => true,
+                'deletePost'    => true,
                 'updateAnyPost' => false,
             ],
             'admin C' => [
-                'createPost' => true,
-                'readPost' => true,
-                'updatePost' => false,
+                'createPost'    => true,
+                'readPost'      => true,
+                'updatePost'    => false,
                 'updateAnyPost' => true,
-                'blablabla' => false,
-                null => false,
+                'blablabla'     => false,
+                null            => false,
             ],
             'guest' => [
                 // all actions denied for guest (user not exists)
-                'createPost' => false,
-                'readPost' => false,
-                'updatePost' => false,
-                'deletePost' => false,
+                'createPost'    => false,
+                'readPost'      => false,
+                'updatePost'    => false,
+                'deletePost'    => false,
                 'updateAnyPost' => false,
-                'blablabla' => false,
-                null => false,
+                'blablabla'     => false,
+                null            => false,
             ],
         ];
 
@@ -374,8 +374,8 @@ abstract class ManagerTestCase extends TestCase
             $roleNames[] = $role->name;
         }
 
-        $this->assertContains('reader', $roleNames, 'Roles should contain reader. Currently it has: ' . implode(', ', $roleNames));
-        $this->assertContains('author', $roleNames, 'Roles should contain author. Currently it has: ' . implode(', ', $roleNames));
+        $this->assertContains('reader', $roleNames, 'Roles should contain reader. Currently it has: '.implode(', ', $roleNames));
+        $this->assertContains('author', $roleNames, 'Roles should contain author. Currently it has: '.implode(', ', $roleNames));
     }
 
     public function testAssignmentsToIntegerId()
@@ -389,7 +389,7 @@ abstract class ManagerTestCase extends TestCase
         $this->auth->assign($reader, 1337);
 
         $this->auth = $this->createManager();
-       // $this->auth->load();
+        // $this->auth->load();
 
         $this->assertCount(0, $this->auth->getAssignments(0));
         $this->assertCount(1, $this->auth->getAssignments(42));
@@ -421,7 +421,6 @@ abstract class ManagerTestCase extends TestCase
         $this->assertTrue($this->auth->canAddChild($author, $reader));
         $this->assertFalse($this->auth->canAddChild($reader, $author));
     }
-
 
     public function testRemoveAllRules()
     {
@@ -469,6 +468,7 @@ abstract class ManagerTestCase extends TestCase
 
     /**
      * @dataProvider RBACItemsProvider
+     *
      * @param mixed $RBACItemType
      */
     public function testAssignRule($RBACItemType)
@@ -537,6 +537,7 @@ abstract class ManagerTestCase extends TestCase
 
     /**
      * @dataProvider RBACItemsProvider
+     *
      * @param mixed $RBACItemType
      */
     public function testRevokeRule($RBACItemType)
@@ -567,8 +568,10 @@ abstract class ManagerTestCase extends TestCase
 
     /**
      * Create Role or Permission RBAC item.
-     * @param int $RBACItemType
+     *
+     * @param int    $RBACItemType
      * @param string $name
+     *
      * @return Permission|Role
      */
     private function createRBACItem($RBACItemType, $name)
@@ -585,8 +588,10 @@ abstract class ManagerTestCase extends TestCase
 
     /**
      * Get Role or Permission RBAC item.
-     * @param int $RBACItemType
+     *
+     * @param int    $RBACItemType
      * @param string $name
+     *
      * @return Permission|Role
      */
     private function getRBACItem($RBACItemType, $name)

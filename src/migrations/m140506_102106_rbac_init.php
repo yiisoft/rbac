@@ -1,18 +1,19 @@
 <?php
 /**
  * @link http://www.yiiframework.com/
+ *
  * @copyright Copyright (c) 2008 Yii Software LLC
  * @license http://www.yiiframework.com/license/
  */
-
-use yii\rbac\exceptions\InvalidConfigException;
 use yii\rbac\BaseManager;
 use yii\rbac\DbManager;
+use yii\rbac\exceptions\InvalidConfigException;
 
 /**
  * Initializes RBAC tables.
  *
  * @author Alexander Kochetov <creocoder@gmail.com>
+ *
  * @since 2.0
  */
 class m140506_102106_rbac_init extends \yii\db\Migration
@@ -55,43 +56,43 @@ class m140506_102106_rbac_init extends \yii\db\Migration
         }
 
         $this->createTable($authManager->ruleTable, [
-            'name' => $this->string(64)->notNull(),
-            'data' => $this->binary(),
+            'name'       => $this->string(64)->notNull(),
+            'data'       => $this->binary(),
             'created_at' => $this->integer(),
             'updated_at' => $this->integer(),
             'PRIMARY KEY ([[name]])',
         ], $tableOptions);
 
         $this->createTable($authManager->itemTable, [
-            'name' => $this->string(64)->notNull(),
-            'type' => $this->smallInteger()->notNull(),
+            'name'        => $this->string(64)->notNull(),
+            'type'        => $this->smallInteger()->notNull(),
             'description' => $this->text(),
-            'rule_name' => $this->string(64),
-            'data' => $this->binary(),
-            'created_at' => $this->integer(),
-            'updated_at' => $this->integer(),
+            'rule_name'   => $this->string(64),
+            'data'        => $this->binary(),
+            'created_at'  => $this->integer(),
+            'updated_at'  => $this->integer(),
             'PRIMARY KEY ([[name]])',
-            'FOREIGN KEY ([[rule_name]]) REFERENCES ' . $authManager->ruleTable . ' ([[name]])' .
+            'FOREIGN KEY ([[rule_name]]) REFERENCES '.$authManager->ruleTable.' ([[name]])'.
                 $this->buildFkClause('ON DELETE SET NULL', 'ON UPDATE CASCADE'),
         ], $tableOptions);
         $this->createIndex('idx-auth_item-type', $authManager->itemTable, 'type');
 
         $this->createTable($authManager->itemChildTable, [
             'parent' => $this->string(64)->notNull(),
-            'child' => $this->string(64)->notNull(),
+            'child'  => $this->string(64)->notNull(),
             'PRIMARY KEY ([[parent]], [[child]])',
-            'FOREIGN KEY ([[parent]]) REFERENCES ' . $authManager->itemTable . ' ([[name]])' .
+            'FOREIGN KEY ([[parent]]) REFERENCES '.$authManager->itemTable.' ([[name]])'.
                 $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
-            'FOREIGN KEY ([[child]]) REFERENCES ' . $authManager->itemTable . ' ([[name]])' .
+            'FOREIGN KEY ([[child]]) REFERENCES '.$authManager->itemTable.' ([[name]])'.
                 $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
         ], $tableOptions);
 
         $this->createTable($authManager->assignmentTable, [
-            'item_name' => $this->string(64)->notNull(),
-            'user_id' => $this->string(64)->notNull(),
+            'item_name'  => $this->string(64)->notNull(),
+            'user_id'    => $this->string(64)->notNull(),
             'created_at' => $this->integer(),
             'PRIMARY KEY ([[item_name]], [[user_id]])',
-            'FOREIGN KEY ([[item_name]]) REFERENCES ' . $authManager->itemTable . ' ([[name]])' .
+            'FOREIGN KEY ([[item_name]]) REFERENCES '.$authManager->itemTable.' ([[name]])'.
                 $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
         ], $tableOptions);
 
@@ -158,7 +159,7 @@ class m140506_102106_rbac_init extends \yii\db\Migration
         }
 
         if ($this->isOracle()) {
-            return ' ' . $delete;
+            return ' '.$delete;
         }
 
         return implode(' ', ['', $delete, $update]);

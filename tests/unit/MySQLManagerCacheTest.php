@@ -1,6 +1,7 @@
 <?php
 /**
  * @link http://www.yiiframework.com/
+ *
  * @copyright Copyright (c) 2008 Yii Software LLC
  * @license http://www.yiiframework.com/license/
  */
@@ -12,6 +13,7 @@ use yii\cache\FileCache;
 
 /**
  * MySQLManagerCacheTest.
+ *
  * @group rbac
  * @group db
  * @group mysql
@@ -25,6 +27,7 @@ class MySQLManagerCacheTest extends MySQLManagerTest
     {
         $manager = parent::createManager();
         $manager->cache = new Cache(new FileCache('@yii/tests/runtime/cache'));
-        return $manager;        
+
+        return $manager;
     }
 }

@@ -1,6 +1,7 @@
 <?php
 /**
  * @link http://www.yiiframework.com/
+ *
  * @copyright Copyright (c) 2008 Yii Software LLC
  * @license http://www.yiiframework.com/license/
  */
@@ -10,21 +11,20 @@ namespace yii\rbac\tests\unit;
 use Psr\Log\LogLevel;
 use yii\cache\ArrayCache;
 use yii\cache\Cache;
-use yii\console\Application;
 use yii\console\ExitCode;
 use yii\db\Connection;
 use yii\helpers\Yii;
+use Yii\Log\Tests\Unit\ArrayTarget;
 use yii\rbac\Assignment;
 use yii\rbac\DbManager;
+use yii\rbac\DIRuleFactory;
 use yii\rbac\Permission;
 use yii\rbac\Role;
 use yii\tests\data\rbac\UserID;
-use yii\console\tests\controllers\EchoMigrateController;
-use Yii\Log\Tests\Unit\ArrayTarget;
-use yii\rbac\DIRuleFactory;
 
 /**
  * DbManagerTestCase.
+ *
  * @group db
  * @group rbac
  */
@@ -47,17 +47,17 @@ abstract class DbManagerTestCase extends ManagerTestCase
         // If we don't overwrite this values, inside src/migrations/m* files, will be used last db config
         // Try to comment the third line ('yii\rbac\BaseManager' => $manager) and you see that launching all tests, when reaching pgsql tests will fail
         // because migrations will never be done on postgres but on mysql, because in up() and down() method is used $db connection from $authManager
-        // that is the first connection established (mysql). 
+        // that is the first connection established (mysql).
         Yii::getContainer()->setAll([
-            'db' => $db,
-            'authManager' => $manager,
-            'yii\rbac\BaseManager' => $manager, 
+            'db'                   => $db,
+            'authManager'          => $manager,
+            'yii\rbac\BaseManager' => $manager,
         ]);
 
         self::assertSame(static::$driverName, Yii::getApp()->db->getDriverName(), 'Connection represents the same DB driver, as is tested');
         ob_start();
         $result = Yii::getApp()->runAction($route, $params);
-        echo 'Result is ' . $result;
+        echo 'Result is '.$result;
         if ($result !== ExitCode::OK) {
             ob_end_flush();
         } else {
@@ -70,10 +70,10 @@ abstract class DbManagerTestCase extends ManagerTestCase
         parent::setUpBeforeClass();
         $databases = static::getParam('databases');
         static::$database = $databases[static::$driverName];
-        $pdo_database = 'pdo_' . static::$driverName;
+        $pdo_database = 'pdo_'.static::$driverName;
 
         if (!extension_loaded('pdo') || !extension_loaded($pdo_database)) {
-            static::markTestSkipped('pdo and ' . $pdo_database . ' extension are required.');
+            static::markTestSkipped('pdo and '.$pdo_database.' extension are required.');
         }
 
         static::runConsoleAction('migrate/up', ['migrationPath' => '@yii/rbac/migrations/', 'interactive' => false]);
@@ -106,6 +106,7 @@ abstract class DbManagerTestCase extends ManagerTestCase
      * @throws \yii\rbac\exceptions\InvalidArgumentException
      * @throws \yii\db\Exception
      * @throws \yii\rbac\exceptions\InvalidConfigException
+     *
      * @return \yii\db\Connection
      */
     public function getConnection()
@@ -149,6 +150,7 @@ abstract class DbManagerTestCase extends ManagerTestCase
             null
         );
         $manager->defaultRoles = ['myDefaultRole'];
+
         return $manager;
     }
 
@@ -180,6 +182,7 @@ abstract class DbManagerTestCase extends ManagerTestCase
 
     /**
      * @dataProvider emptyValuesProvider
+     *
      * @param mixed $userId
      * @param mixed $searchUserId
      * @param mixed $isValid
@@ -200,6 +203,7 @@ abstract class DbManagerTestCase extends ManagerTestCase
 
     /**
      * @dataProvider emptyValuesProvider
+     *
      * @param mixed $userId
      * @param mixed $searchUserId
      * @param mixed $isValid
@@ -220,6 +224,7 @@ abstract class DbManagerTestCase extends ManagerTestCase
 
     /**
      * @dataProvider emptyValuesProvider
+     *
      * @param mixed $userId
      * @param mixed $searchUserId
      * @param mixed $isValid
@@ -240,6 +245,7 @@ abstract class DbManagerTestCase extends ManagerTestCase
 
     /**
      * @dataProvider emptyValuesProvider
+     *
      * @param mixed $userId
      * @param mixed $searchUserId
      * @param mixed $isValid
@@ -261,6 +267,7 @@ abstract class DbManagerTestCase extends ManagerTestCase
 
     /**
      * @dataProvider emptyValuesProvider
+     *
      * @param mixed $userId
      * @param mixed $searchUserId
      * @param mixed $isValid
@@ -281,6 +288,7 @@ abstract class DbManagerTestCase extends ManagerTestCase
 
     /**
      * @dataProvider emptyValuesProvider
+     *
      * @param mixed $userId
      * @param mixed $searchUserId
      * @param mixed $isValid
@@ -367,7 +375,7 @@ abstract class DbManagerTestCase extends ManagerTestCase
 
     private function assertSingleQueryToAssignmentsTable($logTarget)
     {
-        $this->assertCount(1, $logTarget->messages, 'Only one query should have been performed, but there are the following logs: ' . print_r($logTarget->messages, true));
+        $this->assertCount(1, $logTarget->messages, 'Only one query should have been performed, but there are the following logs: '.print_r($logTarget->messages, true));
         $this->assertContains('auth_assignment', $logTarget->messages[0][1], 'Log message should be a query to auth_assignment table');
         $logTarget->messages = [];
     }
