@@ -70,7 +70,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "yii\\log\\tests\\": "vendor/yiisoft/log/tests",
+            "Yii\\Log\\Tests\\": "vendor/yiisoft/log/tests",
             "yii\\rbac\\tests\\": "tests"
         }
     },
