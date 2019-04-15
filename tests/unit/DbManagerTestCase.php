@@ -14,7 +14,7 @@ use yii\cache\Cache;
 use yii\console\ExitCode;
 use yii\db\Connection;
 use yii\helpers\Yii;
-use Yii\Log\Tests\Unit\ArrayTarget;
+use Yii\Log\Tests\ArrayTarget;
 use yii\rbac\Assignment;
 use yii\rbac\DbManager;
 use yii\rbac\DIRuleFactory;
