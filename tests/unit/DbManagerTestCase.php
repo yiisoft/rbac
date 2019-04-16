@@ -14,13 +14,30 @@ use yii\cache\Cache;
 use yii\console\ExitCode;
 use yii\db\Connection;
 use yii\helpers\Yii;
-use Yii\Log\Tests\ArrayTarget;
 use yii\rbac\Assignment;
 use yii\rbac\DbManager;
 use yii\rbac\DIRuleFactory;
 use yii\rbac\Permission;
 use yii\rbac\Role;
 use yii\tests\data\rbac\UserID;
+
+/**
+ * ArrayTarget logs messages into an array, useful for tracking data in tests.
+ */
+class ArrayTarget extends \Yii\Log\Target
+{
+    public $exportInterval = 1000000;
+
+    /**
+     * Exports log [[messages]] to a specific destination.
+     */
+    public function export()
+    {
+        // throw exception if message limit is reached
+        throw new \yii\exceptions\Exception('More than 1000000 messages logged.');
+    }
+}
+
 
 /**
  * DbManagerTestCase.

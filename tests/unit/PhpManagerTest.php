@@ -32,6 +32,7 @@ function time()
 
 namespace yii\rbac\tests\unit;
 
+use yii\helpers\FileHelper;
 use yii\rbac\DIRuleFactory;
 
 /**
@@ -87,6 +88,7 @@ class PhpManagerTest extends ManagerTestCase
         parent::setUp();
 
         $this->mockApplication();
+        FileHelper::createDirectory($this->app->getAlias('@runtime'));
         $this->removeDataFiles();
         $this->auth = $this->createManager();
     }
