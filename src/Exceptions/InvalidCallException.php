@@ -6,22 +6,22 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac\exceptions;
+namespace Yiisoft\Rbac\Exceptions;
 
 /**
- * InvalidConfigException represents an exception caused by incorrect object configuration.
+ * InvalidCallException represents an exception caused by calling a method in a wrong way.
  *
  * @author Andrii Vasyliev <sol@hiqdev.com>
  *
  * @since 3.0
  */
-class InvalidConfigException extends \Exception implements ExceptionInterface
+class InvalidCallException extends \BadMethodCallException implements ExceptionInterface
 {
     /**
      * @return string the user-friendly name of this exception
      */
     public function getName()
     {
-        return 'Invalid Configuration';
+        return 'Invalid Call';
     }
 }

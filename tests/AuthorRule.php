@@ -6,9 +6,9 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac\tests\unit;
+namespace Yiisoft\Rbac\Tests;
 
-use yii\rbac\Rule;
+use Yiisoft\Rbac\Rule;
 
 /**
  * Checks if authorID matches userID passed via params.

@@ -6,11 +6,11 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac;
+namespace Yiisoft\Rbac;
 
 use yii\helpers\VarDumper;
-use yii\rbac\exceptions\InvalidArgumentException;
-use yii\rbac\exceptions\InvalidCallException;
+use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
+use Yiisoft\Rbac\Exceptions\InvalidCallException;
 
 /**
  * PhpManager represents an authorization manager that stores authorization

@@ -6,22 +6,22 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac\exceptions;
+namespace Yiisoft\Rbac\Exceptions;
 
 /**
- * InvalidValueException represents an exception caused by a function returning a value of unexpected type.
+ * InvalidConfigException represents an exception caused by incorrect object configuration.
  *
  * @author Andrii Vasyliev <sol@hiqdev.com>
  *
  * @since 3.0
  */
-class InvalidValueException extends \UnexpectedValueException implements ExceptionInterface
+class InvalidConfigException extends \Exception implements ExceptionInterface
 {
     /**
      * @return string the user-friendly name of this exception
      */
     public function getName()
     {
-        return 'Invalid Return Value';
+        return 'Invalid Configuration';
     }
 }

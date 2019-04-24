@@ -6,7 +6,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac\tests\unit;
+namespace Yiisoft\Rbac\Tests;
 
 /**
  * SqliteManagerTest.

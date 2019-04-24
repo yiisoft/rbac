@@ -6,15 +6,15 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac;
+namespace Yiisoft\Rbac;
 
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use yii\db\ConnectionInterface;
 use yii\db\Expression;
 use yii\db\Query;
-use yii\rbac\exceptions\InvalidArgumentException;
-use yii\rbac\exceptions\InvalidCallException;
+use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
+use Yiisoft\Rbac\Exceptions\InvalidCallException;
 
 /**
  * DbManager represents an authorization manager that stores authorization information in database.

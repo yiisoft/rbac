@@ -6,7 +6,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac;
+namespace Yiisoft\Rbac;
 
 /**
  * For more details and usage information on ManagerInterface, see the [guide article on security authorization](guide:security-authorization).
@@ -102,7 +102,7 @@ interface ManagerInterface extends CheckAccessInterface
      *
      * @param string $roleName name of the role to file child roles for
      *
-     * @throws \yii\rbac\exceptions\InvalidArgumentException if Role was not found that are getting by $roleName
+     * @throws \Yiisoft\Rbac\Exceptions\InvalidArgumentException if Role was not found that are getting by $roleName
      *
      * @return Role[] Child roles. The array is indexed by the role names.
      *                First element is an instance of the parent Role itself.
@@ -179,7 +179,7 @@ interface ManagerInterface extends CheckAccessInterface
      * @param Item $parent
      * @param Item $child
      *
-     * @throws \yii\rbac\exceptions\Exception if the parent-child relationship already exists or if a loop has been detected.
+     * @throws \Yiisoft\Rbac\Exceptions\Exception if the parent-child relationship already exists or if a loop has been detected.
      *
      * @return bool whether the child successfully added
      */

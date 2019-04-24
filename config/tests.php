@@ -1,8 +1,8 @@
 <?php
 
 return [
-    \yii\rbac\BaseManager::class => [
-        '__class' => \yii\rbac\DbManager::class,
+    \Yiisoft\Rbac\BaseManager::class => [
+        '__class' => \Yiisoft\Rbac\DbManager::class,
     ],
     'db' => [
         'dsn'      => '/tmp/rbac-test',

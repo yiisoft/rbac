@@ -6,24 +6,24 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac\tests\unit;
+namespace Yiisoft\Rbac\Tests;
 
-use yii\rbac\DbManager;
-use yii\rbac\DIRuleFactory;
+use Yiisoft\Rbac\DbManager;
+use Yiisoft\Rbac\DIRuleFactory;
 
 /**
- * PgSQLManagerTest.
+ * MySQLManagerTest.
  *
  * @group db
  * @group rbac
- * @group pgsql
+ * @group mysql
  */
-class PgSQLManagerTest extends DbManagerTestCase
+class MySQLManagerTest extends DbManagerTestCase
 {
-    protected static $driverName = 'pgsql';
+    protected static $driverName = 'mysql';
 
     /**
-     * @return \yii\rbac\ManagerInterface
+     * @return \Yiisoft\Rbac\ManagerInterface
      */
     protected function createManager()
     {

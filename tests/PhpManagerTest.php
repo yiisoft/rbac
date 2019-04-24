@@ -6,7 +6,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac;
+namespace Yiisoft\Rbac;
 
 /**
  * Mock for the filemtime() function for rbac classes. Avoid random test fails.
@@ -17,7 +17,7 @@ namespace yii\rbac;
  */
 function filemtime($file)
 {
-    return \yii\rbac\tests\unit\PhpManagerTest::$filemtime ?: \filemtime($file);
+    return \Yiisoft\Rbac\Tests\PhpManagerTest::$filemtime ?: \filemtime($file);
 }
 
 /**
@@ -27,13 +27,13 @@ function filemtime($file)
  */
 function time()
 {
-    return \yii\rbac\tests\unit\PhpManagerTest::$time ?: \time();
+    return \Yiisoft\Rbac\Tests\PhpManagerTest::$time ?: \time();
 }
 
-namespace yii\rbac\tests\unit;
+namespace Yiisoft\Rbac\Tests;
 
 use yii\helpers\FileHelper;
-use yii\rbac\DIRuleFactory;
+use Yiisoft\Rbac\DIRuleFactory;
 
 /**
  * @group rbac
@@ -141,7 +141,7 @@ class PhpManagerTest extends ManagerTestCase
     }
 
     /**
-     * @expectedException \yii\rbac\exceptions\InvalidArgumentException
+     * @expectedException \Yiisoft\Rbac\Exceptions\InvalidArgumentException
      */
     public function testOverwriteName()
     {

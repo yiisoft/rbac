@@ -5,9 +5,9 @@
  * @copyright Copyright (c) 2008 Yii Software LLC
  * @license http://www.yiiframework.com/license/
  */
-use yii\rbac\BaseManager;
-use yii\rbac\DbManager;
-use yii\rbac\exceptions\InvalidConfigException;
+use Yiisoft\Rbac\BaseManager;
+use Yiisoft\Rbac\DbManager;
+use Yiisoft\Rbac\Exceptions\InvalidConfigException;
 
 /**
  * Initializes RBAC tables.

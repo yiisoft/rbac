@@ -6,12 +6,12 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac\tests\unit;
+namespace Yiisoft\Rbac\Tests;
 
-use yii\rbac\BaseManager;
-use yii\rbac\Item;
-use yii\rbac\Permission;
-use yii\rbac\Role;
+use Yiisoft\Rbac\BaseManager;
+use Yiisoft\Rbac\Item;
+use Yiisoft\Rbac\Permission;
+use Yiisoft\Rbac\Role;
 use yii\tests\TestCase;
 
 /**
@@ -20,12 +20,12 @@ use yii\tests\TestCase;
 abstract class ManagerTestCase extends TestCase
 {
     /**
-     * @var \yii\rbac\ManagerInterface|BaseManager
+     * @var \Yiisoft\Rbac\ManagerInterface|BaseManager
      */
     protected $auth;
 
     /**
-     * @return \yii\rbac\ManagerInterface
+     * @return \Yiisoft\Rbac\ManagerInterface
      */
     abstract protected function createManager();
 
@@ -78,7 +78,7 @@ abstract class ManagerTestCase extends TestCase
         $this->prepareData();
 
         $rule = $this->auth->getRule('isAuthor');
-        $this->assertInstanceOf('yii\rbac\Rule', $rule);
+        $this->assertInstanceOf('Yiisoft\Rbac\Rule', $rule);
         $this->assertEquals('isAuthor', $rule->name);
 
         $rule = $this->auth->getRule('nonExisting');
@@ -496,16 +496,16 @@ abstract class ManagerTestCase extends TestCase
         // using rule class name
         $auth->removeAll();
         $item = $this->createRBACItem($RBACItemType, 'Reader');
-        $item->ruleName = 'yii\rbac\tests\unit\ActionRule';
+        $item->ruleName = 'Yiisoft\Rbac\Tests\ActionRule';
         $auth->add($item);
         $auth->assign($item, $userId);
         $this->assertTrue($auth->checkAccess($userId, 'Reader', ['action' => 'read']));
         $this->assertFalse($auth->checkAccess($userId, 'Reader', ['action' => 'write']));
 
         // using DI
-        $this->container->set('write_rule', ['__class' => 'yii\rbac\tests\unit\ActionRule', 'action' => 'write']);
-        $this->container->set('delete_rule', ['__class' => 'yii\rbac\tests\unit\ActionRule', 'action' => 'delete']);
-        $this->container->set('all_rule', ['__class' => 'yii\rbac\tests\unit\ActionRule', 'action' => 'all']);
+        $this->container->set('write_rule', ['__class' => 'Yiisoft\Rbac\Tests\ActionRule', 'action' => 'write']);
+        $this->container->set('delete_rule', ['__class' => 'Yiisoft\Rbac\Tests\ActionRule', 'action' => 'delete']);
+        $this->container->set('all_rule', ['__class' => 'Yiisoft\Rbac\Tests\ActionRule', 'action' => 'all']);
 
         $item = $this->createRBACItem($RBACItemType, 'Writer');
         $item->ruleName = 'write_rule';
@@ -626,7 +626,7 @@ abstract class ManagerTestCase extends TestCase
 
     public function testDefaultRolesWithClosureReturningNonArrayValue()
     {
-        $this->expectException('yii\rbac\exceptions\InvalidValueException');
+        $this->expectException('Yiisoft\Rbac\Exceptions\InvalidValueException');
         $this->expectExceptionMessage('Default roles closure must return an array');
         $this->auth->defaultRoles = function () {
             return 'test';
@@ -635,7 +635,7 @@ abstract class ManagerTestCase extends TestCase
 
     public function testDefaultRolesWithNonArrayValue()
     {
-        $this->expectException('yii\rbac\exceptions\InvalidArgumentException');
+        $this->expectException('Yiisoft\Rbac\Exceptions\InvalidArgumentException');
         $this->expectExceptionMessage('Default roles must be either an array or a callable');
         $this->auth->defaultRoles = 'test';
     }

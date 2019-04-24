@@ -6,9 +6,9 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac\tests\unit;
+namespace Yiisoft\Rbac\Tests;
 
-use yii\rbac\PhpManager;
+use Yiisoft\Rbac\PhpManager;
 
 /**
  * Exposes protected properties and methods to inspect from outside.
@@ -16,7 +16,7 @@ use yii\rbac\PhpManager;
 class ExposedPhpManager extends PhpManager
 {
     /**
-     * @var \yii\rbac\Item[]
+     * @var \Yiisoft\Rbac\Item[]
      */
     public $items = []; // itemName => item
     /**
@@ -24,11 +24,11 @@ class ExposedPhpManager extends PhpManager
      */
     public $children = []; // itemName, childName => child
     /**
-     * @var \yii\rbac\Assignment[]
+     * @var \Yiisoft\Rbac\Assignment[]
      */
     public $assignments = []; // userId, itemName => assignment
     /**
-     * @var \yii\rbac\Rule[]
+     * @var \Yiisoft\Rbac\Rule[]
      */
     public $rules = []; // ruleName => rule
 
