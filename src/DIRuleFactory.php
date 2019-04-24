@@ -6,7 +6,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac;
+namespace Yiisoft\Rbac;
 
 use yii\di\FactoryInterface;
 

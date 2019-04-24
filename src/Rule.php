@@ -6,7 +6,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac;
+namespace Yiisoft\Rbac;
 
 /**
  * Rule represents a business constraint that may be associated with a role, permission or assignment.

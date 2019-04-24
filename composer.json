@@ -70,13 +70,13 @@
     },
     "autoload": {
         "psr-4": {
-            "yii\\rbac\\": "src"
+            "Yiisoft\\Rbac\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
             "yii\\log\\tests\\": "vendor/yiisoft/log/tests",
-            "yii\\rbac\\tests\\": "tests"
+            "Yiisoft\\Rbac\\Tests\\": "tests"
         }
     },
     "extra": {

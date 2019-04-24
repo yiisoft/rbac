@@ -6,7 +6,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac;
+namespace Yiisoft\Rbac;
 
 /**
  * Assignment represents an assignment of a role to a user.

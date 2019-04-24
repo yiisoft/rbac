@@ -6,7 +6,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac\exceptions;
+namespace Yiisoft\Rbac\Exceptions;
 
 /**
  * InvalidCallException represents an exception caused by calling a method in a wrong way.

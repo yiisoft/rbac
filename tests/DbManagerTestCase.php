@@ -6,7 +6,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac\tests\unit;
+namespace Yiisoft\Rbac\Tests;
 
 use Psr\Log\LogLevel;
 use yii\cache\ArrayCache;
@@ -14,11 +14,11 @@ use yii\cache\Cache;
 use yii\console\ExitCode;
 use yii\db\Connection;
 use yii\helpers\Yii;
-use yii\rbac\Assignment;
-use yii\rbac\DbManager;
-use yii\rbac\DIRuleFactory;
-use yii\rbac\Permission;
-use yii\rbac\Role;
+use Yiisoft\Rbac\Assignment;
+use Yiisoft\Rbac\DbManager;
+use Yiisoft\Rbac\DIRuleFactory;
+use Yiisoft\Rbac\Permission;
+use Yiisoft\Rbac\Role;
 use yii\tests\data\rbac\UserID;
 
 /**
@@ -60,15 +60,15 @@ abstract class DbManagerTestCase extends ManagerTestCase
         $db = static::createConnection();
         $manager = new DbManager($db, Yii::getContainer()->get(DIRuleFactory::class), null, null);
 
-        // We need to overwrite yii\rbac\BaseManager instance content because it is set in config/tests.php
+        // We need to overwrite Yiisoft\Rbac\BaseManager instance content because it is set in config/tests.php
         // If we don't overwrite this values, inside src/migrations/m* files, will be used last db config
-        // Try to comment the third line ('yii\rbac\BaseManager' => $manager) and you see that launching all tests, when reaching pgsql tests will fail
+        // Try to comment the third line ('Yiisoft\Rbac\BaseManager' => $manager) and you see that launching all tests, when reaching pgsql tests will fail
         // because migrations will never be done on postgres but on mysql, because in up() and down() method is used $db connection from $authManager
         // that is the first connection established (mysql).
         Yii::getContainer()->setAll([
             'db'                   => $db,
             'authManager'          => $manager,
-            'yii\rbac\BaseManager' => $manager,
+            'Yiisoft\Rbac\BaseManager' => $manager,
         ]);
 
         self::assertSame(static::$driverName, Yii::getApp()->db->getDriverName(), 'Connection represents the same DB driver, as is tested');
@@ -120,9 +120,9 @@ abstract class DbManagerTestCase extends ManagerTestCase
     }
 
     /**
-     * @throws \yii\rbac\exceptions\InvalidArgumentException
+     * @throws \Yiisoft\Rbac\Exceptions\InvalidArgumentException
      * @throws \yii\db\Exception
-     * @throws \yii\rbac\exceptions\InvalidConfigException
+     * @throws \Yiisoft\Rbac\Exceptions\InvalidConfigException
      *
      * @return \yii\db\Connection
      */
@@ -154,7 +154,7 @@ abstract class DbManagerTestCase extends ManagerTestCase
     }
 
     /**
-     * @return \yii\rbac\ManagerInterface
+     * @return \Yiisoft\Rbac\ManagerInterface
      */
     protected function createManager()
     {

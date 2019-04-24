@@ -6,12 +6,12 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac;
+namespace Yiisoft\Rbac;
 
 use yii\base\Component;
-use yii\rbac\exceptions\InvalidArgumentException;
-use yii\rbac\exceptions\InvalidConfigException;
-use yii\rbac\exceptions\InvalidValueException;
+use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
+use Yiisoft\Rbac\Exceptions\InvalidConfigException;
+use Yiisoft\Rbac\Exceptions\InvalidValueException;
 
 /**
  * BaseManager is a base class implementing [[ManagerInterface]] for RBAC management.

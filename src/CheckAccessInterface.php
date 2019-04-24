@@ -6,7 +6,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac;
+namespace Yiisoft\Rbac;
 
 /**
  * For more details and usage information on CheckAccessInterface, see the [guide article on security authorization](guide:security-authorization).
@@ -26,7 +26,7 @@ interface CheckAccessInterface
      * @param array      $params         name-value pairs that will be passed to the rules associated
      *                                   with the roles and permissions assigned to the user.
      *
-     * @throws \yii\rbac\exceptions\InvalidArgumentException if $permissionName does not refer to an existing permission
+     * @throws \Yiisoft\Rbac\Exceptions\InvalidArgumentException if $permissionName does not refer to an existing permission
      *
      * @return bool whether the user has the specified permission.
      */

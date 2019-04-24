@@ -6,22 +6,24 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac\tests\unit;
+namespace Yiisoft\Rbac\Tests;
 
 use yii\cache\Cache;
 use yii\cache\FileCache;
 
 /**
- * MySQLManagerCacheTest.
+ * PgSQLManagerTest.
  *
- * @group rbac
  * @group db
- * @group mysql
+ * @group rbac
+ * @group pgsql
  */
-class MySQLManagerCacheTest extends MySQLManagerTest
+class PgSQLManagerCacheTest extends PgSQLManagerTest
 {
+    protected static $driverName = 'pgsql';
+
     /**
-     * @return \yii\rbac\ManagerInterface
+     * @return \Yiisoft\Rbac\ManagerInterface
      */
     protected function createManager()
     {

@@ -6,7 +6,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac\exceptions;
+namespace Yiisoft\Rbac\Exceptions;
 
 /**
  * InvalidConfigException represents an exception caused by incorrect object configuration.

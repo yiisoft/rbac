@@ -6,7 +6,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac\exceptions;
+namespace Yiisoft\Rbac\Exceptions;
 
 /**
  * InvalidValueException represents an exception caused by a function returning a value of unexpected type.

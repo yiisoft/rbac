@@ -6,7 +6,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac\exceptions;
+namespace Yiisoft\Rbac\Exceptions;
 
 /**
  * InvalidArgumentException represents an exception caused by invalid arguments passed to a method.

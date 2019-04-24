@@ -6,9 +6,9 @@
  * @license http://www.yiiframework.com/license/
  */
 use yii\db\Migration;
-use yii\rbac\BaseManager;
-use yii\rbac\DbManager;
-use yii\rbac\exceptions\InvalidConfigException;
+use Yiisoft\Rbac\BaseManager;
+use Yiisoft\Rbac\DbManager;
+use Yiisoft\Rbac\Exceptions\InvalidConfigException;
 
 /**
  * Adds index on `user_id` column in `auth_assignment` table for performance reasons.
