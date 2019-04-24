@@ -63,9 +63,6 @@ matrix:
     - php: 7.3
       env: DEFAULT_COMPOSER_FLAGS="$DEFAULT_COMPOSER_FLAGS --ignore-platform-reqs" # php-cs
     - php: 7.2
-
-    # run tests coverage on PHP 7.1
-    - php: 7.1
       env: TASK_TESTS_COVERAGE=1
     - php: nightly
       services:
