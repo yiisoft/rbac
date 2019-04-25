@@ -24,7 +24,7 @@ use yii\tests\data\rbac\UserID;
 /**
  * ArrayTarget logs messages into an array, useful for tracking data in tests.
  */
-class ArrayTarget extends \Yii\Log\Target
+class ArrayTarget extends \Yiisoft\Log\Target
 {
     public $exportInterval = 1000000;
 
@@ -337,7 +337,7 @@ abstract class DbManagerTestCase extends ManagerTestCase
         $this->auth->checkAccess(new UserID('author B'), 'createPost');
 
         // track db queries
-        /* @var $logger \Yii\Log\Logger */
+        /* @var $logger \Yiisoft\Log\Logger */
         $logger = $this->app->getLogger();
 
         $logger->flushInterval = 1;
