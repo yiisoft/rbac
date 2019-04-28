@@ -8,8 +8,8 @@
 
 namespace Yiisoft\Rbac\Tests;
 
-use yii\cache\Cache;
-use yii\cache\FileCache;
+use Yiisoft\Cache\Cache;
+use Yiisoft\Cache\FileCache;
 
 /**
  * MySQLManagerCacheTest.

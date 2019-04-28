@@ -9,8 +9,8 @@
 namespace Yiisoft\Rbac\Tests;
 
 use Psr\Log\LogLevel;
-use yii\cache\ArrayCache;
-use yii\cache\Cache;
+use Yiisoft\Cache\ArrayCache;
+use Yiisoft\Cache\Cache;
 use yii\console\ExitCode;
 use yii\db\Connection;
 use yii\helpers\Yii;

@@ -10,6 +10,6 @@ return [
         'password' => 'rbac',
     ],
     'cache' => [
-        '__class' => \yii\cache\ArrayCache::class,
+        '__class' => \Yiisoft\Cache\ArrayCache::class,
     ],
 ];
