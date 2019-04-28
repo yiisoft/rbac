@@ -11,7 +11,7 @@ namespace Yiisoft\Rbac\Tests;
 use Psr\Log\LogLevel;
 use Yiisoft\Cache\ArrayCache;
 use Yiisoft\Cache\Cache;
-use yii\console\ExitCode;
+use Yiisoft\Yii\Console\ExitCode;
 use yii\db\Connection;
 use yii\helpers\Yii;
 use Yiisoft\Rbac\Assignment;
