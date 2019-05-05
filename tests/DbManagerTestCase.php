@@ -344,7 +344,7 @@ abstract class DbManagerTestCase extends ManagerTestCase
         $logger->messages = [];
 
         $logTarget = new ArrayTarget();
-        $logTarget->categories = ['yii\\db\\Command::query'];
+        $logTarget->categories = ['Yiisoft\\Db\\Command::query'];
         $logTarget->levels = [LogLevel::INFO];
 
         $logger->addTarget($logTarget, 'rbacqueries');
