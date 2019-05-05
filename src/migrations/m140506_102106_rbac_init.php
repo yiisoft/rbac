@@ -16,7 +16,7 @@ use Yiisoft\Rbac\Exceptions\InvalidConfigException;
  *
  * @since 2.0
  */
-class m140506_102106_rbac_init extends \yii\db\Migration
+class m140506_102106_rbac_init extends \Yiisoft\Db\Migration
 {
     protected $authManager;
 

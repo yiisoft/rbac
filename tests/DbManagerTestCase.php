@@ -12,7 +12,7 @@ use Psr\Log\LogLevel;
 use Yiisoft\Cache\ArrayCache;
 use Yiisoft\Cache\Cache;
 use Yiisoft\Yii\Console\ExitCode;
-use yii\db\Connection;
+use Yiisoft\Db\Connection;
 use yii\helpers\Yii;
 use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\DbManager;
@@ -121,10 +121,10 @@ abstract class DbManagerTestCase extends ManagerTestCase
 
     /**
      * @throws \Yiisoft\Rbac\Exceptions\InvalidArgumentException
-     * @throws \yii\db\Exception
+     * @throws \Yiisoft\Db\Exception
      * @throws \Yiisoft\Rbac\Exceptions\InvalidConfigException
      *
-     * @return \yii\db\Connection
+     * @return \Yiisoft\Db\Connection
      */
     public function getConnection()
     {

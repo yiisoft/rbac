@@ -5,7 +5,7 @@
  * @copyright Copyright (c) 2008 Yii Software LLC
  * @license http://www.yiiframework.com/license/
  */
-use yii\db\Migration;
+use Yiisoft\Db\Migration;
 use Yiisoft\Rbac\BaseManager;
 use Yiisoft\Rbac\DbManager;
 use Yiisoft\Rbac\Exceptions\InvalidConfigException;

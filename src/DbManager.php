@@ -10,9 +10,9 @@ namespace Yiisoft\Rbac;
 
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
-use yii\db\ConnectionInterface;
-use yii\db\Expression;
-use yii\db\Query;
+use Yiisoft\Db\ConnectionInterface;
+use Yiisoft\Db\Expression;
+use Yiisoft\Db\Query;
 use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
 use Yiisoft\Rbac\Exceptions\InvalidCallException;
 
