@@ -31,7 +31,7 @@ class ArrayTarget extends \Yiisoft\Log\Target
     /**
      * Exports log [[messages]] to a specific destination.
      */
-    public function export()
+    public function export(): void
     {
         // throw exception if message limit is reached
         throw new \yii\exceptions\Exception('More than 1000000 messages logged.');
@@ -344,11 +344,11 @@ abstract class DbManagerTestCase extends ManagerTestCase
         $logger->messages = [];
 
         $logTarget = new ArrayTarget();
-        $logTarget->categories = ['Yiisoft\\Db\\Command::query'];
-        $logTarget->levels = [LogLevel::INFO];
+        $logTarget->setCategories(['Yiisoft\\Db\\Command::query']);
+        $logTarget->setLevels([LogLevel::INFO]);
 
         $logger->addTarget($logTarget, 'rbacqueries');
-        $this->assertCount(0, $logTarget->messages);
+        $this->assertCount(0, $logTarget->getMessages());
 
         // testing access on two different permissons for the same user should only result in one DB query for user assignments
         foreach (['readPost' => true, 'createPost' => false] as $permission => $result) {
