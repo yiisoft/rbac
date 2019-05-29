@@ -121,10 +121,7 @@ class DbManager extends BaseManager
 
     private $_checkAccessAssignments = [];
 
-    /**
-     * {@inheritdoc}
-     */
-    public function checkAccess($userId, $permissionName, $params = [])
+    public function checkAccess($userId, string $permissionName, array $parameters = []): bool
     {
         if (isset($this->_checkAccessAssignments[(string) $userId])) {
             $assignments = $this->_checkAccessAssignments[(string) $userId];
@@ -139,10 +136,10 @@ class DbManager extends BaseManager
 
         $this->loadFromCache();
         if ($this->items !== null) {
-            return $this->checkAccessFromCache($userId, $permissionName, $params, $assignments);
+            return $this->checkAccessFromCache($userId, $permissionName, $parameters, $assignments);
         }
 
-        return $this->checkAccessRecursive($userId, $permissionName, $params, $assignments);
+        return $this->checkAccessRecursive($userId, $permissionName, $parameters, $assignments);
     }
 
     /**

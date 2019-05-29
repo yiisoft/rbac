@@ -10,7 +10,7 @@ return [
     \Yiisoft\Rbac\RuleFactoryInterface::class => [
         '__class' => \Yiisoft\Rbac\RuleFactory::class,
     ],
-    \Yiisoft\Rbac\CheckAccessInterface::class => [
+    \Yiisoft\Access\CheckAccessInterface::class => [
         '__class' => \Yiisoft\Rbac\DenyAll::class,
     ],
 ];

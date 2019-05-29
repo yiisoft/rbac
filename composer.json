@@ -49,7 +49,9 @@
     "prefer-stable": true,
     "require": {
         "yiisoft/di": "^3.0@dev",
-        "yiisoft/yii-core": "^3.0@dev"
+        "yiisoft/yii-core": "^3.0@dev",
+        "yiisoft/access": "^3.0@dev",
+        "yiisoft/var-dumper": "^3.0@dev"
     },
     "require-dev": {
         "psr/log": "~1.1.0",

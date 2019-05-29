@@ -8,6 +8,8 @@
 
 namespace Yiisoft\Rbac;
 
+use Yiisoft\Access\CheckAccessInterface;
+
 /**
  * For more details and usage information on ManagerInterface, see the [guide article on security authorization](guide:security-authorization).
  *
