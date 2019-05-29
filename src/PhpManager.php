@@ -92,8 +92,7 @@ class PhpManager extends BaseManager
         string $itemFile = 'items.php',
         string $assignmentFile = 'assignments.php',
         string $ruleFile = 'rules.php'
-    )
-    {
+    ) {
         $this->itemFile = $dir . DIRECTORY_SEPARATOR . $itemFile;
         $this->assignmentFile = $dir . DIRECTORY_SEPARATOR . $assignmentFile;
         $this->ruleFile = $dir . DIRECTORY_SEPARATOR . $ruleFile;
