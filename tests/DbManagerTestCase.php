@@ -9,17 +9,17 @@
 namespace Yiisoft\Rbac\Tests;
 
 use Psr\Log\LogLevel;
+use yii\helpers\Yii;
+use yii\tests\data\rbac\UserID;
 use Yiisoft\Cache\ArrayCache;
 use Yiisoft\Cache\Cache;
-use Yiisoft\Yii\Console\ExitCode;
 use Yiisoft\Db\Connection;
-use yii\helpers\Yii;
 use Yiisoft\Rbac\Assignment;
-use Yiisoft\Rbac\DbManager;
-use Yiisoft\Rbac\DIRuleFactory;
+use Yiisoft\Rbac\Factories\DIRuleFactory;
+use Yiisoft\Rbac\Managers\DbManager;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
-use yii\tests\data\rbac\UserID;
+use Yiisoft\Yii\Console\ExitCode;
 
 /**
  * ArrayTarget logs messages into an array, useful for tracking data in tests.
