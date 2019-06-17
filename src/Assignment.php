@@ -21,7 +21,7 @@ namespace Yiisoft\Rbac;
 class Assignment extends BaseItem
 {
     /**
-     * @var string|int user ID (see [[\yii\web\User::id]])
+     * @var string user ID (see [[\yii\web\User::id]])
      */
     public $userId;
     /**

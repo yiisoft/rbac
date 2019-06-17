@@ -11,11 +11,12 @@ namespace Yiisoft\Rbac;
 use Yiisoft\Access\CheckAccessInterface;
 
 /**
- * For more details and usage information on ManagerInterface, see the [guide article on security authorization](guide:security-authorization).
+ * For more details and usage information on ManagerInterface, see the [guide article on security
+ * authorization](guide:security-authorization).
  *
  * @author Qiang Xue <qiang.xue@gmail.com>
  *
- * @since 2.0
+ * @since  2.0
  */
 interface ManagerInterface extends CheckAccessInterface
 {
@@ -28,7 +29,7 @@ interface ManagerInterface extends CheckAccessInterface
      *
      * @return Role the new Role object
      */
-    public function createRole($name);
+    public function createRole(string $name): Role;
 
     /**
      * Creates a new Permission object.
@@ -39,39 +40,35 @@ interface ManagerInterface extends CheckAccessInterface
      *
      * @return Permission the new Permission object
      */
-    public function createPermission($name);
+    public function createPermission(string $name): Permission;
 
     /**
      * Adds a role, permission or rule to the RBAC system.
      *
-     * @param Role|Permission|Rule $object
+     * @param \Yiisoft\Rbac\BaseItem $object
      *
-     * @throws \Exception if data validation or saving fails (such as the name of the role or permission is not unique)
-     *
-     * @return bool whether the role, permission or rule is successfully added to the system
+     * @return void
      */
-    public function add($object);
+    public function add(BaseItem $object): void;
 
     /**
      * Removes a role, permission or rule from the RBAC system.
      *
-     * @param Role|Permission|Rule $object
+     * @param \Yiisoft\Rbac\BaseItem $object
      *
-     * @return bool whether the role, permission or rule is successfully removed
+     * @return void
      */
-    public function remove($object);
+    public function remove(BaseItem $object): void;
 
     /**
      * Updates the specified role, permission or rule in the system.
      *
-     * @param string               $name   the old name of the role, permission or rule
-     * @param Role|Permission|Rule $object
+     * @param string                 $name the old name of the role, permission or rule
+     * @param \Yiisoft\Rbac\BaseItem $object
      *
-     * @throws \Exception if data validation or saving fails (such as the name of the role or permission is not unique)
-     *
-     * @return bool whether the update is successful
+     * @return void
      */
-    public function update($name, $object);
+    public function update(string $name, BaseItem $object): void;
 
     /**
      * Returns the named role.
@@ -80,14 +77,14 @@ interface ManagerInterface extends CheckAccessInterface
      *
      * @return null|Role the role corresponding to the specified name. Null is returned if no such role.
      */
-    public function getRole($name);
+    public function getRole(string $name): Role;
 
     /**
      * Returns all roles in the system.
      *
      * @return Role[] all roles in the system. The array is indexed by the role names.
      */
-    public function getRoles();
+    public function getRoles(): array;
 
     /**
      * Returns the roles that are assigned to the user via [[assign()]].
@@ -97,37 +94,38 @@ interface ManagerInterface extends CheckAccessInterface
      *
      * @return Role[] all roles directly assigned to the user. The array is indexed by the role names.
      */
-    public function getRolesByUser($userId);
+    public function getRolesByUser(string $userId): array;
 
     /**
      * Returns child roles of the role specified. Depth isn't limited.
      *
      * @param string $roleName name of the role to file child roles for
      *
-     * @throws \Yiisoft\Rbac\Exceptions\InvalidArgumentException if Role was not found that are getting by $roleName
-     *
      * @return Role[] Child roles. The array is indexed by the role names.
      *                First element is an instance of the parent Role itself.
      *
+     * @throws \Yiisoft\Rbac\Exceptions\InvalidArgumentException if Role was not found that are getting by $roleName
+     *
      * @since 2.0.10
      */
-    public function getChildRoles($roleName);
+    public function getChildRoles(string $roleName): array;
 
     /**
      * Returns the named permission.
      *
      * @param string $name the permission name.
      *
-     * @return null|Permission the permission corresponding to the specified name. Null is returned if no such permission.
+     * @return null|Permission the permission corresponding to the specified name. Null is returned if no such
+     *                         permission.
      */
-    public function getPermission($name);
+    public function getPermission(string $name): ?Permission;
 
     /**
      * Returns all permissions in the system.
      *
      * @return Permission[] all permissions in the system. The array is indexed by the permission names.
      */
-    public function getPermissions();
+    public function getPermissions(): array;
 
     /**
      * Returns all permissions that the specified role represents.
@@ -136,16 +134,16 @@ interface ManagerInterface extends CheckAccessInterface
      *
      * @return Permission[] all permissions that the role represents. The array is indexed by the permission names.
      */
-    public function getPermissionsByRole($roleName);
+    public function getPermissionsByRole(string $roleName): array;
 
     /**
      * Returns all permissions that the user has.
      *
-     * @param string|int $userId the user ID (see [[\yii\web\User::id]])
+     * @param string $userId the user ID (see [[\yii\web\User::id]])
      *
      * @return Permission[] all permissions that the user has. The array is indexed by the permission names.
      */
-    public function getPermissionsByUser($userId);
+    public function getPermissionsByUser(string $userId): array;
 
     /**
      * Returns the rule of the specified name.
@@ -154,14 +152,14 @@ interface ManagerInterface extends CheckAccessInterface
      *
      * @return null|Rule the rule object, or null if the specified name does not correspond to a rule.
      */
-    public function getRule($name);
+    public function getRule(string $name): ?Rule;
 
     /**
      * Returns all rules available in the system.
      *
      * @return Rule[] the rules indexed by the rule names
      */
-    public function getRules();
+    public function getRules(): array;
 
     /**
      * Checks the possibility of adding a child to parent.
@@ -173,7 +171,7 @@ interface ManagerInterface extends CheckAccessInterface
      *
      * @since 2.0.8
      */
-    public function canAddChild($parent, $child);
+    public function canAddChild(Item $parent, Item $child): bool;
 
     /**
      * Adds an item as a child of another item.
@@ -181,11 +179,9 @@ interface ManagerInterface extends CheckAccessInterface
      * @param Item $parent
      * @param Item $child
      *
-     * @throws \Yiisoft\Rbac\Exceptions\Exception if the parent-child relationship already exists or if a loop has been detected.
-     *
-     * @return bool whether the child successfully added
+     * @return void whether the child successfully added
      */
-    public function addChild($parent, $child);
+    public function addChild(Item $parent, Item $child): void;
 
     /**
      * Removes a child from its parent.
@@ -194,9 +190,9 @@ interface ManagerInterface extends CheckAccessInterface
      * @param Item $parent
      * @param Item $child
      *
-     * @return bool whether the removal is successful
+     * @return void
      */
-    public function removeChild($parent, $child);
+    public function removeChild(Item $parent, Item $child): void;
 
     /**
      * Removed all children form their parent.
@@ -204,9 +200,9 @@ interface ManagerInterface extends CheckAccessInterface
      *
      * @param Item $parent
      *
-     * @return bool whether the removal is successful
+     * @return void
      */
-    public function removeChildren($parent);
+    public function removeChildren(Item $parent): void;
 
     /**
      * Returns a value indicating whether the child already exists for the parent.
@@ -216,7 +212,7 @@ interface ManagerInterface extends CheckAccessInterface
      *
      * @return bool whether `$child` is already a child of `$parent`
      */
-    public function hasChild($parent, $child);
+    public function hasChild(Item $parent, Item $child): bool;
 
     /**
      * Returns the child permissions and/or roles.
@@ -225,38 +221,38 @@ interface ManagerInterface extends CheckAccessInterface
      *
      * @return Item[] the child permissions and/or roles
      */
-    public function getChildren($name);
+    public function getChildren(string $name): array;
 
     /**
      * Assigns a role to a user.
      *
      * @param Role|Permission $role
-     * @param string|int      $userId the user ID (see [[\yii\web\User::id]])
-     *
-     * @throws \Exception if the role has already been assigned to the user
+     * @param string          $userId the user ID (see [[\yii\web\User::id]])
      *
      * @return Assignment the role assignment information.
+     * @throws \Exception if the role has already been assigned to the user
+     *
      */
-    public function assign($role, $userId);
+    public function assign(Item $role, string $userId): Assignment;
 
     /**
      * Revokes a role from a user.
      *
-     * @param Role|Permission $role
-     * @param string|int      $userId the user ID (see [[\yii\web\User::id]])
+     * @param \Yiisoft\Rbac\Item $role
+     * @param string|int         $userId the user ID (see [[\yii\web\User::id]])
      *
-     * @return bool whether the revoking is successful
+     * @return void
      */
-    public function revoke($role, $userId);
+    public function revoke(Item $role, string $userId): void;
 
     /**
      * Revokes all roles from a user.
      *
      * @param mixed $userId the user ID (see [[\yii\web\User::id]])
      *
-     * @return bool whether the revoking is successful
+     * @return void
      */
-    public function revokeAll($userId);
+    public function revokeAll(string $userId): void;
 
     /**
      * Returns the assignment information regarding a role and a user.
@@ -267,7 +263,7 @@ interface ManagerInterface extends CheckAccessInterface
      * @return null|Assignment the assignment information. Null is returned if
      *                         the role is not assigned to the user.
      */
-    public function getAssignment($roleName, $userId);
+    public function getAssignment(string $roleName, string $userId): Assignment;
 
     /**
      * Returns all role assignment information for the specified user.
@@ -277,7 +273,7 @@ interface ManagerInterface extends CheckAccessInterface
      * @return Assignment[] the assignments indexed by role names. An empty array will be
      *                      returned if there is no role assigned to the user.
      */
-    public function getAssignments($userId);
+    public function getAssignments(string $userId): array;
 
     /**
      * Returns all user IDs assigned to the role specified.
@@ -288,33 +284,33 @@ interface ManagerInterface extends CheckAccessInterface
      *
      * @since 2.0.7
      */
-    public function getUserIdsByRole($roleName);
+    public function getUserIdsByRole(string $roleName): array;
 
     /**
      * Removes all authorization data, including roles, permissions, rules, and assignments.
      */
-    public function removeAll();
+    public function removeAll(): void;
 
     /**
      * Removes all permissions.
      * All parent child relations will be adjusted accordingly.
      */
-    public function removeAllPermissions();
+    public function removeAllPermissions(): void;
 
     /**
      * Removes all roles.
      * All parent child relations will be adjusted accordingly.
      */
-    public function removeAllRoles();
+    public function removeAllRoles(): void;
 
     /**
      * Removes all rules.
      * All roles and permissions which have rules will be adjusted accordingly.
      */
-    public function removeAllRules();
+    public function removeAllRules(): void;
 
     /**
      * Removes all role assignments.
      */
-    public function removeAllAssignments();
+    public function removeAllAssignments(): void;
 }
