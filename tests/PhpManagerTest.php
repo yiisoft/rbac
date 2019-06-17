@@ -33,7 +33,7 @@ function time()
 namespace Yiisoft\Rbac\Tests;
 
 use yii\helpers\FileHelper;
-use Yiisoft\Rbac\DIRuleFactory;
+use Yiisoft\Rbac\Factories\DIRuleFactory;
 
 /**
  * @group rbac
@@ -47,17 +47,17 @@ class PhpManagerTest extends ManagerTestCase
 
     protected function getItemFile()
     {
-        return $this->app->getRuntimePath().'/rbac-items.php';
+        return $this->app->getRuntimePath() . '/rbac-items.php';
     }
 
     protected function getAssignmentFile()
     {
-        return $this->app->getRuntimePath().'/rbac-assignments.php';
+        return $this->app->getRuntimePath() . '/rbac-assignments.php';
     }
 
     protected function getRuleFile()
     {
-        return $this->app->getRuntimePath().'/rbac-rules.php';
+        return $this->app->getRuntimePath() . '/rbac-rules.php';
     }
 
     protected function removeDataFiles()
@@ -74,7 +74,7 @@ class PhpManagerTest extends ManagerTestCase
     {
         return (new ExposedPhpManager(
             '',
-            $this->factory->get(DIRuleFactory::class),
+            $this->container->get(DIRuleFactory::class),
             $this->getItemFile(),
             $this->getAssignmentFile(),
             $this->getRuleFile()
@@ -87,7 +87,7 @@ class PhpManagerTest extends ManagerTestCase
         static::$time = null;
         parent::setUp();
 
-        $this->mockApplication();
+        $this->createApp();
         FileHelper::createDirectory($this->app->getAlias('@runtime'));
         $this->removeDataFiles();
         $this->auth = $this->createManager();
@@ -128,7 +128,11 @@ class PhpManagerTest extends ManagerTestCase
         $name = 'readPost';
         $permission = $this->auth->getPermission($name);
         $permission->name = 'UPDATED-NAME';
-        $this->assertTrue($this->auth->update($name, $permission), 'You should be able to update name.');
+        $this->auth->update($name, $permission);
+        $oldPermission = $this->auth->getPermission('readPost');
+        $newPermission = $this->auth->getPermission('UPDATED-NAME');
+        $this->assertNull($oldPermission);
+        $this->assertNotNull($newPermission);
     }
 
     public function testUpdateDescription()
@@ -136,19 +140,21 @@ class PhpManagerTest extends ManagerTestCase
         $this->prepareData();
         $name = 'readPost';
         $permission = $this->auth->getPermission($name);
-        $permission->description = 'UPDATED-DESCRIPTION';
-        $this->assertTrue($this->auth->update($name, $permission), 'You should be able to save w/o changing name.');
+        $newDescription = 'UPDATED-DESCRIPTION';
+        $permission->description = $newDescription;
+        $this->auth->update($name, $permission);
+
+        $permission = $this->auth->getPermission('readPost');
+        $this->assertEquals($newDescription, $permission->description);
     }
 
-    /**
-     * @expectedException \Yiisoft\Rbac\Exceptions\InvalidArgumentException
-     */
     public function testOverwriteName()
     {
         $this->prepareData();
         $name = 'readPost';
         $permission = $this->auth->getPermission($name);
         $permission->name = 'createPost';
+        $this->expectException(\Yiisoft\Rbac\Exceptions\InvalidArgumentException::class);
         $this->auth->update($name, $permission);
     }
 
