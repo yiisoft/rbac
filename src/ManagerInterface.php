@@ -77,7 +77,7 @@ interface ManagerInterface extends CheckAccessInterface
      *
      * @return null|Role the role corresponding to the specified name. Null is returned if no such role.
      */
-    public function getRole(string $name): Role;
+    public function getRole(string $name): ?Role;
 
     /**
      * Returns all roles in the system.

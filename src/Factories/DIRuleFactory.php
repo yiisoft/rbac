@@ -11,12 +11,6 @@ namespace Yiisoft\Rbac\Factories;
 use Psr\Container\ContainerInterface;
 use Yiisoft\Rbac\Rule;
 
-/**
- * @author Andrii Vasyliev <sol@hiqdev.com>
- * @author Dmitrii Derepko <xepozz@list.ru>
- *
- * @since  3.0
- */
 class DIRuleFactory implements RuleFactoryInterface
 {
     private $container;

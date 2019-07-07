@@ -149,24 +149,22 @@ abstract class BaseManager extends Component implements ManagerInterface
 
     public function add(BaseItem $object): void
     {
-        switch (true) {
-            case $object instanceof Item:
-                /* @var $object Item */
-                if ($object->ruleName && $this->getRule($object->ruleName) === null) {
-                    $rule = $this->createRule($object->ruleName);
-                    $this->addRule($rule);
-                }
+        if ($object instanceof Item) {
+            if ($object->ruleName !== '' && $this->getRule($object->ruleName) === null) {
+                $rule = $this->createRule($object->ruleName);
+                $this->addRule($rule);
+            }
 
-                $this->addItem($object);
-
-                break;
-            case $object instanceof Rule:
-                /* @var $object Rule */
-                $this->addRule($object);
-                break;
-            default:
-                throw new InvalidArgumentException('Adding unsupported object type.');
+            $this->addItem($object);
+            return;
         }
+
+        if ($object instanceof Rule) {
+            $this->addRule($object);
+            return;
+        }
+
+        throw new InvalidArgumentException('Adding unsupported object type.');
     }
 
     protected function createRule($name): Rule
@@ -176,45 +174,43 @@ abstract class BaseManager extends Component implements ManagerInterface
 
     public function remove(BaseItem $object): void
     {
-        switch (true) {
-            case $object instanceof Item:
-                /* @var $object Item */
-                $this->removeItem($object);
-                break;
-            case $object instanceof Rule:
-                /* @var $object Rule */
-                $this->removeRule($object);
-                break;
-            default:
-                throw new InvalidArgumentException('Removing unsupported object type.');
+        if ($object instanceof Item) {
+            $this->removeItem($object);
+            return;
         }
+
+        if ($object instanceof Rule) {
+            $this->removeRule($object);
+            return;
+        }
+
+        throw new InvalidArgumentException('Removing unsupported object type.');
     }
 
     public function update(string $name, BaseItem $object): void
     {
-        switch (true) {
-            case $object instanceof Item:
-                /* @var $object Item */
-                if ($object->ruleName && $this->getRule($object->ruleName) === null) {
-                    $rule = $this->createRule($object->ruleName);
-                    $this->addRule($rule);
-                }
+        if ($object instanceof Item) {
+            if ($object->ruleName && $this->getRule($object->ruleName) === null) {
+                $rule = $this->createRule($object->ruleName);
+                $this->addRule($rule);
+            }
 
-                $this->updateItem($name, $object);
-                break;
-            case $object instanceof Rule:
-                /* @var $object Rule */
-                $this->updateRule($name, $object);
-                break;
-            default:
-                throw new InvalidArgumentException('Updating unsupported object type.');
+            $this->updateItem($name, $object);
+            return;
         }
+
+        if ($object instanceof Rule) {
+            $this->updateRule($name, $object);
+            return;
+        }
+
+        throw new InvalidArgumentException('Updating unsupported object type.');
     }
 
-    public function getRole(string $name): Role
+    public function getRole(string $name): ?Role
     {
         $item = $this->getItem($name);
-        if (!($item instanceof Role)) {
+        if ($item !== null && !($item instanceof Role)) {
             throw new \yii\exceptions\InvalidValueException();
         }
 
