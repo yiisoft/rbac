@@ -1,12 +1,5 @@
 /**
- * Database schema required by \Yiisoft\Rbac\DbManager.
- *
- * @author Qiang Xue <qiang.xue@gmail.com>
- * @author Alexander Kochetov <creocoder@gmail.com>
- * @link http://www.yiiframework.com/
- * @copyright 2008 Yii Software LLC
- * @license http://www.yiiframework.com/license/
- * @since 2.0
+ * Database schema required by \Yiisoft\Rbac\DbManager
  */
 
 drop table if exists `auth_assignment`;

@@ -1,11 +1,4 @@
 <?php
-/**
- * @link http://www.yiiframework.com/
- *
- * @copyright Copyright (c) 2008 Yii Software LLC
- * @license http://www.yiiframework.com/license/
- */
-
 namespace Yiisoft\Rbac;
 
 use yii\base\Component;
@@ -22,10 +15,6 @@ use Yiisoft\Rbac\Exceptions\InvalidValueException;
  * is read-only.
  * @property string[] $defaultRoles Default roles. Note that the type of this property differs in getter and
  * setter. See [[getDefaultRoles()]] and [[setDefaultRoles()]] for details.
- *
- * @author Qiang Xue <qiang.xue@gmail.com>
- *
- * @since 2.0
  */
 abstract class BaseManager extends Component implements ManagerInterface
 {

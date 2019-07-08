@@ -1,11 +1,4 @@
 <?php
-/**
- * @link http://www.yiiframework.com/
- *
- * @copyright Copyright (c) 2008 Yii Software LLC
- * @license http://www.yiiframework.com/license/
- */
-
 namespace Yiisoft\Rbac;
 
 use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
@@ -24,13 +17,6 @@ use Yiisoft\VarDumper\VarDumper;
  * Use [[DbManager]] for more complex authorization data.
  *
  * For more details and usage information on PhpManager, see the [guide article on security authorization](guide:security-authorization).
- *
- * @author Qiang Xue <qiang.xue@gmail.com>
- * @author Alexander Kochetov <creocoder@gmail.com>
- * @author Christophe Boulain <christophe.boulain@gmail.com>
- * @author Alexander Makarov <sam@rmcreative.ru>
- *
- * @since 2.0
  */
 class PhpManager extends BaseManager
 {

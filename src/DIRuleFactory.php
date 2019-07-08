@@ -1,20 +1,8 @@
 <?php
-/**
- * @link http://www.yiiframework.com/
- *
- * @copyright Copyright (c) 2008 Yii Software LLC
- * @license http://www.yiiframework.com/license/
- */
-
 namespace Yiisoft\Rbac;
 
-use yii\di\FactoryInterface;
+use Yiisoft\Factory\FactoryInterface;
 
-/**
- * @author Andrii Vasyliev <sol@hiqdev.com>
- *
- * @since 3.0
- */
 class DIRuleFactory implements RuleFactoryInterface
 {
     /**

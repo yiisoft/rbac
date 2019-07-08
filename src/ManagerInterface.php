@@ -1,21 +1,10 @@
 <?php
-/**
- * @link http://www.yiiframework.com/
- *
- * @copyright Copyright (c) 2008 Yii Software LLC
- * @license http://www.yiiframework.com/license/
- */
-
 namespace Yiisoft\Rbac;
 
 use Yiisoft\Access\CheckAccessInterface;
 
 /**
  * For more details and usage information on ManagerInterface, see the [guide article on security authorization](guide:security-authorization).
- *
- * @author Qiang Xue <qiang.xue@gmail.com>
- *
- * @since 2.0
  */
 interface ManagerInterface extends CheckAccessInterface
 {
