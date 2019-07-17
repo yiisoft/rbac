@@ -25,7 +25,7 @@ function time()
 
 namespace Yiisoft\Rbac\Tests;
 
-use yii\helpers\FileHelper;
+use Yiisoft\Files\FileHelper;
 use Yiisoft\Rbac\DIRuleFactory;
 
 /**

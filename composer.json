@@ -35,7 +35,8 @@
         "yiisoft/db-pgsql": "^3.0@dev",
         "phpunit/phpunit": "^7.3",
         "friendsofphp/php-cs-fixer": "^2.2",
-        "hiqdev/composer-config-plugin": "^1.0@dev"
+        "hiqdev/composer-config-plugin": "^1.0@dev",
+        "yiisoft/files": "^3.0@dev"
     },
     "suggest": {
         "yiisoft/db": "^3.0 for data base"
