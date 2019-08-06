@@ -248,7 +248,6 @@ abstract class BaseManager extends Component implements ManagerInterface
      * @return string[] default roles
      *
      * @since 2.0.14
-     * @deprecated
      */
     public function getDefaultRoles()
     {
