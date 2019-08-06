@@ -1,11 +1,4 @@
 <?php
-/**
- * @link http://www.yiiframework.com/
- *
- * @copyright Copyright (c) 2008 Yii Software LLC
- * @license http://www.yiiframework.com/license/
- */
-
 namespace Yiisoft\Rbac\Tests;
 
 use Psr\Log\LogLevel;
@@ -340,7 +333,7 @@ abstract class DbManagerTestCase extends ManagerTestCase
         /* @var $logger \Yiisoft\Log\Logger */
         $logger = $this->app->getLogger();
 
-        $logger->flushInterval = 1;
+        $logger->setFlushInterval(1);
         $logger->messages = [];
 
         $logTarget = new ArrayTarget();

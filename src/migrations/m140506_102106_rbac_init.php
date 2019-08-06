@@ -1,20 +1,11 @@
 <?php
-/**
- * @link http://www.yiiframework.com/
- *
- * @copyright Copyright (c) 2008 Yii Software LLC
- * @license http://www.yiiframework.com/license/
- */
+
 use Yiisoft\Rbac\BaseManager;
 use Yiisoft\Rbac\DbManager;
 use Yiisoft\Rbac\Exceptions\InvalidConfigException;
 
 /**
- * Initializes RBAC tables.
- *
- * @author Alexander Kochetov <creocoder@gmail.com>
- *
- * @since 2.0
+ * Initializes RBAC tables
  */
 class m140506_102106_rbac_init extends \Yiisoft\Db\Migration
 {

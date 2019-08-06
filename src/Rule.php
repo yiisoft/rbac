@@ -1,21 +1,10 @@
 <?php
-/**
- * @link http://www.yiiframework.com/
- *
- * @copyright Copyright (c) 2008 Yii Software LLC
- * @license http://www.yiiframework.com/license/
- */
-
 namespace Yiisoft\Rbac;
 
 /**
  * Rule represents a business constraint that may be associated with a role, permission or assignment.
  *
  * For more details and usage information on Rule, see the [guide article on security authorization](guide:security-authorization).
- *
- * @author Alexander Makarov <sam@rmcreative.ru>
- *
- * @since 2.0
  */
 abstract class Rule extends BaseItem
 {

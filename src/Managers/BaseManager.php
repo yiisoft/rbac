@@ -1,25 +1,11 @@
 <?php
-/**
- * @link      http://www.yiiframework.com/
- *
- * @copyright Copyright (c) 2008 Yii Software LLC
- * @license   http://www.yiiframework.com/license/
- */
-
-namespace Yiisoft\Rbac\Managers;
+namespace Yiisoft\Rbac;
 
 use yii\base\Component;
-use Yiisoft\Rbac\Assignment;
-use Yiisoft\Rbac\BaseItem;
 use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
 use Yiisoft\Rbac\Exceptions\InvalidConfigException;
 use Yiisoft\Rbac\Exceptions\InvalidValueException;
 use Yiisoft\Rbac\Factories\RuleFactoryInterface;
-use Yiisoft\Rbac\Item;
-use Yiisoft\Rbac\ManagerInterface;
-use Yiisoft\Rbac\Permission;
-use Yiisoft\Rbac\Role;
-use Yiisoft\Rbac\Rule;
 
 /**
  * BaseManager is a base class implementing [[ManagerInterface]] for RBAC management.
@@ -31,10 +17,6 @@ use Yiisoft\Rbac\Rule;
  * is read-only.
  * @property string[] $defaultRoles         Default roles. Note that the type of this property differs in getter and
  * setter. See [[getDefaultRoles()]] and [[setDefaultRoles()]] for details.
- *
- * @author Qiang Xue <qiang.xue@gmail.com>
- *
- * @since  2.0
  */
 abstract class BaseManager extends Component implements ManagerInterface
 {

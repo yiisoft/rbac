@@ -1,19 +1,8 @@
 <?php
-/**
- * @link http://www.yiiframework.com/
- *
- * @copyright Copyright (c) 2008 Yii Software LLC
- * @license http://www.yiiframework.com/license/
- */
-
 namespace Yiisoft\Rbac\Exceptions;
 
 /**
  * InvalidCallException represents an exception caused by calling a method in a wrong way.
- *
- * @author Andrii Vasyliev <sol@hiqdev.com>
- *
- * @since 3.0
  */
 class InvalidCallException extends \BadMethodCallException implements ExceptionInterface
 {

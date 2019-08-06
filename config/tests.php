@@ -1,5 +1,4 @@
 <?php
-
 return [
     \Yiisoft\Rbac\BaseManager::class => [
         '__class' => \Yiisoft\Rbac\DbManager::class,
