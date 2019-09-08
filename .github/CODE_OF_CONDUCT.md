@@ -1,5 +1,4 @@
-Yii Contributor Code of Conduct
-=======================
+# Yii Contributor Code of Conduct
 
 ## Our Pledge
 
