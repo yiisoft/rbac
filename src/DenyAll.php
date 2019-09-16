@@ -1,14 +1,14 @@
 <?php
 namespace Yiisoft\Rbac;
 
-use Yiisoft\Access\CheckAccessInterface;
+use Yiisoft\Access\AccessCheckerInterface;
 
 /**
  * Deny all access control.
  */
-class DenyAll implements CheckAccessInterface
+class DenyAll implements AccessCheckerInterface
 {
-    public function checkAccess($userId, string $permissionName, array $parameters = []): bool
+    public function hasPermission($userId, string $permissionName, array $parameters = []): bool
     {
         return false;
     }

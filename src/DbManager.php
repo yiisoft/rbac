@@ -109,7 +109,7 @@ class DbManager extends BaseManager
 
     private $_checkAccessAssignments = [];
 
-    public function checkAccess($userId, string $permissionName, array $parameters = []): bool
+    public function hasPermission($userId, string $permissionName, array $parameters = []): bool
     {
         if (isset($this->_checkAccessAssignments[(string) $userId])) {
             $assignments = $this->_checkAccessAssignments[(string) $userId];
@@ -132,7 +132,7 @@ class DbManager extends BaseManager
 
     /**
      * Performs access check for the specified user based on the data loaded from cache.
-     * This method is internally called by [[checkAccess()]] when [[cache]] is enabled.
+     * This method is internally called by [[hasPermission()]] when [[cache]] is enabled.
      *
      * @param string|int   $user        the user ID. This should can be either an integer or a string representing
      *                                  the unique identifier of a user. See [[\yii\web\User::id]].
@@ -177,7 +177,7 @@ class DbManager extends BaseManager
 
     /**
      * Performs access check for the specified user.
-     * This method is internally called by [[checkAccess()]].
+     * This method is internally called by [[hasPermission()]].
      *
      * @param string|int   $user        the user ID. This should can be either an integer or a string representing
      *                                  the unique identifier of a user. See [[\yii\web\User::id]].
