@@ -28,17 +28,13 @@
         "yiisoft/log": "^3.0@dev",
         "yiisoft/view": "^3.0@dev",
         "yiisoft/cache": "^3.0@dev",
-        "yiisoft/db": "^3.0@dev",
-        "yiisoft/db-sqlite": "^3.0@dev",
-        "yiisoft/db-mysql": "^3.0@dev",
-        "yiisoft/db-pgsql": "^3.0@dev",
         "phpunit/phpunit": "^7.3",
-        "friendsofphp/php-cs-fixer": "^2.2",
         "hiqdev/composer-config-plugin": "^1.0@dev",
         "yiisoft/files": "^3.0@dev"
     },
     "suggest": {
-        "yiisoft/db": "^3.0 for data base"
+        "yiisoft/rbac-php": "To store rules in PHP files",
+        "yiisoft/rbac-db": "To store rules in database"
     },
     "autoload": {
         "psr-4": {
@@ -47,7 +43,6 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Yiisoft\\Log\\tests\\": "vendor/yiisoft/log/tests",
             "Yiisoft\\Rbac\\Tests\\": "tests"
         }
     },
