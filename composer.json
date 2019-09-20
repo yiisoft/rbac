@@ -1,7 +1,7 @@
 {
     "name": "yiisoft/rbac",
     "type": "library",
-    "description": "Yii Role-Based Access Control Library",
+    "description": "Yii Role-Based Access Control",
     "keywords": [
         "yii",
         "rbac"
@@ -29,7 +29,6 @@
         "yiisoft/view": "^3.0@dev",
         "yiisoft/cache": "^3.0@dev",
         "phpunit/phpunit": "^7.3",
-        "hiqdev/composer-config-plugin": "^1.0@dev",
         "yiisoft/files": "^3.0@dev"
     },
     "suggest": {
@@ -49,11 +48,6 @@
     "extra": {
         "branch-alias": {
             "dev-master": "3.0.x-dev"
-        },
-        "config-plugin": {
-            "params": "config/params.php",
-            "common": "config/common.php",
-            "tests": "config/tests.php"
         }
     }
 }
