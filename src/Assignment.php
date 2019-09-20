@@ -3,21 +3,36 @@ namespace Yiisoft\Rbac;
 
 /**
  * Assignment represents an assignment of a role to a user.
- *
- * For more details and usage information on Assignment, see the [guide article on security authorization](guide:security-authorization).
  */
-class Assignment extends BaseItem
+class Assignment
 {
     /**
-     * @var string user ID (see [[\yii\web\User::id]])
+     * @var string the user ID. This should be a string representing
+     * the unique identifier of a user.
      */
-    public $userId;
+    private $userId;
     /**
      * @var string the role name
      */
-    public $roleName;
+    private $roleName;
     /**
      * @var int UNIX timestamp representing the assignment creation time
      */
-    public $createdAt;
+    private $createdAt;
+
+    public function __construct(string $userId, string $roleName)
+    {
+        $this->userId = $userId;
+        $this->roleName = $roleName;
+    }
+
+    public function getUserId(): string
+    {
+        return $this->userId;
+    }
+
+    public function getRoleName(): string
+    {
+        return $this->roleName;
+    }
 }

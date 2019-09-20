@@ -1,10 +1,10 @@
 <?php
 namespace Yiisoft\Rbac;
 
-/**
- * For more details and usage information on Permission, see the [guide article on security authorization](guide:security-authorization).
- */
 class Permission extends Item
 {
-    public $type = self::TYPE_PERMISSION;
+    public function getType(): string
+    {
+        return self::TYPE_PERMISSION;
+    }
 }

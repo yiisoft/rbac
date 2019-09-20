@@ -2,6 +2,7 @@
 namespace Yiisoft\Rbac;
 
 use Yiisoft\Access\AccessCheckerInterface;
+use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
 
 /**
  * For more details and usage information on ManagerInterface, see the [guide article on security authorization](guide:security-authorization).
@@ -33,30 +34,30 @@ interface ManagerInterface extends AccessCheckerInterface
     /**
      * Adds a role, permission or rule to the RBAC system.
      *
-     * @param \Yiisoft\Rbac\BaseItem $object
+     * @param ItemInterface $item
      *
      * @return void
      */
-    public function add(BaseItem $object): void;
+    public function add(ItemInterface $item): void;
 
     /**
      * Removes a role, permission or rule from the RBAC system.
      *
-     * @param \Yiisoft\Rbac\BaseItem $object
+     * @param ItemInterface $item
      *
      * @return void
      */
-    public function remove(BaseItem $object): void;
+    public function remove(ItemInterface $item): void;
 
     /**
      * Updates the specified role, permission or rule in the system.
      *
-     * @param string                 $name the old name of the role, permission or rule
-     * @param \Yiisoft\Rbac\BaseItem $object
+     * @param string $name the old name of the role, permission or rule
+     * @param ItemInterface $item
      *
      * @return void
      */
-    public function update(string $name, BaseItem $object): void;
+    public function update(string $name, ItemInterface $item): void;
 
     /**
      * Returns the named role.
@@ -78,7 +79,7 @@ interface ManagerInterface extends AccessCheckerInterface
      * Returns the roles that are assigned to the user via [[assign()]].
      * Note that child roles that are not assigned directly to the user will not be returned.
      *
-     * @param string|int $userId the user ID (see [[\yii\web\User::id]])
+     * @param string $userId the user ID
      *
      * @return Role[] all roles directly assigned to the user. The array is indexed by the role names.
      */
@@ -90,11 +91,9 @@ interface ManagerInterface extends AccessCheckerInterface
      * @param string $roleName name of the role to file child roles for
      *
      * @return Role[] Child roles. The array is indexed by the role names.
-     *                First element is an instance of the parent Role itself.
+     * First element is an instance of the parent Role itself.
      *
-     * @throws \Yiisoft\Rbac\Exceptions\InvalidArgumentException if Role was not found that are getting by $roleName
-     *
-     * @since 2.0.10
+     * @throws InvalidArgumentException if Role was not found that are getting by $roleName
      */
     public function getChildRoles(string $roleName): array;
 
@@ -104,7 +103,7 @@ interface ManagerInterface extends AccessCheckerInterface
      * @param string $name the permission name.
      *
      * @return null|Permission the permission corresponding to the specified name. Null is returned if no such
-     *                         permission.
+     * permission.
      */
     public function getPermission(string $name): ?Permission;
 
@@ -127,7 +126,7 @@ interface ManagerInterface extends AccessCheckerInterface
     /**
      * Returns all permissions that the user has.
      *
-     * @param string $userId the user ID (see [[\yii\web\User::id]])
+     * @param string $userId the user ID
      *
      * @return Permission[] all permissions that the user has. The array is indexed by the permission names.
      */
@@ -156,8 +155,6 @@ interface ManagerInterface extends AccessCheckerInterface
      * @param Item $child  the child item to be added to the hierarchy
      *
      * @return bool possibility of adding
-     *
-     * @since 2.0.8
      */
     public function canAddChild(Item $parent, Item $child): bool;
 
@@ -214,20 +211,20 @@ interface ManagerInterface extends AccessCheckerInterface
     /**
      * Assigns a role to a user.
      *
-     * @param Role|Permission $role
-     * @param string          $userId the user ID (see [[\yii\web\User::id]])
+     * @param Role $role
+     * @param string $userId the user ID
      *
      * @return Assignment the role assignment information.
      * @throws \Exception if the role has already been assigned to the user
      *
      */
-    public function assign(Item $role, string $userId): Assignment;
+    public function assign(Role $role, string $userId): Assignment;
 
     /**
      * Revokes a role from a user.
      *
-     * @param \Yiisoft\Rbac\Item $role
-     * @param string|int         $userId the user ID (see [[\yii\web\User::id]])
+     * @param Item $role
+     * @param string $userId the user ID
      *
      * @return void
      */
@@ -236,7 +233,7 @@ interface ManagerInterface extends AccessCheckerInterface
     /**
      * Revokes all roles from a user.
      *
-     * @param mixed $userId the user ID (see [[\yii\web\User::id]])
+     * @param mixed $userId the user ID
      *
      * @return void
      */
@@ -245,21 +242,21 @@ interface ManagerInterface extends AccessCheckerInterface
     /**
      * Returns the assignment information regarding a role and a user.
      *
-     * @param string     $roleName the role name
-     * @param string|int $userId   the user ID (see [[\yii\web\User::id]])
+     * @param string $roleName the role name
+     * @param string $userId the user ID
      *
      * @return null|Assignment the assignment information. Null is returned if
-     *                         the role is not assigned to the user.
+     * the role is not assigned to the user.
      */
-    public function getAssignment(string $roleName, string $userId): Assignment;
+    public function getAssignment(string $roleName, string $userId): ?Assignment;
 
     /**
      * Returns all role assignment information for the specified user.
      *
-     * @param string|int $userId the user ID (see [[\yii\web\User::id]])
+     * @param string $userId the user ID
      *
      * @return Assignment[] the assignments indexed by role names. An empty array will be
-     *                      returned if there is no role assigned to the user.
+     * returned if there is no role assigned to the user.
      */
     public function getAssignments(string $userId): array;
 
@@ -269,8 +266,6 @@ interface ManagerInterface extends AccessCheckerInterface
      * @param string $roleName
      *
      * @return array array of user ID strings
-     *
-     * @since 2.0.7
      */
     public function getUserIdsByRole(string $roleName): array;
 

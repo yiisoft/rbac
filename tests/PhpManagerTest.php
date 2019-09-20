@@ -31,46 +31,12 @@ use Yiisoft\Rbac\DIRuleFactory;
 /**
  * @group rbac
  */
-class PhpManagerTest extends ManagerTestCase
+final class PhpManagerTest extends ManagerTestCase
 {
     public static $filemtime;
     public static $time;
 
-    protected function getItemFile()
-    {
-        return $this->app->getRuntimePath() . '/rbac-items.php';
-    }
-
-    protected function getAssignmentFile()
-    {
-        return $this->app->getRuntimePath() . '/rbac-assignments.php';
-    }
-
-    protected function getRuleFile()
-    {
-        return $this->app->getRuntimePath() . '/rbac-rules.php';
-    }
-
-    protected function removeDataFiles()
-    {
-        @unlink($this->getItemFile());
-        @unlink($this->getAssignmentFile());
-        @unlink($this->getRuleFile());
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function createManager()
-    {
-        return (new ExposedPhpManager(
-            '',
-            $this->container->get(DIRuleFactory::class),
-            $this->getItemFile(),
-            $this->getAssignmentFile(),
-            $this->getRuleFile()
-        ))->setDefaultRoles(['myDefaultRole']);
-    }
+    private $testDataPath = '';
 
     protected function setUp()
     {
@@ -78,20 +44,26 @@ class PhpManagerTest extends ManagerTestCase
         static::$time = null;
         parent::setUp();
 
-        FileHelper::createDirectory($this->app->getAlias('@runtime'));
-        $this->removeDataFiles();
-        $this->auth = $this->createManager();
+        $this->testDataPath = sys_get_temp_dir() . '/' . str_replace('\\', '_', get_class($this)) . uniqid('', false);
     }
 
     protected function tearDown()
     {
-        $this->removeDataFiles();
+        FileHelper::removeDirectory($this->testDataPath);
         static::$filemtime = null;
         static::$time = null;
         parent::tearDown();
     }
 
-    public function testSaveLoad()
+    protected function createManager()
+    {
+        return (new ExposedPhpManager(
+            '',
+            $this->container->get(DIRuleFactory::class)
+        ))->setDefaultRoles(['myDefaultRole']);
+    }
+
+    public function testSaveLoad(): void
     {
         static::$time = static::$filemtime = \time();
 
@@ -111,7 +83,7 @@ class PhpManagerTest extends ManagerTestCase
         $this->assertEquals($rules, $this->auth->rules);
     }
 
-    public function testUpdateItemName()
+    public function testUpdateItemName(): void
     {
         $this->prepareData();
 
@@ -125,7 +97,7 @@ class PhpManagerTest extends ManagerTestCase
         $this->assertNotNull($newPermission);
     }
 
-    public function testUpdateDescription()
+    public function testUpdateDescription(): void
     {
         $this->prepareData();
         $name = 'readPost';
@@ -138,7 +110,7 @@ class PhpManagerTest extends ManagerTestCase
         $this->assertEquals($newDescription, $permission->description);
     }
 
-    public function testOverwriteName()
+    public function testOverwriteName(): void
     {
         $this->prepareData();
         $name = 'readPost';
@@ -148,17 +120,17 @@ class PhpManagerTest extends ManagerTestCase
         $this->auth->update($name, $permission);
     }
 
-    public function testSaveAssignments()
+    public function testSaveAssignments(): void
     {
         $this->auth->removeAll();
         $role = $this->auth->createRole('Admin');
         $this->auth->add($role);
         $this->auth->assign($role, 13);
-        $this->assertContains('Admin', file_get_contents($this->getAssignmentFile()));
+        $this->assertContains('Admin', file_get_contents($this->getAssignmentFilePath()));
         $role->name = 'NewAdmin';
         $this->auth->update('Admin', $role);
-        $this->assertContains('NewAdmin', file_get_contents($this->getAssignmentFile()));
+        $this->assertContains('NewAdmin', file_get_contents($this->getAssignmentFilePath()));
         $this->auth->remove($role);
-        $this->assertNotContains('NewAdmin', file_get_contents($this->getAssignmentFile()));
+        $this->assertNotContains('NewAdmin', file_get_contents($this->getAssignmentFilePath()));
     }
 }

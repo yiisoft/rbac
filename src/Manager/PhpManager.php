@@ -1,9 +1,13 @@
 <?php
+
 namespace Yiisoft\Rbac\Manager;
 
+use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
 use Yiisoft\Rbac\Exceptions\InvalidCallException;
-use Yiisoft\Rbac\Factory\RuleFactoryInterface;
+use Yiisoft\Rbac\Item;
+use Yiisoft\Rbac\Permission;
+use Yiisoft\Rbac\Rule;
 use Yiisoft\VarDumper\VarDumper;
 
 /**
@@ -23,9 +27,9 @@ class PhpManager extends BaseManager
 {
     /**
      * @var string the path of the PHP script that contains the authorization items.
-     *             This can be either a file path or a [path alias](guide:concept-aliases) to the file.
-     *             Make sure this file is writable by the Web server process if the authorization needs to be changed
-     *             online.
+     * This can be either a file path or a [path alias](guide:concept-aliases) to the file.
+     * Make sure this file is writable by the Web server process if the authorization needs to be changed
+     * online.
      *
      * @see loadFromFile()
      * @see saveToFile()
@@ -33,9 +37,9 @@ class PhpManager extends BaseManager
     protected $itemFile;
     /**
      * @var string the path of the PHP script that contains the authorization assignments.
-     *             This can be either a file path or a [path alias](guide:concept-aliases) to the file.
-     *             Make sure this file is writable by the Web server process if the authorization needs to be changed
-     *             online.
+     * This can be either a file path or a [path alias](guide:concept-aliases) to the file.
+     * Make sure this file is writable by the Web server process if the authorization needs to be changed
+     * online.
      *
      * @see loadFromFile()
      * @see saveToFile()
@@ -43,9 +47,9 @@ class PhpManager extends BaseManager
     protected $assignmentFile;
     /**
      * @var string the path of the PHP script that contains the authorization rules.
-     *             This can be either a file path or a [path alias](guide:concept-aliases) to the file.
-     *             Make sure this file is writable by the Web server process if the authorization needs to be changed
-     *             online.
+     * This can be either a file path or a [path alias](guide:concept-aliases) to the file.
+     * Make sure this file is writable by the Web server process if the authorization needs to be changed
+     * online.
      *
      * @see loadFromFile()
      * @see saveToFile()
@@ -70,15 +74,13 @@ class PhpManager extends BaseManager
     protected $rules = []; // ruleName => rule
 
     /**
-     * @param string               $dir
-     * @param RuleFactoryInterface $ruleFactory
-     * @param string               $itemFile
-     * @param string               $assignmentFile
-     * @param string               $ruleFile
+     * @param string $dir
+     * @param string $itemFile
+     * @param string $assignmentFile
+     * @param string $ruleFile
      */
     public function __construct(
         string $dir,
-        RuleFactoryInterface $ruleFactory,
         string $itemFile = 'items.php',
         string $assignmentFile = 'assignments.php',
         string $ruleFile = 'rules.php'
@@ -86,7 +88,6 @@ class PhpManager extends BaseManager
         $this->itemFile = $dir . DIRECTORY_SEPARATOR . $itemFile;
         $this->assignmentFile = $dir . DIRECTORY_SEPARATOR . $assignmentFile;
         $this->ruleFile = $dir . DIRECTORY_SEPARATOR . $ruleFile;
-        parent::__construct($ruleFactory);
         $this->load();
     }
 
@@ -110,10 +111,10 @@ class PhpManager extends BaseManager
      * Performs access check for the specified user.
      * This method is internally called by [[checkAccess()]].
      *
-     * @param string|int   $user        the user ID. This should can be either an integer or a string representing
+     * @param string|int $user the user ID. This should can be either an integer or a string representing
      *                                  the unique identifier of a user. See [[\yii\web\User::id]].
-     * @param string       $itemName    the name of the operation that need access check
-     * @param array        $params      name-value pairs that would be passed to rules associated
+     * @param string $itemName the name of the operation that need access check
+     * @param array $params name-value pairs that would be passed to rules associated
      *                                  with the tasks and roles assigned to the user. A param with name 'user' is
      *                                  added to this array, which holds the value of `$userId`.
      * @param Assignment[] $assignments the assignments to the specified user
@@ -128,7 +129,6 @@ class PhpManager extends BaseManager
 
         /* @var $item Item */
         $item = $this->items[$itemName];
-        //Yii::debug($item instanceof Role ? "Checking role: $itemName" : "Checking permission : $itemName", __METHOD__);
 
         if (!$this->executeRule($user, $item, $params)) {
             return false;
@@ -139,7 +139,12 @@ class PhpManager extends BaseManager
         }
 
         foreach ($this->children as $parentName => $children) {
-            if (isset($children[$itemName]) && $this->hasPermissionRecursive($user, $parentName, $params, $assignments)) {
+            if (isset($children[$itemName]) && $this->hasPermissionRecursive(
+                    $user,
+                    $parentName,
+                    $params,
+                    $assignments
+                )) {
                 return true;
             }
         }
@@ -147,11 +152,6 @@ class PhpManager extends BaseManager
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     *
-     * @since 2.0.8
-     */
     public function canAddChild(Item $parent, Item $child): bool
     {
         return !$this->detectLoop($parent, $child);
@@ -171,7 +171,9 @@ class PhpManager extends BaseManager
         }
 
         if ($this->detectLoop($parent, $child)) {
-            throw new InvalidCallException("Cannot add '{$child->name}' as a child of '{$parent->name}'. A loop has been detected.");
+            throw new InvalidCallException(
+                "Cannot add '{$child->name}' as a child of '{$parent->name}'. A loop has been detected."
+            );
         }
         if (isset($this->children[$parent->name][$child->name])) {
             throw new InvalidCallException("The item '{$parent->name}' already has a child '{$child->name}'.");
@@ -184,7 +186,7 @@ class PhpManager extends BaseManager
      * Checks whether there is a loop in the authorization item hierarchy.
      *
      * @param Item $parent parent item
-     * @param Item $child  the child item that is to be added to the hierarchy
+     * @param Item $child the child item that is to be added to the hierarchy
      *
      * @return bool whether a loop exists
      */
@@ -234,14 +236,18 @@ class PhpManager extends BaseManager
         }
 
         if (isset($this->assignments[$userId][$role->name])) {
-            throw new InvalidArgumentException("Authorization item '{$role->name}' has already been assigned to user '$userId'.");
+            throw new InvalidArgumentException(
+                "Authorization item '{$role->name}' has already been assigned to user '$userId'."
+            );
         }
 
-        $this->assignments[$userId][$role->name] = new Assignment([
-            'userId' => $userId,
-            'roleName' => $role->name,
-            'createdAt' => time(),
-        ]);
+        $this->assignments[$userId][$role->name] = new Assignment(
+            [
+                'userId' => $userId,
+                'roleName' => $role->name,
+                'createdAt' => time(),
+            ]
+        );
         $this->saveAssignments();
 
         return $this->assignments[$userId][$role->name];
@@ -353,9 +359,12 @@ class PhpManager extends BaseManager
 
         $roles = [$roleName => $role];
 
-        $roles += array_filter($this->getRoles(), function (Role $roleItem) use ($result) {
-            return array_key_exists($roleItem->name, $result);
-        });
+        $roles += array_filter(
+            $this->getRoles(),
+            function (Role $roleItem) use ($result) {
+                return array_key_exists($roleItem->name, $result);
+            }
+        );
 
         return $roles;
     }
@@ -380,8 +389,8 @@ class PhpManager extends BaseManager
     /**
      * Recursively finds all children and grand children of the specified item.
      *
-     * @param string $name   the name of the item whose children are to be looked for.
-     * @param array  $result the children and grand children (in array keys)
+     * @param string $name the name of the item whose children are to be looked for.
+     * @param array $result the children and grand children (in array keys)
      */
     protected function getChildrenRecursive(string $name, &$result): void
     {
@@ -407,8 +416,6 @@ class PhpManager extends BaseManager
      * @param string $userId the user ID (see [[\yii\web\User::id]])
      *
      * @return Permission[] all direct permissions that the user has. The array is indexed by the permission names.
-     *
-     * @since 2.0.7
      */
     protected function getDirectPermissionsByUser(string $userId): array
     {
@@ -429,8 +436,6 @@ class PhpManager extends BaseManager
      * @param string $userId the user ID (see [[\yii\web\User::id]])
      *
      * @return Permission[] all inherited permissions that the user has. The array is indexed by the permission names.
-     *
-     * @since 2.0.7
      */
     protected function getInheritedPermissionsByUser(string $userId): array
     {
@@ -557,7 +562,9 @@ class PhpManager extends BaseManager
     {
         if ($name !== $item->name) {
             if (isset($this->items[$item->name])) {
-                throw new InvalidArgumentException("Unable to change the item name. The name '{$item->name}' is already used by another item.");
+                throw new InvalidArgumentException(
+                    "Unable to change the item name. The name '{$item->name}' is already used by another item."
+                );
             }
 
             // Remove old item in case of renaming
@@ -622,14 +629,16 @@ class PhpManager extends BaseManager
         foreach ($items as $name => $item) {
             $class = $item['type'] == Item::TYPE_PERMISSION ? Permission::class : Role::class;
 
-            $this->items[$name] = new $class([
-                'name' => $name,
-                'description' => $item['description'] ?? null,
-                'ruleName' => $item['ruleName'] ?? null,
-                'data' => $item['data'] ?? null,
-                'createdAt' => $itemsMtime,
-                'updatedAt' => $itemsMtime,
-            ]);
+            $this->items[$name] = new $class(
+                [
+                    'name' => $name,
+                    'description' => $item['description'] ?? null,
+                    'ruleName' => $item['ruleName'] ?? null,
+                    'data' => $item['data'] ?? null,
+                    'createdAt' => $itemsMtime,
+                    'updatedAt' => $itemsMtime,
+                ]
+            );
         }
 
         foreach ($items as $name => $item) {
@@ -644,11 +653,13 @@ class PhpManager extends BaseManager
 
         foreach ($assignments as $userId => $roles) {
             foreach ($roles as $role) {
-                $this->assignments[$userId][$role] = new Assignment([
-                    'userId' => $userId,
-                    'roleName' => $role,
-                    'createdAt' => $assignmentsMtime,
-                ]);
+                $this->assignments[$userId][$role] = new Assignment(
+                    [
+                        'userId' => $userId,
+                        'roleName' => $role,
+                        'createdAt' => $assignmentsMtime,
+                    ]
+                );
             }
         }
 
@@ -688,7 +699,7 @@ class PhpManager extends BaseManager
     /**
      * Saves the authorization data to a PHP script file.
      *
-     * @param array  $data the authorization data
+     * @param array $data the authorization data
      * @param string $file the file path.
      *
      * @see loadFromFile()
@@ -703,8 +714,6 @@ class PhpManager extends BaseManager
      * Invalidates precompiled script cache (such as OPCache) for the given file.
      *
      * @param string $file the file path.
-     *
-     * @since 2.0.9
      */
     protected function invalidateScriptCache($file)
     {
@@ -766,11 +775,6 @@ class PhpManager extends BaseManager
         $this->saveToFile($rules, $this->ruleFile);
     }
 
-    /**
-     * {@inheritdoc}
-     *
-     * @since 2.0.7
-     */
     public function getUserIdsByRole(string $roleName): array
     {
         $result = [];

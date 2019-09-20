@@ -4,37 +4,69 @@ namespace Yiisoft\Rbac;
 /**
  * For more details and usage information on Item, see the [guide article on security authorization](guide:security-authorization).
  */
-class Item extends BaseItem
+abstract class Item implements ItemInterface
 {
-    public const TYPE_ROLE = 1;
-    public const TYPE_PERMISSION = 2;
+    public const TYPE_ROLE = 'role';
+    public const TYPE_PERMISSION = 'permission';
 
-    /**
-     * @var int the type of the item. This should be either [[TYPE_ROLE]] or [[TYPE_PERMISSION]].
-     */
-    public $type;
     /**
      * @var string the name of the item. This must be globally unique.
      */
-    public $name;
+    private $name;
+
     /**
      * @var string the item description
      */
-    public $description;
+    private $description = '';
+
     /**
      * @var string name of the rule associated with this item
      */
-    public $ruleName;
-    /**
-     * @var mixed the additional data associated with this item
-     */
-    public $data;
+    private $ruleName;
+
     /**
      * @var int UNIX timestamp representing the item creation time
      */
-    public $createdAt;
+    private $createdAt;
+
     /**
      * @var int UNIX timestamp representing the item updating time
      */
-    public $updatedAt;
+    private $updatedAt;
+
+    public function __construct(string $name)
+    {
+        $this->name = $name;
+    }
+
+    abstract public function getType(): string;
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function withDescription(string $description): self
+    {
+        $new = clone $this;
+        $new->description = $description;
+        return $new;
+    }
+
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
+
+    public function withRuleName(?string $ruleName): self
+    {
+        $new = clone $this;
+        $new->ruleName = $ruleName;
+        return $new;
+    }
+
+    public function getRuleName(): ?string
+    {
+        return $this->ruleName;
+    }
 }

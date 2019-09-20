@@ -18,17 +18,15 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "yiisoft/di": "^3.0@dev",
         "yiisoft/access": "^3.0@dev",
-        "yiisoft/var-dumper": "^3.0@dev"
+        "yiisoft/var-dumper": "^3.0@dev",
+        "yiisoft/friendlyexception": "dev-master"
     },
     "require-dev": {
         "psr/log": "~1.1.0",
-        "yiisoft/yii-console": "^3.0@dev",
         "yiisoft/log": "^3.0@dev",
-        "yiisoft/view": "^3.0@dev",
         "yiisoft/cache": "^3.0@dev",
-        "phpunit/phpunit": "^7.3",
+        "phpunit/phpunit": "^8.2",
         "yiisoft/files": "^3.0@dev"
     },
     "suggest": {
