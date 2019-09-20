@@ -1,7 +1,7 @@
 <?php
 namespace Yiisoft\Rbac\Tests;
 
-use Yiisoft\Rbac\Managers\PhpManager;
+use Yiisoft\Rbac\Manager\PhpManager;
 
 /**
  * Exposes protected properties and methods to inspect from outside.

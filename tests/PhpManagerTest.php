@@ -30,8 +30,6 @@ use Yiisoft\Rbac\DIRuleFactory;
 
 /**
  * @group rbac
- *
- * @property ExposedPhpManager $auth
  */
 class PhpManagerTest extends ManagerTestCase
 {
@@ -80,7 +78,6 @@ class PhpManagerTest extends ManagerTestCase
         static::$time = null;
         parent::setUp();
 
-        $this->createApp();
         FileHelper::createDirectory($this->app->getAlias('@runtime'));
         $this->removeDataFiles();
         $this->auth = $this->createManager();

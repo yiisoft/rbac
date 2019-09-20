@@ -1,15 +1,16 @@
 <?php
 namespace Yiisoft\Rbac\Tests;
 
+use PHPUnit\Framework\TestCase;
 use Yiisoft\Rbac\Item;
-use Yiisoft\Rbac\Managers\BaseManager;
+use Yiisoft\Rbac\Manager\BaseManager;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 
 /**
  * ManagerTestCase.
  */
-abstract class ManagerTestCase extends BaseTestCase
+abstract class ManagerTestCase extends TestCase
 {
     /**
      * @var \Yiisoft\Rbac\ManagerInterface|BaseManager
