@@ -1,7 +1,7 @@
 <?php
 return [
-    \Yiisoft\Rbac\Factories\RuleFactoryInterface::class => [
-        '__class' => \Yiisoft\Rbac\Factories\RuleFactory::class,
+    \Yiisoft\Rbac\Factory\RuleFactoryInterface::class => [
+        '__class' => \Yiisoft\Rbac\Factory\RuleFactory::class,
     ],
     \Yiisoft\Access\AccessCheckerInterface::class => [
         '__class' => \Yiisoft\Rbac\DenyAll::class,

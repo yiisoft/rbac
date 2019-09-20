@@ -2,6 +2,7 @@
 namespace Yiisoft\Rbac;
 
 use Yiisoft\Factory\FactoryInterface;
+use Yiisoft\Rbac\Factory\RuleFactoryInterface;
 
 class DIRuleFactory implements RuleFactoryInterface
 {

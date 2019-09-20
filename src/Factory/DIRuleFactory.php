@@ -6,7 +6,7 @@
  * @license   http://www.yiiframework.com/license/
  */
 
-namespace Yiisoft\Rbac\Factories;
+namespace Yiisoft\Rbac\Factory;
 
 use Psr\Container\ContainerInterface;
 use Yiisoft\Rbac\Rule;

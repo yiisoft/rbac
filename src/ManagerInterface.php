@@ -1,12 +1,12 @@
 <?php
 namespace Yiisoft\Rbac;
 
-use Yiisoft\Access\CheckAccessInterface;
+use Yiisoft\Access\AccessCheckerInterface;
 
 /**
  * For more details and usage information on ManagerInterface, see the [guide article on security authorization](guide:security-authorization).
  */
-interface ManagerInterface extends CheckAccessInterface
+interface ManagerInterface extends AccessCheckerInterface
 {
     /**
      * Creates a new Role object.

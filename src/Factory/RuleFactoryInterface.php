@@ -1,5 +1,7 @@
 <?php
-namespace Yiisoft\Rbac;
+namespace Yiisoft\Rbac\Factory;
+
+use Yiisoft\Rbac\Rule;
 
 interface RuleFactoryInterface
 {

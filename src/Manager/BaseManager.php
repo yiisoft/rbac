@@ -1,11 +1,11 @@
 <?php
-namespace Yiisoft\Rbac;
+namespace Yiisoft\Rbac\Manager;
 
 use yii\base\Component;
 use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
 use Yiisoft\Rbac\Exceptions\InvalidConfigException;
 use Yiisoft\Rbac\Exceptions\InvalidValueException;
-use Yiisoft\Rbac\Factories\RuleFactoryInterface;
+use Yiisoft\Rbac\Factory\RuleFactoryInterface;
 
 /**
  * BaseManager is a base class implementing [[ManagerInterface]] for RBAC management.

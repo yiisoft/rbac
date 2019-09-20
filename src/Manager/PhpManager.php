@@ -1,9 +1,9 @@
 <?php
-namespace Yiisoft\Rbac;
+namespace Yiisoft\Rbac\Manager;
 
 use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
 use Yiisoft\Rbac\Exceptions\InvalidCallException;
-use Yiisoft\Rbac\Factories\RuleFactoryInterface;
+use Yiisoft\Rbac\Factory\RuleFactoryInterface;
 use Yiisoft\VarDumper\VarDumper;
 
 /**
