@@ -1,12 +1,9 @@
 <?php
-namespace Yiisoft\Rbac;
+namespace Yiisoft\Rbac\Factory;
 
 class RuleFactory implements RuleFactoryInterface
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function create($class): Rule
+    public function create(string $class): Rule
     {
         return new $class();
     }

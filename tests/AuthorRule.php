@@ -11,9 +11,6 @@ class AuthorRule extends Rule
     public $name = 'isAuthor';
     public $reallyReally = false;
 
-    /**
-     * {@inheritdoc}
-     */
     public function execute($user, $item, $params)
     {
         return $params['authorID'] == $user;

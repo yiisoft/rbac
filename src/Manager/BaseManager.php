@@ -1,10 +1,11 @@
 <?php
-namespace Yiisoft\Rbac;
+namespace Yiisoft\Rbac\Manager;
 
 use yii\base\Component;
 use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
 use Yiisoft\Rbac\Exceptions\InvalidConfigException;
 use Yiisoft\Rbac\Exceptions\InvalidValueException;
+use Yiisoft\Rbac\Factory\RuleFactoryInterface;
 
 /**
  * BaseManager is a base class implementing [[ManagerInterface]] for RBAC management.
@@ -44,7 +45,7 @@ abstract class BaseManager extends Component implements ManagerInterface
      *
      * @return Item the auth item corresponding to the specified name. Null is returned if no such item.
      */
-    abstract protected function getItem($name);
+    abstract protected function getItem(string $name): ?Item;
 
     /**
      * Returns the items of the specified type.
@@ -53,51 +54,43 @@ abstract class BaseManager extends Component implements ManagerInterface
      *
      * @return Item[] the auth items of the specified type.
      */
-    abstract protected function getItems($type);
+    abstract protected function getItems(int $type): array;
 
     /**
      * Adds an auth item to the RBAC system.
      *
      * @param Item $item the item to add
      *
-     * @throws \Exception if data validation or saving fails (such as the name of the role or permission is not unique)
-     *
-     * @return bool whether the auth item is successfully added to the system
+     * @return void whether the auth item is successfully added to the system
      */
-    abstract protected function addItem($item);
+    abstract protected function addItem(Item $item): void;
 
     /**
      * Adds a rule to the RBAC system.
      *
      * @param Rule $rule the rule to add
      *
-     * @throws \Exception if data validation or saving fails (such as the name of the rule is not unique)
-     *
-     * @return bool whether the rule is successfully added to the system
+     * @return void whether the rule is successfully added to the system
      */
-    abstract protected function addRule($rule);
+    abstract protected function addRule(Rule $rule): void;
 
     /**
      * Removes an auth item from the RBAC system.
      *
      * @param Item $item the item to remove
      *
-     * @throws \Exception if data validation or saving fails (such as the name of the role or permission is not unique)
-     *
-     * @return bool whether the role or permission is successfully removed
+     * @return void
      */
-    abstract protected function removeItem($item);
+    abstract protected function removeItem(Item $item): void;
 
     /**
      * Removes a rule from the RBAC system.
      *
      * @param Rule $rule the rule to remove
      *
-     * @throws \Exception if data validation or saving fails (such as the name of the rule is not unique)
-     *
-     * @return bool whether the rule is successfully removed
+     * @return void
      */
-    abstract protected function removeRule($rule);
+    abstract protected function removeRule(Rule $rule): void;
 
     /**
      * Updates an auth item in the RBAC system.
@@ -105,11 +98,9 @@ abstract class BaseManager extends Component implements ManagerInterface
      * @param string $name the name of the item being updated
      * @param Item   $item the updated item
      *
-     * @throws \Exception if data validation or saving fails (such as the name of the role or permission is not unique)
-     *
-     * @return bool whether the auth item is successfully updated
+     * @return void whether the auth item is successfully updated
      */
-    abstract protected function updateItem($name, $item);
+    abstract protected function updateItem(string $name, Item $item): void;
 
     /**
      * Updates a rule to the RBAC system.
@@ -117,16 +108,11 @@ abstract class BaseManager extends Component implements ManagerInterface
      * @param string $name the name of the rule being updated
      * @param Rule   $rule the updated rule
      *
-     * @throws \Exception if data validation or saving fails (such as the name of the rule is not unique)
-     *
-     * @return bool whether the rule is successfully updated
+     * @return void whether the rule is successfully updated
      */
-    abstract protected function updateRule($name, $rule);
+    abstract protected function updateRule(string $name, Rule $rule): void;
 
-    /**
-     * {@inheritdoc}
-     */
-    public function createRole($name)
+    public function createRole(string $name): Role
     {
         $role = new Role();
         $role->name = $name;
@@ -134,10 +120,7 @@ abstract class BaseManager extends Component implements ManagerInterface
         return $role;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function createPermission($name)
+    public function createPermission(string $name): Permission
     {
         $permission = new Permission();
         $permission->name = $name;
@@ -145,20 +128,21 @@ abstract class BaseManager extends Component implements ManagerInterface
         return $permission;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function add($object)
+    public function add(BaseItem $object): void
     {
         if ($object instanceof Item) {
-            if ($object->ruleName && $this->getRule($object->ruleName) === null) {
+            if ($object->ruleName !== '' && $this->getRule($object->ruleName) === null) {
                 $rule = $this->createRule($object->ruleName);
                 $this->addRule($rule);
             }
 
-            return $this->addItem($object);
-        } elseif ($object instanceof Rule) {
-            return $this->addRule($object);
+            $this->addItem($object);
+            return;
+        }
+
+        if ($object instanceof Rule) {
+            $this->addRule($object);
+            return;
         }
 
         throw new InvalidArgumentException('Adding unsupported object type.');
@@ -169,24 +153,22 @@ abstract class BaseManager extends Component implements ManagerInterface
         return $this->ruleFactory->create($name)->setName($name);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function remove($object)
+    public function remove(BaseItem $object): void
     {
         if ($object instanceof Item) {
-            return $this->removeItem($object);
-        } elseif ($object instanceof Rule) {
-            return $this->removeRule($object);
+            $this->removeItem($object);
+            return;
+        }
+
+        if ($object instanceof Rule) {
+            $this->removeRule($object);
+            return;
         }
 
         throw new InvalidArgumentException('Removing unsupported object type.');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function update($name, $object)
+    public function update(string $name, BaseItem $object): void
     {
         if ($object instanceof Item) {
             if ($object->ruleName && $this->getRule($object->ruleName) === null) {
@@ -194,38 +176,39 @@ abstract class BaseManager extends Component implements ManagerInterface
                 $this->addRule($rule);
             }
 
-            return $this->updateItem($name, $object);
-        } elseif ($object instanceof Rule) {
-            return $this->updateRule($name, $object);
+            $this->updateItem($name, $object);
+            return;
+        }
+
+        if ($object instanceof Rule) {
+            $this->updateRule($name, $object);
+            return;
         }
 
         throw new InvalidArgumentException('Updating unsupported object type.');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getRole($name)
+    public function getRole(string $name): ?Role
     {
         $item = $this->getItem($name);
+        if ($item !== null && !($item instanceof Role)) {
+            throw new \yii\exceptions\InvalidValueException();
+        }
 
-        return $item instanceof Item && $item->type == Item::TYPE_ROLE ? $item : null;
+        return $item;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getPermission($name)
+    public function getPermission(string $name): ?Permission
     {
         $item = $this->getItem($name);
+        if ($item !== null && !($item instanceof Permission)) {
+            throw new \yii\exceptions\InvalidValueException();
+        }
 
-        return $item instanceof Item && $item->type == Item::TYPE_PERMISSION ? $item : null;
+        return $item;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getRoles()
+    public function getRoles(): array
     {
         return $this->getItems(Item::TYPE_ROLE);
     }
@@ -235,6 +218,7 @@ abstract class BaseManager extends Component implements ManagerInterface
      *
      * @param string[]|\Closure $roles either array of roles or a callable returning it
      *
+     * @return \Yiisoft\Rbac\Managers\BaseManager
      * @throws InvalidArgumentException when $roles is neither array nor Closure
      * @throws InvalidValueException    when Closure return is not an array
      *
@@ -272,11 +256,11 @@ abstract class BaseManager extends Component implements ManagerInterface
     /**
      * Returns defaultRoles as array of Role objects.
      *
+     * @return Role[] default roles. The array is indexed by the role names
      * @since 2.0.12
      *
-     * @return Role[] default roles. The array is indexed by the role names
      */
-    public function getDefaultRoleInstances()
+    public function getDefaultRoleInstances(): array
     {
         $result = [];
         foreach ($this->defaultRoles as $roleName) {
@@ -286,10 +270,7 @@ abstract class BaseManager extends Component implements ManagerInterface
         return $result;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getPermissions()
+    public function getPermissions(): array
     {
         return $this->getItems(Item::TYPE_PERMISSION);
     }
@@ -305,9 +286,10 @@ abstract class BaseManager extends Component implements ManagerInterface
      * @param Item $item the auth item that needs to execute its rule
      * @param array $params parameters passed to {@see AccessCheckerInterface::hasPermission()} and will be passed to the rule
      *
+     * @return bool the return value of [[Rule::execute()]]. If the auth item does not specify a rule, true will be
+     *              returned.
      * @throws InvalidConfigException if the auth item has an invalid rule.
      *
-     * @return bool the return value of [[Rule::execute()]]. If the auth item does not specify a rule, true will be returned.
      */
     protected function executeRule($user, $item, $params)
     {
@@ -331,7 +313,7 @@ abstract class BaseManager extends Component implements ManagerInterface
      *
      * @since 2.0.11
      */
-    protected function hasNoAssignments(array $assignments)
+    protected function hasNoAssignments(array $assignments): bool
     {
         return empty($assignments) && empty($this->defaultRoles);
     }

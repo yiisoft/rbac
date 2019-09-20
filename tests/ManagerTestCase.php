@@ -1,11 +1,11 @@
 <?php
 namespace Yiisoft\Rbac\Tests;
 
-use Yiisoft\Rbac\BaseManager;
+use PHPUnit\Framework\TestCase;
 use Yiisoft\Rbac\Item;
+use Yiisoft\Rbac\Manager\BaseManager;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
-use yii\tests\TestCase;
 
 /**
  * ManagerTestCase.
@@ -42,15 +42,17 @@ abstract class ManagerTestCase extends TestCase
     {
         $role = $this->auth->createRole('admin');
         $role->description = 'administrator';
-        $this->assertTrue($this->auth->add($role));
+        $this->auth->add($role);
+        $this->assertNotNull($this->auth->getRole('admin'));
 
         $permission = $this->auth->createPermission('edit post');
         $permission->description = 'edit a post';
-        $this->assertTrue($this->auth->add($permission));
+        $this->auth->add($permission);
+        $this->assertNotNull($this->auth->getPermission('edit post'));
 
         $rule = new AuthorRule(['name' => 'is author', 'reallyReally' => true]);
-        $this->assertTrue($this->auth->add($rule));
-
+        $this->auth->add($rule);
+        $this->assertNotNull($this->auth->getRule('is author'));
         // todo: check duplication of name
     }
 
@@ -162,35 +164,35 @@ abstract class ManagerTestCase extends TestCase
 
         $testSuites = [
             'reader A' => [
-                'createPost'    => false,
-                'readPost'      => true,
-                'updatePost'    => false,
+                'createPost' => false,
+                'readPost' => true,
+                'updatePost' => false,
                 'updateAnyPost' => false,
             ],
             'author B' => [
-                'createPost'    => true,
-                'readPost'      => true,
-                'updatePost'    => true,
-                'deletePost'    => true,
+                'createPost' => true,
+                'readPost' => true,
+                'updatePost' => true,
+                'deletePost' => true,
                 'updateAnyPost' => false,
             ],
             'admin C' => [
-                'createPost'    => true,
-                'readPost'      => true,
-                'updatePost'    => false,
+                'createPost' => true,
+                'readPost' => true,
+                'updatePost' => false,
                 'updateAnyPost' => true,
-                'blablabla'     => false,
-                null            => false,
+                'blablabla' => false,
+                null => false,
             ],
             'guest' => [
                 // all actions denied for guest (user not exists)
-                'createPost'    => false,
-                'readPost'      => false,
-                'updatePost'    => false,
-                'deletePost'    => false,
+                'createPost' => false,
+                'readPost' => false,
+                'updatePost' => false,
+                'deletePost' => false,
                 'updateAnyPost' => false,
-                'blablabla'     => false,
-                null            => false,
+                'blablabla' => false,
+                null => false,
             ],
         ];
 
@@ -367,8 +369,10 @@ abstract class ManagerTestCase extends TestCase
             $roleNames[] = $role->name;
         }
 
-        $this->assertContains('reader', $roleNames, 'Roles should contain reader. Currently it has: '.implode(', ', $roleNames));
-        $this->assertContains('author', $roleNames, 'Roles should contain author. Currently it has: '.implode(', ', $roleNames));
+        $this->assertContains('reader', $roleNames,
+            'Roles should contain reader. Currently it has: ' . implode(', ', $roleNames));
+        $this->assertContains('author', $roleNames,
+            'Roles should contain author. Currently it has: ' . implode(', ', $roleNames));
     }
 
     public function testAssignmentsToIntegerId()
@@ -543,8 +547,8 @@ abstract class ManagerTestCase extends TestCase
         $auth->add($item);
         $auth->assign($item, $userId);
 
-        $this->assertTrue($auth->revoke($item, $userId));
-        $this->assertFalse($auth->hasPermission($userId, 'Admin'));
+        $auth->revoke($item, $userId);
+        $this->assertFalse($auth->checkAccess($userId, 'Admin'));
 
         $auth->removeAll();
         $rule = new ActionRule();
@@ -554,7 +558,7 @@ abstract class ManagerTestCase extends TestCase
         $auth->add($item);
         $auth->assign($item, $userId);
 
-        $this->assertTrue($auth->revoke($item, $userId));
+        $auth->revoke($item, $userId);
         $this->assertFalse($auth->hasPermission($userId, 'Reader', ['action' => 'read']));
         $this->assertFalse($auth->hasPermission($userId, 'Reader', ['action' => 'write']));
     }

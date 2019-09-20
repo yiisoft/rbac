@@ -6,8 +6,8 @@ namespace Yiisoft\Rbac;
  */
 class Item extends BaseItem
 {
-    const TYPE_ROLE = 1;
-    const TYPE_PERMISSION = 2;
+    public const TYPE_ROLE = 1;
+    public const TYPE_PERMISSION = 2;
 
     /**
      * @var int the type of the item. This should be either [[TYPE_ROLE]] or [[TYPE_PERMISSION]].
