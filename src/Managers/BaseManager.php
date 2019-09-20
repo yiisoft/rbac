@@ -10,12 +10,11 @@ use Yiisoft\Rbac\Factories\RuleFactoryInterface;
 /**
  * BaseManager is a base class implementing [[ManagerInterface]] for RBAC management.
  *
- * For more details and usage information on DbManager, see the [guide article on security
- * authorization](guide:security-authorization).
+ * For more details and usage information on DbManager, see the [guide article on security authorization](guide:security-authorization).
  *
- * @property Role[]   $defaultRoleInstances Default roles. The array is indexed by the role names. This property
+ * @property Role[] $defaultRoleInstances Default roles. The array is indexed by the role names. This property
  * is read-only.
- * @property string[] $defaultRoles         Default roles. Note that the type of this property differs in getter and
+ * @property string[] $defaultRoles Default roles. Note that the type of this property differs in getter and
  * setter. See [[getDefaultRoles()]] and [[setDefaultRoles()]] for details.
  */
 abstract class BaseManager extends Component implements ManagerInterface
@@ -282,11 +281,10 @@ abstract class BaseManager extends Component implements ManagerInterface
      * If the item does not specify a rule, this method will return true. Otherwise, it will
      * return the value of [[Rule::execute()]].
      *
-     * @param string|int $user   the user ID. This should be either an integer or a string representing
-     *                           the unique identifier of a user. See [[\yii\web\User::id]].
-     * @param Item       $item   the auth item that needs to execute its rule
-     * @param array      $params parameters passed to [[CheckAccessInterface::checkAccess()]] and will be passed to the
-     *                           rule
+     * @param string|int $user the user ID. This should be either an integer or a string representing
+     * the unique identifier of a user. See [[\yii\web\User::id]].
+     * @param Item $item the auth item that needs to execute its rule
+     * @param array $params parameters passed to {@see AccessCheckerInterface::hasPermission()} and will be passed to the rule
      *
      * @return bool the return value of [[Rule::execute()]]. If the auth item does not specify a rule, true will be
      *              returned.

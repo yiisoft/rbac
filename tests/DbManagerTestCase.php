@@ -326,8 +326,8 @@ abstract class DbManagerTestCase extends ManagerTestCase
 
         // warm up item cache, so only assignment queries are sent to DB
         $this->auth->cache = new Cache(new ArrayCache());
-        $this->auth->checkAccess('author B', 'readPost');
-        $this->auth->checkAccess(new UserID('author B'), 'createPost');
+        $this->auth->hasPermission('author B', 'readPost');
+        $this->auth->hasPermission(new UserID('author B'), 'createPost');
 
         // track db queries
         /* @var $logger \Yiisoft\Log\Logger */
@@ -345,40 +345,40 @@ abstract class DbManagerTestCase extends ManagerTestCase
 
         // testing access on two different permissons for the same user should only result in one DB query for user assignments
         foreach (['readPost' => true, 'createPost' => false] as $permission => $result) {
-            $this->assertEquals($result, $this->auth->checkAccess('reader A', $permission), "Checking $permission");
+            $this->assertEquals($result, $this->auth->hasPermission('reader A', $permission), "Checking $permission");
         }
         $this->assertSingleQueryToAssignmentsTable($logTarget);
 
         // verify cache is flushed on assign (createPost is now true)
         $this->auth->assign($this->auth->getRole('admin'), 'reader A');
         foreach (['readPost' => true, 'createPost' => true] as $permission => $result) {
-            $this->assertEquals($result, $this->auth->checkAccess('reader A', $permission), "Checking $permission");
+            $this->assertEquals($result, $this->auth->hasPermission('reader A', $permission), "Checking $permission");
         }
         $this->assertSingleQueryToAssignmentsTable($logTarget);
 
         // verify cache is flushed on unassign (createPost is now false again)
         $this->auth->revoke($this->auth->getRole('admin'), 'reader A');
         foreach (['readPost' => true, 'createPost' => false] as $permission => $result) {
-            $this->assertEquals($result, $this->auth->checkAccess('reader A', $permission), "Checking $permission");
+            $this->assertEquals($result, $this->auth->hasPermission('reader A', $permission), "Checking $permission");
         }
         $this->assertSingleQueryToAssignmentsTable($logTarget);
 
         // verify cache is flushed on revokeall
         $this->auth->revokeAll('reader A');
         foreach (['readPost' => false, 'createPost' => false] as $permission => $result) {
-            $this->assertEquals($result, $this->auth->checkAccess('reader A', $permission), "Checking $permission");
+            $this->assertEquals($result, $this->auth->hasPermission('reader A', $permission), "Checking $permission");
         }
         $this->assertSingleQueryToAssignmentsTable($logTarget);
 
         // verify cache is flushed on removeAllAssignments
         $this->auth->assign($this->auth->getRole('admin'), 'reader A');
         foreach (['readPost' => true, 'createPost' => true] as $permission => $result) {
-            $this->assertEquals($result, $this->auth->checkAccess('reader A', $permission), "Checking $permission");
+            $this->assertEquals($result, $this->auth->hasPermission('reader A', $permission), "Checking $permission");
         }
         $this->assertSingleQueryToAssignmentsTable($logTarget);
         $this->auth->removeAllAssignments();
         foreach (['readPost' => false, 'createPost' => false] as $permission => $result) {
-            $this->assertEquals($result, $this->auth->checkAccess('reader A', $permission), "Checking $permission");
+            $this->assertEquals($result, $this->auth->hasPermission('reader A', $permission), "Checking $permission");
         }
         $this->assertSingleQueryToAssignmentsTable($logTarget);
     }

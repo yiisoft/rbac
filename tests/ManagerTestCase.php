@@ -157,7 +157,7 @@ abstract class ManagerTestCase extends BaseTestCase
         $this->assertNull($item);
     }
 
-    public function testCheckAccess()
+    public function testHasPermission()
     {
         $this->prepareData();
 
@@ -199,8 +199,7 @@ abstract class ManagerTestCase extends BaseTestCase
 
         foreach ($testSuites as $user => $tests) {
             foreach ($tests as $permission => $result) {
-                $this->assertEquals($result, $this->auth->checkAccess($user, $permission, $params),
-                    "Checking $user can $permission");
+                $this->assertEquals($result, $this->auth->hasPermission($user, $permission, $params), "Checking $user can $permission");
             }
         }
     }
@@ -477,7 +476,7 @@ abstract class ManagerTestCase extends BaseTestCase
         $item = $this->createRBACItem($RBACItemType, 'Admin');
         $auth->add($item);
         $auth->assign($item, $userId);
-        $this->assertTrue($auth->checkAccess($userId, 'Admin'));
+        $this->assertTrue($auth->hasPermission($userId, 'Admin'));
 
         // with normal register rule
         $auth->removeAll();
@@ -487,8 +486,8 @@ abstract class ManagerTestCase extends BaseTestCase
         $item->ruleName = $rule->name;
         $auth->add($item);
         $auth->assign($item, $userId);
-        $this->assertTrue($auth->checkAccess($userId, 'Reader', ['action' => 'read']));
-        $this->assertFalse($auth->checkAccess($userId, 'Reader', ['action' => 'write']));
+        $this->assertTrue($auth->hasPermission($userId, 'Reader', ['action' => 'read']));
+        $this->assertFalse($auth->hasPermission($userId, 'Reader', ['action' => 'write']));
 
         // using rule class name
         $auth->removeAll();
@@ -496,8 +495,8 @@ abstract class ManagerTestCase extends BaseTestCase
         $item->ruleName = 'Yiisoft\Rbac\Tests\ActionRule';
         $auth->add($item);
         $auth->assign($item, $userId);
-        $this->assertTrue($auth->checkAccess($userId, 'Reader', ['action' => 'read']));
-        $this->assertFalse($auth->checkAccess($userId, 'Reader', ['action' => 'write']));
+        $this->assertTrue($auth->hasPermission($userId, 'Reader', ['action' => 'read']));
+        $this->assertFalse($auth->hasPermission($userId, 'Reader', ['action' => 'write']));
 
         // using DI
         $this->container->set('write_rule', ['__class' => 'Yiisoft\Rbac\Tests\ActionRule', 'action' => 'write']);
@@ -508,28 +507,28 @@ abstract class ManagerTestCase extends BaseTestCase
         $item->ruleName = 'write_rule';
         $auth->add($item);
         $auth->assign($item, $userId);
-        $this->assertTrue($auth->checkAccess($userId, 'Writer', ['action' => 'write']));
-        $this->assertFalse($auth->checkAccess($userId, 'Writer', ['action' => 'update']));
+        $this->assertTrue($auth->hasPermission($userId, 'Writer', ['action' => 'write']));
+        $this->assertFalse($auth->hasPermission($userId, 'Writer', ['action' => 'update']));
 
         $item = $this->createRBACItem($RBACItemType, 'Deleter');
         $item->ruleName = 'delete_rule';
         $auth->add($item);
         $auth->assign($item, $userId);
-        $this->assertTrue($auth->checkAccess($userId, 'Deleter', ['action' => 'delete']));
-        $this->assertFalse($auth->checkAccess($userId, 'Deleter', ['action' => 'update']));
+        $this->assertTrue($auth->hasPermission($userId, 'Deleter', ['action' => 'delete']));
+        $this->assertFalse($auth->hasPermission($userId, 'Deleter', ['action' => 'update']));
 
         $item = $this->createRBACItem($RBACItemType, 'Author');
         $item->ruleName = 'all_rule';
         $auth->add($item);
         $auth->assign($item, $userId);
-        $this->assertTrue($auth->checkAccess($userId, 'Author', ['action' => 'update']));
+        $this->assertTrue($auth->hasPermission($userId, 'Author', ['action' => 'update']));
 
         // update role and rule
         $item = $this->getRBACItem($RBACItemType, 'Reader');
         $item->name = 'AdminPost';
         $item->ruleName = 'all_rule';
         $auth->update('Reader', $item);
-        $this->assertTrue($auth->checkAccess($userId, 'AdminPost', ['action' => 'print']));
+        $this->assertTrue($auth->hasPermission($userId, 'AdminPost', ['action' => 'print']));
     }
 
     /**
@@ -559,8 +558,8 @@ abstract class ManagerTestCase extends BaseTestCase
         $auth->assign($item, $userId);
 
         $auth->revoke($item, $userId);
-        $this->assertFalse($auth->checkAccess($userId, 'Reader', ['action' => 'read']));
-        $this->assertFalse($auth->checkAccess($userId, 'Reader', ['action' => 'write']));
+        $this->assertFalse($auth->hasPermission($userId, 'Reader', ['action' => 'read']));
+        $this->assertFalse($auth->hasPermission($userId, 'Reader', ['action' => 'write']));
     }
 
     /**

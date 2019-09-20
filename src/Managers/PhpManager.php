@@ -90,7 +90,7 @@ class PhpManager extends BaseManager
         $this->load();
     }
 
-    public function checkAccess($userId, string $permissionName, array $parameters = []): bool
+    public function hasPermission($userId, string $permissionName, array $parameters = []): bool
     {
         $assignments = $this->getAssignments($userId);
 
@@ -98,7 +98,7 @@ class PhpManager extends BaseManager
             return false;
         }
 
-        return $this->checkAccessRecursive($userId, $permissionName, $parameters, $assignments);
+        return $this->hasPermissionRecursive($userId, $permissionName, $parameters, $assignments);
     }
 
     public function getAssignments(string $userId): array
@@ -120,7 +120,7 @@ class PhpManager extends BaseManager
      *
      * @return bool whether the operations can be performed by the user.
      */
-    protected function checkAccessRecursive($user, $itemName, $params, $assignments)
+    protected function hasPermissionRecursive($user, $itemName, $params, $assignments)
     {
         if (!isset($this->items[$itemName])) {
             return false;
@@ -139,7 +139,7 @@ class PhpManager extends BaseManager
         }
 
         foreach ($this->children as $parentName => $children) {
-            if (isset($children[$itemName]) && $this->checkAccessRecursive($user, $parentName, $params, $assignments)) {
+            if (isset($children[$itemName]) && $this->hasPermissionRecursive($user, $parentName, $params, $assignments)) {
                 return true;
             }
         }
