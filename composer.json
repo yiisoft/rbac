@@ -20,7 +20,7 @@
     "require": {
         "yiisoft/access": "^3.0@dev",
         "yiisoft/var-dumper": "^3.0@dev",
-        "yiisoft/friendlyexception": "dev-master"
+        "yiisoft/friendly-exception": "dev-master"
     },
     "require-dev": {
         "psr/log": "~1.1.0",
