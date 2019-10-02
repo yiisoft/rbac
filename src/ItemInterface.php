@@ -2,7 +2,7 @@
 namespace Yiisoft\Rbac;
 
 /**
- * Common interface for authrization items:
+ * Common interface for authorization items:
  *
  * - Role
  * - Permission
