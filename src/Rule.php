@@ -17,11 +17,11 @@ abstract class Rule implements ItemInterface
     /**
      * @var int UNIX timestamp representing the rule creation time
      */
-    public $createdAt;
+    private $createdAt;
     /**
      * @var int UNIX timestamp representing the rule updating time
      */
-    public $updatedAt;
+    private $updatedAt;
 
     /**
      * Executes the rule.
@@ -33,10 +33,20 @@ abstract class Rule implements ItemInterface
      *
      * @return bool whether the rule permits the auth item it is associated with.
      */
-    abstract public function execute(string $userId, Item $item, array $parameters = []): bool;
+    public function execute(string $userId, Item $item, array $parameters = []): bool
+    {
+        return true;
+    }
 
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function withName(string $name): self
+    {
+        $new = clone $this;
+        $new->name = $name;
+        return $new;
     }
 }

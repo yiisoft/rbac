@@ -1,6 +1,7 @@
 <?php
 namespace Yiisoft\Rbac\Tests;
 
+use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\Rule;
 
 /**
@@ -8,8 +9,9 @@ use Yiisoft\Rbac\Rule;
  */
 class ActionRule extends Rule
 {
-    public $name = 'action_rule';
-    public $action = 'read';
+    private const NAME = 'action_rule';
+
+    private $action;
 
     /**
      * Private and protected properties to ensure that serialized object
@@ -22,8 +24,14 @@ class ActionRule extends Rule
     private $somePrivateProperty;
     protected $someProtectedProperty;
 
-    public function execute($user, $item, $params)
+    public function __construct(string $action = 'read')
     {
-        return $this->action === 'all' || $this->action === $params['action'];
+        parent::__construct(self::NAME);
+        $this->action = $action;
+    }
+
+    public function execute(string $userId, Item $item, array $parameters = []): bool
+    {
+        return $this->action === 'all' || $this->action === $parameters['action'];
     }
 }

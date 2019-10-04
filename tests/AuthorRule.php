@@ -1,6 +1,7 @@
 <?php
 namespace Yiisoft\Rbac\Tests;
 
+use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\Rule;
 
 /**
@@ -8,11 +9,30 @@ use Yiisoft\Rbac\Rule;
  */
 class AuthorRule extends Rule
 {
-    public $name = 'isAuthor';
-    public $reallyReally = false;
+    private const NAME = 'isAuthor';
 
-    public function execute($user, $item, $params)
+    private $reallyReally;
+
+    public function __construct($name = self::NAME, $reallyReally = false)
     {
-        return $params['authorID'] == $user;
+        parent::__construct($name);
+        $this->reallyReally = $reallyReally;
+    }
+
+    public function execute(string $userId, Item $item, array $parameters = []): bool
+    {
+        return $parameters['authorID'] == $userId;
+    }
+
+    public function withReallyReally(bool $reallyReally): self
+    {
+        $new = clone $this;
+        $new->reallyReally = $reallyReally;
+        return $new;
+    }
+
+    public function isReallyReally(): bool
+    {
+        return $this->reallyReally;
     }
 }

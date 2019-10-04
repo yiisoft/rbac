@@ -211,47 +211,47 @@ interface ManagerInterface extends AccessCheckerInterface
     /**
      * Assigns a role to a user.
      *
-     * @param Role $role
+     * @param Item $role
      * @param string $userId the user ID
      *
      * @return Assignment the role assignment information.
      * @throws \Exception if the role has already been assigned to the user
      *
      */
-    public function assign(Role $role, string $userId): Assignment;
+    public function assign(Item $role, string $userId): Assignment;
 
     /**
-     * Revokes a role from a user.
+     * Revokes a role or a permission from a user.
      *
-     * @param Item $role
+     * @param Item $item
      * @param string $userId the user ID
      *
      * @return void
      */
-    public function revoke(Item $role, string $userId): void;
+    public function revoke(Item $item, string $userId): void;
 
     /**
-     * Revokes all roles from a user.
+     * Revokes all roles and permissions from a user.
      *
-     * @param mixed $userId the user ID
+     * @param string $userId the user ID
      *
      * @return void
      */
     public function revokeAll(string $userId): void;
 
     /**
-     * Returns the assignment information regarding a role and a user.
+     * Returns the assignment information regarding a role or a permission and a user.
      *
-     * @param string $roleName the role name
+     * @param string $itemName the role or the permission name
      * @param string $userId the user ID
      *
      * @return null|Assignment the assignment information. Null is returned if
      * the role is not assigned to the user.
      */
-    public function getAssignment(string $roleName, string $userId): ?Assignment;
+    public function getAssignment(string $itemName, string $userId): ?Assignment;
 
     /**
-     * Returns all role assignment information for the specified user.
+     * Returns all role or permission assignment information for the specified user.
      *
      * @param string $userId the user ID
      *

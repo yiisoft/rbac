@@ -26,7 +26,9 @@ function time()
 namespace Yiisoft\Rbac\Tests;
 
 use Yiisoft\Files\FileHelper;
-use Yiisoft\Rbac\DIRuleFactory;
+use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
+use Yiisoft\Rbac\ManagerInterface;
+use Yiisoft\Rbac\RuleFactory\RuleFactory;
 
 /**
  * @group rbac
@@ -36,30 +38,39 @@ final class PhpManagerTest extends ManagerTestCase
     public static $filemtime;
     public static $time;
 
-    private $testDataPath = '';
+    private $testDataPath;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         static::$filemtime = null;
         static::$time = null;
-        parent::setUp();
-
         $this->testDataPath = sys_get_temp_dir() . '/' . str_replace('\\', '_', get_class($this)) . uniqid('', false);
+        if (FileHelper::createDirectory($this->testDataPath) === false) {
+            throw new \RuntimeException('Unable to create directory: ' . $this->testDataPath);
+        }
+
+        parent::setUp();
     }
 
-    protected function tearDown()
+    private function getAssignmentFilePath(): string
+    {
+        return $this->testDataPath . '/assignments.php';
+    }
+
+    protected function tearDown(): void
     {
         FileHelper::removeDirectory($this->testDataPath);
         static::$filemtime = null;
         static::$time = null;
+
         parent::tearDown();
     }
 
-    protected function createManager()
+    protected function createManager(): ManagerInterface
     {
         return (new ExposedPhpManager(
-            '',
-            $this->container->get(DIRuleFactory::class)
+            new RuleFactory(),
+            $this->testDataPath
         ))->setDefaultRoles(['myDefaultRole']);
     }
 
@@ -89,12 +100,11 @@ final class PhpManagerTest extends ManagerTestCase
 
         $name = 'readPost';
         $permission = $this->auth->getPermission($name);
-        $permission->name = 'UPDATED-NAME';
+        $permission = $permission->withName('UPDATED-NAME');
         $this->auth->update($name, $permission);
-        $oldPermission = $this->auth->getPermission('readPost');
-        $newPermission = $this->auth->getPermission('UPDATED-NAME');
-        $this->assertNull($oldPermission);
-        $this->assertNotNull($newPermission);
+
+        $this->assertNull($this->auth->getPermission('readPost'));
+        $this->assertNotNull($this->auth->getPermission('UPDATED-NAME'));
     }
 
     public function testUpdateDescription(): void
@@ -103,11 +113,11 @@ final class PhpManagerTest extends ManagerTestCase
         $name = 'readPost';
         $permission = $this->auth->getPermission($name);
         $newDescription = 'UPDATED-DESCRIPTION';
-        $permission->description = $newDescription;
+        $permission = $permission->withDescription($newDescription);
         $this->auth->update($name, $permission);
 
         $permission = $this->auth->getPermission('readPost');
-        $this->assertEquals($newDescription, $permission->description);
+        $this->assertEquals($newDescription, $permission->getDescription());
     }
 
     public function testOverwriteName(): void
@@ -115,8 +125,8 @@ final class PhpManagerTest extends ManagerTestCase
         $this->prepareData();
         $name = 'readPost';
         $permission = $this->auth->getPermission($name);
-        $permission->name = 'createPost';
-        $this->expectException(\Yiisoft\Rbac\Exceptions\InvalidArgumentException::class);
+        $permission = $permission->withName('createPost');
+        $this->expectException(InvalidArgumentException::class);
         $this->auth->update($name, $permission);
     }
 
@@ -126,11 +136,11 @@ final class PhpManagerTest extends ManagerTestCase
         $role = $this->auth->createRole('Admin');
         $this->auth->add($role);
         $this->auth->assign($role, 13);
-        $this->assertContains('Admin', file_get_contents($this->getAssignmentFilePath()));
-        $role->name = 'NewAdmin';
+        $this->assertStringContainsString('Admin', file_get_contents($this->getAssignmentFilePath()));
+        $role = $role->withName('NewAdmin');
         $this->auth->update('Admin', $role);
-        $this->assertContains('NewAdmin', file_get_contents($this->getAssignmentFilePath()));
+        $this->assertStringContainsString('NewAdmin', file_get_contents($this->getAssignmentFilePath()));
         $this->auth->remove($role);
-        $this->assertNotContains('NewAdmin', file_get_contents($this->getAssignmentFilePath()));
+        $this->assertStringContainsString('NewAdmin', file_get_contents($this->getAssignmentFilePath()));
     }
 }

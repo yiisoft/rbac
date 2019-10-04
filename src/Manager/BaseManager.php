@@ -11,6 +11,7 @@ use Yiisoft\Rbac\ManagerInterface;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Rule;
 use Yiisoft\Rbac\Role;
+use Yiisoft\Rbac\RuleFactoryInterface;
 
 /**
  * BaseManager is a base class implementing {@see ManagerInterface} for RBAC management.
@@ -20,10 +21,20 @@ use Yiisoft\Rbac\Role;
 abstract class BaseManager implements ManagerInterface
 {
     /**
+     * @var RuleFactoryInterface
+     */
+    private $ruleFactory;
+
+    /**
      * @var array a list of role names that are assigned to every user automatically without calling [[assign()]].
-     *            Note that these roles are applied to users, regardless of their state of authentication.
+     * Note that these roles are applied to users, regardless of their state of authentication.
      */
     protected $defaultRoles = [];
+
+    public function __construct(RuleFactoryInterface $ruleFactory)
+    {
+        $this->ruleFactory = $ruleFactory;
+    }
 
     /**
      * Returns the named auth item.
@@ -37,11 +48,11 @@ abstract class BaseManager implements ManagerInterface
     /**
      * Returns the items of the specified type.
      *
-     * @param int $type the auth item type (either [[Item::TYPE_ROLE]] or [[Item::TYPE_PERMISSION]]
+     * @param string $type the auth item type (either [[Item::TYPE_ROLE]] or [[Item::TYPE_PERMISSION]]
      *
      * @return Item[] the auth items of the specified type.
      */
-    abstract protected function getItems(int $type): array;
+    abstract protected function getItems(string $type): array;
 
     /**
      * Adds an auth item to the RBAC system.
@@ -112,7 +123,7 @@ abstract class BaseManager implements ManagerInterface
     public function add(ItemInterface $item): void
     {
         if ($item instanceof Item) {
-            if ($item->getRuleName() !== '' && $this->getRule($item->getRuleName()) === null) {
+            if ($item->getRuleName() !== null && $this->getRule($item->getRuleName()) === null) {
                 $rule = $this->createRule($item->getRuleName());
                 $this->addRule($rule);
             }
@@ -131,7 +142,7 @@ abstract class BaseManager implements ManagerInterface
 
     protected function createRule(string $name): Rule
     {
-        return new Rule($name);
+        return $this->ruleFactory->create($name);
     }
 
     public function remove(ItemInterface $item): void

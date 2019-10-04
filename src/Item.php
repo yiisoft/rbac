@@ -46,6 +46,13 @@ abstract class Item implements ItemInterface
         return $this->name;
     }
 
+    public function withName(string $name): self
+    {
+        $new = clone $this;
+        $new->name = $name;
+        return $new;
+    }
+
     public function withDescription(string $description): self
     {
         $new = clone $this;
@@ -68,5 +75,29 @@ abstract class Item implements ItemInterface
     public function getRuleName(): ?string
     {
         return $this->ruleName;
+    }
+
+    public function withCreatedAt(int $createdAt): self
+    {
+        $new = clone $this;
+        $new->createdAt = $createdAt;
+        return $new;
+    }
+
+    public function getCreatedAt(): ?int
+    {
+        return $this->createdAt;
+    }
+
+    public function withUpdatedAt(int $updatedAt): self
+    {
+        $new = clone $this;
+        $new->updatedAt = $updatedAt;
+        return $new;
+    }
+
+    public function getUpdatedAt(): ?int
+    {
+        return $this->updatedAt;
     }
 }
