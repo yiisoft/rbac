@@ -251,6 +251,14 @@ interface ManagerInterface extends AccessCheckerInterface
     public function getAssignment(string $itemName, string $userId): ?Assignment;
 
     /**
+     * Returns if there are assignments for role or permission specified.
+     *
+     * @param string $itemName the role or the permission name
+     * @return bool
+     */
+    public function hasAssignments(string $itemName): bool;
+
+    /**
      * Returns all role or permission assignment information for the specified user.
      *
      * @param string $userId the user ID

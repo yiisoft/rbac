@@ -62,19 +62,19 @@ class PhpManager extends BaseManager
     /**
      * @var Item[]
      */
-    protected $items = []; // itemName => item
+    protected $items = []; // [itemName => item]
     /**
      * @var array
      */
-    protected $children = []; // itemName, childName => child
+    protected $children = []; // [itemName => [childName => child]]
     /**
      * @var array
      */
-    protected $assignments = []; // userId, itemName => assignment
+    protected $assignments = []; // [userId => [itemName => assignment]]
     /**
      * @var Rule[]
      */
-    protected $rules = []; // ruleName => rule
+    protected $rules = []; // [ruleName => rule]
 
     /**
      * @param string $dir
@@ -114,6 +114,18 @@ class PhpManager extends BaseManager
     public function getAssignments(string $userId): array
     {
         return $this->assignments[$userId] ?? [];
+    }
+
+    public function hasAssignments(string $itemName): bool
+    {
+        foreach ($this->assignments as $assignment) {
+            foreach ($assignment as $name => $object) {
+                if ($name === $itemName) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -352,7 +364,7 @@ class PhpManager extends BaseManager
     {
         $roles = $this->getDefaultRoleInstances();
         foreach ($this->getAssignments($userId) as $name => $assignment) {
-            $role = $this->items[$assignment->getRoleName()];
+            $role = $this->items[$assignment->getItemName()];
             if ($role->getType() === Item::TYPE_ROLE) {
                 $roles[$name] = $role;
             }
@@ -436,7 +448,7 @@ class PhpManager extends BaseManager
     {
         $permissions = [];
         foreach ($this->getAssignments($userId) as $name => $assignment) {
-            $permission = $this->items[$assignment->getRoleName()];
+            $permission = $this->items[$assignment->getItemName()];
             if ($permission->getType() === Item::TYPE_PERMISSION) {
                 $permissions[$name] = $permission;
             }
@@ -773,7 +785,7 @@ class PhpManager extends BaseManager
         foreach ($this->assignments as $userId => $assignments) {
             foreach ($assignments as $assignment) {
                 /* @var $assignment Assignment */
-                $assignmentData[$userId][] = $assignment->getRoleName();
+                $assignmentData[$userId][] = $assignment->getItemName();
             }
         }
         $this->saveToFile($assignmentData, $this->assignmentFile);

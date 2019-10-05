@@ -408,6 +408,32 @@ abstract class ManagerTestCase extends TestCase
         $this->assertCount(2, $this->auth->getAssignments(1337));
     }
 
+    public function testHasAssignments(): void
+    {
+        $this->auth->removeAll();
+
+        $this->assertFalse(
+            $this->auth->hasAssignments('non_existing'),
+            'Non existing permission should not have assignments'
+        );
+
+        $admin = $this->auth->createRole('admin');
+        $this->auth->add($admin);
+        $this->auth->assign($admin, 1);
+
+        $this->assertTrue(
+            $this->auth->hasAssignments('admin'),
+            'Existing assigned role should have assignments'
+        );
+
+        $role = $this->auth->createRole('unassigned');
+        $this->auth->add($role);
+        $this->assertFalse(
+            $this->auth->hasAssignments('unassigned'),
+            'Existing not assigned role should not have assignments'
+        );
+    }
+
     public function testGetAssignmentsByRole(): void
     {
         $this->prepareData();
