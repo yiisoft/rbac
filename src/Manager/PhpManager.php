@@ -294,7 +294,7 @@ class PhpManager extends BaseManager
         return $this->assignments[$userId][$roleName];
     }
 
-    public function getItems(string $type): array
+    protected function getItems(string $type): array
     {
         $items = [];
 
@@ -308,7 +308,7 @@ class PhpManager extends BaseManager
         return $items;
     }
 
-    public function removeItem(Item $item): void
+    protected function removeItem(Item $item): void
     {
         if (isset($this->items[$item->getName()])) {
             foreach ($this->children as &$children) {
@@ -324,12 +324,12 @@ class PhpManager extends BaseManager
         }
     }
 
-    public function getItem(string $name): ?Item
+    protected function getItem(string $name): ?Item
     {
         return $this->items[$name] ?? null;
     }
 
-    public function updateRule(string $name, Rule $rule): void
+    protected function updateRule(string $name, Rule $rule): void
     {
         if ($rule->getName() !== $name) {
             unset($this->rules[$name]);
