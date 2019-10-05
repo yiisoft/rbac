@@ -10,7 +10,7 @@ use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\Rule;
-use Yiisoft\Rbac\RuleFactory\RuleFactory;
+use Yiisoft\Rbac\RuleFactory\ClassNameRuleFactory;
 use Yiisoft\VarDumper\VarDumper;
 
 /**
@@ -83,7 +83,7 @@ class PhpManager extends BaseManager
      * @param string $ruleFile
      */
     public function __construct(
-        RuleFactory $ruleFactory,
+        ClassNameRuleFactory $ruleFactory,
         string $dir,
         string $itemFile = 'items.php',
         string $assignmentFile = 'assignments.php',

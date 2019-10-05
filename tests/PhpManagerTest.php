@@ -28,7 +28,7 @@ namespace Yiisoft\Rbac\Tests;
 use Yiisoft\Files\FileHelper;
 use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
 use Yiisoft\Rbac\ManagerInterface;
-use Yiisoft\Rbac\RuleFactory\RuleFactory;
+use Yiisoft\Rbac\RuleFactory\ClassNameRuleFactory;
 
 /**
  * @group rbac
@@ -69,7 +69,7 @@ final class PhpManagerTest extends ManagerTestCase
     protected function createManager(): ManagerInterface
     {
         return (new ExposedPhpManager(
-            new RuleFactory(),
+            new ClassNameRuleFactory(),
             $this->testDataPath
         ))->setDefaultRoles(['myDefaultRole']);
     }
@@ -133,14 +133,36 @@ final class PhpManagerTest extends ManagerTestCase
     public function testSaveAssignments(): void
     {
         $this->auth->removeAll();
+
         $role = $this->auth->createRole('Admin');
         $this->auth->add($role);
         $this->auth->assign($role, 13);
-        $this->assertStringContainsString('Admin', file_get_contents($this->getAssignmentFilePath()));
+
+        $this->assertStringContainsString(
+            'Admin',
+            file_get_contents($this->getAssignmentFilePath()),
+            'Role "Admin" was not added when saving'
+        );
+
         $role = $role->withName('NewAdmin');
         $this->auth->update('Admin', $role);
-        $this->assertStringContainsString('NewAdmin', file_get_contents($this->getAssignmentFilePath()));
+        $this->assertStringContainsString(
+            'NewAdmin',
+            file_get_contents($this->getAssignmentFilePath()),
+            'Role "NewAdmin" was not added when saving'
+        );
         $this->auth->remove($role);
-        $this->assertStringContainsString('NewAdmin', file_get_contents($this->getAssignmentFilePath()));
+        $this->assertStringNotContainsString(
+            'Admin',
+            file_get_contents($this->getAssignmentFilePath()),
+            'Role "Admin" was not removed when saving'
+        );
+
+        $this->auth->remove($role);
+        $this->assertStringNotContainsString(
+            'NewAdmin',
+            file_get_contents($this->getAssignmentFilePath()),
+            'Role "NewAdmin" was not removed when saving'
+        );
     }
 }

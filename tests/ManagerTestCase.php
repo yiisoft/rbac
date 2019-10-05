@@ -484,72 +484,50 @@ abstract class ManagerTestCase extends TestCase
      * @param string $RBACItemType
      * @throws \Exception
      */
-    public function testAssignRule(string $RBACItemType): void
+    public function testAssignRuleByName(string $RBACItemType): void
     {
-        $auth = $this->auth;
         $userId = 3;
-
-        $auth->removeAll();
-        $item = $this->createRBACItem($RBACItemType, 'Admin');
-        $auth->add($item);
-
-        $auth->assign($item, $userId);
-
-        $this->assertTrue($auth->hasPermission($userId, 'Admin'));
-
-        // with normal register rule
+        $auth = $this->auth;
         $auth->removeAll();
         $rule = new ActionRule();
         $auth->add($rule);
         $item = $this->createRBACItem($RBACItemType, 'Reader')
             ->withRuleName($rule->getName());
         $auth->add($item);
+
         $auth->assign($item, $userId);
 
         $this->assertTrue($auth->hasPermission($userId, 'Reader', ['action' => 'read']));
         $this->assertFalse($auth->hasPermission($userId, 'Reader', ['action' => 'write']));
+    }
 
-        // using rule class name
+    /**
+     * @dataProvider RBACItemsProvider
+     *
+     * @param string $RBACItemType
+     * @throws \Exception
+     */
+    public function testUpdateRoleAndRule(string $RBACItemType): void
+    {
+        $userId = 3;
+        $auth = $this->auth;
         $auth->removeAll();
-        $item = $this->createRBACItem($RBACItemType, 'Reader')
-            ->withRuleName(ActionRule::class);
-        $auth->add($item);
-        $auth->assign($item, $userId);
 
-        $this->assertTrue($auth->hasPermission($userId, 'Reader', ['action' => 'read']));
-        $this->assertFalse($auth->hasPermission($userId, 'Reader', ['action' => 'write']));
+        $auth->add(new ActionRule());
+        $auth->add(new AuthorRule());
 
-        // using DI
-        $this->container->set('write_rule', ['__class' => ActionRule::class, 'action' => 'write']);
-        $this->container->set('delete_rule', ['__class' => ActionRule::class, 'action' => 'delete']);
-        $this->container->set('all_rule', ['__class' => ActionRule::class, 'action' => 'all']);
+        $reader = $this->createRBACItem($RBACItemType, 'Reader')
+            ->withRuleName('action_rule');
+        $auth->add($reader);
+        $auth->assign($reader, $userId);
 
-        $item = $this->createRBACItem($RBACItemType, 'Writer')
-            ->withRuleName('write_rule');
-        $auth->add($item);
-        $auth->assign($item, $userId);
-        $this->assertTrue($auth->hasPermission($userId, 'Writer', ['action' => 'write']));
-        $this->assertFalse($auth->hasPermission($userId, 'Writer', ['action' => 'update']));
-
-        $item = $this->createRBACItem($RBACItemType, 'Deleter')
-            ->withRuleName('delete_rule');
-        $auth->add($item);
-        $auth->assign($item, $userId);
-        $this->assertTrue($auth->hasPermission($userId, 'Deleter', ['action' => 'delete']));
-        $this->assertFalse($auth->hasPermission($userId, 'Deleter', ['action' => 'update']));
-
-        $item = $this->createRBACItem($RBACItemType, 'Author')
-            ->withRuleName('all_rule');
-        $auth->add($item);
-        $auth->assign($item, $userId);
-        $this->assertTrue($auth->hasPermission($userId, 'Author', ['action' => 'update']));
-
-        // update role and rule
-        $item = $this->getRBACItem($RBACItemType, 'Reader')
+        $reader = $this->getRBACItem($RBACItemType, 'Reader')
             ->withName('AdminPost')
-            ->withRuleName('all_rule');
-        $auth->update('Reader', $item);
-        $this->assertTrue($auth->hasPermission($userId, 'AdminPost', ['action' => 'print']));
+            ->withRuleName('isAuthor');
+        $auth->update('Reader', $reader);
+
+        $this->assertTrue($auth->hasPermission($userId, 'AdminPost', ['authorID' => 3]));
+        $this->assertFalse($auth->hasPermission($userId, 'Reader', ['authorID' => 3]));
     }
 
     /**
