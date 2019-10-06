@@ -185,25 +185,25 @@ class PhpManager extends BaseManager
     {
         if (!isset($this->items[$parent->getName()], $this->items[$child->getName()])) {
             throw new InvalidArgumentException(
-                "Either '{$parent->getName()}' or '{$child->getName()}' does not exist."
+                "Either \"{$parent->getName()}\" or \"{$child->getName()}\" does not exist."
             );
         }
 
         if ($parent->getName() === $child->getName()) {
-            throw new InvalidArgumentException("Cannot add '{$parent->getName()} ' as a child of itself.");
+            throw new InvalidArgumentException("Cannot add \"{$parent->getName()}\" as a child of itself.");
         }
         if ($parent instanceof Permission && $child instanceof Role) {
-            throw new InvalidArgumentException('Cannot add a role as a child of a permission.');
+            throw new InvalidArgumentException("Can not add \"{$child->getName()}\" role as a child of \"{$parent->getName()}\" permission.");
         }
 
         if ($this->detectLoop($parent, $child)) {
             throw new InvalidCallException(
-                "Cannot add '{$child->getName()}' as a child of '{$parent->getName()}'. A loop has been detected."
+                "Cannot add \"{$child->getName()}\" as a child of \"{$parent->getName()}\". A loop has been detected."
             );
         }
         if (isset($this->children[$parent->getName()][$child->getName()])) {
             throw new InvalidCallException(
-                "The item '{$parent->getName()}' already has a child '{$child->getName()}'."
+                "The item \"{$parent->getName()}\" already has a child \"{$child->getName()}\"."
             );
         }
         $this->children[$parent->getName()][$child->getName()] = $this->items[$child->getName()];
