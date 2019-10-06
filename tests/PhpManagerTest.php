@@ -28,6 +28,7 @@ namespace Yiisoft\Rbac\Tests;
 use Yiisoft\Files\FileHelper;
 use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
 use Yiisoft\Rbac\ManagerInterface;
+use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\RuleFactory\ClassNameRuleFactory;
 
 /**
@@ -134,7 +135,7 @@ final class PhpManagerTest extends ManagerTestCase
     {
         $this->auth->removeAll();
 
-        $role = $this->auth->createRole('Admin');
+        $role = new Role('Admin');
         $this->auth->add($role);
         $this->auth->assign($role, 13);
 

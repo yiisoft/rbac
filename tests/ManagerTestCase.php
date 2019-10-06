@@ -52,11 +52,11 @@ abstract class ManagerTestCase extends TestCase
 
     public function testGetChildren(): void
     {
-        $user = $this->auth->createRole('user');
+        $user = new Role('user');
         $this->auth->add($user);
         $this->assertCount(0, $this->auth->getChildren($user->getName()));
 
-        $changeName = $this->auth->createPermission('changeName');
+        $changeName = new Permission('changeName');
         $this->auth->add($changeName);
         $this->auth->addChild($user, $changeName);
         $this->assertCount(1, $this->auth->getChildren($user->getName()));
@@ -209,47 +209,47 @@ abstract class ManagerTestCase extends TestCase
         $rule = new AuthorRule();
         $this->auth->add($rule);
 
-        $uniqueTrait = $this->auth->createPermission('Fast Metabolism')
+        $uniqueTrait = (new Permission('Fast Metabolism'))
             ->withDescription('Your metabolic rate is twice normal. This means that you are much less resistant to radiation and poison, but your body heals faster.');
         $this->auth->add($uniqueTrait);
 
-        $createPost = $this->auth->createPermission('createPost')
+        $createPost = (new Permission('createPost'))
             ->withDescription('create a post');
         // FIXME: $createPost->data = 'createPostData';
         $this->auth->add($createPost);
 
-        $readPost = $this->auth->createPermission('readPost')
+        $readPost = (new Permission('readPost'))
             ->withDescription('read a post');
         $this->auth->add($readPost);
 
-        $deletePost = $this->auth->createPermission('deletePost')
+        $deletePost = (new Permission('deletePost'))
             ->withDescription('delete a post');
         $this->auth->add($deletePost);
 
-        $updatePost = $this->auth->createPermission('updatePost')
+        $updatePost = (new Permission('updatePost'))
             ->withDescription('update a post')
             ->withRuleName($rule->getName());
         $this->auth->add($updatePost);
 
-        $updateAnyPost = $this->auth->createPermission('updateAnyPost')
+        $updateAnyPost = (new Permission('updateAnyPost'))
             ->withDescription('update any post');
         $this->auth->add($updateAnyPost);
 
-        $withoutChildren = $this->auth->createRole('withoutChildren');
+        $withoutChildren = new Role('withoutChildren');
         $this->auth->add($withoutChildren);
 
-        $reader = $this->auth->createRole('reader');
+        $reader = new Role('reader');
         $this->auth->add($reader);
         $this->auth->addChild($reader, $readPost);
 
-        $author = $this->auth->createRole('author');
+        $author = new Role('author');
         // FIXME: $author->data = 'authorData';
         $this->auth->add($author);
         $this->auth->addChild($author, $createPost);
         $this->auth->addChild($author, $updatePost);
         $this->auth->addChild($author, $reader);
 
-        $admin = $this->auth->createRole('admin');
+        $admin = new Role('admin');
         $this->auth->add($admin);
         $this->auth->addChild($admin, $author);
         $this->auth->addChild($admin, $updateAnyPost);
@@ -401,7 +401,7 @@ abstract class ManagerTestCase extends TestCase
             'Non existing permission should not have assignments'
         );
 
-        $admin = $this->auth->createRole('admin');
+        $admin = new Role('admin');
         $this->auth->add($admin);
         $this->auth->assign($admin, 1);
 
@@ -410,7 +410,7 @@ abstract class ManagerTestCase extends TestCase
             'Existing assigned role should have assignments'
         );
 
-        $role = $this->auth->createRole('unassigned');
+        $role = new Role('unassigned');
         $this->auth->add($role);
         $this->assertFalse(
             $this->auth->hasAssignments('unassigned'),
@@ -437,11 +437,20 @@ abstract class ManagerTestCase extends TestCase
     {
         $this->prepareData();
 
-        $author = $this->auth->createRole('author');
-        $reader = $this->auth->createRole('reader');
+        $author = new Role('author');
+        $reader = new Role('reader');
 
         $this->assertTrue($this->auth->canAddChild($author, $reader));
         $this->assertFalse($this->auth->canAddChild($reader, $author));
+    }
+
+    public function testCanNotAddRoleToPermission(): void
+    {
+        $permission = new Permission('test_permission');
+        $role = new Role('test_role');
+
+        $this->assertFalse($this->auth->canAddChild($permission, $role));
+        $this->assertTrue($this->auth->canAddChild($role, $permission));
     }
 
     public function testRemoveAllRules(): void
@@ -584,10 +593,10 @@ abstract class ManagerTestCase extends TestCase
     private function createRBACItem($RBACItemType, $name)
     {
         if ($RBACItemType === Item::TYPE_ROLE) {
-            return $this->auth->createRole($name);
+            return new Role($name);
         }
         if ($RBACItemType === Item::TYPE_PERMISSION) {
-            return $this->auth->createPermission($name);
+            return new Permission($name);
         }
 
         throw new \InvalidArgumentException();

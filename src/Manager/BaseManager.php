@@ -110,16 +110,6 @@ abstract class BaseManager implements ManagerInterface
      */
     abstract protected function updateRule(string $name, Rule $rule): void;
 
-    public function createRole(string $name): Role
-    {
-        return new Role($name);
-    }
-
-    public function createPermission(string $name): Permission
-    {
-        return new Permission($name);
-    }
-
     public function add(ItemInterface $item): void
     {
         if ($item instanceof Item) {
@@ -253,7 +243,7 @@ abstract class BaseManager implements ManagerInterface
     {
         $result = [];
         foreach ($this->defaultRoles as $roleName) {
-            $result[$roleName] = $this->createRole($roleName);
+            $result[$roleName] = new Role($roleName);
         }
 
         return $result;

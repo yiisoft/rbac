@@ -175,6 +175,9 @@ class PhpManager extends BaseManager
 
     public function canAddChild(Item $parent, Item $child): bool
     {
+        if ($parent instanceof Permission && $child instanceof Role) {
+            return false;
+        }
         return !$this->detectLoop($parent, $child);
     }
 
