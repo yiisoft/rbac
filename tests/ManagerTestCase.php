@@ -32,38 +32,22 @@ abstract class ManagerTestCase extends TestCase
 
     abstract protected function createManager(): ManagerInterface;
 
-    public function testCreateRole(): void
+    public function testAddRole(): void
     {
-        $role = $this->auth->createRole('admin');
-        $this->assertInstanceOf(Role::class, $role);
-        $this->assertEquals(Item::TYPE_ROLE, $role->getType());
-        $this->assertEquals('admin', $role->getName());
-    }
+        $role = (new Role('admin'))
+            ->withDescription('administrator');
 
-    public function testCreatePermission(): void
-    {
-        $permission = $this->auth->createPermission('edit post');
-        $this->assertInstanceOf(Permission::class, $permission);
-        $this->assertEquals(Item::TYPE_PERMISSION, $permission->getType());
-        $this->assertEquals('edit post', $permission->getName());
-    }
-
-    public function testAdd(): void
-    {
-        $role = $this->auth->createRole('admin');
-        $role = $role->withDescription('administrator');
         $this->auth->add($role);
         $this->assertNotNull($this->auth->getRole('admin'));
+    }
 
-        $permission = $this->auth->createPermission('edit post');
-        $permission = $permission->withDescription('edit a post');
+    public function testAddPermission(): void
+    {
+        $permission = (new Permission('edit post'))
+            ->withDescription('edit a post');
+
         $this->auth->add($permission);
         $this->assertNotNull($this->auth->getPermission('edit post'));
-
-        $rule = new AuthorRule('is author', true);
-        $this->auth->add($rule);
-        $this->assertNotNull($this->auth->getRule('is author'));
-        // todo: check duplication of name
     }
 
     public function testGetChildren(): void

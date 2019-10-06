@@ -10,28 +10,6 @@ use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
 interface ManagerInterface extends AccessCheckerInterface
 {
     /**
-     * Creates a new Role object.
-     * Note that the newly created role is not added to the RBAC system yet.
-     * You must fill in the needed data and call [[add()]] to add it to the system.
-     *
-     * @param string $name the role name
-     *
-     * @return Role the new Role object
-     */
-    public function createRole(string $name): Role;
-
-    /**
-     * Creates a new Permission object.
-     * Note that the newly created permission is not added to the RBAC system yet.
-     * You must fill in the needed data and call [[add()]] to add it to the system.
-     *
-     * @param string $name the permission name
-     *
-     * @return Permission the new Permission object
-     */
-    public function createPermission(string $name): Permission;
-
-    /**
      * Adds a role, permission or rule to the RBAC system.
      *
      * @param ItemInterface $item
