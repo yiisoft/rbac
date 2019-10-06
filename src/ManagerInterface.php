@@ -209,16 +209,16 @@ interface ManagerInterface extends AccessCheckerInterface
     public function getChildren(string $name): array;
 
     /**
-     * Assigns a role to a user.
+     * Assigns a role or permission to a user.
      *
-     * @param Item $role
+     * @param Item $item
      * @param string $userId the user ID
      *
-     * @return Assignment the role assignment information.
+     * @return Assignment the role or permission assignment information.
      * @throws \Exception if the role has already been assigned to the user
      *
      */
-    public function assign(Item $role, string $userId): Assignment;
+    public function assign(Item $item, string $userId): Assignment;
 
     /**
      * Revokes a role or a permission from a user.
