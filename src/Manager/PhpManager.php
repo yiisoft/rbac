@@ -530,7 +530,7 @@ class PhpManager extends BaseManager
 
         foreach ($this->assignments as $i => $assignments) {
             foreach ($assignments as $n => $assignment) {
-                if (isset($names[$assignment->getRoleName()])) {
+                if (isset($names[$assignment->getItemName()])) {
                     unset($this->assignments[$i][$n]);
                 }
             }
@@ -613,7 +613,7 @@ class PhpManager extends BaseManager
 
             foreach ($this->assignments as &$assignments) {
                 if (isset($assignments[$name])) {
-                    $assignments[$item->getName()] = $assignments[$name]->withRoleName($item->getName());
+                    $assignments[$item->getName()] = $assignments[$name]->withItemName($item->getName());
                     unset($assignments[$name]);
                 }
             }
@@ -808,7 +808,7 @@ class PhpManager extends BaseManager
         $result = [];
         foreach ($this->assignments as $userID => $assignments) {
             foreach ($assignments as $userAssignment) {
-                if ($userAssignment->getRoleName() === $roleName && $userAssignment->getUserId() == $userID) {
+                if ($userAssignment->getItemName() === $roleName && $userAssignment->getUserId() == $userID) {
                     $result[] = (string)$userID;
                 }
             }
