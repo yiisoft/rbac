@@ -77,22 +77,23 @@ class PhpManager extends BaseManager
     protected $rules = []; // [ruleName => rule]
 
     /**
-     * @param string $dir
-     * @param string $itemFile
-     * @param string $assignmentFile
-     * @param string $ruleFile
+     * @param ClassNameRuleFactory $ruleFactory
+     * @param string $directory directory to store data into
+     * @param string $itemFile path to the file storing auth items
+     * @param string $assignmentFile path to file storing assignments
+     * @param string $ruleFile path to file storing rules
      */
     public function __construct(
         ClassNameRuleFactory $ruleFactory,
-        string $dir,
+        string $directory,
         string $itemFile = 'items.php',
         string $assignmentFile = 'assignments.php',
         string $ruleFile = 'rules.php'
     ) {
         parent::__construct($ruleFactory);
-        $this->itemFile = $dir . DIRECTORY_SEPARATOR . $itemFile;
-        $this->assignmentFile = $dir . DIRECTORY_SEPARATOR . $assignmentFile;
-        $this->ruleFile = $dir . DIRECTORY_SEPARATOR . $ruleFile;
+        $this->itemFile = $directory . DIRECTORY_SEPARATOR . $itemFile;
+        $this->assignmentFile = $directory . DIRECTORY_SEPARATOR . $assignmentFile;
+        $this->ruleFile = $directory . DIRECTORY_SEPARATOR . $ruleFile;
         $this->load();
     }
 
@@ -306,13 +307,9 @@ class PhpManager extends BaseManager
         }
     }
 
-    public function getAssignment(string $roleName, string $userId): Assignment
+    public function getAssignment(string $roleName, string $userId): ?Assignment
     {
-        if (!isset($this->assignments[$userId][$roleName])) {
-            throw new \InvalidArgumentException();
-        }
-
-        return $this->assignments[$userId][$roleName];
+        return $this->assignments[$userId][$roleName] ?? null;
     }
 
     protected function getItems(string $type): array
@@ -397,7 +394,7 @@ class PhpManager extends BaseManager
 
         $roles += array_filter(
             $this->getRoles(),
-            function (Role $roleItem) use ($result) {
+            static function (Role $roleItem) use ($result) {
                 return array_key_exists($roleItem->getName(), $result);
             }
         );

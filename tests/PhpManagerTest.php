@@ -22,6 +22,7 @@ use Yiisoft\Rbac\RuleFactory\ClassNameRuleFactory;
 
 /**
  * @group rbac
+ * @property ExposedPhpManager $auth
  */
 final class PhpManagerTest extends ManagerTestCase
 {
