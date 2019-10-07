@@ -133,9 +133,9 @@ class PhpManager extends BaseManager
      * This method is internally called by [[checkAccess()]].
      *
      * @param string $user the user ID. This should br a string representing the unique identifier of a user.
-     * @param string $itemName the name of the operation that need access check
+     * @param string $itemName the name of the permission that need access check
      * @param array $params name-value pairs that would be passed to rules associated
-     * with the tasks and roles assigned to the user. A param with name 'user' is
+     * with the permissions and roles assigned to the user. A param with name 'user' is
      * added to this array, which holds the value of `$userId`.
      * @param Assignment[] $assignments the assignments to the specified user
      *

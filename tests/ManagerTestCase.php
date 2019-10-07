@@ -204,6 +204,11 @@ abstract class ManagerTestCase extends TestCase
         }
     }
 
+    /**
+     * See hierarchy.png in tests directory for a quick overview
+     *
+     * @throws \Exception
+     */
     protected function prepareData(): void
     {
         $rule = new AuthorRule();
