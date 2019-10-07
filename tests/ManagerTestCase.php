@@ -64,6 +64,20 @@ abstract class ManagerTestCase extends TestCase
         $this->assertNotNull($this->auth->getPermission('edit post'));
     }
 
+    public function testAddRule(): void
+    {
+        $this->prepareData();
+
+        $ruleName = 'isReallyReallyAuthor';
+        $rule = new AuthorRule($ruleName, true);
+        $this->auth->add($rule);
+
+        /** @var AuthorRule $rule */
+        $rule = $this->auth->getRule($ruleName);
+        $this->assertEquals($ruleName, $rule->getName());
+        $this->assertTrue($rule->isReallyReally());
+    }
+
     public function testGetChildren(): void
     {
         $user = new Role('user');
@@ -86,57 +100,6 @@ abstract class ManagerTestCase extends TestCase
 
         $rule = $this->auth->getRule('nonExisting');
         $this->assertNull($rule);
-    }
-
-    public function testAddRule(): void
-    {
-        $this->prepareData();
-
-        $ruleName = 'isReallyReallyAuthor';
-        $rule = new AuthorRule($ruleName, true);
-        $this->auth->add($rule);
-
-        /** @var AuthorRule $rule */
-        $rule = $this->auth->getRule($ruleName);
-        $this->assertEquals($ruleName, $rule->getName());
-        $this->assertTrue($rule->isReallyReally());
-    }
-
-    public function testUpdateRule(): void
-    {
-        $this->prepareData();
-
-        $rule = $this->auth->getRule('isAuthor');
-        $rule = $rule
-            ->withName('newName')
-            ->withReallyReally(false);
-
-        $this->auth->update('isAuthor', $rule);
-
-        $rule = $this->auth->getRule('isAuthor');
-        $this->assertNull($rule);
-
-        /** @var AuthorRule $rule */
-        $rule = $this->auth->getRule('newName');
-        $this->assertEquals('newName', $rule->getName());
-        $this->assertFalse($rule->isReallyReally());
-
-        $rule = $rule->withReallyReally(true);
-        $this->auth->update('newName', $rule);
-
-        /** @var AuthorRule $rule */
-        $rule = $this->auth->getRule('newName');
-        $this->assertTrue($rule->isReallyReally());
-
-        $item = $this->auth->getPermission('createPost')
-            ->withName('new createPost');
-        $this->auth->update('createPost', $item);
-
-        $item = $this->auth->getPermission('createPost');
-        $this->assertNull($item);
-
-        $item = $this->auth->getPermission('new createPost');
-        $this->assertEquals('new createPost', $item->getName());
     }
 
     public function testGetRules(): void
@@ -181,6 +144,8 @@ abstract class ManagerTestCase extends TestCase
                 'readPost' => true,
                 'updatePost' => false,
                 'updateAnyPost' => false,
+                // roles checked directly should return false:
+                'reader' => false,
             ],
             'author B' => [
                 'createPost' => true,
@@ -194,7 +159,7 @@ abstract class ManagerTestCase extends TestCase
                 'readPost' => true,
                 'updatePost' => false,
                 'updateAnyPost' => true,
-                'blablabla' => false,
+                'nonExistingPermission' => false,
                 null => false,
             ],
             'guest' => [
@@ -213,7 +178,7 @@ abstract class ManagerTestCase extends TestCase
 
         foreach ($testSuites as $user => $tests) {
             foreach ($tests as $permission => $result) {
-                $this->assertEquals($result, $this->auth->userHasPermission($user, $permission, $params), "Checking $user can $permission");
+                $this->assertEquals($result, $this->auth->userHasPermission($user, $permission, $params), "Checking \"$user\" can \"$permission\"");
             }
         }
     }
@@ -379,7 +344,7 @@ abstract class ManagerTestCase extends TestCase
         $this->auth->assign($author, 'readingAuthor');
 
         $this->auth = $this->createManager();
-//        $this->auth->load();
+        $this->auth->load();
 
         $roles = $this->auth->getRolesByUser('readingAuthor');
         $roleNames = [];
@@ -404,7 +369,7 @@ abstract class ManagerTestCase extends TestCase
         $this->auth->assign($reader, 1337);
 
         $this->auth = $this->createManager();
-        // $this->auth->load();
+        $this->auth->load();
 
         $this->assertCount(0, $this->auth->getAssignments(0));
         $this->assertCount(1, $this->auth->getAssignments(42));
@@ -675,31 +640,68 @@ abstract class ManagerTestCase extends TestCase
         $this->auth->setDefaultRoles('test');
     }
 
+    public function testUpdateRule(): void
+    {
+        $this->prepareData();
+
+        $rule = $this->auth->getRule('isAuthor');
+        $rule = $rule
+            ->withName('newName')
+            ->withReallyReally(false);
+
+        $this->auth->update('isAuthor', $rule);
+
+        $rule = $this->auth->getRule('isAuthor');
+        $this->assertNull($rule);
+
+        /** @var AuthorRule $rule */
+        $rule = $this->auth->getRule('newName');
+        $this->assertEquals('newName', $rule->getName());
+        $this->assertFalse($rule->isReallyReally());
+
+        $rule = $rule->withReallyReally(true);
+        $this->auth->update('newName', $rule);
+
+        /** @var AuthorRule $rule */
+        $rule = $this->auth->getRule('newName');
+        $this->assertTrue($rule->isReallyReally());
+
+        $item = $this->auth->getPermission('createPost')
+            ->withName('new createPost');
+        $this->auth->update('createPost', $item);
+
+        $item = $this->auth->getPermission('createPost');
+        $this->assertNull($item);
+
+        $item = $this->auth->getPermission('new createPost');
+        $this->assertEquals('new createPost', $item->getName());
+    }
+
     public function testUpdateItemName(): void
-    {
-        $this->prepareData();
+   {
+       $this->prepareData();
 
-        $name = 'readPost';
-        $permission = $this->auth->getPermission($name);
-        $permission = $permission->withName('UPDATED-NAME');
-        $this->auth->update($name, $permission);
+       $name = 'readPost';
+       $permission = $this->auth->getPermission($name);
+       $permission = $permission->withName('UPDATED-NAME');
+       $this->auth->update($name, $permission);
 
-        $this->assertNull($this->auth->getPermission('readPost'));
-        $this->assertNotNull($this->auth->getPermission('UPDATED-NAME'));
-    }
+       $this->assertNull($this->auth->getPermission('readPost'));
+       $this->assertNotNull($this->auth->getPermission('UPDATED-NAME'));
+   }
 
-    public function testUpdateDescription(): void
-    {
-        $this->prepareData();
-        $name = 'readPost';
-        $permission = $this->auth->getPermission($name);
-        $newDescription = 'UPDATED-DESCRIPTION';
-        $permission = $permission->withDescription($newDescription);
-        $this->auth->update($name, $permission);
+   public function testUpdateDescription(): void
+   {
+       $this->prepareData();
+       $name = 'readPost';
+       $permission = $this->auth->getPermission($name);
+       $newDescription = 'UPDATED-DESCRIPTION';
+       $permission = $permission->withDescription($newDescription);
+       $this->auth->update($name, $permission);
 
-        $permission = $this->auth->getPermission('readPost');
-        $this->assertEquals($newDescription, $permission->getDescription());
-    }
+       $permission = $this->auth->getPermission('readPost');
+       $this->assertEquals($newDescription, $permission->getDescription());
+   }
 
     public function testOverwriteName(): void
     {
