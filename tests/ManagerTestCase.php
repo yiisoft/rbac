@@ -676,30 +676,30 @@ abstract class ManagerTestCase extends TestCase
     }
 
     public function testUpdateItemName(): void
-   {
-       $this->prepareData();
+    {
+        $this->prepareData();
 
-       $name = 'readPost';
-       $permission = $this->auth->getPermission($name);
-       $permission = $permission->withName('UPDATED-NAME');
-       $this->auth->update($name, $permission);
+        $name = 'readPost';
+        $permission = $this->auth->getPermission($name);
+        $permission = $permission->withName('UPDATED-NAME');
+        $this->auth->update($name, $permission);
 
-       $this->assertNull($this->auth->getPermission('readPost'));
-       $this->assertNotNull($this->auth->getPermission('UPDATED-NAME'));
-   }
+        $this->assertNull($this->auth->getPermission('readPost'));
+        $this->assertNotNull($this->auth->getPermission('UPDATED-NAME'));
+    }
 
-   public function testUpdateDescription(): void
-   {
-       $this->prepareData();
-       $name = 'readPost';
-       $permission = $this->auth->getPermission($name);
-       $newDescription = 'UPDATED-DESCRIPTION';
-       $permission = $permission->withDescription($newDescription);
-       $this->auth->update($name, $permission);
+    public function testUpdateDescription(): void
+    {
+        $this->prepareData();
+        $name = 'readPost';
+        $permission = $this->auth->getPermission($name);
+        $newDescription = 'UPDATED-DESCRIPTION';
+        $permission = $permission->withDescription($newDescription);
+        $this->auth->update($name, $permission);
 
-       $permission = $this->auth->getPermission('readPost');
-       $this->assertEquals($newDescription, $permission->getDescription());
-   }
+        $permission = $this->auth->getPermission('readPost');
+        $this->assertEquals($newDescription, $permission->getDescription());
+    }
 
     public function testOverwriteName(): void
     {
