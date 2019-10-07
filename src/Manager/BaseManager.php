@@ -263,7 +263,7 @@ abstract class BaseManager implements ManagerInterface
      * @param string $user the user ID. This should be a string representing
      * the unique identifier of a user.
      * @param Item $item the auth item that needs to execute its rule
-     * @param array $params parameters passed to {@see AccessCheckerInterface::hasPermission()} and will be passed to the rule
+     * @param array $params parameters passed to {@see AccessCheckerInterface::userHasPermission()} and will be passed to the rule
      *
      * @return bool the return value of {@see Rule::execute()}. If the auth item does not specify a rule, true will be
      * returned.

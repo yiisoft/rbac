@@ -157,7 +157,7 @@ abstract class ManagerTestCase extends TestCase
         $this->assertNull($item);
     }
 
-    public function testHasPermission(): void
+    public function testUserHasPermission(): void
     {
         $this->prepareData();
 
@@ -199,7 +199,7 @@ abstract class ManagerTestCase extends TestCase
 
         foreach ($testSuites as $user => $tests) {
             foreach ($tests as $permission => $result) {
-                $this->assertEquals($result, $this->auth->hasPermission($user, $permission, $params), "Checking $user can $permission");
+                $this->assertEquals($result, $this->auth->userHasPermission($user, $permission, $params), "Checking $user can $permission");
             }
         }
     }
@@ -516,8 +516,8 @@ abstract class ManagerTestCase extends TestCase
 
         $auth->assign($item, $userId);
 
-        $this->assertTrue($auth->hasPermission($userId, 'Reader', ['action' => 'read']));
-        $this->assertFalse($auth->hasPermission($userId, 'Reader', ['action' => 'write']));
+        $this->assertTrue($auth->userHasPermission($userId, 'Reader', ['action' => 'read']));
+        $this->assertFalse($auth->userHasPermission($userId, 'Reader', ['action' => 'write']));
     }
 
     /**
@@ -545,8 +545,8 @@ abstract class ManagerTestCase extends TestCase
             ->withRuleName('isAuthor');
         $auth->update('Reader', $reader);
 
-        $this->assertTrue($auth->hasPermission($userId, 'AdminPost', ['authorID' => 3]));
-        $this->assertFalse($auth->hasPermission($userId, 'Reader', ['authorID' => 3]));
+        $this->assertTrue($auth->userHasPermission($userId, 'AdminPost', ['authorID' => 3]));
+        $this->assertFalse($auth->userHasPermission($userId, 'Reader', ['authorID' => 3]));
     }
 
     /**
@@ -566,7 +566,7 @@ abstract class ManagerTestCase extends TestCase
         $auth->assign($item, $userId);
 
         $auth->revoke($item, $userId);
-        $this->assertFalse($auth->hasPermission($userId, 'Admin'));
+        $this->assertFalse($auth->userHasPermission($userId, 'Admin'));
 
         $auth->removeAll();
         $rule = new ActionRule();
@@ -578,8 +578,8 @@ abstract class ManagerTestCase extends TestCase
         $auth->assign($item, $userId);
 
         $auth->revoke($item, $userId);
-        $this->assertFalse($auth->hasPermission($userId, 'Reader', ['action' => 'read']));
-        $this->assertFalse($auth->hasPermission($userId, 'Reader', ['action' => 'write']));
+        $this->assertFalse($auth->userHasPermission($userId, 'Reader', ['action' => 'read']));
+        $this->assertFalse($auth->userHasPermission($userId, 'Reader', ['action' => 'write']));
     }
 
     /**

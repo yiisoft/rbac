@@ -29,7 +29,7 @@ abstract class Rule implements ItemInterface
      * @param string $userId the user ID. This should be a string representing
      * the unique identifier of a user.
      * @param Item $item the role or permission that this rule is associated with
-     * @param array $parameters parameters passed to {@see CheckAccessInterface::hasPermission()}.
+     * @param array $parameters parameters passed to {@see CheckAccessInterface::userHasPermission()}.
      *
      * @return bool whether the rule permits the auth item it is associated with.
      */

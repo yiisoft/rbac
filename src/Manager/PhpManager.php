@@ -96,7 +96,7 @@ class PhpManager extends BaseManager
         $this->load();
     }
 
-    public function hasPermission($userId, string $permissionName, array $parameters = []): bool
+    public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
     {
         $assignments = $this->getAssignments($userId);
 
@@ -104,7 +104,7 @@ class PhpManager extends BaseManager
             return false;
         }
 
-        return $this->hasPermissionRecursive($userId, $permissionName, $parameters, $assignments);
+        return $this->userHasPermissionRecursive($userId, $permissionName, $parameters, $assignments);
     }
 
     /**
@@ -142,7 +142,7 @@ class PhpManager extends BaseManager
      * @return bool whether the operations can be performed by the user.
      * @throws InvalidConfigException
      */
-    protected function hasPermissionRecursive(string $user, string $itemName, array $params, array $assignments): bool
+    protected function userHasPermissionRecursive(string $user, string $itemName, array $params, array $assignments): bool
     {
         if (!isset($this->items[$itemName])) {
             return false;
@@ -160,7 +160,7 @@ class PhpManager extends BaseManager
         }
 
         foreach ($this->children as $parentName => $children) {
-            if (isset($children[$itemName]) && $this->hasPermissionRecursive(
+            if (isset($children[$itemName]) && $this->userHasPermissionRecursive(
                     $user,
                     $parentName,
                     $params,
