@@ -96,17 +96,6 @@ class PhpManager extends BaseManager
         $this->load();
     }
 
-    public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
-    {
-        $assignments = $this->getAssignments($userId);
-
-        if ($this->hasNoAssignments($assignments)) {
-            return false;
-        }
-
-        return $this->userHasPermissionRecursive($userId, $permissionName, $parameters, $assignments);
-    }
-
     /**
      * @param string $userId
      * @return Assignment[]
@@ -128,12 +117,29 @@ class PhpManager extends BaseManager
         return false;
     }
 
+    public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
+    {
+        $assignments = $this->getAssignments($userId);
+
+        if ($this->hasNoAssignments($assignments)) {
+            return false;
+        }
+
+        /* @var $item Item */
+        $item = $this->items[$permissionName] ?? null;
+        if (!$item instanceof Permission) {
+            return false;
+        }
+
+        return $this->userHasPermissionRecursive($userId, $permissionName, $parameters, $assignments);
+    }
+
     /**
      * Performs access check for the specified user.
      * This method is internally called by [[checkAccess()]].
      *
      * @param string $user the user ID. This should br a string representing the unique identifier of a user.
-     * @param string $itemName the name of the permission that need access check
+     * @param string $itemName the name of the permission or role that need access check
      * @param array $params name-value pairs that would be passed to rules associated
      * with the permissions and roles assigned to the user. A param with name 'user' is
      * added to this array, which holds the value of `$userId`.
@@ -155,7 +161,7 @@ class PhpManager extends BaseManager
             return false;
         }
 
-        if (isset($assignments[$itemName]) || in_array($itemName, $this->defaultRoles, true)) {
+        if (isset($assignments[$itemName])) {
             return true;
         }
 

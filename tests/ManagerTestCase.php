@@ -1,14 +1,15 @@
 <?php
+
 namespace Yiisoft\Rbac\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
+use Yiisoft\Rbac\Exceptions\InvalidValueException;
 use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\Manager\BaseManager;
 use Yiisoft\Rbac\ManagerInterface;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
-use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
-use Yiisoft\Rbac\Exceptions\InvalidValueException;
 use Yiisoft\Rbac\Rule;
 
 /**
@@ -178,7 +179,11 @@ abstract class ManagerTestCase extends TestCase
 
         foreach ($testSuites as $user => $tests) {
             foreach ($tests as $permission => $result) {
-                $this->assertEquals($result, $this->auth->userHasPermission($user, $permission, $params), "Checking \"$user\" can \"$permission\"");
+                $this->assertEquals(
+                    $result,
+                    $this->auth->userHasPermission($user, $permission, $params),
+                    "Checking \"$user\" can \"$permission\""
+                );
             }
         }
     }
@@ -194,7 +199,9 @@ abstract class ManagerTestCase extends TestCase
         $this->auth->add($rule);
 
         $uniqueTrait = (new Permission('Fast Metabolism'))
-            ->withDescription('Your metabolic rate is twice normal. This means that you are much less resistant to radiation and poison, but your body heals faster.');
+            ->withDescription(
+                'Your metabolic rate is twice normal. This means that you are much less resistant to radiation and poison, but your body heals faster.'
+            );
         $this->auth->add($uniqueTrait);
 
         $createPost = (new Permission('createPost'))
@@ -352,10 +359,16 @@ abstract class ManagerTestCase extends TestCase
             $roleNames[] = $role->getName();
         }
 
-        $this->assertContains('reader', $roleNames,
-            'Roles should contain reader. Currently it has: ' . implode(', ', $roleNames));
-        $this->assertContains('author', $roleNames,
-            'Roles should contain author. Currently it has: ' . implode(', ', $roleNames));
+        $this->assertContains(
+            'reader',
+            $roleNames,
+            'Roles should contain reader. Currently it has: ' . implode(', ', $roleNames)
+        );
+        $this->assertContains(
+            'author',
+            $roleNames,
+            'Roles should contain author. Currently it has: ' . implode(', ', $roleNames)
+        );
     }
 
     public function testAssignmentsToIntegerId(): void
@@ -473,44 +486,47 @@ abstract class ManagerTestCase extends TestCase
         $this->assertNotEmpty($this->auth->getRoles());
     }
 
-    public function RBACItemsProvider(): array
+    public function testAssignRuleToRoleByName(): void
     {
-        return [
-            [Item::TYPE_ROLE],
-            [Item::TYPE_PERMISSION],
-        ];
+        $userId = 3;
+        $auth = $this->auth;
+        $auth->removeAll();
+
+        $rule = new ActionRule();
+        $auth->add($rule);
+
+        $role = (new Role('Reader'))
+            ->withRuleName($rule->getName());
+        $auth->add($role);
+
+        $permission = new Permission('manage');
+        $auth->add($permission);
+        $auth->addChild($role, $permission);
+
+        $auth->assign($role, $userId);
+
+        $this->assertTrue($auth->userHasPermission($userId, 'manage', ['action' => 'read']));
+        $this->assertFalse($auth->userHasPermission($userId, 'manage', ['action' => 'write']));
     }
 
-    /**
-     * @dataProvider RBACItemsProvider
-     *
-     * @param string $RBACItemType
-     * @throws \Exception
-     */
-    public function testAssignRuleByName(string $RBACItemType): void
+    public function testAssignRuleToPermissionByName(): void
     {
         $userId = 3;
         $auth = $this->auth;
         $auth->removeAll();
         $rule = new ActionRule();
         $auth->add($rule);
-        $item = $this->createRBACItem($RBACItemType, 'Reader')
+        $item = (new Permission('manage'))
             ->withRuleName($rule->getName());
         $auth->add($item);
 
         $auth->assign($item, $userId);
 
-        $this->assertTrue($auth->userHasPermission($userId, 'Reader', ['action' => 'read']));
-        $this->assertFalse($auth->userHasPermission($userId, 'Reader', ['action' => 'write']));
+        $this->assertTrue($auth->userHasPermission($userId, 'manage', ['action' => 'read']));
+        $this->assertFalse($auth->userHasPermission($userId, 'manage', ['action' => 'write']));
     }
 
-    /**
-     * @dataProvider RBACItemsProvider
-     *
-     * @param string $RBACItemType
-     * @throws \Exception
-     */
-    public function testUpdateRoleAndRule(string $RBACItemType): void
+    public function testUpdateRoleNameAndRule(): void
     {
         $userId = 3;
         $auth = $this->auth;
@@ -519,91 +535,125 @@ abstract class ManagerTestCase extends TestCase
         $auth->add(new ActionRule());
         $auth->add(new AuthorRule());
 
-        $reader = $this->createRBACItem($RBACItemType, 'Reader')
+        $role = (new Role('Reader'))
             ->withRuleName('action_rule');
-        $auth->add($reader);
-        $auth->assign($reader, $userId);
+        $auth->add($role);
+        $auth->assign($role, $userId);
 
-        $reader = $this->getRBACItem($RBACItemType, 'Reader')
+        $permission = new Permission('manage');
+        $auth->add($permission);
+        $auth->addChild($role, $permission);
+
+        $role = $auth->getRole('Reader')
             ->withName('AdminPost')
             ->withRuleName('isAuthor');
-        $auth->update('Reader', $reader);
+        $auth->update('Reader', $role);
 
-        $this->assertTrue($auth->userHasPermission($userId, 'AdminPost', ['authorID' => 3]));
-        $this->assertFalse($auth->userHasPermission($userId, 'Reader', ['authorID' => 3]));
+        $this->assertArrayNotHasKey(
+            'Reader',
+            $auth->getRolesByUser($userId),
+            'Old role should not be assigned'
+        );
+
+        $this->assertArrayHasKey(
+            'AdminPost',
+            $auth->getRolesByUser($userId),
+            'New role should be assigned'
+        );
+
+        $role = $auth->getRole('AdminPost');
+        $this->assertSame('isAuthor', $role->getRuleName(), 'Rule should have new name');
     }
 
-    /**
-     * @dataProvider RBACItemsProvider
-     *
-     * @param string $RBACItemType
-     */
-    public function testRevokeRule(string $RBACItemType): void
+    public function testUpdatePermissionNameAndRule(): void
     {
         $userId = 3;
         $auth = $this->auth;
-
         $auth->removeAll();
-        $item = $this->createRBACItem($RBACItemType, 'Admin');
-        $auth->add($item);
 
-        $auth->assign($item, $userId);
+        $auth->add(new ActionRule());
+        $auth->add(new AuthorRule());
 
-        $auth->revoke($item, $userId);
-        $this->assertFalse($auth->userHasPermission($userId, 'Admin'));
+        $manage = (new Permission('manage'))
+            ->withRuleName('action_rule');
+        $auth->add($manage);
+        $auth->assign($manage, $userId);
 
+        $manage = $auth->getPermission('manage')
+            ->withName('admin')
+            ->withRuleName('isAuthor');
+        $auth->update('manage', $manage);
+
+        $this->assertTrue($auth->userHasPermission($userId, 'admin', ['authorID' => 3]));
+        $this->assertFalse($auth->userHasPermission($userId, 'manage', ['authorID' => 3]));
+    }
+
+    public function testRevokeRole(): void
+    {
+        $userId = 3;
+        $auth = $this->auth;
         $auth->removeAll();
+
+        $role = new Role('Admin');
+        $auth->add($role);
+        $auth->assign($role, $userId);
+        $auth->revoke($role, $userId);
+
+        $this->assertNotContains('Admin', $auth->getRolesByUser($userId));
+    }
+
+    public function testRevokePermission(): void
+    {
+        $userId = 3;
+        $auth = $this->auth;
+        $auth->removeAll();
+
+        $permission = new Permission('manage');
+        $auth->add($permission);
+        $auth->assign($permission, $userId);
+        $auth->revoke($permission, $userId);
+
+        $this->assertFalse($auth->userHasPermission($userId, 'manage'));
+    }
+
+    public function testRevokePermissionWithRule(): void
+    {
+        $userId = 3;
+        $auth = $this->auth;
+        $auth->removeAll();
+
         $rule = new ActionRule();
         $auth->add($rule);
-        $item = $this->createRBACItem($RBACItemType, 'Reader')
+
+        $permission = (new Permission('manage'))
             ->withRuleName($rule->getName());
-        $auth->add($item);
+        $auth->add($permission);
+        $auth->assign($permission, $userId);
 
-        $auth->assign($item, $userId);
+        $auth->revoke($permission, $userId);
 
-        $auth->revoke($item, $userId);
-        $this->assertFalse($auth->userHasPermission($userId, 'Reader', ['action' => 'read']));
-        $this->assertFalse($auth->userHasPermission($userId, 'Reader', ['action' => 'write']));
+        $this->assertFalse($auth->userHasPermission($userId, 'manage', ['action' => 'read']));
+        $this->assertFalse($auth->userHasPermission($userId, 'manage', ['action' => 'write']));
     }
 
-    /**
-     * Create Role or Permission RBAC item.
-     *
-     * @param int $RBACItemType
-     * @param string $name
-     *
-     * @return Permission|Role
-     */
-    private function createRBACItem($RBACItemType, $name)
+    public function testRevokeRoleWithRule(): void
     {
-        if ($RBACItemType === Item::TYPE_ROLE) {
-            return new Role($name);
-        }
-        if ($RBACItemType === Item::TYPE_PERMISSION) {
-            return new Permission($name);
-        }
+        $userId = 3;
+        $auth = $this->auth;
+        $auth->removeAll();
 
-        throw new \InvalidArgumentException();
-    }
+        $rule = new ActionRule();
+        $auth->add($rule);
 
-    /**
-     * Get Role or Permission RBAC item.
-     *
-     * @param int    $RBACItemType
-     * @param string $name
-     *
-     * @return Permission|Role
-     */
-    private function getRBACItem($RBACItemType, $name)
-    {
-        if ($RBACItemType === Item::TYPE_ROLE) {
-            return $this->auth->getRole($name);
-        }
-        if ($RBACItemType === Item::TYPE_PERMISSION) {
-            return $this->auth->getPermission($name);
-        }
+        $role = (new Role('Admin'))
+            ->withRuleName($rule->getName());
+        $auth->add($role);
+        $auth->assign($role, $userId);
 
-        throw new \InvalidArgumentException();
+        $auth->revoke($role, $userId);
+
+        $this->assertFalse($auth->userHasPermission($userId, 'Admin', ['action' => 'read']));
+        $this->assertFalse($auth->userHasPermission($userId, 'Admin', ['action' => 'write']));
     }
 
     /**
@@ -628,9 +678,11 @@ abstract class ManagerTestCase extends TestCase
     {
         $this->expectException(InvalidValueException::class);
         $this->expectExceptionMessage('Default roles closure must return an array');
-        $this->auth->setDefaultRoles(static function () {
-            return 'test';
-        });
+        $this->auth->setDefaultRoles(
+            static function () {
+                return 'test';
+            }
+        );
     }
 
     public function testDefaultRolesWithNonArrayValue(): void
@@ -678,30 +730,30 @@ abstract class ManagerTestCase extends TestCase
     }
 
     public function testUpdateItemName(): void
-   {
-       $this->prepareData();
+    {
+        $this->prepareData();
 
-       $name = 'readPost';
-       $permission = $this->auth->getPermission($name);
-       $permission = $permission->withName('UPDATED-NAME');
-       $this->auth->update($name, $permission);
+        $name = 'readPost';
+        $permission = $this->auth->getPermission($name);
+        $permission = $permission->withName('UPDATED-NAME');
+        $this->auth->update($name, $permission);
 
-       $this->assertNull($this->auth->getPermission('readPost'));
-       $this->assertNotNull($this->auth->getPermission('UPDATED-NAME'));
-   }
+        $this->assertNull($this->auth->getPermission('readPost'));
+        $this->assertNotNull($this->auth->getPermission('UPDATED-NAME'));
+    }
 
-   public function testUpdateDescription(): void
-   {
-       $this->prepareData();
-       $name = 'readPost';
-       $permission = $this->auth->getPermission($name);
-       $newDescription = 'UPDATED-DESCRIPTION';
-       $permission = $permission->withDescription($newDescription);
-       $this->auth->update($name, $permission);
+    public function testUpdateDescription(): void
+    {
+        $this->prepareData();
+        $name = 'readPost';
+        $permission = $this->auth->getPermission($name);
+        $newDescription = 'UPDATED-DESCRIPTION';
+        $permission = $permission->withDescription($newDescription);
+        $this->auth->update($name, $permission);
 
-       $permission = $this->auth->getPermission('readPost');
-       $this->assertEquals($newDescription, $permission->getDescription());
-   }
+        $permission = $this->auth->getPermission('readPost');
+        $this->assertEquals($newDescription, $permission->getDescription());
+    }
 
     public function testOverwriteName(): void
     {
