@@ -11,8 +11,20 @@ use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
 use Yiisoft\Rbac\Exceptions\InvalidValueException;
 use Yiisoft\Rbac\Rule;
 
+/**
+ * Mock for the time() function for RBAC classes. Avoid random test fails.
+ *
+ * @return int
+ */
+function time()
+{
+    return \Yiisoft\Rbac\Tests\PhpManagerTest::$time ?: \time();
+}
+
 abstract class ManagerTestCase extends TestCase
 {
+    public static $time;
+
     /**
      * @var ManagerInterface|BaseManager
      */
@@ -22,12 +34,14 @@ abstract class ManagerTestCase extends TestCase
     {
         parent::setUp();
         $this->auth = $this->createManager();
+        static::$time = null;
     }
 
     protected function tearDown(): void
     {
         parent::tearDown();
         $this->auth->removeAll();
+        static::$time = null;
     }
 
     abstract protected function createManager(): ManagerInterface;
@@ -590,7 +604,7 @@ abstract class ManagerTestCase extends TestCase
     /**
      * Create Role or Permission RBAC item.
      *
-     * @param int    $RBACItemType
+     * @param int $RBACItemType
      * @param string $name
      *
      * @return Permission|Role
@@ -659,5 +673,41 @@ abstract class ManagerTestCase extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Default roles must be either an array or a callable');
         $this->auth->setDefaultRoles('test');
+    }
+
+    public function testUpdateItemName(): void
+   {
+       $this->prepareData();
+
+       $name = 'readPost';
+       $permission = $this->auth->getPermission($name);
+       $permission = $permission->withName('UPDATED-NAME');
+       $this->auth->update($name, $permission);
+
+       $this->assertNull($this->auth->getPermission('readPost'));
+       $this->assertNotNull($this->auth->getPermission('UPDATED-NAME'));
+   }
+
+   public function testUpdateDescription(): void
+   {
+       $this->prepareData();
+       $name = 'readPost';
+       $permission = $this->auth->getPermission($name);
+       $newDescription = 'UPDATED-DESCRIPTION';
+       $permission = $permission->withDescription($newDescription);
+       $this->auth->update($name, $permission);
+
+       $permission = $this->auth->getPermission('readPost');
+       $this->assertEquals($newDescription, $permission->getDescription());
+   }
+
+    public function testOverwriteName(): void
+    {
+        $this->prepareData();
+        $name = 'readPost';
+        $permission = $this->auth->getPermission($name);
+        $permission = $permission->withName('createPost');
+        $this->expectException(InvalidArgumentException::class);
+        $this->auth->update($name, $permission);
     }
 }
