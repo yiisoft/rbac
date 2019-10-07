@@ -127,7 +127,7 @@ abstract class BaseManager implements ManagerInterface
             return;
         }
 
-        throw new InvalidArgumentException('Adding unsupported object type.');
+        throw new InvalidArgumentException('Adding unsupported item type.');
     }
 
     protected function createRule(string $name): Rule
@@ -173,8 +173,8 @@ abstract class BaseManager implements ManagerInterface
     public function getRole(string $name): ?Role
     {
         $item = $this->getItem($name);
-        if ($item !== null && !($item instanceof Role)) {
-            throw new InvalidValueException();
+        if (!($item instanceof Role)) {
+            return null;
         }
 
         return $item;
@@ -200,9 +200,9 @@ abstract class BaseManager implements ManagerInterface
      *
      * @param string[]|callable $roles either array of roles or a callable returning it
      *
-     * @return BaseManager
+     * @return $this
      * @throws InvalidArgumentException when $roles is neither array nor Closure
-     * @throws InvalidValueException    when Closure return is not an array
+     * @throws InvalidValueException when Closure return is not an array
      */
     public function setDefaultRoles($roles): self
     {
