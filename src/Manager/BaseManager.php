@@ -1,4 +1,5 @@
 <?php
+
 namespace Yiisoft\Rbac\Manager;
 
 use Yiisoft\Rbac\Assignment;

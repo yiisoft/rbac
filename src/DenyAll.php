@@ -1,4 +1,5 @@
 <?php
+
 namespace Yiisoft\Rbac;
 
 use Yiisoft\Access\AccessCheckerInterface;

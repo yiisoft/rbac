@@ -1,4 +1,5 @@
 <?php
+
 namespace Yiisoft\Rbac\Exceptions;
 
 use Yiisoft\FriendlyException\FriendlyExceptionInterface;

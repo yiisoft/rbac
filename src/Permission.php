@@ -1,4 +1,5 @@
 <?php
+
 namespace Yiisoft\Rbac;
 
 class Permission extends Item

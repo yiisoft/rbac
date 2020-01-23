@@ -1,4 +1,5 @@
 <?php
+
 namespace Yiisoft\Rbac\Tests;
 
 use Yiisoft\Rbac\Assignment;

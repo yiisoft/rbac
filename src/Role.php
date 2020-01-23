@@ -1,4 +1,5 @@
 <?php
+
 namespace Yiisoft\Rbac;
 
 class Role extends Item
