@@ -13,27 +13,27 @@ abstract class Item implements ItemInterface
     /**
      * @var string the name of the item. This must be globally unique.
      */
-    private $name;
+    private string $name;
 
     /**
      * @var string the item description
      */
-    private $description = '';
+    private string $description = '';
 
     /**
      * @var string name of the rule associated with this item
      */
-    private $ruleName;
+    private ?string $ruleName = null;
 
     /**
      * @var int UNIX timestamp representing the item creation time
      */
-    private $createdAt;
+    private ?int $createdAt = null;
 
     /**
      * @var int UNIX timestamp representing the item updating time
      */
-    private $updatedAt;
+    private ?int $updatedAt = null;
 
     public function __construct(string $name)
     {
@@ -100,5 +100,15 @@ abstract class Item implements ItemInterface
     public function getUpdatedAt(): ?int
     {
         return $this->updatedAt;
+    }
+
+    public function hasCreatedAt(): bool
+    {
+        return $this->createdAt !== null;
+    }
+
+    public function hasUpdatedAt(): bool
+    {
+        return $this->updatedAt !== null;
     }
 }

@@ -10,7 +10,7 @@ use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\Rule;
-use Yiisoft\Rbac\RuleFactory\ClassNameRuleFactory;
+use Yiisoft\Rbac\RuleFactoryInterface;
 use Yiisoft\VarDumper\VarDumper;
 
 /**
@@ -37,7 +37,7 @@ class PhpManager extends BaseManager
      * @see loadFromFile()
      * @see saveToFile()
      */
-    protected $itemFile;
+    protected string $itemFile;
     /**
      * @var string the path of the PHP script that contains the authorization assignments.
      * This can be either a file path or a [path alias](guide:concept-aliases) to the file.
@@ -47,7 +47,7 @@ class PhpManager extends BaseManager
      * @see loadFromFile()
      * @see saveToFile()
      */
-    protected $assignmentFile;
+    protected string $assignmentFile;
     /**
      * @var string the path of the PHP script that contains the authorization rules.
      * This can be either a file path or a [path alias](guide:concept-aliases) to the file.
@@ -57,34 +57,41 @@ class PhpManager extends BaseManager
      * @see loadFromFile()
      * @see saveToFile()
      */
-    protected $ruleFile;
+    protected string $ruleFile;
 
     /**
      * @var Item[]
+     * format [itemName => item]
      */
-    protected $items = []; // [itemName => item]
-    /**
-     * @var array
-     */
-    protected $children = []; // [itemName => [childName => child]]
-    /**
-     * @var array
-     */
-    protected $assignments = []; // [userId => [itemName => assignment]]
-    /**
-     * @var Rule[]
-     */
-    protected $rules = []; // [ruleName => rule]
+    protected array $items = [];
 
     /**
-     * @param ClassNameRuleFactory $ruleFactory
+     * @var array
+     * format [itemName => [childName => child]]
+     */
+    protected array $children = [];
+
+    /**
+     * @var array
+     * format [userId => [itemName => assignment]]
+     */
+    protected array $assignments = [];
+
+    /**
+     * @var Rule[]
+     * format [ruleName => rule]
+     */
+    protected array $rules = [];
+
+    /**
+     * @param RuleFactoryInterface $ruleFactory
      * @param string $directory directory to store data into
      * @param string $itemFile path to the file storing auth items
      * @param string $assignmentFile path to file storing assignments
      * @param string $ruleFile path to file storing rules
      */
     public function __construct(
-        ClassNameRuleFactory $ruleFactory,
+        RuleFactoryInterface $ruleFactory,
         string $directory,
         string $itemFile = 'items.php',
         string $assignmentFile = 'assignments.php',
@@ -128,7 +135,7 @@ class PhpManager extends BaseManager
 
         /* @var $item Item */
         $item = $this->items[$permissionName] ?? null;
-        if (!$item instanceof Permission) {
+        if (!$this->isPermission($item)) {
             return false;
         }
 
@@ -149,9 +156,13 @@ class PhpManager extends BaseManager
      * @return bool whether the operations can be performed by the user.
      * @throws InvalidConfigException
      */
-    protected function userHasPermissionRecursive(string $user, string $itemName, array $params, array $assignments): bool
-    {
-        if (!isset($this->items[$itemName])) {
+    protected function userHasPermissionRecursive(
+        string $user,
+        string $itemName,
+        array $params,
+        array $assignments
+    ): bool {
+        if (!$this->hasItem($itemName)) {
             return false;
         }
 
@@ -182,7 +193,7 @@ class PhpManager extends BaseManager
 
     public function canAddChild(Item $parent, Item $child): bool
     {
-        if ($parent instanceof Permission && $child instanceof Role) {
+        if ($this->isPermission($parent) && $this->isRole($child)) {
             return false;
         }
         return !$this->detectLoop($parent, $child);
@@ -190,7 +201,7 @@ class PhpManager extends BaseManager
 
     public function addChild(Item $parent, Item $child): void
     {
-        if (!isset($this->items[$parent->getName()], $this->items[$child->getName()])) {
+        if (!$this->hasItem($parent->getName()) || !$this->hasItem($child->getName())) {
             throw new InvalidArgumentException(
                 "Either \"{$parent->getName()}\" or \"{$child->getName()}\" does not exist."
             );
@@ -199,8 +210,10 @@ class PhpManager extends BaseManager
         if ($parent->getName() === $child->getName()) {
             throw new InvalidArgumentException("Cannot add \"{$parent->getName()}\" as a child of itself.");
         }
-        if ($parent instanceof Permission && $child instanceof Role) {
-            throw new InvalidArgumentException("Can not add \"{$child->getName()}\" role as a child of \"{$parent->getName()}\" permission.");
+        if ($this->isPermission($parent) && $this->isRole($child)) {
+            throw new InvalidArgumentException(
+                "Can not add \"{$child->getName()}\" role as a child of \"{$parent->getName()}\" permission."
+            );
         }
 
         if ($this->detectLoop($parent, $child)) {
@@ -266,14 +279,9 @@ class PhpManager extends BaseManager
 
     public function assign(Item $item, string $userId): Assignment
     {
-        $itemName = 'authorization item';
-        if ($item instanceof Role) {
-            $itemName = 'role';
-        } elseif ($item instanceof Permission) {
-            $itemName = 'permission';
-        }
+        $itemName = $this->getTypeByItem($item);
 
-        if (!isset($this->items[$item->getName()])) {
+        if (!$this->hasItem($item->getName())) {
             throw new InvalidArgumentException("Unknown {$itemName} '{$item->getName()}'.");
         }
 
@@ -328,7 +336,7 @@ class PhpManager extends BaseManager
 
     protected function removeItem(Item $item): void
     {
-        if (isset($this->items[$item->getName()])) {
+        if ($this->hasItem($item->getName())) {
             foreach ($this->children as &$children) {
                 unset($children[$item->getName()]);
             }
@@ -406,17 +414,12 @@ class PhpManager extends BaseManager
     {
         $result = [];
         $this->getChildrenRecursive($roleName, $result);
+
         if (empty($result)) {
             return [];
         }
-        $permissions = [];
-        foreach (array_keys($result) as $itemName) {
-            if (isset($this->items[$itemName]) && $this->items[$itemName] instanceof Permission) {
-                $permissions[$itemName] = $this->items[$itemName];
-            }
-        }
 
-        return $permissions;
+        return $this->normalizePermissions($result);
     }
 
     /**
@@ -482,14 +485,7 @@ class PhpManager extends BaseManager
             return [];
         }
 
-        $permissions = [];
-        foreach (array_keys($result) as $itemName) {
-            if (isset($this->items[$itemName]) && $this->items[$itemName] instanceof Permission) {
-                $permissions[$itemName] = $this->items[$itemName];
-            }
-        }
-
-        return $permissions;
+        return $this->normalizePermissions($result);
     }
 
     public function getChildren(string $name): array
@@ -573,7 +569,7 @@ class PhpManager extends BaseManager
         $this->saveAssignments();
     }
 
-    protected function removeRule($rule): void
+    protected function removeRule(Rule $rule): void
     {
         if (isset($this->rules[$rule->getName()])) {
             unset($this->rules[$rule->getName()]);
@@ -587,7 +583,7 @@ class PhpManager extends BaseManager
         }
     }
 
-    protected function addRule($rule): void
+    protected function addRule(Rule $rule): void
     {
         $this->rules[$rule->getName()] = $rule;
         $this->saveRules();
@@ -596,7 +592,7 @@ class PhpManager extends BaseManager
     protected function updateItem(string $name, Item $item): void
     {
         if ($name !== $item->getName()) {
-            if (isset($this->items[$item->getName()])) {
+            if ($this->hasItem($item->getName())) {
                 throw new InvalidArgumentException(
                     "Unable to change the item name. The name '{$item->getName()}' is already used by another item."
                 );
@@ -636,10 +632,10 @@ class PhpManager extends BaseManager
     protected function addItem(Item $item): void
     {
         $time = time();
-        if ($item->getCreatedAt() === null) {
+        if (!$item->hasCreatedAt()) {
             $item = $item->withCreatedAt($time);
         }
-        if ($item->getUpdatedAt() === null) {
+        if (!$item->hasUpdatedAt()) {
             $item = $item->withUpdatedAt($time);
         }
 
@@ -678,7 +674,7 @@ class PhpManager extends BaseManager
         foreach ($items as $name => $item) {
             if (isset($item['children'])) {
                 foreach ($item['children'] as $childName) {
-                    if (isset($this->items[$childName])) {
+                    if ($this->hasItem($childName)) {
                         $this->children[$name][$childName] = $this->items[$childName];
                     }
                 }
@@ -822,5 +818,31 @@ class PhpManager extends BaseManager
         }
 
         return $result;
+    }
+
+    protected function getTypeByItem(Item $item): string
+    {
+        if ($this->isRole($item) || $this->isPermission($item)) {
+            return $item->getType();
+        }
+
+        return 'authorization item';
+    }
+
+    protected function hasItem(string $name): bool
+    {
+        return isset($this->items[$name]);
+    }
+
+    protected function normalizePermissions(array $result): array
+    {
+        $permissions = [];
+        foreach (array_keys($result) as $itemName) {
+            if ($this->hasItem($itemName) && $this->isPermission($this->items[$itemName])) {
+                $permissions[$itemName] = $this->items[$itemName];
+            }
+        }
+
+        return $permissions;
     }
 }

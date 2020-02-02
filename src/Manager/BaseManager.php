@@ -24,13 +24,13 @@ abstract class BaseManager implements ManagerInterface
     /**
      * @var RuleFactoryInterface
      */
-    private $ruleFactory;
+    private RuleFactoryInterface $ruleFactory;
 
     /**
      * @var array a list of role names that are assigned to every user automatically without calling [[assign()]].
      * Note that these roles are applied to users, regardless of their state of authentication.
      */
-    protected $defaultRoles = [];
+    protected array $defaultRoles = [];
 
     public function __construct(RuleFactoryInterface $ruleFactory)
     {
@@ -42,7 +42,7 @@ abstract class BaseManager implements ManagerInterface
      *
      * @param string $name the auth item name.
      *
-     * @return Item the auth item corresponding to the specified name. Null is returned if no such item.
+     * @return Item|Permission|Role the auth item corresponding to the specified name. Null is returned if no such item.
      */
     abstract protected function getItem(string $name): ?Item;
 
@@ -95,7 +95,7 @@ abstract class BaseManager implements ManagerInterface
      * Updates an auth item in the RBAC system.
      *
      * @param string $name the name of the item being updated
-     * @param Item   $item the updated item
+     * @param Item $item the updated item
      *
      * @return void whether the auth item is successfully updated
      */
@@ -105,25 +105,24 @@ abstract class BaseManager implements ManagerInterface
      * Updates a rule to the RBAC system.
      *
      * @param string $name the name of the rule being updated
-     * @param Rule   $rule the updated rule
+     * @param Rule $rule the updated rule
      *
      * @return void whether the rule is successfully updated
      */
     abstract protected function updateRule(string $name, Rule $rule): void;
 
+    /**
+     * @param ItemInterface|Item|Rule $item
+     */
     public function add(ItemInterface $item): void
     {
-        if ($item instanceof Item) {
-            if ($item->getRuleName() !== null && $this->getRule($item->getRuleName()) === null) {
-                $rule = $this->createRule($item->getRuleName());
-                $this->addRule($rule);
-            }
-
+        if ($this->isItem($item)) {
+            $this->createItemRuleIfNotExist($item);
             $this->addItem($item);
             return;
         }
 
-        if ($item instanceof Rule) {
+        if ($this->isRule($item)) {
             $this->addRule($item);
             return;
         }
@@ -136,14 +135,17 @@ abstract class BaseManager implements ManagerInterface
         return $this->ruleFactory->create($name);
     }
 
+    /**
+     * @param ItemInterface|Item|Rule $item
+     */
     public function remove(ItemInterface $item): void
     {
-        if ($item instanceof Item) {
+        if ($this->isItem($item)) {
             $this->removeItem($item);
             return;
         }
 
-        if ($item instanceof Rule) {
+        if ($this->isRule($item)) {
             $this->removeRule($item);
             return;
         }
@@ -151,19 +153,19 @@ abstract class BaseManager implements ManagerInterface
         throw new InvalidArgumentException('Removing unsupported item type.');
     }
 
+    /**
+     * @param string $name
+     * @param ItemInterface|Item|Rule $object
+     */
     public function update(string $name, ItemInterface $object): void
     {
-        if ($object instanceof Item) {
-            if ($object->getRuleName() && $this->getRule($object->getRuleName()) === null) {
-                $rule = $this->createRule($object->getRuleName());
-                $this->addRule($rule);
-            }
-
+        if ($this->isItem($object)) {
+            $this->createItemRuleIfNotExist($object);
             $this->updateItem($name, $object);
             return;
         }
 
-        if ($object instanceof Rule) {
+        if ($this->isRule($object)) {
             $this->updateRule($name, $object);
             return;
         }
@@ -174,21 +176,13 @@ abstract class BaseManager implements ManagerInterface
     public function getRole(string $name): ?Role
     {
         $item = $this->getItem($name);
-        if (!($item instanceof Role)) {
-            return null;
-        }
-
-        return $item;
+        return $this->isRole($item) ? $item : null;
     }
 
     public function getPermission(string $name): ?Permission
     {
         $item = $this->getItem($name);
-        if (!($item instanceof Permission)) {
-            return null;
-        }
-
-        return $item;
+        return $this->isPermission($item) ? $item : null;
     }
 
     public function getRoles(): array
@@ -294,5 +288,33 @@ abstract class BaseManager implements ManagerInterface
     protected function hasNoAssignments(array $assignments): bool
     {
         return empty($assignments) && empty($this->defaultRoles);
+    }
+
+    protected function isPermission(?ItemInterface $item): bool
+    {
+        return $item !== null && $item instanceof Permission;
+    }
+
+    protected function isRole(?ItemInterface $item): bool
+    {
+        return $item !== null && $item instanceof Role;
+    }
+
+    protected function isItem(?ItemInterface $item): bool
+    {
+        return $item !== null && $item instanceof Item;
+    }
+
+    protected function isRule(?ItemInterface $item): bool
+    {
+        return $item !== null && $item instanceof Rule;
+    }
+
+    protected function createItemRuleIfNotExist(Item $item): void
+    {
+        if ($item->getRuleName() && $this->getRule($item->getRuleName()) === null) {
+            $rule = $this->createRule($item->getRuleName());
+            $this->addRule($rule);
+        }
     }
 }
