@@ -837,15 +837,15 @@ class PhpManager extends BaseManager
         return isset($this->items[$name]);
     }
 
-    protected function normalizePermissions(array $result): array
+    protected function normalizePermissions(array $permissions): array
     {
-        $permissions = [];
-        foreach (array_keys($result) as $itemName) {
+        $normalizePermissions = [];
+        foreach (array_keys($permissions) as $itemName) {
             if ($this->hasItem($itemName) && $this->isPermission($this->items[$itemName])) {
-                $permissions[$itemName] = $this->items[$itemName];
+                $normalizePermissions[$itemName] = $this->items[$itemName];
             }
         }
 
-        return $permissions;
+        return $normalizePermissions;
     }
 }
