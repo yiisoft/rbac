@@ -15,19 +15,19 @@ class ExposedPhpManager extends PhpManager
     /**
      * @var Item[]
      */
-    public $items = []; // itemName => item
+    public array $items = []; // itemName => item
     /**
      * @var array
      */
-    public $children = []; // itemName, childName => child
+    public array $children = []; // itemName, childName => child
     /**
      * @var Assignment[]
      */
-    public $assignments = []; // userId, itemName => assignment
+    public array $assignments = []; // userId, itemName => assignment
     /**
      * @var Rule[]
      */
-    public $rules = []; // ruleName => rule
+    public array $rules = []; // ruleName => rule
 
     public function load(): void
     {
