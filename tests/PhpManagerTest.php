@@ -9,7 +9,7 @@ namespace Yiisoft\Rbac;
  *
  * @return int
  */
-function filemtime($file)
+function filemtime(string $file): int
 {
     return \Yiisoft\Rbac\Tests\PhpManagerTest::$filemtime ?: \filemtime($file);
 }
@@ -31,9 +31,9 @@ use Yiisoft\Rbac\RuleFactory\ClassNameRuleFactory;
  */
 final class PhpManagerTest extends ManagerTestCase
 {
-    public static $filemtime;
+    public static ?string $filemtime;
 
-    private $testDataPath;
+    private string $testDataPath;
 
     protected function setUp(): void
     {
@@ -126,7 +126,7 @@ final class PhpManagerTest extends ManagerTestCase
     /**
      * @test
      */
-    public function shouldReturnExceptionWhenAddingByUnknownType(): void
+    public function returnExceptionWhenAddingUnknownItemType(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Adding unsupported item type.');
@@ -136,7 +136,7 @@ final class PhpManagerTest extends ManagerTestCase
     /**
      * @test
      */
-    public function shouldClearAllRolesAndPermissionsFromUser(): void
+    public function revokeAllClearAllUseAssignments(): void
     {
         $this->prepareData();
         $this->auth->revokeAll('author B');
@@ -146,7 +146,7 @@ final class PhpManagerTest extends ManagerTestCase
     /**
      * @test
      */
-    public function shouldReturnUserAssignment(): void
+    public function returnUserAssignment(): void
     {
         $this->prepareData();
         $this->assertInstanceOf(Assignment::class, $this->auth->getAssignment('author', 'author B'));
@@ -155,7 +155,7 @@ final class PhpManagerTest extends ManagerTestCase
     /**
      * @test
      */
-    public function shouldReturnNullBecauseUserNotHaveAssignment(): void
+    public function returnNullForUserWithoutAssignment(): void
     {
         $this->prepareData();
         $this->assertNull($this->auth->getAssignment('author', 'guest'));
@@ -164,7 +164,7 @@ final class PhpManagerTest extends ManagerTestCase
     /**
      * @test
      */
-    public function shouldReturnEmptyArrayAfterRemoveAssignments(): void
+    public function returnEmptyArrayWithNoAssignments(): void
     {
         $this->prepareData();
         $this->auth->removeAllAssignments();
@@ -175,7 +175,7 @@ final class PhpManagerTest extends ManagerTestCase
     /**
      * @test
      */
-    public function shouldReturnTrueBecauseChildExists(): void
+    public function returnTrueWhenChildExists(): void
     {
         $this->prepareData();
 
@@ -188,7 +188,7 @@ final class PhpManagerTest extends ManagerTestCase
     /**
      * @test
      */
-    public function shouldReturnFalseBecauseChildNotExists(): void
+    public function returnFalseWhenHasNoChild(): void
     {
         $this->prepareData();
 
@@ -201,7 +201,7 @@ final class PhpManagerTest extends ManagerTestCase
     /**
      * @test
      */
-    public function shouldDeleteAllChildren(): void
+    public function removeChildren(): void
     {
         $this->prepareData();
 
@@ -218,7 +218,7 @@ final class PhpManagerTest extends ManagerTestCase
     /**
      * @test
      */
-    public function shouldDeleteOneChildren(): void
+    public function removeChild(): void
     {
         $this->prepareData();
 
@@ -235,7 +235,7 @@ final class PhpManagerTest extends ManagerTestCase
     /**
      * @test
      */
-    public function expectedAddNewRuleWhenUpdatingItem(): void
+    public function ruleSetWhenUpdatingItem(): void
     {
         $newRule = new EasyRule();
 
@@ -251,7 +251,7 @@ final class PhpManagerTest extends ManagerTestCase
     /**
      * @test
      */
-    public function shouldReturnExceptionWhenUpdateByUnknownType(): void
+    public function returnExceptionWhenUpdateWithUnknownItemType(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Updating unsupported item type.');
@@ -262,7 +262,7 @@ final class PhpManagerTest extends ManagerTestCase
     /**
      * @test
      */
-    public function setDefaultRolesWithClosureSuccessSetupRoles(): void
+    public function defaultRolesSetWithClosure(): void
     {
         $this->auth->setDefaultRoles(
             static function () {
@@ -276,7 +276,7 @@ final class PhpManagerTest extends ManagerTestCase
     /**
      * @test
      */
-    public function shouldReturnFalseByUnknownUserAndNoDefaultRoles(): void
+    public function returnFalseForNonExistingUserAndNoDefaultRoles(): void
     {
         $this->auth->setDefaultRoles([]);
         $this->assertFalse($this->auth->userHasPermission('unknown user', 'createPost'));
@@ -285,7 +285,7 @@ final class PhpManagerTest extends ManagerTestCase
     /**
      * @test
      */
-    public function shouldReturnExceptionWhenRemoveByUnknownType(): void
+    public function returnExceptionWhenRemoveByUnknownItemType(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Removing unsupported item type.');
@@ -295,7 +295,7 @@ final class PhpManagerTest extends ManagerTestCase
     /**
      * @test
      */
-    public function expectedAddNewRuleWhenAddItem(): void
+    public function ruleSetWhenAddingItem(): void
     {
         $newRule = new EasyRule();
         $itemName = 'newPermission';
@@ -310,7 +310,7 @@ final class PhpManagerTest extends ManagerTestCase
     /**
      * @test
      */
-    public function shouldReturnNullWhenNoRoleRequested(): void
+    public function getRuleReturnNullForNonExistingRole(): void
     {
         $this->prepareData();
         $author = $this->auth->getRole('createPost');
