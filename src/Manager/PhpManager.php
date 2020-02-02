@@ -156,12 +156,7 @@ class PhpManager extends BaseManager
      * @return bool whether the operations can be performed by the user.
      * @throws InvalidConfigException
      */
-    protected function userHasPermissionRecursive(
-        string $user,
-        string $itemName,
-        array $params,
-        array $assignments
-    ): bool {
+    protected function userHasPermissionRecursive(string $user, string $itemName, array $params, array $assignments): bool {
         if (!$this->hasItem($itemName)) {
             return false;
         }
@@ -202,30 +197,25 @@ class PhpManager extends BaseManager
     public function addChild(Item $parent, Item $child): void
     {
         if (!$this->hasItem($parent->getName()) || !$this->hasItem($child->getName())) {
-            throw new InvalidArgumentException(
-                "Either \"{$parent->getName()}\" or \"{$child->getName()}\" does not exist."
-            );
+            throw new InvalidArgumentException("Either \"{$parent->getName()}\" or \"{$child->getName()}\" does not exist.");
         }
 
         if ($parent->getName() === $child->getName()) {
             throw new InvalidArgumentException("Cannot add \"{$parent->getName()}\" as a child of itself.");
         }
+
         if ($this->isPermission($parent) && $this->isRole($child)) {
-            throw new InvalidArgumentException(
-                "Can not add \"{$child->getName()}\" role as a child of \"{$parent->getName()}\" permission."
-            );
+            throw new InvalidArgumentException("Can not add \"{$child->getName()}\" role as a child of \"{$parent->getName()}\" permission.");
         }
 
         if ($this->detectLoop($parent, $child)) {
-            throw new InvalidCallException(
-                "Cannot add \"{$child->getName()}\" as a child of \"{$parent->getName()}\". A loop has been detected."
-            );
+            throw new InvalidCallException("Cannot add \"{$child->getName()}\" as a child of \"{$parent->getName()}\". A loop has been detected.");
         }
+
         if (isset($this->children[$parent->getName()][$child->getName()])) {
-            throw new InvalidCallException(
-                "The item \"{$parent->getName()}\" already has a child \"{$child->getName()}\"."
-            );
+            throw new InvalidCallException("The item \"{$parent->getName()}\" already has a child \"{$child->getName()}\".");
         }
+
         $this->children[$parent->getName()][$child->getName()] = $this->items[$child->getName()];
         $this->saveItems();
     }
