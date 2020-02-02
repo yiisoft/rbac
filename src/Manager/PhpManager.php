@@ -162,7 +162,6 @@ class PhpManager extends BaseManager
         array $params,
         array $assignments
     ): bool {
-
         if (!$this->hasItem($itemName)) {
             return false;
         }
