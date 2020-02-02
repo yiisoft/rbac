@@ -11,7 +11,7 @@ namespace Yiisoft\Rbac;
  */
 function filemtime($file)
 {
-    return \Yiisoft\Rbac\Tests\PhpManagerTest::$filemtime ? : \filemtime($file);
+    return \Yiisoft\Rbac\Tests\PhpManagerTest::$filemtime ?: \filemtime($file);
 }
 
 namespace Yiisoft\Rbac\Tests;
@@ -37,7 +37,7 @@ final class PhpManagerTest extends ManagerTestCase
 
     protected function setUp(): void
     {
-        static::$filemtime  = null;
+        static::$filemtime = null;
         $this->testDataPath = sys_get_temp_dir() . '/' . str_replace('\\', '_', get_class($this)) . uniqid('', false);
         if (FileHelper::createDirectory($this->testDataPath) === false) {
             throw new \RuntimeException('Unable to create directory: ' . $this->testDataPath);
@@ -72,10 +72,10 @@ final class PhpManagerTest extends ManagerTestCase
         static::$time = static::$filemtime = \time();
 
         $this->prepareData();
-        $items       = $this->auth->items;
-        $children    = $this->auth->children;
+        $items = $this->auth->items;
+        $children = $this->auth->children;
         $assignments = $this->auth->assignments;
-        $rules       = $this->auth->rules;
+        $rules = $this->auth->rules;
         $this->auth->save();
 
         $this->auth = $this->createManager();
@@ -179,7 +179,7 @@ final class PhpManagerTest extends ManagerTestCase
     {
         $this->prepareData();
 
-        $reader   = $this->auth->getRole('reader');
+        $reader = $this->auth->getRole('reader');
         $readPost = $this->auth->getPermission('readPost');
 
         $this->assertTrue($this->auth->hasChild($reader, $readPost));
@@ -192,7 +192,7 @@ final class PhpManagerTest extends ManagerTestCase
     {
         $this->prepareData();
 
-        $reader     = $this->auth->getRole('reader');
+        $reader = $this->auth->getRole('reader');
         $updatePost = $this->auth->getPermission('updatePost');
 
         $this->assertFalse($this->auth->hasChild($reader, $updatePost));
@@ -205,7 +205,7 @@ final class PhpManagerTest extends ManagerTestCase
     {
         $this->prepareData();
 
-        $author     = $this->auth->getRole('author');
+        $author = $this->auth->getRole('author');
         $createPost = $this->auth->getPermission('createPost');
         $updatePost = $this->auth->getPermission('updatePost');
 
@@ -222,7 +222,7 @@ final class PhpManagerTest extends ManagerTestCase
     {
         $this->prepareData();
 
-        $author     = $this->auth->getRole('author');
+        $author = $this->auth->getRole('author');
         $createPost = $this->auth->getPermission('createPost');
         $updatePost = $this->auth->getPermission('updatePost');
 
@@ -240,7 +240,7 @@ final class PhpManagerTest extends ManagerTestCase
         $newRule = new EasyRule();
 
         $permissionName = 'newPermission';
-        $permission     = (new Permission($permissionName))
+        $permission = (new Permission($permissionName))
             ->withRuleName($newRule->getName());
 
         $this->auth->update($permissionName, $permission);
@@ -297,9 +297,9 @@ final class PhpManagerTest extends ManagerTestCase
      */
     public function expectedAddNewRuleWhenAddItem(): void
     {
-        $newRule  = new EasyRule();
+        $newRule = new EasyRule();
         $itemName = 'newPermission';
-        $item     = (new Permission($itemName))
+        $item = (new Permission($itemName))
             ->withRuleName($newRule->getName());
 
         $this->auth->add($item);
