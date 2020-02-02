@@ -17,7 +17,11 @@ function filemtime($file)
 namespace Yiisoft\Rbac\Tests;
 
 use Yiisoft\Files\FileHelper;
+use Yiisoft\Rbac\Assignment;
+use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
+use Yiisoft\Rbac\ItemInterface;
 use Yiisoft\Rbac\ManagerInterface;
+use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\RuleFactory\ClassNameRuleFactory;
 
@@ -117,5 +121,210 @@ final class PhpManagerTest extends ManagerTestCase
             file_get_contents($this->getAssignmentFilePath()),
             'Role "NewAdmin" was not removed when saving'
         );
+    }
+
+    /**
+     * @test
+     */
+    public function shouldReturnExceptionWhenAddingByUnknownType(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Adding unsupported item type.');
+        $this->auth->add($this->getCustomItem());
+    }
+
+    /**
+     * @test
+     */
+    public function shouldClearAllRolesAndPermissionsFromUser(): void
+    {
+        $this->prepareData();
+        $this->auth->revokeAll('author B');
+        $this->assertEmpty($this->auth->getAssignments('author B'));
+    }
+
+    /**
+     * @test
+     */
+    public function shouldReturnUserAssignment(): void
+    {
+        $this->prepareData();
+        $this->assertInstanceOf(Assignment::class, $this->auth->getAssignment('author', 'author B'));
+    }
+
+    /**
+     * @test
+     */
+    public function shouldReturnNullBecauseUserNotHaveAssignment(): void
+    {
+        $this->prepareData();
+        $this->assertNull($this->auth->getAssignment('author', 'guest'));
+    }
+
+    /**
+     * @test
+     */
+    public function shouldReturnEmptyArrayAfterRemoveAssignments(): void
+    {
+        $this->prepareData();
+        $this->auth->removeAllAssignments();
+        $this->assertEmpty($this->auth->getAssignments('author B'));
+        $this->assertEmpty($this->auth->getAssignments('author A'));
+    }
+
+    /**
+     * @test
+     */
+    public function shouldReturnTrueBecauseChildExists(): void
+    {
+        $this->prepareData();
+
+        $reader   = $this->auth->getRole('reader');
+        $readPost = $this->auth->getPermission('readPost');
+
+        $this->assertTrue($this->auth->hasChild($reader, $readPost));
+    }
+
+    /**
+     * @test
+     */
+    public function shouldReturnFalseBecauseChildNotExists(): void
+    {
+        $this->prepareData();
+
+        $reader     = $this->auth->getRole('reader');
+        $updatePost = $this->auth->getPermission('updatePost');
+
+        $this->assertFalse($this->auth->hasChild($reader, $updatePost));
+    }
+
+    /**
+     * @test
+     */
+    public function shouldDeleteAllChildren(): void
+    {
+        $this->prepareData();
+
+        $author     = $this->auth->getRole('author');
+        $createPost = $this->auth->getPermission('createPost');
+        $updatePost = $this->auth->getPermission('updatePost');
+
+        $this->auth->removeChildren($author);
+
+        $this->assertFalse($this->auth->hasChild($author, $createPost));
+        $this->assertFalse($this->auth->hasChild($author, $updatePost));
+    }
+
+    /**
+     * @test
+     */
+    public function shouldDeleteOneChildren(): void
+    {
+        $this->prepareData();
+
+        $author     = $this->auth->getRole('author');
+        $createPost = $this->auth->getPermission('createPost');
+        $updatePost = $this->auth->getPermission('updatePost');
+
+        $this->auth->removeChild($author, $createPost);
+
+        $this->assertFalse($this->auth->hasChild($author, $createPost));
+        $this->assertTrue($this->auth->hasChild($author, $updatePost));
+    }
+
+    /**
+     * @test
+     */
+    public function expectedAddNewRuleWhenUpdatingItem(): void
+    {
+        $newRule = new EasyRule();
+
+        $permissionName = 'newPermission';
+        $permission     = (new Permission($permissionName))
+            ->withRuleName($newRule->getName());
+
+        $this->auth->update($permissionName, $permission);
+        $this->assertNotNull($this->auth->getPermission($permissionName));
+        $this->assertNotNull($this->auth->getRule($newRule->getName()));
+    }
+
+    /**
+     * @test
+     */
+    public function shouldReturnExceptionWhenUpdateByUnknownType(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Updating unsupported item type.');
+        $customItem = $this->getCustomItem();
+        $this->auth->update($customItem->getName(), $customItem);
+    }
+
+    /**
+     * @test
+     */
+    public function setDefaultRolesWithClosureSuccessSetupRoles(): void
+    {
+        $this->auth->setDefaultRoles(
+            static function () {
+                return ['newDefaultRole'];
+            }
+        );
+
+        $this->assertEquals($this->auth->getDefaultRoles(), ['newDefaultRole']);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldReturnFalseByUnknownUserAndNoDefaultRoles(): void
+    {
+        $this->auth->setDefaultRoles([]);
+        $this->assertFalse($this->auth->userHasPermission('unknown user', 'createPost'));
+    }
+
+    /**
+     * @test
+     */
+    public function shouldReturnExceptionWhenRemoveByUnknownType(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Removing unsupported item type.');
+        $this->auth->remove($this->getCustomItem());
+    }
+
+    /**
+     * @test
+     */
+    public function expectedAddNewRuleWhenAddItem(): void
+    {
+        $newRule  = new EasyRule();
+        $itemName = 'newPermission';
+        $item     = (new Permission($itemName))
+            ->withRuleName($newRule->getName());
+
+        $this->auth->add($item);
+        $this->assertNotNull($this->auth->getPermission($itemName));
+        $this->assertNotNull($this->auth->getRule($newRule->getName()));
+    }
+
+    /**
+     * @test
+     */
+    public function shouldReturnNullWhenNoRoleRequested(): void
+    {
+        $this->prepareData();
+        $author = $this->auth->getRole('createPost');
+
+        $this->assertNull($author);
+    }
+
+    private function getCustomItem(): ItemInterface
+    {
+        return new class implements ItemInterface {
+            public function getName(): string
+            {
+                return 'custom item';
+            }
+        };
     }
 }
