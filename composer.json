@@ -27,7 +27,7 @@
         "psr/log": "~1.1.0",
         "yiisoft/log": "^3.0@dev",
         "yiisoft/cache": "^3.0@dev",
-        "phpunit/phpunit": "^8.4",
+        "phpunit/phpunit": "^8.4 || ^9.0",
         "yiisoft/files": "^3.0@dev"
     },
     "suggest": {
