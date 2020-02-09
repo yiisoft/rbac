@@ -763,7 +763,14 @@ class PhpManager extends BaseManager
         $items = [];
         foreach ($this->items as $name => $item) {
             /* @var $item Item */
-            $items[$name] = array_filter($item->getAttributes());
+            $items[$name] = array_filter(
+                [
+                    'type' => $item->getType(),
+                    'description' => $item->getDescription(),
+                    'ruleName' => $item->getRuleName(),
+                    // FIXME: 'data' => $item->data,
+                ]
+            );
             if (isset($this->children[$name])) {
                 foreach ($this->children[$name] as $child) {
                     /* @var $child Item */
