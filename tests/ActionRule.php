@@ -12,7 +12,7 @@ class ActionRule extends Rule
 {
     private const NAME = 'action_rule';
 
-    private $action;
+    private string $action;
 
     /**
      * Private and protected properties to ensure that serialized object
