@@ -12,4 +12,6 @@ namespace Yiisoft\Rbac;
 interface ItemInterface
 {
     public function getName(): string;
+
+    public function getAttributes(): array;
 }

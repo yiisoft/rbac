@@ -7,21 +7,12 @@ namespace Yiisoft\Rbac;
  */
 abstract class Rule implements ItemInterface
 {
-    private $name;
+    private string $name;
 
     public function __construct(string $name)
     {
         $this->name = $name;
     }
-
-    /**
-     * @var int UNIX timestamp representing the rule creation time
-     */
-    private $createdAt;
-    /**
-     * @var int UNIX timestamp representing the rule updating time
-     */
-    private $updatedAt;
 
     /**
      * Executes the rule.
@@ -48,5 +39,12 @@ abstract class Rule implements ItemInterface
         $new = clone $this;
         $new->name = $name;
         return $new;
+    }
+
+    public function getAttributes(): array
+    {
+        return [
+            'name' => $this->getName()
+        ];
     }
 }

@@ -111,4 +111,16 @@ abstract class Item implements ItemInterface
     {
         return $this->updatedAt !== null;
     }
+
+    public function getAttributes(): array
+    {
+        return [
+            'name' => $this->getName(),
+            'description' => $this->getDescription(),
+            'ruleName' => $this->getRuleName(),
+            'type' => $this->getType(),
+            'updatedAt' => $this->getUpdatedAt(),
+            'createdAt' => $this->getCreatedAt(),
+        ];
+    }
 }
