@@ -14,5 +14,6 @@ It is used in [Yii Framework] but is supposed to be usable separately.
 
 [![Latest Stable Version](https://poser.pugx.org/yiisoft/rbac/v/stable.png)](https://packagist.org/packages/yiisoft/rbac)
 [![Total Downloads](https://poser.pugx.org/yiisoft/rbac/downloads.png)](https://packagist.org/packages/yiisoft/rbac)
+[![Code Coverage](https://scrutinizer-ci.com/g/yiisoft/rbac/badges/coverage.png)](https://scrutinizer-ci.com/g/yiisoft/rbac/)
 [![Build Status](https://travis-ci.com/yiisoft/rbac.svg?branch=master)](https://travis-ci.com/yiisoft/rbac)
 
