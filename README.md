@@ -37,14 +37,9 @@ In the directory config will contain permissions and rules.
 
 ```php
 
-$createPost = new Permission('createPost');
-$manager->add($createPost);
-
-$readPost = new Permission('readPost');
-$manager->add($readPost);
-
-$deletePost = new Permission('deletePost');
-$manager->add($deletePost);
+$manager->add(new Permission('createPost'));
+$manager->add(new Permission('readPost'));
+$manager->add(new Permission('deletePost'));
 
 ```
 
