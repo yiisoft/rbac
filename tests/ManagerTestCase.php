@@ -98,6 +98,10 @@ abstract class ManagerTestCase extends TestCase
         $rule = $this->auth->getRule('isAuthor');
         $this->assertInstanceOf(Rule::class, $rule);
         $this->assertEquals('isAuthor', $rule->getName());
+        $this->assertEquals(
+            ['name' => 'isAuthor'],
+            $rule->getAttributes()
+        );
 
         $rule = $this->auth->getRule('nonExisting');
         $this->assertNull($rule);
@@ -281,7 +285,17 @@ abstract class ManagerTestCase extends TestCase
         $author = $this->auth->getRole('author');
         $this->assertEquals(Item::TYPE_ROLE, $author->getType());
         $this->assertEquals('author', $author->getName());
-        // FIXME: $this->assertEquals('authorData', $author->data);
+        $this->assertEquals(
+            [
+                'name' => 'author',
+                'description' => '',
+                'ruleName' => null,
+                'type' => 'role',
+                'updatedAt' => time(),
+                'createdAt' => time(),
+            ],
+            $author->getAttributes()
+        );
     }
 
     public function testGetPermission(): void
@@ -290,7 +304,17 @@ abstract class ManagerTestCase extends TestCase
         $createPost = $this->auth->getPermission('createPost');
         $this->assertEquals(Item::TYPE_PERMISSION, $createPost->getType());
         $this->assertEquals('createPost', $createPost->getName());
-        // FIXME: $this->assertEquals('createPostData', $createPost->data);
+        $this->assertEquals(
+            [
+                'name' => 'createPost',
+                'description' => 'create a post',
+                'ruleName' => null,
+                'type' => 'permission',
+                'updatedAt' => time(),
+                'createdAt' => time(),
+            ],
+            $createPost->getAttributes()
+        );
     }
 
     public function testGetRolesByUser(): void

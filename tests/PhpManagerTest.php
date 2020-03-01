@@ -123,48 +123,33 @@ final class PhpManagerTest extends ManagerTestCase
         );
     }
 
-    /**
-     * @test
-     */
-    public function returnExceptionWhenAddingUnknownItemType(): void
+    public function testReturnExceptionWhenAddingUnknownItemType(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Adding unsupported item type.');
         $this->auth->add($this->getCustomItem());
     }
 
-    /**
-     * @test
-     */
-    public function revokeAllClearAllUseAssignments(): void
+    public function testRevokeAllClearAllUseAssignments(): void
     {
         $this->prepareData();
         $this->auth->revokeAll('author B');
         $this->assertEmpty($this->auth->getAssignments('author B'));
     }
 
-    /**
-     * @test
-     */
-    public function returnUserAssignment(): void
+    public function testReturnUserAssignment(): void
     {
         $this->prepareData();
         $this->assertInstanceOf(Assignment::class, $this->auth->getAssignment('author', 'author B'));
     }
 
-    /**
-     * @test
-     */
-    public function returnNullForUserWithoutAssignment(): void
+    public function testReturnNullForUserWithoutAssignment(): void
     {
         $this->prepareData();
         $this->assertNull($this->auth->getAssignment('author', 'guest'));
     }
 
-    /**
-     * @test
-     */
-    public function returnEmptyArrayWithNoAssignments(): void
+    public function testReturnEmptyArrayWithNoAssignments(): void
     {
         $this->prepareData();
         $this->auth->removeAllAssignments();
@@ -172,10 +157,7 @@ final class PhpManagerTest extends ManagerTestCase
         $this->assertEmpty($this->auth->getAssignments('author A'));
     }
 
-    /**
-     * @test
-     */
-    public function returnTrueWhenChildExists(): void
+    public function testReturnTrueWhenChildExists(): void
     {
         $this->prepareData();
 
@@ -185,10 +167,7 @@ final class PhpManagerTest extends ManagerTestCase
         $this->assertTrue($this->auth->hasChild($reader, $readPost));
     }
 
-    /**
-     * @test
-     */
-    public function returnFalseWhenHasNoChild(): void
+    public function testReturnFalseWhenHasNoChild(): void
     {
         $this->prepareData();
 
@@ -198,10 +177,7 @@ final class PhpManagerTest extends ManagerTestCase
         $this->assertFalse($this->auth->hasChild($reader, $updatePost));
     }
 
-    /**
-     * @test
-     */
-    public function removeChildren(): void
+    public function testRemoveChildren(): void
     {
         $this->prepareData();
 
@@ -215,10 +191,7 @@ final class PhpManagerTest extends ManagerTestCase
         $this->assertFalse($this->auth->hasChild($author, $updatePost));
     }
 
-    /**
-     * @test
-     */
-    public function removeChild(): void
+    public function testRemoveChild(): void
     {
         $this->prepareData();
 
@@ -232,10 +205,7 @@ final class PhpManagerTest extends ManagerTestCase
         $this->assertTrue($this->auth->hasChild($author, $updatePost));
     }
 
-    /**
-     * @test
-     */
-    public function ruleSetWhenUpdatingItem(): void
+    public function testRuleSetWhenUpdatingItem(): void
     {
         $newRule = new EasyRule();
 
@@ -248,10 +218,7 @@ final class PhpManagerTest extends ManagerTestCase
         $this->assertNotNull($this->auth->getRule($newRule->getName()));
     }
 
-    /**
-     * @test
-     */
-    public function returnExceptionWhenUpdateWithUnknownItemType(): void
+    public function testReturnExceptionWhenUpdateWithUnknownItemType(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Updating unsupported item type.');
@@ -259,10 +226,7 @@ final class PhpManagerTest extends ManagerTestCase
         $this->auth->update($customItem->getName(), $customItem);
     }
 
-    /**
-     * @test
-     */
-    public function defaultRolesSetWithClosure(): void
+    public function testDefaultRolesSetWithClosure(): void
     {
         $this->auth->setDefaultRoles(
             static function () {
@@ -273,29 +237,20 @@ final class PhpManagerTest extends ManagerTestCase
         $this->assertEquals($this->auth->getDefaultRoles(), ['newDefaultRole']);
     }
 
-    /**
-     * @test
-     */
-    public function returnFalseForNonExistingUserAndNoDefaultRoles(): void
+    public function testReturnFalseForNonExistingUserAndNoDefaultRoles(): void
     {
         $this->auth->setDefaultRoles([]);
         $this->assertFalse($this->auth->userHasPermission('unknown user', 'createPost'));
     }
 
-    /**
-     * @test
-     */
-    public function returnExceptionWhenRemoveByUnknownItemType(): void
+    public function testReturnExceptionWhenRemoveByUnknownItemType(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Removing unsupported item type.');
         $this->auth->remove($this->getCustomItem());
     }
 
-    /**
-     * @test
-     */
-    public function ruleSetWhenAddingItem(): void
+    public function testRuleSetWhenAddingItem(): void
     {
         $newRule = new EasyRule();
         $itemName = 'newPermission';
@@ -307,10 +262,7 @@ final class PhpManagerTest extends ManagerTestCase
         $this->assertNotNull($this->auth->getRule($newRule->getName()));
     }
 
-    /**
-     * @test
-     */
-    public function getRuleReturnNullForNonExistingRole(): void
+    public function testGetRuleReturnNullForNonExistingRole(): void
     {
         $this->prepareData();
         $author = $this->auth->getRole('createPost');
@@ -324,6 +276,13 @@ final class PhpManagerTest extends ManagerTestCase
             public function getName(): string
             {
                 return 'custom item';
+            }
+
+            public function getAttributes(): array
+            {
+                return [
+                    'name' => $this->getName()
+                ];
             }
         };
     }

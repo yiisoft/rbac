@@ -12,7 +12,7 @@ class AuthorRule extends Rule
 {
     private const NAME = 'isAuthor';
 
-    private $reallyReally;
+    private bool $reallyReally;
 
     public function __construct($name = self::NAME, $reallyReally = false)
     {
