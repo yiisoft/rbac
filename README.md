@@ -88,3 +88,40 @@ if ($manager->userHasPermission(100, 'createPost')) {
 }
 ```
 
+### Usage rules
+
+```php
+
+$manager->add(new ActionRule());
+$manager->add(
+    (new Permission('viewList'))->withRuleName('action_rule')
+);
+
+```
+The role will also support the rules.
+
+#### Rule example 
+
+```php
+class ActionRule extends Rule
+{
+    public function __construct()
+    {
+        parent::__construct('action_rule');
+    }
+
+    public function execute(string $userId, Item $item, array $parameters = []): bool
+    {
+        return isset($parameters['action']) && $parameters['action'] === 'home';
+    }
+}
+```
+
+#### check permissions with rule
+
+
+```php
+if (!$manager->userHasPermission(103, 'viewList', ['action' => 'home'])) {
+    echo 'reader not has permission index';
+}
+```
