@@ -17,3 +17,74 @@ It is used in [Yii Framework] but is supposed to be usable separately.
 [![Code Coverage](https://scrutinizer-ci.com/g/yiisoft/rbac/badges/coverage.png)](https://scrutinizer-ci.com/g/yiisoft/rbac/)
 [![Build Status](https://travis-ci.com/yiisoft/rbac.svg?branch=master)](https://travis-ci.com/yiisoft/rbac)
 
+
+## Install:
+
+```
+composer require yiisoft/rbac
+```
+
+## Basic usage:
+
+#### create instance
+
+```php
+$manager = new PhpManager(new ClassNameRuleFactory(), '../config/');
+```
+In the directory config will contain permissions and rules. 
+
+#### create permissions
+
+```php
+
+$manager->add(new Permission('createPost'));
+$manager->add(new Permission('readPost'));
+$manager->add(new Permission('deletePost'));
+
+```
+
+After executing this code, this configuration will be saved in ../config/items.php
+
+#### Create roles
+
+```php
+$manager->add(new Role('author'));
+$manager->add(new Role('reader'));
+```
+
+
+#### Attach permissions to roles
+
+```php
+$manager->addChild(
+    $manager->getRole('reader'),
+    $manager->getPermission('readPost')
+);
+
+$manager->addChild(
+    $manager->getRole('author'),
+    $manager->getPermission('createPost')
+);
+
+$manager->addChild(
+    $manager->getRole('author'),
+    $manager->getRole('reader')
+);
+```
+
+#### Assign role to user
+
+```php
+$manager->assign($manager->getRole('author'), 100);
+```
+After executing this code, this configuration will be saved in ../config/assignments.php
+
+
+#### Check permissions
+
+```php
+if ($manager->userHasPermission(100, 'createPost')) {
+    echo 'author has permission createPost';
+}
+```
+
