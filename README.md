@@ -10,7 +10,7 @@ This library provides [RBAC] (Role-Based Access Control) library.
 It is used in [Yii Framework] but is supposed to be usable separately.
 
 [RBAC]: https://en.wikipedia.org/wiki/Role-based_access_control
-[Yii Framework]: https://github.com/yiisoft/core
+[Yii Framework]: https://yiiframework.com
 
 [![Latest Stable Version](https://poser.pugx.org/yiisoft/rbac/v/stable.png)](https://packagist.org/packages/yiisoft/rbac)
 [![Total Downloads](https://poser.pugx.org/yiisoft/rbac/downloads.png)](https://packagist.org/packages/yiisoft/rbac)
