@@ -10,7 +10,7 @@ This library provides [RBAC] (Role-Based Access Control) library.
 It is used in [Yii Framework] but is supposed to be usable separately.
 
 [RBAC]: https://en.wikipedia.org/wiki/Role-based_access_control
-[Yii Framework]: https://github.com/yiisoft/core
+[Yii Framework]: https://yiiframework.com
 
 [![Latest Stable Version](https://poser.pugx.org/yiisoft/rbac/v/stable.png)](https://packagist.org/packages/yiisoft/rbac)
 [![Total Downloads](https://poser.pugx.org/yiisoft/rbac/downloads.png)](https://packagist.org/packages/yiisoft/rbac)
@@ -88,3 +88,40 @@ if ($manager->userHasPermission(100, 'createPost')) {
 }
 ```
 
+### Usage rules
+
+```php
+
+$manager->add(new ActionRule());
+$manager->add(
+    (new Permission('viewList'))->withRuleName('action_rule')
+);
+
+```
+The role will also support the rules.
+
+#### Rule example 
+
+```php
+class ActionRule extends Rule
+{
+    public function __construct()
+    {
+        parent::__construct('action_rule');
+    }
+
+    public function execute(string $userId, Item $item, array $parameters = []): bool
+    {
+        return isset($parameters['action']) && $parameters['action'] === 'home';
+    }
+}
+```
+
+#### check permissions with rule
+
+
+```php
+if (!$manager->userHasPermission(103, 'viewList', ['action' => 'home'])) {
+    echo 'reader not has permission index';
+}
+```
