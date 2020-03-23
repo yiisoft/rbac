@@ -739,7 +739,7 @@ class PhpManager extends BaseManager
             throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
         }
 
-        file_put_contents($file, "<?php\nreturn " . VarDumper::export($data) . ";\n", LOCK_EX);
+        file_put_contents($file, "<?php\nreturn " . VarDumper::create($data)->export() . ";\n", LOCK_EX);
         $this->invalidateScriptCache($file);
     }
 
