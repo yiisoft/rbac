@@ -180,11 +180,11 @@ class PhpManager extends BaseManager
 
         foreach ($this->children as $parentName => $children) {
             if (isset($children[$itemName]) && $this->userHasPermissionRecursive(
-                    $user,
-                    $parentName,
-                    $params,
-                    $assignments
-                )) {
+                $user,
+                $parentName,
+                $params,
+                $assignments
+            )) {
                 return true;
             }
         }
@@ -735,8 +735,8 @@ class PhpManager extends BaseManager
     protected function saveToFile(array $data, string $file): void
     {
         if (!file_exists(dirname($file)) && !mkdir($concurrentDirectory = dirname($file)) && !is_dir(
-                $concurrentDirectory
-            )) {
+            $concurrentDirectory
+        )) {
             throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
         }
 
