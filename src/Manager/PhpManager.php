@@ -7,6 +7,7 @@ use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
 use Yiisoft\Rbac\Exceptions\InvalidCallException;
 use Yiisoft\Rbac\Exceptions\InvalidConfigException;
 use Yiisoft\Rbac\Item;
+use Yiisoft\Rbac\ItemInterface;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\Rule;
@@ -179,11 +180,11 @@ class PhpManager extends BaseManager
 
         foreach ($this->children as $parentName => $children) {
             if (isset($children[$itemName]) && $this->userHasPermissionRecursive(
-                $user,
-                $parentName,
-                $params,
-                $assignments
-            )) {
+                    $user,
+                    $parentName,
+                    $params,
+                    $assignments
+                )) {
                 return true;
             }
         }
@@ -734,8 +735,8 @@ class PhpManager extends BaseManager
     protected function saveToFile(array $data, string $file): void
     {
         if (!file_exists(dirname($file)) && !mkdir($concurrentDirectory = dirname($file)) && !is_dir(
-            $concurrentDirectory
-        )) {
+                $concurrentDirectory
+            )) {
             throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
         }
 
@@ -804,16 +805,37 @@ class PhpManager extends BaseManager
     public function getUserIdsByRole(string $roleName): array
     {
         $result = [];
+        $roles = [$roleName];
+        $this->getParentRolesRecursive($roleName, $roles);
+
+        /**
+         * @var $assignments Assignment[]
+         */
         foreach ($this->assignments as $userID => $assignments) {
-            $userID = (string)$userID;
             foreach ($assignments as $userAssignment) {
-                if ($userAssignment->getItemName() === $roleName && $userAssignment->getUserId() === $userID) {
-                    $result[] = $userID;
+                if (in_array($userAssignment->getItemName(), $roles, true)) {
+                    $result[] = (string)$userID;
                 }
             }
         }
 
         return $result;
+    }
+
+    private function getParentRolesRecursive(string $roleName, &$result): void
+    {
+        /**
+         * @var $items Item[]
+         */
+        foreach ($this->children as $parentRole => $items) {
+            foreach ($items as $item) {
+                if ($item->isEqualName($roleName)) {
+                    $result[] = $parentRole;
+                    $this->getParentRolesRecursive($parentRole, $result);
+                    break;
+                }
+            }
+        }
     }
 
     protected function getTypeByItem(Item $item): string

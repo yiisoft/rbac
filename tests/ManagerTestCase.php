@@ -442,16 +442,34 @@ abstract class ManagerTestCase extends TestCase
     public function testGetAssignmentsByRole(): void
     {
         $this->prepareData();
-        $reader = $this->auth->getRole('reader');
-        $this->auth->assign($reader, 123);
-
         $this->auth = $this->createManager();
-        //$this->auth->load();
 
-        $this->assertEquals([], $this->auth->getUserIdsByRole('nonexisting'));
-        $this->assertEqualsCanonicalizing(['reader A', '123'], $this->auth->getUserIdsByRole('reader'), '');
-        $this->assertEquals(['author B'], $this->auth->getUserIdsByRole('author'));
+        $this->assertEqualsCanonicalizing(
+            [
+                'reader A',
+                'author B',
+                'admin C'
+            ],
+            $this->auth->getUserIdsByRole('reader'),
+            ''
+        );
+
+        $this->assertEquals(
+            [
+                'author B',
+                'admin C'
+            ],
+            $this->auth->getUserIdsByRole('author')
+        );
+
         $this->assertEquals(['admin C'], $this->auth->getUserIdsByRole('admin'));
+    }
+
+    public function testGetAssignmentsByRoleNonExistentRole(): void
+    {
+        $this->prepareData();
+        $this->auth = $this->createManager();
+        $this->assertEquals([], $this->auth->getUserIdsByRole('nonexisting'));
     }
 
     public function testCanAddChild(): void

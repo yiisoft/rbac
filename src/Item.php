@@ -123,4 +123,9 @@ abstract class Item implements ItemInterface
             'createdAt' => $this->getCreatedAt(),
         ];
     }
+
+    public function isEqualName(string $name): bool
+    {
+        return $this->name === $name;
+    }
 }
