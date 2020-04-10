@@ -828,7 +828,7 @@ class PhpManager extends BaseManager
          */
         foreach ($this->children as $parentRole => $items) {
             foreach ($items as $item) {
-                if ($item->isEqualName($roleName)) {
+                if ($item->getName() === $roleName) {
                     $result[] = $parentRole;
                     $this->getParentRolesRecursive($parentRole, $result);
                     break;
