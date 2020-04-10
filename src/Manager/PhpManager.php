@@ -7,7 +7,6 @@ use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
 use Yiisoft\Rbac\Exceptions\InvalidCallException;
 use Yiisoft\Rbac\Exceptions\InvalidConfigException;
 use Yiisoft\Rbac\Item;
-use Yiisoft\Rbac\ItemInterface;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\Rule;
