@@ -804,16 +804,37 @@ class PhpManager extends BaseManager
     public function getUserIdsByRole(string $roleName): array
     {
         $result = [];
+        $roles = [$roleName];
+        $this->getParentRolesRecursive($roleName, $roles);
+
+        /**
+         * @var $assignments Assignment[]
+         */
         foreach ($this->assignments as $userID => $assignments) {
-            $userID = (string)$userID;
             foreach ($assignments as $userAssignment) {
-                if ($userAssignment->getItemName() === $roleName && $userAssignment->getUserId() === $userID) {
-                    $result[] = $userID;
+                if (in_array($userAssignment->getItemName(), $roles, true)) {
+                    $result[] = (string)$userID;
                 }
             }
         }
 
         return $result;
+    }
+
+    private function getParentRolesRecursive(string $roleName, &$result): void
+    {
+        /**
+         * @var $items Item[]
+         */
+        foreach ($this->children as $parentRole => $items) {
+            foreach ($items as $item) {
+                if ($item->getName() === $roleName) {
+                    $result[] = $parentRole;
+                    $this->getParentRolesRecursive($parentRole, $result);
+                    break;
+                }
+            }
+        }
     }
 
     protected function getTypeByItem(Item $item): string
