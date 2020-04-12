@@ -10,16 +10,16 @@ class Assignment
     /**
      * @var string the user ID. This should be a string representing the unique identifier of a user.
      */
-    private $userId;
+    private string $userId;
     /**
      * @var string the role or permission name
      */
-    private $itemName;
+    private string $itemName;
 
     /**
      * @var int UNIX timestamp representing the assignment creation time.
      */
-    private $createdAt;
+    private int $createdAt;
 
     /**
      * @param string $userId the user ID. This should be a string representing the unique identifier of a user.
@@ -50,7 +50,7 @@ class Assignment
         return $new;
     }
 
-    public function getCreatedAt(): ?int
+    public function getCreatedAt(): int
     {
         return $this->createdAt;
     }

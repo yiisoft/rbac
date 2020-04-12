@@ -18,10 +18,9 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
+        "php": "^7.4",
         "yiisoft/access": "^3.0@dev",
-        "yiisoft/var-dumper": "^3.0@dev",
-        "yiisoft/friendly-exception": "^1.0",
-        "php": "^7.4"
+        "yiisoft/var-dumper": "^3.0@dev"
     },
     "require-dev": {
         "psr/log": "~1.1.0",
