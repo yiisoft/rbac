@@ -117,7 +117,7 @@ class ActionRule extends Rule
 }
 ```
 
-#### check permissions with rule
+#### Check permissions with rule
 
 
 ```php
