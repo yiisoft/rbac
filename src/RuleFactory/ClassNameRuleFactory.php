@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Yiisoft\Rbac\RuleFactory;
 
 use Yiisoft\Rbac\Rule;

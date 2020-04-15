@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Yiisoft\Rbac;
 
 /**
@@ -31,7 +33,7 @@ use Yiisoft\Rbac\RuleFactory\ClassNameRuleFactory;
  */
 final class PhpManagerTest extends ManagerTestCase
 {
-    public static ?string $filemtime;
+    public static ?int $filemtime;
 
     private string $testDataPath;
 
@@ -93,7 +95,7 @@ final class PhpManagerTest extends ManagerTestCase
 
         $role = new Role('Admin');
         $this->auth->add($role);
-        $this->auth->assign($role, 13);
+        $this->auth->assign($role, '13');
 
         $this->assertStringContainsString(
             'Admin',
