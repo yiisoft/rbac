@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Yiisoft\Rbac\Tests;
 
 use PHPUnit\Framework\TestCase;
@@ -321,18 +323,18 @@ abstract class ManagerTestCase extends TestCase
     {
         $this->prepareData();
         $reader = $this->auth->getRole('reader');
-        $this->auth->assign($reader, 0);
-        $this->auth->assign($reader, 123);
+        $this->auth->assign($reader, '0');
+        $this->auth->assign($reader, '123');
 
         $roles = $this->auth->getRolesByUser('reader A');
         $this->assertInstanceOf(Role::class, reset($roles));
         $this->assertEquals($roles['reader']->getName(), 'reader');
 
-        $roles = $this->auth->getRolesByUser(0);
+        $roles = $this->auth->getRolesByUser('0');
         $this->assertInstanceOf(Role::class, reset($roles));
         $this->assertEquals($roles['reader']->getName(), 'reader');
 
-        $roles = $this->auth->getRolesByUser(123);
+        $roles = $this->auth->getRolesByUser('123');
         $this->assertInstanceOf(Role::class, reset($roles));
         $this->assertEquals($roles['reader']->getName(), 'reader');
 
@@ -395,24 +397,6 @@ abstract class ManagerTestCase extends TestCase
         );
     }
 
-    public function testAssignmentsToIntegerId(): void
-    {
-        $this->prepareData();
-
-        $reader = $this->auth->getRole('reader');
-        $author = $this->auth->getRole('author');
-        $this->auth->assign($reader, 42);
-        $this->auth->assign($author, 1337);
-        $this->auth->assign($reader, 1337);
-
-        $this->auth = $this->createManager();
-        $this->auth->load();
-
-        $this->assertCount(0, $this->auth->getAssignments(0));
-        $this->assertCount(1, $this->auth->getAssignments(42));
-        $this->assertCount(2, $this->auth->getAssignments(1337));
-    }
-
     public function testHasAssignments(): void
     {
         $this->auth->removeAll();
@@ -424,7 +408,7 @@ abstract class ManagerTestCase extends TestCase
 
         $admin = new Role('admin');
         $this->auth->add($admin);
-        $this->auth->assign($admin, 1);
+        $this->auth->assign($admin, '1');
 
         $this->assertTrue(
             $this->auth->hasAssignments('admin'),
@@ -530,7 +514,7 @@ abstract class ManagerTestCase extends TestCase
 
     public function testAssignRuleToRoleByName(): void
     {
-        $userId = 3;
+        $userId = '3';
         $auth = $this->auth;
         $auth->removeAll();
 
@@ -553,7 +537,7 @@ abstract class ManagerTestCase extends TestCase
 
     public function testAssignRuleToPermissionByName(): void
     {
-        $userId = 3;
+        $userId = '3';
         $auth = $this->auth;
         $auth->removeAll();
         $rule = new ActionRule();
@@ -570,7 +554,7 @@ abstract class ManagerTestCase extends TestCase
 
     public function testUpdateRoleNameAndRule(): void
     {
-        $userId = 3;
+        $userId = '3';
         $auth = $this->auth;
         $auth->removeAll();
 
@@ -609,7 +593,7 @@ abstract class ManagerTestCase extends TestCase
 
     public function testUpdatePermissionNameAndRule(): void
     {
-        $userId = 3;
+        $userId = '3';
         $auth = $this->auth;
         $auth->removeAll();
 
@@ -632,7 +616,7 @@ abstract class ManagerTestCase extends TestCase
 
     public function testRevokeRole(): void
     {
-        $userId = 3;
+        $userId = '3';
         $auth = $this->auth;
         $auth->removeAll();
 
@@ -646,7 +630,7 @@ abstract class ManagerTestCase extends TestCase
 
     public function testRevokePermission(): void
     {
-        $userId = 3;
+        $userId = '3';
         $auth = $this->auth;
         $auth->removeAll();
 
@@ -660,7 +644,7 @@ abstract class ManagerTestCase extends TestCase
 
     public function testRevokePermissionWithRule(): void
     {
-        $userId = 3;
+        $userId = '3';
         $auth = $this->auth;
         $auth->removeAll();
 
@@ -680,7 +664,7 @@ abstract class ManagerTestCase extends TestCase
 
     public function testRevokeRoleWithRule(): void
     {
-        $userId = 3;
+        $userId = '3';
         $auth = $this->auth;
         $auth->removeAll();
 
