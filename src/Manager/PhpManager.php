@@ -8,12 +8,15 @@ use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
 use Yiisoft\Rbac\Exceptions\InvalidCallException;
 use Yiisoft\Rbac\Exceptions\InvalidConfigException;
+use Yiisoft\Rbac\Exceptions\InvalidValueException;
 use Yiisoft\Rbac\Item;
+use Yiisoft\Rbac\ItemInterface;
+use Yiisoft\Rbac\ManagerInterface;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\Rule;
 use Yiisoft\Rbac\RuleFactoryInterface;
-use Yiisoft\VarDumper\VarDumper;
+use Yiisoft\Rbac\Storage;
 
 /**
  * PhpManager represents an authorization manager that stores authorization
@@ -28,82 +31,23 @@ use Yiisoft\VarDumper\VarDumper;
  *
  * For more details and usage information on PhpManager, see the [guide article on security authorization](guide:security-authorization).
  */
-class PhpManager extends BaseManager
+class PhpManager implements ManagerInterface
 {
-    /**
-     * @var string the path of the PHP script that contains the authorization items.
-     * This can be either a file path or a [path alias](guide:concept-aliases) to the file.
-     * Make sure this file is writable by the Web server process if the authorization needs to be changed
-     * online.
-     *
-     * @see loadFromFile()
-     * @see saveToFile()
-     */
-    protected string $itemFile;
-    /**
-     * @var string the path of the PHP script that contains the authorization assignments.
-     * This can be either a file path or a [path alias](guide:concept-aliases) to the file.
-     * Make sure this file is writable by the Web server process if the authorization needs to be changed
-     * online.
-     *
-     * @see loadFromFile()
-     * @see saveToFile()
-     */
-    protected string $assignmentFile;
-    /**
-     * @var string the path of the PHP script that contains the authorization rules.
-     * This can be either a file path or a [path alias](guide:concept-aliases) to the file.
-     * Make sure this file is writable by the Web server process if the authorization needs to be changed
-     * online.
-     *
-     * @see loadFromFile()
-     * @see saveToFile()
-     */
-    protected string $ruleFile;
+    private Storage $storage;
+    private RuleFactoryInterface $ruleFactory;
 
     /**
-     * @var Item[]
-     * format [itemName => item]
+     * @var array a list of role names that are assigned to every user automatically without calling [[assign()]].
+     * Note that these roles are applied to users, regardless of their state of authentication.
      */
-    protected array $items = [];
+    protected array $defaultRoles = [];
 
-    /**
-     * @var array
-     * format [itemName => [childName => child]]
-     */
-    protected array $children = [];
-
-    /**
-     * @var array
-     * format [userId => [itemName => assignment]]
-     */
-    protected array $assignments = [];
-
-    /**
-     * @var Rule[]
-     * format [ruleName => rule]
-     */
-    protected array $rules = [];
-
-    /**
-     * @param RuleFactoryInterface $ruleFactory
-     * @param string $directory directory to store data into
-     * @param string $itemFile path to the file storing auth items
-     * @param string $assignmentFile path to file storing assignments
-     * @param string $ruleFile path to file storing rules
-     */
     public function __construct(
-        RuleFactoryInterface $ruleFactory,
-        string $directory,
-        string $itemFile = 'items.php',
-        string $assignmentFile = 'assignments.php',
-        string $ruleFile = 'rules.php'
+        Storage $storage,
+        RuleFactoryInterface $ruleFactory
     ) {
-        parent::__construct($ruleFactory);
-        $this->itemFile = $directory . DIRECTORY_SEPARATOR . $itemFile;
-        $this->assignmentFile = $directory . DIRECTORY_SEPARATOR . $assignmentFile;
-        $this->ruleFile = $directory . DIRECTORY_SEPARATOR . $ruleFile;
-        $this->load();
+        $this->storage = $storage;
+        $this->ruleFactory = $ruleFactory;
     }
 
     /**
@@ -112,19 +56,12 @@ class PhpManager extends BaseManager
      */
     public function getAssignments(string $userId): array
     {
-        return $this->assignments[$userId] ?? [];
+        return $this->storage->getAssignmentsByUser($userId);
     }
 
     public function hasAssignments(string $itemName): bool
     {
-        foreach ($this->assignments as $assignment) {
-            foreach ($assignment as $name => $object) {
-                if ($name === $itemName) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return $this->storage->assignmentExist($itemName);
     }
 
     public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
@@ -135,62 +72,11 @@ class PhpManager extends BaseManager
             return false;
         }
 
-        /* @var $item Item */
-        $item = $this->items[$permissionName] ?? null;
-        if (!$this->isPermission($item)) {
+        if ($this->getPermission($permissionName) === null) {
             return false;
         }
 
         return $this->userHasPermissionRecursive($userId, $permissionName, $parameters, $assignments);
-    }
-
-    /**
-     * Performs access check for the specified user.
-     * This method is internally called by [[checkAccess()]].
-     *
-     * @param string $user the user ID. This should br a string representing the unique identifier of a user.
-     * @param string $itemName the name of the permission or role that need access check
-     * @param array $params name-value pairs that would be passed to rules associated
-     * with the permissions and roles assigned to the user. A param with name 'user' is
-     * added to this array, which holds the value of `$userId`.
-     * @param Assignment[] $assignments the assignments to the specified user
-     *
-     * @return bool whether the operations can be performed by the user.
-     * @throws InvalidConfigException
-     */
-    protected function userHasPermissionRecursive(
-        string $user,
-        string $itemName,
-        array $params,
-        array $assignments
-    ): bool {
-        if (!$this->hasItem($itemName)) {
-            return false;
-        }
-
-        /* @var $item Item */
-        $item = $this->items[$itemName];
-
-        if (!$this->executeRule($user, $item, $params)) {
-            return false;
-        }
-
-        if (isset($assignments[$itemName])) {
-            return true;
-        }
-
-        foreach ($this->children as $parentName => $children) {
-            if (isset($children[$itemName]) && $this->userHasPermissionRecursive(
-                $user,
-                $parentName,
-                $params,
-                $assignments
-            )) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     public function canAddChild(Item $parent, Item $child): bool
@@ -225,61 +111,32 @@ class PhpManager extends BaseManager
             );
         }
 
-        if (isset($this->children[$parent->getName()][$child->getName()])) {
+        if (isset($this->storage->getChildren()[$parent->getName()][$child->getName()])) {
             throw new InvalidCallException(
                 "The item \"{$parent->getName()}\" already has a child \"{$child->getName()}\"."
             );
         }
 
-        $this->children[$parent->getName()][$child->getName()] = $this->items[$child->getName()];
-        $this->saveItems();
-    }
-
-    /**
-     * Checks whether there is a loop in the authorization item hierarchy.
-     *
-     * @param Item $parent parent item
-     * @param Item $child the child item that is to be added to the hierarchy
-     *
-     * @return bool whether a loop exists
-     */
-    protected function detectLoop(Item $parent, Item $child): bool
-    {
-        if ($child->getName() === $parent->getName()) {
-            return true;
-        }
-        if (!isset($this->children[$child->getName()], $this->items[$parent->getName()])) {
-            return false;
-        }
-        foreach ($this->children[$child->getName()] as $grandchild) {
-            /* @var $grandchild Item */
-            if ($this->detectLoop($parent, $grandchild)) {
-                return true;
-            }
-        }
-
-        return false;
+        $this->storage->addChildren($parent, $child);
     }
 
     public function removeChild(Item $parent, Item $child): void
     {
-        if (isset($this->children[$parent->getName()][$child->getName()])) {
-            unset($this->children[$parent->getName()][$child->getName()]);
-            $this->saveItems();
+        if (isset($this->storage->getChildren()[$parent->getName()][$child->getName()])) {
+            $this->storage->removeChild($parent, $child);
         }
     }
 
     public function removeChildren(Item $parent): void
     {
-        if (isset($this->children[$parent->getName()])) {
-            unset($this->children[$parent->getName()]);
-            $this->saveItems();
+        if (isset($this->storage->getChildren()[$parent->getName()])) {
+            $this->storage->removeChildren($parent);
         }
     }
 
     public function hasChild(Item $parent, Item $child): bool
     {
-        return isset($this->children[$parent->getName()][$child->getName()]);
+        return isset($this->storage->getChildren()[$parent->getName()][$child->getName()]);
     }
 
     public function assign(Item $item, string $userId): Assignment
@@ -290,101 +147,50 @@ class PhpManager extends BaseManager
             throw new InvalidArgumentException("Unknown {$itemName} '{$item->getName()}'.");
         }
 
-        if (isset($this->assignments[$userId][$item->getName()])) {
+        if (isset($this->storage->getAssignmentsByUser($userId)[$item->getName()])) {
             throw new InvalidArgumentException(
                 "'{$item->getName()}' {$itemName} has already been assigned to user '$userId'."
             );
         }
 
-        $this->assignments[$userId][$item->getName()] = new Assignment($userId, $item->getName(), time());
-        $this->saveAssignments();
+        $this->storage->addAssignments($userId, $item);
 
-        return $this->assignments[$userId][$item->getName()];
+        return $this->storage->getAssignmentsByUser($userId)[$item->getName()];
     }
 
     public function revoke(Item $role, string $userId): void
     {
-        if (isset($this->assignments[$userId][$role->getName()])) {
-            unset($this->assignments[$userId][$role->getName()]);
-            $this->saveAssignments();
+        if (isset($this->storage->getAssignmentsByUser($userId)[$role->getName()])) {
+            $this->storage->removeAssignments($userId, $role);
         }
     }
 
     public function revokeAll(string $userId): void
     {
-        if (isset($this->assignments[$userId]) && is_array($this->assignments[$userId])) {
-            foreach ($this->assignments[$userId] as $itemName => $value) {
-                unset($this->assignments[$userId][$itemName]);
-            }
-            $this->saveAssignments();
-        }
+        $this->storage->removeAllAssignments($userId);
     }
 
     public function getAssignment(string $roleName, string $userId): ?Assignment
     {
-        return $this->assignments[$userId][$roleName] ?? null;
-    }
-
-    protected function getItems(string $type): array
-    {
-        $items = [];
-
-        foreach ($this->items as $name => $item) {
-            /* @var $item Item */
-            if ($item->getType() === $type) {
-                $items[$name] = $item;
-            }
-        }
-
-        return $items;
-    }
-
-    protected function removeItem(Item $item): void
-    {
-        if ($this->hasItem($item->getName())) {
-            foreach ($this->children as &$children) {
-                unset($children[$item->getName()]);
-            }
-            unset($children);
-            foreach ($this->assignments as &$assignments) {
-                unset($assignments[$item->getName()]);
-            }
-            unset($assignments, $this->items[$item->getName()]);
-            $this->saveItems();
-            $this->saveAssignments();
-        }
-    }
-
-    protected function getItem(string $name): ?Item
-    {
-        return $this->items[$name] ?? null;
-    }
-
-    protected function updateRule(string $name, Rule $rule): void
-    {
-        if ($rule->getName() !== $name) {
-            unset($this->rules[$name]);
-        }
-        $this->rules[$rule->getName()] = $rule;
-        $this->saveRules();
+        return $this->storage->getAssignmentsByUser($userId)[$roleName] ?? null;
     }
 
     public function getRule(string $name): ?Rule
     {
-        return $this->rules[$name] ?? null;
+        return $this->storage->getRulesByName($name);
     }
 
     public function getRules(): array
     {
-        return $this->rules;
+        return $this->storage->getRules();
     }
 
     public function getRolesByUser(string $userId): array
     {
         $roles = $this->getDefaultRoleInstances();
         foreach ($this->getAssignments($userId) as $name => $assignment) {
-            $role = $this->items[$assignment->getItemName()];
-            if ($role->getType() === Item::TYPE_ROLE) {
+            $role = $this->storage->getRoleByName($assignment->getItemName());
+            if ($role !== null) {
                 $roles[$name] = $role;
             }
         }
@@ -395,7 +201,6 @@ class PhpManager extends BaseManager
     public function getChildRoles(string $roleName): array
     {
         $role = $this->getRole($roleName);
-
         if ($role === null) {
             throw new InvalidArgumentException("Role \"$roleName\" not found.");
         }
@@ -427,29 +232,341 @@ class PhpManager extends BaseManager
         return $this->normalizePermissions($result);
     }
 
-    /**
-     * Recursively finds all children and grand children of the specified item.
-     *
-     * @param string $name the name of the item whose children are to be looked for.
-     * @param array $result the children and grand children (in array keys)
-     */
-    protected function getChildrenRecursive(string $name, &$result): void
+    public function getPermissionsByUser(string $userId): array
     {
-        if (isset($this->children[$name])) {
-            foreach ($this->children[$name] as $child) {
-                $result[$child->getName()] = true;
-                $this->getChildrenRecursive($child->getName(), $result);
+        return array_merge(
+            $this->getDirectPermissionsByUser($userId),
+            $this->getInheritedPermissionsByUser($userId)
+        );
+    }
+
+    public function getChildren(string $name): array
+    {
+        return $this->storage->getChildren()[$name] ?? [];
+    }
+
+    public function removeAll(): void
+    {
+        $this->storage->clear();
+    }
+
+    public function removeAllPermissions(): void
+    {
+        $this->storage->removeAllItems(Item::TYPE_PERMISSION);
+    }
+
+    public function removeAllRoles(): void
+    {
+        $this->storage->removeAllItems(Item::TYPE_ROLE);
+    }
+
+    public function removeAllRules(): void
+    {
+        $this->storage->clearRules();
+    }
+
+    public function removeAllAssignments(): void
+    {
+        $this->storage->clearAssignments();
+    }
+
+    public function getUserIdsByRole(string $roleName): array
+    {
+        $result = [];
+        $roles = [$roleName];
+        $this->getParentRolesRecursive($roleName, $roles);
+
+        /**
+         * @var $assignments Assignment[]
+         */
+        foreach ($this->storage->getAssignments() as $userID => $assignments) {
+            foreach ($assignments as $userAssignment) {
+                if (in_array($userAssignment->getItemName(), $roles, true)) {
+                    $result[] = (string)$userID;
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param ItemInterface|Item|Rule $item
+     */
+    public function add(ItemInterface $item): void
+    {
+        if ($this->isItem($item)) {
+            $this->createItemRuleIfNotExist($item);
+            $this->addItem($item);
+            return;
+        }
+
+        if ($this->isRule($item)) {
+            $this->storage->addRule($item);
+            return;
+        }
+
+        throw new InvalidArgumentException('Adding unsupported item type.');
+    }
+
+    /**
+     * @param ItemInterface|Item|Rule $item
+     */
+    public function remove(ItemInterface $item): void
+    {
+        if ($this->isItem($item)) {
+            $this->removeItem($item);
+            return;
+        }
+
+        if ($this->isRule($item)) {
+            $this->removeRule($item);
+            return;
+        }
+
+        throw new InvalidArgumentException('Removing unsupported item type.');
+    }
+
+    /**
+     * @param string $name
+     * @param ItemInterface|Item|Rule $object
+     */
+    public function update(string $name, ItemInterface $object): void
+    {
+        if ($this->isItem($object)) {
+            $this->createItemRuleIfNotExist($object);
+            $this->storage->updateItem($name, $object);
+            return;
+        }
+
+        if ($this->isRule($object)) {
+            $this->updateRule($name, $object);
+            return;
+        }
+
+        throw new InvalidArgumentException('Updating unsupported item type.');
+    }
+
+    public function getRoles(): array
+    {
+        return $this->storage->getRoles();
+    }
+
+    public function getRole(string $name): ?Role
+    {
+        return $this->storage->getRoleByName($name);
+    }
+
+    public function getPermission(string $name): ?Permission
+    {
+        return $this->storage->getPermissionByName($name);
+    }
+
+    /**
+     * Set default roles.
+     *
+     * @param string[]|callable $roles either array of roles or a callable returning it
+     *
+     * @return $this
+     * @throws InvalidArgumentException when $roles is neither array nor Closure
+     * @throws InvalidValueException when Closure return is not an array
+     */
+    public function setDefaultRoles($roles): self
+    {
+        if (is_array($roles)) {
+            $this->defaultRoles = $roles;
+            return $this;
+        }
+
+        if ($roles instanceof \Closure) {
+            $roles = $roles();
+            if (!is_array($roles)) {
+                throw new InvalidValueException('Default roles closure must return an array');
+            }
+            $this->defaultRoles = $roles;
+            return $this;
+        }
+
+        throw new InvalidArgumentException('Default roles must be either an array or a callable');
+    }
+
+    /**
+     * Get default roles.
+     *
+     * @return string[] default roles
+     */
+    public function getDefaultRoles(): array
+    {
+        return $this->defaultRoles;
+    }
+
+    /**
+     * Returns defaultRoles as array of Role objects.
+     *
+     * @return Role[] default roles. The array is indexed by the role names
+     *
+     */
+    public function getDefaultRoleInstances(): array
+    {
+        $result = [];
+        foreach ($this->defaultRoles as $roleName) {
+            $result[$roleName] = new Role($roleName);
+        }
+
+        return $result;
+    }
+
+    /**
+     * @return array
+     */
+    public function getPermissions(): array
+    {
+        return $this->storage->getPermissions();
+    }
+
+    /**
+     * Executes the rule associated with the specified auth item.
+     *
+     * If the item does not specify a rule, this method will return true. Otherwise, it will
+     * return the value of [[Rule::execute()]].
+     *
+     * @param string $user the user ID. This should be a string representing
+     * the unique identifier of a user.
+     * @param Item $item the auth item that needs to execute its rule
+     * @param array $params parameters passed to {@see AccessCheckerInterface::userHasPermission()} and will be passed to the rule
+     *
+     * @return bool the return value of {@see Rule::execute()}. If the auth item does not specify a rule, true will be
+     * returned.
+     * @throws InvalidConfigException if the auth item has an invalid rule.
+     *
+     */
+    protected function executeRule(string $user, Item $item, array $params): bool
+    {
+        if ($item->getRuleName() === null) {
+            return true;
+        }
+        $rule = $this->getRule($item->getRuleName());
+        if ($rule === null) {
+            throw new InvalidConfigException("Rule not found: {$item->getRuleName()}");
+        }
+
+        return $rule->execute($user, $item, $params);
+    }
+
+    /**
+     * Checks whether array of $assignments is empty and [[defaultRoles]] property is empty as well.
+     *
+     * @param Assignment[] $assignments array of user's assignments
+     *
+     * @return bool whether array of $assignments is empty and [[defaultRoles]] property is empty as well
+     */
+    protected function hasNoAssignments(array $assignments): bool
+    {
+        return empty($assignments) && empty($this->defaultRoles);
+    }
+
+    protected function isPermission(?ItemInterface $item): bool
+    {
+        return $item !== null && $item instanceof Permission;
+    }
+
+    protected function isRole(?ItemInterface $item): bool
+    {
+        return $item !== null && $item instanceof Role;
+    }
+
+    protected function isItem(?ItemInterface $item): bool
+    {
+        return $item !== null && $item instanceof Item;
+    }
+
+    protected function isRule(?ItemInterface $item): bool
+    {
+        return $item !== null && $item instanceof Rule;
+    }
+
+    protected function createItemRuleIfNotExist(Item $item): void
+    {
+        if ($item->getRuleName() && $this->getRule($item->getRuleName()) === null) {
+            $rule = $this->createRule($item->getRuleName());
+            $this->storage->addRule($rule);
+        }
+    }
+
+    protected function removeRule(Rule $rule): void
+    {
+        if (isset($this->storage->getRules()[$rule->getName()])) {
+            $this->storage->removeRule($rule->getName());
+            foreach ($this->storage->getItems() as $item) {
+                if ($item->getRuleName() === $rule->getName()) {
+                    $item = $item->withRuleName(null);
+                    $this->storage->updateItem($item->getName(), $item);
+                }
             }
         }
     }
 
-    public function getPermissionsByUser(string $userId): array
+    protected function addItem(Item $item): void
     {
-        $directPermission = $this->getDirectPermissionsByUser($userId);
-        $inheritedPermission = $this->getInheritedPermissionsByUser($userId);
+        $time = time();
+        if (!$item->hasCreatedAt()) {
+            $item = $item->withCreatedAt($time);
+        }
+        if (!$item->hasUpdatedAt()) {
+            $item = $item->withUpdatedAt($time);
+        }
 
-        return array_merge($directPermission, $inheritedPermission);
+        $this->storage->addItem($item);
     }
+
+
+    protected function createRule(string $name): Rule
+    {
+        return $this->ruleFactory->create($name);
+    }
+
+    private function getParentRolesRecursive(string $roleName, &$result): void
+    {
+        /**
+         * @var $items Item[]
+         */
+        foreach ($this->storage->getChildren() as $parentRole => $items) {
+            foreach ($items as $item) {
+                if ($item->getName() === $roleName) {
+                    $result[] = $parentRole;
+                    $this->getParentRolesRecursive($parentRole, $result);
+                    break;
+                }
+            }
+        }
+    }
+
+    protected function getTypeByItem(Item $item): string
+    {
+        if ($this->isRole($item) || $this->isPermission($item)) {
+            return $item->getType();
+        }
+
+        return 'authorization item';
+    }
+
+    protected function hasItem(string $name): bool
+    {
+        return isset($this->storage->getItems()[$name]);
+    }
+
+    protected function normalizePermissions(array $permissions): array
+    {
+        $normalizePermissions = [];
+        foreach (array_keys($permissions) as $itemName) {
+            if ($this->hasItem($itemName) && $this->isPermission($this->storage->getItems()[$itemName])) {
+                $normalizePermissions[$itemName] = $this->storage->getItems()[$itemName];
+            }
+        }
+
+        return $normalizePermissions;
+    }
+
 
     /**
      * Returns all permissions that are directly assigned to user.
@@ -462,7 +579,7 @@ class PhpManager extends BaseManager
     {
         $permissions = [];
         foreach ($this->getAssignments($userId) as $name => $assignment) {
-            $permission = $this->items[$assignment->getItemName()];
+            $permission = $this->storage->getItems()[$assignment->getItemName()];
             if ($permission->getType() === Item::TYPE_PERMISSION) {
                 $permissions[$name] = $permission;
             }
@@ -493,375 +610,108 @@ class PhpManager extends BaseManager
         return $this->normalizePermissions($result);
     }
 
-    public function getChildren(string $name): array
+    protected function removeItem(Item $item): void
     {
-        return $this->children[$name] ?? [];
+        if ($this->hasItem($item->getName())) {
+            $this->storage->removeItem($item);
+        }
     }
 
-    public function removeAll(): void
+    protected function updateRule(string $name, Rule $rule): void
     {
-        $this->children = [];
-        $this->items = [];
-        $this->assignments = [];
-        $this->rules = [];
-        $this->save();
-    }
-
-    public function removeAllPermissions(): void
-    {
-        $this->removeAllItems(Item::TYPE_PERMISSION);
-    }
-
-    public function removeAllRoles(): void
-    {
-        $this->removeAllItems(Item::TYPE_ROLE);
+        if ($rule->getName() !== $name) {
+            $this->storage->removeRule($name);
+        }
+        $this->storage->addRule($rule);
     }
 
     /**
-     * Removes all auth items of the specified type.
+     * Performs access check for the specified user.
+     * This method is internally called by [[checkAccess()]].
      *
-     * @param string $type the auth item type (either Item::TYPE_PERMISSION or Item::TYPE_ROLE)
-     */
-    protected function removeAllItems(string $type): void
-    {
-        $names = [];
-        foreach ($this->items as $name => $item) {
-            if ($item->getType() === $type) {
-                unset($this->items[$name]);
-                $names[$name] = true;
-            }
-        }
-        if (empty($names)) {
-            return;
-        }
-
-        foreach ($this->assignments as $i => $assignments) {
-            foreach ($assignments as $n => $assignment) {
-                if (isset($names[$assignment->getItemName()])) {
-                    unset($this->assignments[$i][$n]);
-                }
-            }
-        }
-        foreach ($this->children as $name => $children) {
-            if (isset($names[$name])) {
-                unset($this->children[$name]);
-            } else {
-                foreach ($children as $childName => $item) {
-                    if (isset($names[$childName])) {
-                        unset($children[$childName]);
-                    }
-                }
-                $this->children[$name] = $children;
-            }
-        }
-
-        $this->saveItems();
-    }
-
-    public function removeAllRules(): void
-    {
-        foreach ($this->items as &$item) {
-            $item = $item->withRuleName(null);
-        }
-        unset($item);
-        $this->rules = [];
-        $this->saveRules();
-    }
-
-    public function removeAllAssignments(): void
-    {
-        $this->assignments = [];
-        $this->saveAssignments();
-    }
-
-    protected function removeRule(Rule $rule): void
-    {
-        if (isset($this->rules[$rule->getName()])) {
-            unset($this->rules[$rule->getName()]);
-            foreach ($this->items as &$item) {
-                if ($item->getRuleName() === $rule->getName()) {
-                    $item = $item->withRuleName(null);
-                }
-            }
-            unset($item);
-            $this->saveRules();
-        }
-    }
-
-    protected function addRule(Rule $rule): void
-    {
-        $this->rules[$rule->getName()] = $rule;
-        $this->saveRules();
-    }
-
-    protected function updateItem(string $name, Item $item): void
-    {
-        if ($name !== $item->getName()) {
-            if ($this->hasItem($item->getName())) {
-                throw new InvalidArgumentException(
-                    "Unable to change the item name. The name '{$item->getName()}' is already used by another item."
-                );
-            }
-
-            // Remove old item in case of renaming
-            unset($this->items[$name]);
-
-            if (isset($this->children[$name])) {
-                $this->children[$item->getName()] = $this->children[$name];
-                unset($this->children[$name]);
-            }
-            foreach ($this->children as &$children) {
-                if (isset($children[$name])) {
-                    $children[$item->getName()] = $children[$name];
-                    unset($children[$name]);
-                }
-            }
-            unset($children);
-
-            foreach ($this->assignments as &$assignments) {
-                if (isset($assignments[$name])) {
-                    $assignments[$item->getName()] = $assignments[$name]->withItemName($item->getName());
-                    unset($assignments[$name]);
-                }
-            }
-            unset($assignments);
-
-            $this->saveAssignments();
-        }
-
-        $this->items[$item->getName()] = $item;
-
-        $this->saveItems();
-    }
-
-    protected function addItem(Item $item): void
-    {
-        $time = time();
-        if (!$item->hasCreatedAt()) {
-            $item = $item->withCreatedAt($time);
-        }
-        if (!$item->hasUpdatedAt()) {
-            $item = $item->withUpdatedAt($time);
-        }
-
-        $this->items[$item->getName()] = $item;
-
-        $this->saveItems();
-    }
-
-    /**
-     * Loads authorization data from persistent storage.
-     */
-    protected function load(): void
-    {
-        $this->children = [];
-        $this->rules = [];
-        $this->assignments = [];
-        $this->items = [];
-
-        $items = $this->loadFromFile($this->itemFile);
-        $itemsMtime = @filemtime($this->itemFile);
-        $assignments = $this->loadFromFile($this->assignmentFile);
-        $assignmentsMtime = @filemtime($this->assignmentFile);
-        $rules = $this->loadFromFile($this->ruleFile);
-
-        foreach ($items as $name => $item) {
-            $class = $item['type'] === Item::TYPE_PERMISSION ? Permission::class : Role::class;
-
-            $this->items[$name] = (new $class($name))
-                ->withDescription($item['description'] ?? '')
-                ->withRuleName($item['ruleName'] ?? null)
-                // FIXME: 'data' => $item['data'] ?? null,
-                ->withCreatedAt($itemsMtime)
-                ->withUpdatedAt($itemsMtime);
-        }
-
-        foreach ($items as $name => $item) {
-            if (isset($item['children'])) {
-                foreach ($item['children'] as $childName) {
-                    if ($this->hasItem($childName)) {
-                        $this->children[$name][$childName] = $this->items[$childName];
-                    }
-                }
-            }
-        }
-
-        foreach ($assignments as $userId => $roles) {
-            foreach ($roles as $role) {
-                $this->assignments[$userId][$role] = new Assignment($userId, $role, $assignmentsMtime);
-            }
-        }
-
-        foreach ($rules as $name => $ruleData) {
-            $this->rules[$name] = unserialize($ruleData);
-        }
-    }
-
-    /**
-     * Saves authorization data into persistent storage.
-     */
-    protected function save(): void
-    {
-        $this->saveItems();
-        $this->saveAssignments();
-        $this->saveRules();
-    }
-
-    /**
-     * Loads the authorization data from a PHP script file.
+     * @param string $user the user ID. This should br a string representing the unique identifier of a user.
+     * @param string $itemName the name of the permission or role that need access check
+     * @param array $params name-value pairs that would be passed to rules associated
+     * with the permissions and roles assigned to the user. A param with name 'user' is
+     * added to this array, which holds the value of `$userId`.
+     * @param Assignment[] $assignments the assignments to the specified user
      *
-     * @param string $file the file path.
-     *
-     * @return array the authorization data
-     *
-     * @see saveToFile()
+     * @return bool whether the operations can be performed by the user.
+     * @throws InvalidConfigException
      */
-    protected function loadFromFile(string $file): array
-    {
-        if (is_file($file)) {
-            return require $file;
+    protected function userHasPermissionRecursive(
+        string $user,
+        string $itemName,
+        array $params,
+        array $assignments
+    ): bool {
+        if (!$this->hasItem($itemName)) {
+            return false;
         }
 
-        return [];
-    }
+        $item = $this->storage->getItems()[$itemName];
 
-    /**
-     * Saves the authorization data to a PHP script file.
-     *
-     * @param array $data the authorization data
-     * @param string $file the file path.
-     *
-     * @see loadFromFile()
-     */
-    protected function saveToFile(array $data, string $file): void
-    {
-        if (!file_exists(dirname($file)) && !mkdir($concurrentDirectory = dirname($file)) && !is_dir(
-            $concurrentDirectory
-        )) {
-            throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
+        if (!$this->executeRule($user, $item, $params)) {
+            return false;
         }
 
-        file_put_contents($file, "<?php\nreturn " . VarDumper::create($data)->export() . ";\n", LOCK_EX);
-        $this->invalidateScriptCache($file);
-    }
-
-    /**
-     * Invalidates precompiled script cache (such as OPCache) for the given file.
-     *
-     * @param string $file the file path.
-     */
-    protected function invalidateScriptCache(string $file): void
-    {
-        if (function_exists('opcache_invalidate')) {
-            opcache_invalidate($file, true);
+        if (isset($assignments[$itemName])) {
+            return true;
         }
-    }
 
-    /**
-     * Saves items data into persistent storage.
-     */
-    protected function saveItems(): void
-    {
-        $items = [];
-        foreach ($this->items as $name => $item) {
-            /* @var $item Item */
-            $items[$name] = array_filter($item->getAttributes());
-            if (isset($this->children[$name])) {
-                foreach ($this->children[$name] as $child) {
-                    /* @var $child Item */
-                    $items[$name]['children'][] = $child->getName();
-                }
-            }
-        }
-        $this->saveToFile($items, $this->itemFile);
-    }
-
-    /**
-     * Saves assignments data into persistent storage.
-     */
-    protected function saveAssignments(): void
-    {
-        $assignmentData = [];
-        foreach ($this->assignments as $userId => $assignments) {
-            foreach ($assignments as $assignment) {
-                /* @var $assignment Assignment */
-                $assignmentData[$userId][] = $assignment->getItemName();
-            }
-        }
-        $this->saveToFile($assignmentData, $this->assignmentFile);
-    }
-
-    /**
-     * Saves rules data into persistent storage.
-     */
-    protected function saveRules(): void
-    {
-        $rules = [];
-        foreach ($this->rules as $name => $rule) {
-            $rules[$name] = serialize($rule);
-        }
-        $this->saveToFile($rules, $this->ruleFile);
-    }
-
-    public function getUserIdsByRole(string $roleName): array
-    {
-        $result = [];
-        $roles = [$roleName];
-        $this->getParentRolesRecursive($roleName, $roles);
-
-        /**
-         * @var $assignments Assignment[]
-         */
-        foreach ($this->assignments as $userID => $assignments) {
-            foreach ($assignments as $userAssignment) {
-                if (in_array($userAssignment->getItemName(), $roles, true)) {
-                    $result[] = (string)$userID;
-                }
+        foreach ($this->storage->getChildren() as $parentName => $children) {
+            if (isset($children[$itemName]) && $this->userHasPermissionRecursive(
+                    $user,
+                    $parentName,
+                    $params,
+                    $assignments
+                )) {
+                return true;
             }
         }
 
-        return $result;
+        return false;
     }
 
-    private function getParentRolesRecursive(string $roleName, &$result): void
+    /**
+     * Checks whether there is a loop in the authorization item hierarchy.
+     *
+     * @param Item $parent parent item
+     * @param Item $child the child item that is to be added to the hierarchy
+     *
+     * @return bool whether a loop exists
+     */
+    protected function detectLoop(Item $parent, Item $child): bool
     {
-        /**
-         * @var $items Item[]
-         */
-        foreach ($this->children as $parentRole => $items) {
-            foreach ($items as $item) {
-                if ($item->getName() === $roleName) {
-                    $result[] = $parentRole;
-                    $this->getParentRolesRecursive($parentRole, $result);
-                    break;
-                }
-            }
+        if ($child->getName() === $parent->getName()) {
+            return true;
         }
-    }
-
-    protected function getTypeByItem(Item $item): string
-    {
-        if ($this->isRole($item) || $this->isPermission($item)) {
-            return $item->getType();
+        if (!isset($this->storage->getChildren()[$child->getName()], $this->storage->getItems()[$parent->getName()])) {
+            return false;
         }
-
-        return 'authorization item';
-    }
-
-    protected function hasItem(string $name): bool
-    {
-        return isset($this->items[$name]);
-    }
-
-    protected function normalizePermissions(array $permissions): array
-    {
-        $normalizePermissions = [];
-        foreach (array_keys($permissions) as $itemName) {
-            if ($this->hasItem($itemName) && $this->isPermission($this->items[$itemName])) {
-                $normalizePermissions[$itemName] = $this->items[$itemName];
+        foreach ($this->storage->getChildren()[$child->getName()] as $grandchild) {
+            /* @var $grandchild Item */
+            if ($this->detectLoop($parent, $grandchild)) {
+                return true;
             }
         }
 
-        return $normalizePermissions;
+        return false;
+    }
+
+    /**
+     * Recursively finds all children and grand children of the specified item.
+     *
+     * @param string $name the name of the item whose children are to be looked for.
+     * @param array $result the children and grand children (in array keys)
+     */
+    protected function getChildrenRecursive(string $name, &$result): void
+    {
+        if (isset($this->storage->getChildren()[$name])) {
+            foreach ($this->storage->getChildren()[$name] as $child) {
+                $result[$child->getName()] = true;
+                $this->getChildrenRecursive($child->getName(), $result);
+            }
+        }
     }
 }

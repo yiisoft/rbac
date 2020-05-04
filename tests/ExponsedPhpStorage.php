@@ -6,13 +6,13 @@ namespace Yiisoft\Rbac\Tests;
 
 use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\Item;
-use Yiisoft\Rbac\Manager\PhpManager;
+use Yiisoft\Rbac\PhpStorage;
 use Yiisoft\Rbac\Rule;
 
 /**
  * Exposes protected properties and methods to inspect from outside.
  */
-class ExposedPhpManager extends PhpManager
+class ExponsedPhpStorage extends PhpStorage
 {
     /**
      * @var Item[]
@@ -30,14 +30,4 @@ class ExposedPhpManager extends PhpManager
      * @var Rule[]
      */
     public array $rules = []; // ruleName => rule
-
-    public function load(): void
-    {
-        parent::load();
-    }
-
-    public function save(): void
-    {
-        parent::save();
-    }
 }
