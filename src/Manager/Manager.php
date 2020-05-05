@@ -4,36 +4,35 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac\Manager;
 
+use Yiisoft\Access\AccessCheckerInterface;
 use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
 use Yiisoft\Rbac\Exceptions\InvalidCallException;
 use Yiisoft\Rbac\Exceptions\InvalidConfigException;
 use Yiisoft\Rbac\Exceptions\InvalidValueException;
 use Yiisoft\Rbac\Item;
-use Yiisoft\Rbac\ItemInterface;
-use Yiisoft\Rbac\ManagerInterface;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\Rule;
 use Yiisoft\Rbac\RuleFactoryInterface;
-use Yiisoft\Rbac\Storage;
+use Yiisoft\Rbac\Repository;
 
 /**
- * PhpManager represents an authorization manager that stores authorization
+ * Manager represents an authorization manager that stores authorization
  * information in terms of a PHP script file.
  *
  * The authorization data will be saved to and loaded from three files
  * specified by [[itemFile]], [[assignmentFile]] and [[ruleFile]].
  *
- * PhpManager is mainly suitable for authorization data that is not too big
+ * Manager is mainly suitable for authorization data that is not too big
  * (for example, the authorization data for a personal blog system).
  * Use [[DbManager]] for more complex authorization data.
  *
- * For more details and usage information on PhpManager, see the [guide article on security authorization](guide:security-authorization).
+ * For more details and usage information on Manager, see the [guide article on security authorization](guide:security-authorization).
  */
-class PhpManager implements ManagerInterface
+class Manager implements AccessCheckerInterface
 {
-    private Storage $storage;
+    private Repository $repository;
     private RuleFactoryInterface $ruleFactory;
 
     /**
@@ -43,50 +42,56 @@ class PhpManager implements ManagerInterface
     protected array $defaultRoles = [];
 
     public function __construct(
-        Storage $storage,
+        Repository $storage,
         RuleFactoryInterface $ruleFactory
     ) {
-        $this->storage = $storage;
+        $this->repository = $storage;
         $this->ruleFactory = $ruleFactory;
     }
 
     /**
-     * @param string $userId
-     * @return Assignment[]
+     * @param mixed $userId
+     * @param string $permissionName
+     * @param array $parameters
+     * @return bool
+     * @throws InvalidConfigException
      */
-    public function getAssignments(string $userId): array
-    {
-        return $this->storage->getAssignmentsByUser($userId);
-    }
-
-    public function hasAssignments(string $itemName): bool
-    {
-        return $this->storage->assignmentExist($itemName);
-    }
-
     public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
     {
-        $assignments = $this->getAssignments($userId);
+        $assignments = $this->repository->getUserAssignments($userId);
 
-        if ($this->hasNoAssignments($assignments)) {
+        if (empty($assignments) && $this->defaultRolesIsEmpty()) {
             return false;
         }
 
-        if ($this->getPermission($permissionName) === null) {
+        if ($this->repository->getPermissionByName($permissionName) === null) {
             return false;
         }
 
         return $this->userHasPermissionRecursive($userId, $permissionName, $parameters, $assignments);
     }
 
+    /**
+     * Checks the possibility of adding a child to parent.
+     *
+     * @param Item $parent the parent item
+     * @param Item $child  the child item to be added to the hierarchy
+     *
+     * @return bool possibility of adding
+     */
     public function canAddChild(Item $parent, Item $child): bool
     {
-        if ($this->isPermission($parent) && $this->isRole($child)) {
-            return false;
-        }
-        return !$this->detectLoop($parent, $child);
+        return $parent->canBeParentOfItem($child) && !$this->detectLoop($parent, $child);
     }
 
+    /**
+     * Adds an item as a child of another item.
+     *
+     * @param Item $parent
+     * @param Item $child
+     *
+     * @throws InvalidCallException
+     */
     public function addChild(Item $parent, Item $child): void
     {
         if (!$this->hasItem($parent->getName()) || !$this->hasItem($child->getName())) {
@@ -95,11 +100,11 @@ class PhpManager implements ManagerInterface
             );
         }
 
-        if ($parent->getName() === $child->getName()) {
+        if ($parent->isEqualName($child->getName())) {
             throw new InvalidArgumentException("Cannot add \"{$parent->getName()}\" as a child of itself.");
         }
 
-        if ($this->isPermission($parent) && $this->isRole($child)) {
+        if (!$parent->canBeParentOfItem($child)) {
             throw new InvalidArgumentException(
                 "Can not add \"{$child->getName()}\" role as a child of \"{$parent->getName()}\" permission."
             );
@@ -111,85 +116,126 @@ class PhpManager implements ManagerInterface
             );
         }
 
-        if (isset($this->storage->getChildren()[$parent->getName()][$child->getName()])) {
+        if (isset($this->repository->getChildrenByName($parent->getName())[$child->getName()])) {
             throw new InvalidCallException(
                 "The item \"{$parent->getName()}\" already has a child \"{$child->getName()}\"."
             );
         }
 
-        $this->storage->addChildren($parent, $child);
+        $this->repository->addChildren($parent, $child);
     }
 
+    /**
+     * Removes a child from its parent.
+     * Note, the child item is not deleted. Only the parent-child relationship is removed.
+     *
+     * @param Item $parent
+     * @param Item $child
+     *
+     * @return void
+     */
     public function removeChild(Item $parent, Item $child): void
     {
-        if (isset($this->storage->getChildren()[$parent->getName()][$child->getName()])) {
-            $this->storage->removeChild($parent, $child);
+        if ($this->hasChild($parent, $child)) {
+            $this->repository->removeChild($parent, $child);
         }
     }
 
+    /**
+     * Removed all children form their parent.
+     * Note, the children items are not deleted. Only the parent-child relationships are removed.
+     *
+     * @param Item $parent
+     *
+     * @return void
+     */
     public function removeChildren(Item $parent): void
     {
-        if (isset($this->storage->getChildren()[$parent->getName()])) {
-            $this->storage->removeChildren($parent);
+        if ($this->repository->hasChildren($parent->getName())) {
+            $this->repository->removeChildren($parent);
         }
     }
 
+    /**
+     * Returns a value indicating whether the child already exists for the parent.
+     *
+     * @param Item $parent
+     * @param Item $child
+     *
+     * @return bool whether `$child` is already a child of `$parent`
+     */
     public function hasChild(Item $parent, Item $child): bool
     {
-        return isset($this->storage->getChildren()[$parent->getName()][$child->getName()]);
+        return isset($this->repository->getChildrenByName($parent->getName())[$child->getName()]);
     }
 
+    /**
+     * Assigns a role or permission to a user.
+     *
+     * @param Item $item
+     * @param string $userId the user ID
+     *
+     * @return Assignment the role or permission assignment information.
+     * @throws \Exception if the role has already been assigned to the user
+     *
+     */
     public function assign(Item $item, string $userId): Assignment
     {
-        $itemName = $this->getTypeByItem($item);
-
         if (!$this->hasItem($item->getName())) {
-            throw new InvalidArgumentException("Unknown {$itemName} '{$item->getName()}'.");
+            throw new InvalidArgumentException("Unknown {$item->getType()} '{$item->getName()}'.");
         }
 
-        if (isset($this->storage->getAssignmentsByUser($userId)[$item->getName()])) {
+        if ($this->repository->getUserAssignmentsByName($userId, $item->getName()) !== null) {
             throw new InvalidArgumentException(
-                "'{$item->getName()}' {$itemName} has already been assigned to user '$userId'."
+                "'{$item->getName()}' {$item->getType()} has already been assigned to user '$userId'."
             );
         }
 
-        $this->storage->addAssignments($userId, $item);
+        $this->repository->addAssignments($userId, $item);
 
-        return $this->storage->getAssignmentsByUser($userId)[$item->getName()];
+        return $this->repository->getUserAssignmentsByName($userId, $item->getName());
     }
 
+    /**
+     * Revokes a role or a permission from a user.
+     *
+     * @param Item $item
+     * @param string $userId the user ID
+     *
+     * @return void
+     */
     public function revoke(Item $role, string $userId): void
     {
-        if (isset($this->storage->getAssignmentsByUser($userId)[$role->getName()])) {
-            $this->storage->removeAssignments($userId, $role);
+        if ($this->repository->getUserAssignmentsByName($userId, $role->getName()) !== null) {
+            $this->repository->removeAssignments($userId, $role);
         }
     }
 
+    /**
+     * Revokes all roles and permissions from a user.
+     *
+     * @param string $userId the user ID
+     *
+     * @return void
+     */
     public function revokeAll(string $userId): void
     {
-        $this->storage->removeAllAssignments($userId);
+        $this->repository->removeAllAssignments($userId);
     }
 
-    public function getAssignment(string $roleName, string $userId): ?Assignment
-    {
-        return $this->storage->getAssignmentsByUser($userId)[$roleName] ?? null;
-    }
-
-    public function getRule(string $name): ?Rule
-    {
-        return $this->storage->getRulesByName($name);
-    }
-
-    public function getRules(): array
-    {
-        return $this->storage->getRules();
-    }
-
+    /**
+     * Returns the roles that are assigned to the user via [[assign()]].
+     * Note that child roles that are not assigned directly to the user will not be returned.
+     *
+     * @param string $userId the user ID
+     *
+     * @return Role[] all roles directly assigned to the user. The array is indexed by the role names.
+     */
     public function getRolesByUser(string $userId): array
     {
         $roles = $this->getDefaultRoleInstances();
-        foreach ($this->getAssignments($userId) as $name => $assignment) {
-            $role = $this->storage->getRoleByName($assignment->getItemName());
+        foreach ($this->repository->getUserAssignments($userId) as $name => $assignment) {
+            $role = $this->repository->getRoleByName($assignment->getItemName());
             if ($role !== null) {
                 $roles[$name] = $role;
             }
@@ -198,9 +244,19 @@ class PhpManager implements ManagerInterface
         return $roles;
     }
 
+    /**
+     * Returns child roles of the role specified. Depth isn't limited.
+     *
+     * @param string $roleName name of the role to file child roles for
+     *
+     * @return Role[] Child roles. The array is indexed by the role names.
+     * First element is an instance of the parent Role itself.
+     *
+     * @throws InvalidArgumentException if Role was not found that are getting by $roleName
+     */
     public function getChildRoles(string $roleName): array
     {
-        $role = $this->getRole($roleName);
+        $role = $this->repository->getRoleByName($roleName);
         if ($role === null) {
             throw new InvalidArgumentException("Role \"$roleName\" not found.");
         }
@@ -211,7 +267,7 @@ class PhpManager implements ManagerInterface
         $roles = [$roleName => $role];
 
         $roles += array_filter(
-            $this->getRoles(),
+            $this->repository->getRoles(),
             static function (Role $roleItem) use ($result) {
                 return array_key_exists($roleItem->getName(), $result);
             }
@@ -220,6 +276,13 @@ class PhpManager implements ManagerInterface
         return $roles;
     }
 
+    /**
+     * Returns all permissions that the specified role represents.
+     *
+     * @param string $roleName the role name
+     *
+     * @return Permission[] all permissions that the role represents. The array is indexed by the permission names.
+     */
     public function getPermissionsByRole(string $roleName): array
     {
         $result = [];
@@ -232,6 +295,13 @@ class PhpManager implements ManagerInterface
         return $this->normalizePermissions($result);
     }
 
+    /**
+     * Returns all permissions that the user has.
+     *
+     * @param string $userId the user ID
+     *
+     * @return Permission[] all permissions that the user has. The array is indexed by the permission names.
+     */
     public function getPermissionsByUser(string $userId): array
     {
         return array_merge(
@@ -240,36 +310,13 @@ class PhpManager implements ManagerInterface
         );
     }
 
-    public function getChildren(string $name): array
-    {
-        return $this->storage->getChildren()[$name] ?? [];
-    }
-
-    public function removeAll(): void
-    {
-        $this->storage->clear();
-    }
-
-    public function removeAllPermissions(): void
-    {
-        $this->storage->removeAllItems(Item::TYPE_PERMISSION);
-    }
-
-    public function removeAllRoles(): void
-    {
-        $this->storage->removeAllItems(Item::TYPE_ROLE);
-    }
-
-    public function removeAllRules(): void
-    {
-        $this->storage->clearRules();
-    }
-
-    public function removeAllAssignments(): void
-    {
-        $this->storage->clearAssignments();
-    }
-
+    /**
+     * Returns all user IDs assigned to the role specified.
+     *
+     * @param string $roleName
+     *
+     * @return array array of user ID strings
+     */
     public function getUserIdsByRole(string $roleName): array
     {
         $result = [];
@@ -279,7 +326,7 @@ class PhpManager implements ManagerInterface
         /**
          * @var $assignments Assignment[]
          */
-        foreach ($this->storage->getAssignments() as $userID => $assignments) {
+        foreach ($this->repository->getAssignments() as $userID => $assignments) {
             foreach ($assignments as $userAssignment) {
                 if (in_array($userAssignment->getItemName(), $roles, true)) {
                     $result[] = (string)$userID;
@@ -291,75 +338,87 @@ class PhpManager implements ManagerInterface
     }
 
     /**
-     * @param ItemInterface|Item|Rule $item
+     * @param Role $role
      */
-    public function add(ItemInterface $item): void
+    public function addRole(Role $role): void
     {
-        if ($this->isItem($item)) {
-            $this->createItemRuleIfNotExist($item);
-            $this->addItem($item);
-            return;
-        }
-
-        if ($this->isRule($item)) {
-            $this->storage->addRule($item);
-            return;
-        }
-
-        throw new InvalidArgumentException('Adding unsupported item type.');
+        $this->createItemRuleIfNotExist($role);
+        $this->addItem($role);
     }
 
     /**
-     * @param ItemInterface|Item|Rule $item
+     * @param Permission $permission
      */
-    public function remove(ItemInterface $item): void
+    public function addPermission(Permission $permission): void
     {
-        if ($this->isItem($item)) {
-            $this->removeItem($item);
-            return;
-        }
+        $this->createItemRuleIfNotExist($permission);
+        $this->addItem($permission);
+    }
 
-        if ($this->isRule($item)) {
-            $this->removeRule($item);
-            return;
-        }
+    /**
+     * @param Rule $rule
+     */
+    public function addRule(Rule $rule): void
+    {
+        $this->repository->addRule($rule);
+    }
 
-        throw new InvalidArgumentException('Removing unsupported item type.');
+    /**
+     * @param Role $role
+     */
+    public function removeRole(Role $role): void
+    {
+        $this->removeItem($role);
+    }
+
+    /**
+     * @param Permission $permission
+     */
+    public function removePermission(Permission $permission): void
+    {
+        $this->removeItem($permission);
+    }
+
+    /**
+     * @param Rule $rule
+     */
+    public function removeRule(Rule $rule): void
+    {
+        if ($this->repository->getRuleByName($rule->getName()) !== null) {
+            $this->repository->removeRule($rule->getName());
+        }
     }
 
     /**
      * @param string $name
-     * @param ItemInterface|Item|Rule $object
+     * @param Role $role
      */
-    public function update(string $name, ItemInterface $object): void
+    public function updateRole(string $name, Role $role): void
     {
-        if ($this->isItem($object)) {
-            $this->createItemRuleIfNotExist($object);
-            $this->storage->updateItem($name, $object);
-            return;
+        $this->createItemRuleIfNotExist($role);
+        $this->repository->updateItem($name, $role);
+    }
+
+    /**
+     * @param string $name
+     * @param Permission $permission
+     */
+    public function updatePermission(string $name, Permission $permission): void
+    {
+        $this->createItemRuleIfNotExist($permission);
+        $this->repository->updateItem($name, $permission);
+    }
+
+    /**
+     * @param string $name
+     * @param Rule $rule
+     */
+    public function updateRule(string $name, Rule $rule): void
+    {
+        if ($rule->getName() !== $name) {
+            $this->repository->removeRule($name);
         }
-
-        if ($this->isRule($object)) {
-            $this->updateRule($name, $object);
-            return;
-        }
-
-        throw new InvalidArgumentException('Updating unsupported item type.');
-    }
-
-    public function getRoles(): array
-    {
-        return $this->storage->getRoles();
-    }
-
-    public function getRole(string $name): ?Role
-    {
-        return $this->storage->getRoleByName($name);
-    }
-
-    public function getPermission(string $name): ?Permission
-    {
-        return $this->storage->getPermissionByName($name);
+        $this->repository->addRule($rule);
     }
 
     /**
@@ -417,14 +476,6 @@ class PhpManager implements ManagerInterface
     }
 
     /**
-     * @return array
-     */
-    public function getPermissions(): array
-    {
-        return $this->storage->getPermissions();
-    }
-
-    /**
      * Executes the rule associated with the specified auth item.
      *
      * If the item does not specify a rule, this method will return true. Otherwise, it will
@@ -442,10 +493,10 @@ class PhpManager implements ManagerInterface
      */
     protected function executeRule(string $user, Item $item, array $params): bool
     {
-        if ($item->getRuleName() === null) {
+        if (!$item->hasRuleName()) {
             return true;
         }
-        $rule = $this->getRule($item->getRuleName());
+        $rule = $this->repository->getRuleByName($item->getRuleName());
         if ($rule === null) {
             throw new InvalidConfigException("Rule not found: {$item->getRuleName()}");
         }
@@ -454,55 +505,18 @@ class PhpManager implements ManagerInterface
     }
 
     /**
-     * Checks whether array of $assignments is empty and [[defaultRoles]] property is empty as well.
-     *
-     * @param Assignment[] $assignments array of user's assignments
-     *
-     * @return bool whether array of $assignments is empty and [[defaultRoles]] property is empty as well
+     * @return bool
      */
-    protected function hasNoAssignments(array $assignments): bool
+    protected function defaultRolesIsEmpty(): bool
     {
-        return empty($assignments) && empty($this->defaultRoles);
-    }
-
-    protected function isPermission(?ItemInterface $item): bool
-    {
-        return $item !== null && $item instanceof Permission;
-    }
-
-    protected function isRole(?ItemInterface $item): bool
-    {
-        return $item !== null && $item instanceof Role;
-    }
-
-    protected function isItem(?ItemInterface $item): bool
-    {
-        return $item !== null && $item instanceof Item;
-    }
-
-    protected function isRule(?ItemInterface $item): bool
-    {
-        return $item !== null && $item instanceof Rule;
+        return empty($this->defaultRoles);
     }
 
     protected function createItemRuleIfNotExist(Item $item): void
     {
-        if ($item->getRuleName() && $this->getRule($item->getRuleName()) === null) {
+        if ($item->hasRuleName() && $this->repository->getRuleByName($item->getRuleName()) === null) {
             $rule = $this->createRule($item->getRuleName());
-            $this->storage->addRule($rule);
-        }
-    }
-
-    protected function removeRule(Rule $rule): void
-    {
-        if (isset($this->storage->getRules()[$rule->getName()])) {
-            $this->storage->removeRule($rule->getName());
-            foreach ($this->storage->getItems() as $item) {
-                if ($item->getRuleName() === $rule->getName()) {
-                    $item = $item->withRuleName(null);
-                    $this->storage->updateItem($item->getName(), $item);
-                }
-            }
+            $this->addRule($rule);
         }
     }
 
@@ -516,7 +530,7 @@ class PhpManager implements ManagerInterface
             $item = $item->withUpdatedAt($time);
         }
 
-        $this->storage->addItem($item);
+        $this->repository->addItem($item);
     }
 
 
@@ -530,7 +544,7 @@ class PhpManager implements ManagerInterface
         /**
          * @var $items Item[]
          */
-        foreach ($this->storage->getChildren() as $parentRole => $items) {
+        foreach ($this->repository->getChildren() as $parentRole => $items) {
             foreach ($items as $item) {
                 if ($item->getName() === $roleName) {
                     $result[] = $parentRole;
@@ -541,26 +555,18 @@ class PhpManager implements ManagerInterface
         }
     }
 
-    protected function getTypeByItem(Item $item): string
-    {
-        if ($this->isRole($item) || $this->isPermission($item)) {
-            return $item->getType();
-        }
-
-        return 'authorization item';
-    }
-
     protected function hasItem(string $name): bool
     {
-        return isset($this->storage->getItems()[$name]);
+        return $this->repository->getItemByName($name) !== null;
     }
 
     protected function normalizePermissions(array $permissions): array
     {
         $normalizePermissions = [];
         foreach (array_keys($permissions) as $itemName) {
-            if ($this->hasItem($itemName) && $this->isPermission($this->storage->getItems()[$itemName])) {
-                $normalizePermissions[$itemName] = $this->storage->getItems()[$itemName];
+            $permission = $this->repository->getPermissionByName($itemName);
+            if ($permission !== null) {
+                $normalizePermissions[$itemName] = $permission;
             }
         }
 
@@ -578,9 +584,9 @@ class PhpManager implements ManagerInterface
     protected function getDirectPermissionsByUser(string $userId): array
     {
         $permissions = [];
-        foreach ($this->getAssignments($userId) as $name => $assignment) {
-            $permission = $this->storage->getItems()[$assignment->getItemName()];
-            if ($permission->getType() === Item::TYPE_PERMISSION) {
+        foreach ($this->repository->getUserAssignments($userId) as $name => $assignment) {
+            $permission = $this->repository->getPermissionByName($assignment->getItemName());
+            if ($permission !== null) {
                 $permissions[$name] = $permission;
             }
         }
@@ -597,7 +603,7 @@ class PhpManager implements ManagerInterface
      */
     protected function getInheritedPermissionsByUser(string $userId): array
     {
-        $assignments = $this->getAssignments($userId);
+        $assignments = $this->repository->getUserAssignments($userId);
         $result = [];
         foreach (array_keys($assignments) as $roleName) {
             $this->getChildrenRecursive($roleName, $result);
@@ -613,16 +619,8 @@ class PhpManager implements ManagerInterface
     protected function removeItem(Item $item): void
     {
         if ($this->hasItem($item->getName())) {
-            $this->storage->removeItem($item);
+            $this->repository->removeItem($item);
         }
-    }
-
-    protected function updateRule(string $name, Rule $rule): void
-    {
-        if ($rule->getName() !== $name) {
-            $this->storage->removeRule($name);
-        }
-        $this->storage->addRule($rule);
     }
 
     /**
@@ -649,7 +647,7 @@ class PhpManager implements ManagerInterface
             return false;
         }
 
-        $item = $this->storage->getItems()[$itemName];
+        $item = $this->repository->getItems()[$itemName];
 
         if (!$this->executeRule($user, $item, $params)) {
             return false;
@@ -659,7 +657,7 @@ class PhpManager implements ManagerInterface
             return true;
         }
 
-        foreach ($this->storage->getChildren() as $parentName => $children) {
+        foreach ($this->repository->getChildren() as $parentName => $children) {
             if (isset($children[$itemName]) && $this->userHasPermissionRecursive(
                     $user,
                     $parentName,
@@ -683,15 +681,17 @@ class PhpManager implements ManagerInterface
      */
     protected function detectLoop(Item $parent, Item $child): bool
     {
-        if ($child->getName() === $parent->getName()) {
+        if ($child->isEqualName($parent->getName())) {
             return true;
         }
-        if (!isset($this->storage->getChildren()[$child->getName()], $this->storage->getItems()[$parent->getName()])) {
+
+        $children = $this->repository->getChildrenByName($child->getName());
+        if (empty($children)) {
             return false;
         }
-        foreach ($this->storage->getChildren()[$child->getName()] as $grandchild) {
-            /* @var $grandchild Item */
-            if ($this->detectLoop($parent, $grandchild)) {
+
+        foreach ($children as $groupChild) {
+            if ($this->detectLoop($parent, $groupChild)) {
                 return true;
             }
         }
@@ -707,11 +707,14 @@ class PhpManager implements ManagerInterface
      */
     protected function getChildrenRecursive(string $name, &$result): void
     {
-        if (isset($this->storage->getChildren()[$name])) {
-            foreach ($this->storage->getChildren()[$name] as $child) {
-                $result[$child->getName()] = true;
-                $this->getChildrenRecursive($child->getName(), $result);
-            }
+        $children = $this->repository->getChildrenByName($name);
+        if (empty($children)) {
+            return;
+        }
+
+        foreach ($children as $childName => $child) {
+            $result[$childName] = true;
+            $this->getChildrenRecursive($childName, $result);
         }
     }
 }

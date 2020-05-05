@@ -7,7 +7,7 @@ namespace Yiisoft\Rbac;
 use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
 use Yiisoft\VarDumper\VarDumper;
 
-class PhpStorage implements Storage
+class PhpRepository implements Repository
 {
     /**
      * @var string the path of the PHP script that contains the authorization items.
@@ -85,6 +85,15 @@ class PhpStorage implements Storage
     }
 
     /**
+     * @param string $name
+     * @return Item|null
+     */
+    public function getItemByName(string $name): ?Item
+    {
+        return $this->items[$name] ?? null;
+    }
+
+    /**
      * @param Item $item
      */
     public function addItem(Item $item): void
@@ -136,6 +145,15 @@ class PhpStorage implements Storage
     }
 
     /**
+     * @param string $name
+     * @return array
+     */
+    public function getChildrenByName(string $name): array
+    {
+        return $this->children[$name] ?? [];
+    }
+
+    /**
      * @return array
      */
     public function getAssignments(): array
@@ -147,9 +165,19 @@ class PhpStorage implements Storage
      * @param string $userId
      * @return array
      */
-    public function getAssignmentsByUser(string $userId): array
+    public function getUserAssignments(string $userId): array
     {
         return $this->assignments[$userId] ?? [];
+    }
+
+    /**
+     * @param string $userId
+     * @param string $name
+     * @return Assignment|null
+     */
+    public function getUserAssignmentsByName(string $userId, string $name): ?Assignment
+    {
+        return $this->getUserAssignments($userId)[$name] ?? null;
     }
 
     /**
@@ -164,35 +192,63 @@ class PhpStorage implements Storage
      * @param string $name
      * @return Rule|null
      */
-    public function getRulesByName(string $name): ?Rule
+    public function getRuleByName(string $name): ?Rule
     {
         return $this->rules[$name] ?? null;
     }
 
+    /**
+     * @param Item $parent
+     * @param Item $child
+     */
     public function addChildren(Item $parent, Item $child): void
     {
         $this->children[$parent->getName()][$child->getName()] = $this->items[$child->getName()];
         $this->saveItems();
     }
 
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function hasChildren(string $name): bool
+    {
+        return isset($this->children[$name]);
+    }
+
+    /**
+     * @param Item $parent
+     * @param Item $child
+     */
     public function removeChild(Item $parent, Item $child): void
     {
         unset($this->children[$parent->getName()][$child->getName()]);
         $this->saveItems();
     }
 
+    /**
+     * @param Item $parent
+     */
     public function removeChildren(Item $parent): void
     {
         unset($this->children[$parent->getName()]);
         $this->saveItems();
     }
 
+    /**
+     * @param string $userId
+     * @param Item $item
+     */
     public function addAssignments(string $userId, Item $item): void
     {
         $this->assignments[$userId][$item->getName()] = new Assignment($userId, $item->getName(), time());
         $this->saveAssignments();
     }
 
+    /**
+     * @param string $name
+     * @return bool
+     */
     public function assignmentExist(string $name): bool
     {
         foreach ($this->getAssignments() as $assignment) {
@@ -205,12 +261,19 @@ class PhpStorage implements Storage
         return false;
     }
 
+    /**
+     * @param string $userId
+     * @param Item $item
+     */
     public function removeAssignments(string $userId, Item $item): void
     {
         unset($this->assignments[$userId][$item->getName()]);
         $this->saveAssignments();
     }
 
+    /**
+     * @param string $userId
+     */
     public function removeAllAssignments(string $userId): void
     {
         foreach ($this->assignments[$userId] as $itemName => $value) {
@@ -224,28 +287,26 @@ class PhpStorage implements Storage
      */
     public function removeItem(Item $item): void
     {
-        foreach ($this->children as &$children) {
-            unset($children[$item->getName()]);
-        }
-        unset($children);
-        foreach ($this->assignments as &$assignments) {
-            unset($assignments[$item->getName()]);
-        }
-        unset($assignments, $this->items[$item->getName()]);
-        $this->saveItems();
+        $this->clearAssigmentForItem($item);
         $this->saveAssignments();
+        $this->clearChildrenForItem($item);
+        unset($this->items[$item->getName()]);
+        $this->saveItems();
     }
 
+    /**
+     * @param string $name
+     * @param Item $item
+     */
     public function updateItem(string $name, Item $item): void
     {
-        if ($name !== $item->getName()) {
+        if (!$item->isEqualName($name)) {
             if ($this->hasItem($item->getName())) {
                 throw new InvalidArgumentException(
                     "Unable to change the item name. The name '{$item->getName()}' is already used by another item."
                 );
             }
 
-            // Remove old item in case of renaming
             unset($this->items[$name]);
 
             if (isset($this->children[$name])) {
@@ -258,6 +319,7 @@ class PhpStorage implements Storage
                     unset($children[$name]);
                 }
             }
+
             unset($children);
 
             foreach ($this->assignments as &$assignments) {
@@ -276,11 +338,25 @@ class PhpStorage implements Storage
         $this->saveItems();
     }
 
+    /**
+     * @param string $name
+     */
     public function removeRule(string $name): void
     {
         unset($this->rules[$name]);
+        foreach ($this->items as $item) {
+            if ($item->getRuleName() === $name) {
+                $item = $item->withRuleName(null);
+                $this->updateItem($item->getName(), $item);
+            }
+        }
+
+        $this->saveRules();
     }
 
+    /**
+     * @param Rule $rule
+     */
     public function addRule(Rule $rule): void
     {
         $this->rules[$rule->getName()] = $rule;
@@ -289,52 +365,8 @@ class PhpStorage implements Storage
 
     public function clear(): void
     {
-        $this->children = [];
-        $this->items = [];
-        $this->assignments = [];
-        $this->rules = [];
+        $this->clearLoadFiles();
         $this->save();
-    }
-
-    /**
-     * Removes all auth items of the specified type.
-     *
-     * @param string $type the auth item type (either Item::TYPE_PERMISSION or Item::TYPE_ROLE)
-     */
-    public function removeAllItems(string $type): void
-    {
-        $names = [];
-        foreach ($this->items as $name => $item) {
-            if ($item->getType() === $type) {
-                unset($this->items[$name]);
-                $names[$name] = true;
-            }
-        }
-        if (empty($names)) {
-            return;
-        }
-
-        foreach ($this->assignments as $i => $assignments) {
-            foreach ($assignments as $n => $assignment) {
-                if (isset($names[$assignment->getItemName()])) {
-                    unset($this->assignments[$i][$n]);
-                }
-            }
-        }
-        foreach ($this->children as $name => $children) {
-            if (isset($names[$name])) {
-                unset($this->children[$name]);
-            } else {
-                foreach ($children as $childName => $item) {
-                    if (isset($names[$childName])) {
-                        unset($children[$childName]);
-                    }
-                }
-                $this->children[$name] = $children;
-            }
-        }
-
-        $this->saveItems();
     }
 
     public function clearRules(): void
@@ -353,6 +385,16 @@ class PhpStorage implements Storage
         $this->saveAssignments();
     }
 
+    public function clearPermissions(): void
+    {
+        $this->removeAllItems(Item::TYPE_PERMISSION);
+    }
+
+    public function clearRoles(): void
+    {
+        $this->removeAllItems(Item::TYPE_ROLE);
+    }
+
     /**
      * Saves authorization data into persistent storage.
      */
@@ -368,23 +410,18 @@ class PhpStorage implements Storage
      */
     private function load(): void
     {
-        $this->children = [];
-        $this->rules = [];
-        $this->assignments = [];
-        $this->items = [];
+        $this->clearLoadFiles();
+        $this->loadItems();
+        $this->loadAssignments();
+        $this->loadRules();
+    }
 
+    private function loadItems(): void
+    {
         $items = $this->loadFromFile($this->itemFile);
         $itemsMtime = @filemtime($this->itemFile);
-        $assignments = $this->loadFromFile($this->assignmentFile);
-        $assignmentsMtime = @filemtime($this->assignmentFile);
-        $rules = $this->loadFromFile($this->ruleFile);
-
         foreach ($items as $name => $item) {
-            $class = $item['type'] === Item::TYPE_PERMISSION ? Permission::class : Role::class;
-
-            $this->items[$name] = (new $class($name))
-                ->withDescription($item['description'] ?? '')
-                ->withRuleName($item['ruleName'] ?? null)
+            $this->items[$name] = $this->getInstanceFromAttributes($item)
                 ->withCreatedAt($itemsMtime)
                 ->withUpdatedAt($itemsMtime);
         }
@@ -398,16 +435,32 @@ class PhpStorage implements Storage
                 }
             }
         }
+    }
 
+    private function loadAssignments(): void
+    {
+        $assignments = $this->loadFromFile($this->assignmentFile);
+        $assignmentsMtime = @filemtime($this->assignmentFile);
         foreach ($assignments as $userId => $roles) {
             foreach ($roles as $role) {
                 $this->assignments[$userId][$role] = new Assignment($userId, $role, $assignmentsMtime);
             }
         }
+    }
 
-        foreach ($rules as $name => $ruleData) {
+    private function loadRules(): void
+    {
+        foreach ($this->loadFromFile($this->ruleFile) as $name => $ruleData) {
             $this->rules[$name] = unserialize($ruleData);
         }
+    }
+
+    private function clearLoadFiles(): void
+    {
+        $this->children = [];
+        $this->rules = [];
+        $this->assignments = [];
+        $this->items = [];
     }
 
     protected function hasItem(string $name): bool
@@ -522,5 +575,73 @@ class PhpStorage implements Storage
         }
 
         return $items;
+    }
+
+    /**
+     * Removes all auth items of the specified type.
+     *
+     * @param string $type the auth item type (either Item::TYPE_PERMISSION or Item::TYPE_ROLE)
+     */
+    private function removeAllItems(string $type): void
+    {
+        $names = [];
+        foreach ($this->items as $name => $item) {
+            if ($item->getType() === $type) {
+                unset($this->items[$name]);
+                $names[$name] = true;
+            }
+        }
+        if (empty($names)) {
+            return;
+        }
+
+        foreach ($this->assignments as $i => $assignments) {
+            foreach ($assignments as $n => $assignment) {
+                if (isset($names[$assignment->getItemName()])) {
+                    unset($this->assignments[$i][$n]);
+                }
+            }
+        }
+        foreach ($this->children as $name => $children) {
+            if (isset($names[$name])) {
+                unset($this->children[$name]);
+            } else {
+                foreach ($children as $childName => $item) {
+                    if (isset($names[$childName])) {
+                        unset($children[$childName]);
+                    }
+                }
+                $this->children[$name] = $children;
+            }
+        }
+
+        $this->saveItems();
+    }
+
+    private function clearChildrenForItem(Item $item): void
+    {
+        foreach ($this->children as &$children) {
+            unset($children[$item->getName()]);
+        }
+    }
+
+    private function clearAssigmentForItem(Item $item): void
+    {
+        foreach ($this->assignments as &$assignments) {
+            unset($assignments[$item->getName()]);
+        }
+    }
+
+    private function getInstanceByTypeAndName(string $type, string $name): Item
+    {
+        return $type === Item::TYPE_PERMISSION ? new Permission($name) : new Role($name);
+    }
+
+    private function getInstanceFromAttributes(array $attributes): Item
+    {
+        return $this
+            ->getInstanceByTypeAndName($attributes['type'], $attributes['name'])
+            ->withDescription($attributes['description'] ?? '')
+            ->withRuleName($attributes['ruleName'] ?? null);
     }
 }

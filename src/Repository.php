@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac;
 
-interface Storage
+interface Repository
 {
     public function clear(): void;
 
@@ -14,32 +14,15 @@ interface Storage
     public function getItems(): array;
 
     /**
+     * @param string $name
+     * @return Item|null
+     */
+    public function getItemByName(string $name): ?Item;
+
+    /**
      * @param Item $item
      */
     public function addItem(Item $item): void;
-
-    /**
-     * @return array
-     */
-    public function getRoles(): array;
-
-    /**
-     * @param string $name
-     * @return Role|null
-     */
-    public function getRoleByName(string $name): ?Role;
-
-
-    /**
-     * @return array|Permission[]
-     */
-    public function getPermissions(): array;
-
-    /**
-     * @param string $name
-     * @return Permission|null
-     */
-    public function getPermissionByName(string $name): ?Permission;
 
     /**
      * @param string $name
@@ -53,14 +36,47 @@ interface Storage
     public function removeItem(Item $item): void;
 
     /**
-     * @param string $type
+     * @return array
      */
-    public function removeAllItems(string $type): void;
+    public function getChildren(): array;
 
     /**
      * @return array
      */
-    public function getChildren(): array;
+    public function getRoles(): array;
+
+    /**
+     * @param string $name
+     * @return Role|null
+     */
+    public function getRoleByName(string $name): ?Role;
+
+    public function clearRoles(): void;
+
+    /**
+     * @return array|Permission[]
+     */
+    public function getPermissions(): array;
+
+    /**
+     * @param string $name
+     * @return Permission|null
+     */
+    public function getPermissionByName(string $name): ?Permission;
+
+    public function clearPermissions(): void;
+
+    /**
+     * @param string $name
+     * @return array|Item[]
+     */
+    public function getChildrenByName(string $name): array;
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function hasChildren(string $name): bool;
 
     /**
      * @param Item $parent
@@ -88,7 +104,14 @@ interface Storage
      * @param string $userId
      * @return array
      */
-    public function getAssignmentsByUser(string $userId): array;
+    public function getUserAssignments(string $userId): array;
+
+    /**
+     * @param string $userId
+     * @param string $name
+     * @return Assignment|null
+     */
+    public function getUserAssignmentsByName(string $userId, string $name): ?Assignment;
 
     /**
      * @param string $userId
@@ -124,7 +147,7 @@ interface Storage
      * @param string $name
      * @return Rule|null
      */
-    public function getRulesByName(string $name): ?Rule;
+    public function getRuleByName(string $name): ?Rule;
 
     /**
      * @param string $name

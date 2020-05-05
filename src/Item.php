@@ -44,9 +44,16 @@ abstract class Item implements ItemInterface
 
     abstract public function getType(): string;
 
+    abstract public function canBeParentOfItem(Item $child): bool;
+
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function isEqualName(string $name): bool
+    {
+        return $this->name === $name;
     }
 
     public function withName(string $name): self
@@ -78,6 +85,11 @@ abstract class Item implements ItemInterface
     public function getRuleName(): ?string
     {
         return $this->ruleName;
+    }
+
+    public function hasRuleName(): bool
+    {
+        return $this->ruleName !== null;
     }
 
     public function withCreatedAt(int $createdAt): self

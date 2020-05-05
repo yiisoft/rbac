@@ -20,14 +20,12 @@ use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
 use Yiisoft\Rbac\Exceptions\InvalidValueException;
 use Yiisoft\Rbac\Item;
-use Yiisoft\Rbac\ItemInterface;
-use Yiisoft\Rbac\Manager\PhpManager;
-use Yiisoft\Rbac\ManagerInterface;
+use Yiisoft\Rbac\Manager\Manager;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\Rule;
 use Yiisoft\Rbac\RuleFactory\ClassNameRuleFactory;
-use Yiisoft\Rbac\Storage;
+use Yiisoft\Rbac\Repository;
 
 /**
  * @group rbac
@@ -37,39 +35,39 @@ final class PhpManagerTest extends TestCase
     public static ?int $time;
     public static ?int $filemtime;
     private string $testDataPath;
-    private ?Storage $storage = null;
-    private ?PhpManager $auth = null;
+    private ?Repository $repository = null;
+    private ?Manager $auth = null;
 
     public function testSaveLoad(): void
     {
         static::$time = static::$filemtime = \time();
         $this->prepareData();
-        $items = $this->storage->items;
-        $children = $this->storage->children;
-        $assignments = $this->storage->assignments;
-        $rules = $this->storage->rules;
+        $items = $this->repository->items;
+        $children = $this->repository->children;
+        $assignments = $this->repository->assignments;
+        $rules = $this->repository->rules;
 
         $this->createManager();
 
-        $this->assertEquals($items, $this->storage->getItems());
-        $this->assertNotEmpty($this->storage->getItems());
+        $this->assertEquals($items, $this->repository->getItems());
+        $this->assertNotEmpty($this->repository->getItems());
 
-        $this->assertEquals($children, $this->storage->getChildren());
-        $this->assertNotEmpty($this->storage->getChildren());
+        $this->assertEquals($children, $this->repository->getChildren());
+        $this->assertNotEmpty($this->repository->getChildren());
 
-        $this->assertEquals($assignments, $this->storage->getAssignments());
-        $this->assertNotEmpty($this->storage->getAssignments());
+        $this->assertEquals($assignments, $this->repository->getAssignments());
+        $this->assertNotEmpty($this->repository->getAssignments());
 
-        $this->assertEquals($rules, $this->storage->getRules());
-        $this->assertNotEmpty($this->storage->getRules());
+        $this->assertEquals($rules, $this->repository->getRules());
+        $this->assertNotEmpty($this->repository->getRules());
     }
 
     public function testSaveAssignments(): void
     {
-        $this->auth->removeAll();
+        $this->repository->clear();
 
         $role = new Role('Admin');
-        $this->auth->add($role);
+        $this->auth->addRole($role);
         $this->auth->assign($role, '13');
 
         $this->assertStringContainsString(
@@ -79,20 +77,20 @@ final class PhpManagerTest extends TestCase
         );
 
         $role = $role->withName('NewAdmin');
-        $this->auth->update('Admin', $role);
+        $this->auth->updateRole('Admin', $role);
         $this->assertStringContainsString(
             'NewAdmin',
             file_get_contents($this->getAssignmentFilePath()),
             'Role "NewAdmin" was not added when saving'
         );
-        $this->auth->remove($role);
+        $this->auth->removeRole($role);
         $this->assertStringNotContainsString(
             'Admin',
             file_get_contents($this->getAssignmentFilePath()),
             'Role "Admin" was not removed when saving'
         );
 
-        $this->auth->remove($role);
+        $this->auth->removeRole($role);
         $this->assertStringNotContainsString(
             'NewAdmin',
             file_get_contents($this->getAssignmentFilePath()),
@@ -100,46 +98,39 @@ final class PhpManagerTest extends TestCase
         );
     }
 
-    public function testReturnExceptionWhenAddingUnknownItemType(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Adding unsupported item type.');
-        $this->auth->add($this->getCustomItem());
-    }
-
     public function testRevokeAllClearAllUseAssignments(): void
     {
         $this->prepareData();
         $this->auth->revokeAll('author B');
-        $this->assertEmpty($this->auth->getAssignments('author B'));
+        $this->assertEmpty($this->repository->getUserAssignments('author B'));
     }
 
     public function testReturnUserAssignment(): void
     {
         $this->prepareData();
-        $this->assertInstanceOf(Assignment::class, $this->auth->getAssignment('author', 'author B'));
+        $this->assertInstanceOf(Assignment::class, $this->repository->getUserAssignmentsByName('author B', 'author'));
     }
 
     public function testReturnNullForUserWithoutAssignment(): void
     {
         $this->prepareData();
-        $this->assertNull($this->auth->getAssignment('author', 'guest'));
+        $this->assertNull($this->repository->getUserAssignmentsByName('guest', 'author'));
     }
 
     public function testReturnEmptyArrayWithNoAssignments(): void
     {
         $this->prepareData();
-        $this->auth->removeAllAssignments();
-        $this->assertEmpty($this->auth->getAssignments('author B'));
-        $this->assertEmpty($this->auth->getAssignments('author A'));
+        $this->repository->clearAssignments();
+        $this->assertEmpty($this->repository->getUserAssignments('author B'));
+        $this->assertEmpty($this->repository->getUserAssignments('author A'));
     }
 
     public function testReturnTrueWhenChildExists(): void
     {
         $this->prepareData();
 
-        $reader = $this->auth->getRole('reader');
-        $readPost = $this->auth->getPermission('readPost');
+        $reader = $this->repository->getRoleByName('reader');
+        $readPost = $this->repository->getPermissionByName('readPost');
 
         $this->assertTrue($this->auth->hasChild($reader, $readPost));
     }
@@ -148,8 +139,8 @@ final class PhpManagerTest extends TestCase
     {
         $this->prepareData();
 
-        $reader = $this->auth->getRole('reader');
-        $updatePost = $this->auth->getPermission('updatePost');
+        $reader = $this->repository->getRoleByName('reader');
+        $updatePost = $this->repository->getPermissionByName('updatePost');
 
         $this->assertFalse($this->auth->hasChild($reader, $updatePost));
     }
@@ -158,9 +149,9 @@ final class PhpManagerTest extends TestCase
     {
         $this->prepareData();
 
-        $author = $this->auth->getRole('author');
-        $createPost = $this->auth->getPermission('createPost');
-        $updatePost = $this->auth->getPermission('updatePost');
+        $author = $this->repository->getRoleByName('author');
+        $createPost = $this->repository->getPermissionByName('createPost');
+        $updatePost = $this->repository->getPermissionByName('updatePost');
 
         $this->auth->removeChildren($author);
 
@@ -172,9 +163,9 @@ final class PhpManagerTest extends TestCase
     {
         $this->prepareData();
 
-        $author = $this->auth->getRole('author');
-        $createPost = $this->auth->getPermission('createPost');
-        $updatePost = $this->auth->getPermission('updatePost');
+        $author = $this->repository->getRoleByName('author');
+        $createPost = $this->repository->getPermissionByName('createPost');
+        $updatePost = $this->repository->getPermissionByName('updatePost');
 
         $this->auth->removeChild($author, $createPost);
 
@@ -190,17 +181,9 @@ final class PhpManagerTest extends TestCase
         $permission = (new Permission($permissionName))
             ->withRuleName($newRule->getName());
 
-        $this->auth->update($permissionName, $permission);
-        $this->assertNotNull($this->auth->getPermission($permissionName));
-        $this->assertNotNull($this->auth->getRule($newRule->getName()));
-    }
-
-    public function testReturnExceptionWhenUpdateWithUnknownItemType(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Updating unsupported item type.');
-        $customItem = $this->getCustomItem();
-        $this->auth->update($customItem->getName(), $customItem);
+        $this->auth->updatePermission($permissionName, $permission);
+        $this->assertNotNull($this->repository->getPermissionByName($permissionName));
+        $this->assertNotNull($this->repository->getRuleByName($newRule->getName()));
     }
 
     public function testDefaultRolesSetWithClosure(): void
@@ -220,13 +203,6 @@ final class PhpManagerTest extends TestCase
         $this->assertFalse($this->auth->userHasPermission('unknown user', 'createPost'));
     }
 
-    public function testReturnExceptionWhenRemoveByUnknownItemType(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Removing unsupported item type.');
-        $this->auth->remove($this->getCustomItem());
-    }
-
     public function testRuleSetWhenAddingItem(): void
     {
         $newRule = new EasyRule();
@@ -234,15 +210,15 @@ final class PhpManagerTest extends TestCase
         $item = (new Permission($itemName))
             ->withRuleName($newRule->getName());
 
-        $this->auth->add($item);
-        $this->assertNotNull($this->auth->getPermission($itemName));
-        $this->assertNotNull($this->auth->getRule($newRule->getName()));
+        $this->auth->addPermission($item);
+        $this->assertNotNull($this->repository->getPermissionByName($itemName));
+        $this->assertNotNull($this->repository->getRuleByName($newRule->getName()));
     }
 
     public function testGetRuleReturnNullForNonExistingRole(): void
     {
         $this->prepareData();
-        $author = $this->auth->getRole('createPost');
+        $author = $this->repository->getRoleByName('createPost');
 
         $this->assertNull($author);
     }
@@ -252,8 +228,8 @@ final class PhpManagerTest extends TestCase
         $role = (new Role('admin'))
             ->withDescription('administrator');
 
-        $this->auth->add($role);
-        $this->assertNotNull($this->auth->getRole('admin'));
+        $this->auth->addRole($role);
+        $this->assertNotNull($this->repository->getRoleByName('admin'));
     }
 
     public function testAddPermission(): void
@@ -261,8 +237,8 @@ final class PhpManagerTest extends TestCase
         $permission = (new Permission('edit post'))
             ->withDescription('edit a post');
 
-        $this->auth->add($permission);
-        $this->assertNotNull($this->auth->getPermission('edit post'));
+        $this->auth->addPermission($permission);
+        $this->assertNotNull($this->repository->getPermissionByName('edit post'));
     }
 
     public function testAddRule(): void
@@ -271,10 +247,10 @@ final class PhpManagerTest extends TestCase
 
         $ruleName = 'isReallyReallyAuthor';
         $rule = new AuthorRule($ruleName, true);
-        $this->auth->add($rule);
+        $this->auth->addRule($rule);
 
         /** @var AuthorRule $rule */
-        $rule = $this->auth->getRule($ruleName);
+        $rule = $this->repository->getRuleByName($ruleName);
         $this->assertEquals($ruleName, $rule->getName());
         $this->assertTrue($rule->isReallyReally());
     }
@@ -282,20 +258,20 @@ final class PhpManagerTest extends TestCase
     public function testGetChildren(): void
     {
         $user = new Role('user');
-        $this->auth->add($user);
-        $this->assertCount(0, $this->auth->getChildren($user->getName()));
+        $this->auth->addRole($user);
+        $this->assertCount(0, $this->repository->getChildrenByName($user->getName()));
 
         $changeName = new Permission('changeName');
-        $this->auth->add($changeName);
+        $this->auth->addPermission($changeName);
         $this->auth->addChild($user, $changeName);
-        $this->assertCount(1, $this->auth->getChildren($user->getName()));
+        $this->assertCount(1, $this->repository->getChildrenByName($user->getName()));
     }
 
     public function testGetRule(): void
     {
         $this->prepareData();
 
-        $rule = $this->auth->getRule('isAuthor');
+        $rule = $this->repository->getRuleByName('isAuthor');
         $this->assertInstanceOf(Rule::class, $rule);
         $this->assertEquals('isAuthor', $rule->getName());
         $this->assertEquals(
@@ -303,7 +279,7 @@ final class PhpManagerTest extends TestCase
             $rule->getAttributes()
         );
 
-        $rule = $this->auth->getRule('nonExisting');
+        $rule = $this->repository->getRuleByName('nonExisting');
         $this->assertNull($rule);
     }
 
@@ -312,9 +288,9 @@ final class PhpManagerTest extends TestCase
         $this->prepareData();
 
         $rule = new AuthorRule('isReallyReallyAuthor', true);
-        $this->auth->add($rule);
+        $this->auth->addRule($rule);
 
-        $rules = $this->auth->getRules();
+        $rules = $this->repository->getRules();
 
         $ruleNames = [];
         foreach ($rules as $rule) {
@@ -329,13 +305,13 @@ final class PhpManagerTest extends TestCase
     {
         $this->prepareData();
 
-        $this->auth->remove($this->auth->getRule('isAuthor'));
-        $rules = $this->auth->getRules();
+        $this->auth->removeRule($this->repository->getRuleByName('isAuthor'));
+        $rules = $this->repository->getRules();
 
         $this->assertEmpty($rules);
 
-        $this->auth->remove($this->auth->getPermission('createPost'));
-        $item = $this->auth->getPermission('createPost');
+        $this->auth->removePermission($this->repository->getPermissionByName('createPost'));
+        $item = $this->repository->getPermissionByName('createPost');
         $this->assertNull($item);
     }
 
@@ -417,7 +393,7 @@ final class PhpManagerTest extends TestCase
     public function testGetRole(): void
     {
         $this->prepareData();
-        $author = $this->auth->getRole('author');
+        $author = $this->repository->getRoleByName('author');
         $this->assertEquals(Item::TYPE_ROLE, $author->getType());
         $this->assertEquals('author', $author->getName());
         $this->assertEquals(
@@ -436,7 +412,7 @@ final class PhpManagerTest extends TestCase
     public function testGetPermission(): void
     {
         $this->prepareData();
-        $createPost = $this->auth->getPermission('createPost');
+        $createPost = $this->repository->getPermissionByName('createPost');
         $this->assertEquals(Item::TYPE_PERMISSION, $createPost->getType());
         $this->assertEquals('createPost', $createPost->getName());
         $this->assertEquals(
@@ -455,7 +431,7 @@ final class PhpManagerTest extends TestCase
     public function testGetRolesByUser(): void
     {
         $this->prepareData();
-        $reader = $this->auth->getRole('reader');
+        $reader = $this->repository->getRoleByName('reader');
         $this->auth->assign($reader, '0');
         $this->auth->assign($reader, '123');
 
@@ -504,8 +480,8 @@ final class PhpManagerTest extends TestCase
     {
         $this->prepareData();
 
-        $reader = $this->auth->getRole('reader');
-        $author = $this->auth->getRole('author');
+        $reader = $this->repository->getRoleByName('reader');
+        $author = $this->repository->getRoleByName('author');
         $this->auth->assign($reader, 'readingAuthor');
         $this->auth->assign($author, 'readingAuthor');
 
@@ -531,26 +507,26 @@ final class PhpManagerTest extends TestCase
 
     public function testHasAssignments(): void
     {
-        $this->auth->removeAll();
+        $this->repository->clear();
 
         $this->assertFalse(
-            $this->auth->hasAssignments('non_existing'),
+            $this->repository->assignmentExist('non_existing'),
             'Non existing permission should not have assignments'
         );
 
         $admin = new Role('admin');
-        $this->auth->add($admin);
+        $this->auth->addRole($admin);
         $this->auth->assign($admin, '1');
 
         $this->assertTrue(
-            $this->auth->hasAssignments('admin'),
+            $this->repository->assignmentExist('admin'),
             'Existing assigned role should have assignments'
         );
 
         $role = new Role('unassigned');
-        $this->auth->add($role);
+        $this->auth->addRole($role);
         $this->assertFalse(
-            $this->auth->hasAssignments('unassigned'),
+            $this->repository->assignmentExist('unassigned'),
             'Existing not assigned role should not have assignments'
         );
     }
@@ -612,53 +588,50 @@ final class PhpManagerTest extends TestCase
     {
         $this->prepareData();
 
-        $this->auth->removeAllRules();
+        $this->repository->clearRules();
 
-        $this->assertEmpty($this->auth->getRules());
-
-        $this->assertNotEmpty($this->auth->getRoles());
-        $this->assertNotEmpty($this->auth->getPermissions());
+        $this->assertEmpty($this->repository->getRules());
+        $this->assertNotEmpty($this->repository->getRoles());
+        $this->assertNotEmpty($this->repository->getPermissions());
     }
 
     public function testRemoveAllRoles(): void
     {
         $this->prepareData();
 
-        $this->auth->removeAllRoles();
+        $this->repository->clearRoles();
 
-        $this->assertEmpty($this->auth->getRoles());
-
-        $this->assertNotEmpty($this->auth->getRules());
-        $this->assertNotEmpty($this->auth->getPermissions());
+        $this->assertEmpty($this->repository->getRoles());
+        $this->assertNotEmpty($this->repository->getRules());
+        $this->assertNotEmpty($this->repository->getPermissions());
     }
 
     public function testRemoveAllPermissions(): void
     {
         $this->prepareData();
 
-        $this->auth->removeAllPermissions();
+        $this->repository->clearPermissions();
 
-        $this->assertEmpty($this->auth->getPermissions());
-
-        $this->assertNotEmpty($this->auth->getRules());
-        $this->assertNotEmpty($this->auth->getRoles());
+        $this->assertEmpty($this->repository->getPermissions());
+        $this->assertNotEmpty($this->repository->getRules());
+        $this->assertNotEmpty($this->repository->getRoles());
     }
 
     public function testAssignRuleToRoleByName(): void
     {
         $userId = '3';
         $auth = $this->auth;
-        $auth->removeAll();
+        $this->repository->clear();
 
         $rule = new ActionRule();
-        $auth->add($rule);
+        $auth->addRule($rule);
 
         $role = (new Role('Reader'))
             ->withRuleName($rule->getName());
-        $auth->add($role);
+        $auth->addRole($role);
 
         $permission = new Permission('manage');
-        $auth->add($permission);
+        $auth->addPermission($permission);
         $auth->addChild($role, $permission);
 
         $auth->assign($role, $userId);
@@ -671,12 +644,12 @@ final class PhpManagerTest extends TestCase
     {
         $userId = '3';
         $auth = $this->auth;
-        $auth->removeAll();
+        $this->repository->clear();
         $rule = new ActionRule();
-        $auth->add($rule);
+        $auth->addRule($rule);
         $item = (new Permission('manage'))
             ->withRuleName($rule->getName());
-        $auth->add($item);
+        $auth->addPermission($item);
 
         $auth->assign($item, $userId);
 
@@ -688,24 +661,24 @@ final class PhpManagerTest extends TestCase
     {
         $userId = '3';
         $auth = $this->auth;
-        $auth->removeAll();
+        $this->repository->clear();
 
-        $auth->add(new ActionRule());
-        $auth->add(new AuthorRule());
+        $auth->addRule(new ActionRule());
+        $auth->addRule(new AuthorRule());
 
         $role = (new Role('Reader'))
             ->withRuleName('action_rule');
-        $auth->add($role);
+        $auth->addRole($role);
         $auth->assign($role, $userId);
 
         $permission = new Permission('manage');
-        $auth->add($permission);
+        $auth->addPermission($permission);
         $auth->addChild($role, $permission);
 
-        $role = $auth->getRole('Reader')
+        $role = $this->repository->getRoleByName('Reader')
             ->withName('AdminPost')
             ->withRuleName('isAuthor');
-        $auth->update('Reader', $role);
+        $auth->updateRole('Reader', $role);
 
         $this->assertArrayNotHasKey(
             'Reader',
@@ -719,7 +692,7 @@ final class PhpManagerTest extends TestCase
             'New role should be assigned'
         );
 
-        $role = $auth->getRole('AdminPost');
+        $role = $this->repository->getRoleByName('AdminPost');
         $this->assertSame('isAuthor', $role->getRuleName(), 'Rule should have new name');
     }
 
@@ -727,20 +700,20 @@ final class PhpManagerTest extends TestCase
     {
         $userId = '3';
         $auth = $this->auth;
-        $auth->removeAll();
+        $this->repository->clear();
 
-        $auth->add(new ActionRule());
-        $auth->add(new AuthorRule());
+        $auth->addRule(new ActionRule());
+        $auth->addRule(new AuthorRule());
 
         $manage = (new Permission('manage'))
             ->withRuleName('action_rule');
-        $auth->add($manage);
+        $auth->addPermission($manage);
         $auth->assign($manage, $userId);
 
-        $manage = $auth->getPermission('manage')
+        $manage = $this->repository->getPermissionByName('manage')
             ->withName('admin')
             ->withRuleName('isAuthor');
-        $auth->update('manage', $manage);
+        $auth->updatePermission('manage', $manage);
 
         $this->assertTrue($auth->userHasPermission($userId, 'admin', ['authorID' => 3]));
         $this->assertFalse($auth->userHasPermission($userId, 'manage', ['authorID' => 3]));
@@ -750,10 +723,10 @@ final class PhpManagerTest extends TestCase
     {
         $userId = '3';
         $auth = $this->auth;
-        $auth->removeAll();
+        $this->repository->clear();
 
         $role = new Role('Admin');
-        $auth->add($role);
+        $auth->addRole($role);
         $auth->assign($role, $userId);
         $auth->revoke($role, $userId);
 
@@ -764,10 +737,10 @@ final class PhpManagerTest extends TestCase
     {
         $userId = '3';
         $auth = $this->auth;
-        $auth->removeAll();
+        $this->repository->clear();
 
         $permission = new Permission('manage');
-        $auth->add($permission);
+        $auth->addPermission($permission);
         $auth->assign($permission, $userId);
         $auth->revoke($permission, $userId);
 
@@ -778,14 +751,14 @@ final class PhpManagerTest extends TestCase
     {
         $userId = '3';
         $auth = $this->auth;
-        $auth->removeAll();
+        $this->repository->clear();
 
         $rule = new ActionRule();
-        $auth->add($rule);
+        $auth->addRule($rule);
 
         $permission = (new Permission('manage'))
             ->withRuleName($rule->getName());
-        $auth->add($permission);
+        $auth->addPermission($permission);
         $auth->assign($permission, $userId);
 
         $auth->revoke($permission, $userId);
@@ -798,14 +771,14 @@ final class PhpManagerTest extends TestCase
     {
         $userId = '3';
         $auth = $this->auth;
-        $auth->removeAll();
+        $this->repository->clear();
 
         $rule = new ActionRule();
-        $auth->add($rule);
+        $auth->addRule($rule);
 
         $role = (new Role('Admin'))
             ->withRuleName($rule->getName());
-        $auth->add($role);
+        $auth->addRole($role);
         $auth->assign($role, $userId);
 
         $auth->revoke($role, $userId);
@@ -822,13 +795,13 @@ final class PhpManagerTest extends TestCase
     {
         $auth = $this->auth;
 
-        $auth->removeAll();
+        $this->repository->clear();
 
         $rule = new ActionRule();
-        $auth->add($rule);
+        $auth->addRule($rule);
 
         /** @var ActionRule $rule */
-        $rule = $this->auth->getRule('action_rule');
+        $rule = $this->repository->getRuleByName('action_rule');
         $this->assertInstanceOf(ActionRule::class, $rule);
     }
 
@@ -854,36 +827,36 @@ final class PhpManagerTest extends TestCase
     {
         $this->prepareData();
 
-        $rule = $this->auth->getRule('isAuthor');
+        $rule = $this->repository->getRuleByName('isAuthor');
         $rule = $rule
             ->withName('newName')
             ->withReallyReally(false);
 
-        $this->auth->update('isAuthor', $rule);
+        $this->auth->updateRule('isAuthor', $rule);
 
-        $rule = $this->auth->getRule('isAuthor');
+        $rule = $this->repository->getRuleByName('isAuthor');
         $this->assertNull($rule);
 
         /** @var AuthorRule $rule */
-        $rule = $this->auth->getRule('newName');
+        $rule = $this->repository->getRuleByName('newName');
         $this->assertEquals('newName', $rule->getName());
         $this->assertFalse($rule->isReallyReally());
 
         $rule = $rule->withReallyReally(true);
-        $this->auth->update('newName', $rule);
+        $this->auth->updateRule('newName', $rule);
 
         /** @var AuthorRule $rule */
-        $rule = $this->auth->getRule('newName');
+        $rule = $this->repository->getRuleByName('newName');
         $this->assertTrue($rule->isReallyReally());
 
-        $item = $this->auth->getPermission('createPost')
+        $item = $this->repository->getPermissionByName('createPost')
             ->withName('new createPost');
-        $this->auth->update('createPost', $item);
+        $this->auth->updatePermission('createPost', $item);
 
-        $item = $this->auth->getPermission('createPost');
+        $item = $this->repository->getPermissionByName('createPost');
         $this->assertNull($item);
 
-        $item = $this->auth->getPermission('new createPost');
+        $item = $this->repository->getPermissionByName('new createPost');
         $this->assertEquals('new createPost', $item->getName());
     }
 
@@ -892,24 +865,24 @@ final class PhpManagerTest extends TestCase
         $this->prepareData();
 
         $name = 'readPost';
-        $permission = $this->auth->getPermission($name);
+        $permission = $this->repository->getPermissionByName($name);
         $permission = $permission->withName('UPDATED-NAME');
-        $this->auth->update($name, $permission);
+        $this->auth->updatePermission($name, $permission);
 
-        $this->assertNull($this->auth->getPermission('readPost'));
-        $this->assertNotNull($this->auth->getPermission('UPDATED-NAME'));
+        $this->assertNull($this->repository->getPermissionByName('readPost'));
+        $this->assertNotNull($this->repository->getPermissionByName('UPDATED-NAME'));
     }
 
     public function testUpdateDescription(): void
     {
         $this->prepareData();
         $name = 'readPost';
-        $permission = $this->auth->getPermission($name);
+        $permission = $this->repository->getPermissionByName($name);
         $newDescription = 'UPDATED-DESCRIPTION';
         $permission = $permission->withDescription($newDescription);
-        $this->auth->update($name, $permission);
+        $this->auth->updatePermission($name, $permission);
 
-        $permission = $this->auth->getPermission('readPost');
+        $permission = $this->repository->getPermissionByName('readPost');
         $this->assertEquals($newDescription, $permission->getDescription());
     }
 
@@ -917,10 +890,10 @@ final class PhpManagerTest extends TestCase
     {
         $this->prepareData();
         $name = 'readPost';
-        $permission = $this->auth->getPermission($name);
+        $permission = $this->repository->getPermissionByName($name);
         $permission = $permission->withName('createPost');
         $this->expectException(InvalidArgumentException::class);
-        $this->auth->update($name, $permission);
+        $this->auth->updatePermission($name, $permission);
     }
 
     protected function tearDown(): void
@@ -928,7 +901,7 @@ final class PhpManagerTest extends TestCase
         FileHelper::removeDirectory($this->testDataPath);
         static::$filemtime = null;
         parent::tearDown();
-        $this->auth->removeAll();
+        $this->repository->clear();
         static::$time = null;
     }
 
@@ -952,9 +925,9 @@ final class PhpManagerTest extends TestCase
 
     private function createManager(): void
     {
-        $this->storage = new ExponsedPhpStorage($this->testDataPath);
-        $this->auth = (new PhpManager(
-            $this->storage,
+        $this->repository = new ExponsedPhpRepository($this->testDataPath);
+        $this->auth = (new Manager(
+            $this->repository,
             new ClassNameRuleFactory()
         ))->setDefaultRoles(['myDefaultRole']);
     }
@@ -967,52 +940,50 @@ final class PhpManagerTest extends TestCase
     private function prepareData(): void
     {
         $rule = new AuthorRule();
-        $this->auth->add($rule);
+        $this->auth->addRule($rule);
 
         $uniqueTrait = (new Permission('Fast Metabolism'))
             ->withDescription(
                 'Your metabolic rate is twice normal. This means that you are much less resistant to radiation and poison, but your body heals faster.'
             );
-        $this->auth->add($uniqueTrait);
+        $this->auth->addPermission($uniqueTrait);
 
         $createPost = (new Permission('createPost'))
             ->withDescription('create a post');
-        // FIXME: $createPost->data = 'createPostData';
-        $this->auth->add($createPost);
+        $this->auth->addPermission($createPost);
 
         $readPost = (new Permission('readPost'))
             ->withDescription('read a post');
-        $this->auth->add($readPost);
+        $this->auth->addPermission($readPost);
 
         $deletePost = (new Permission('deletePost'))
             ->withDescription('delete a post');
-        $this->auth->add($deletePost);
+        $this->auth->addPermission($deletePost);
 
         $updatePost = (new Permission('updatePost'))
             ->withDescription('update a post')
             ->withRuleName($rule->getName());
-        $this->auth->add($updatePost);
+        $this->auth->addPermission($updatePost);
 
         $updateAnyPost = (new Permission('updateAnyPost'))
             ->withDescription('update any post');
-        $this->auth->add($updateAnyPost);
+        $this->auth->addPermission($updateAnyPost);
 
         $withoutChildren = new Role('withoutChildren');
-        $this->auth->add($withoutChildren);
+        $this->auth->addRole($withoutChildren);
 
         $reader = new Role('reader');
-        $this->auth->add($reader);
+        $this->auth->addRole($reader);
         $this->auth->addChild($reader, $readPost);
 
         $author = new Role('author');
-        // FIXME: $author->data = 'authorData';
-        $this->auth->add($author);
+        $this->auth->addRole($author);
         $this->auth->addChild($author, $createPost);
         $this->auth->addChild($author, $updatePost);
         $this->auth->addChild($author, $reader);
 
         $admin = new Role('admin');
-        $this->auth->add($admin);
+        $this->auth->addRole($admin);
         $this->auth->addChild($admin, $author);
         $this->auth->addChild($admin, $updateAnyPost);
 
@@ -1024,20 +995,4 @@ final class PhpManagerTest extends TestCase
         $this->auth->assign($admin, 'admin C');
     }
 
-    private function getCustomItem(): ItemInterface
-    {
-        return new class() implements ItemInterface {
-            public function getName(): string
-            {
-                return 'custom item';
-            }
-
-            public function getAttributes(): array
-            {
-                return [
-                    'name' => $this->getName()
-                ];
-            }
-        };
-    }
 }

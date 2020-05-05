@@ -6,13 +6,13 @@ namespace Yiisoft\Rbac\Tests;
 
 use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\Item;
-use Yiisoft\Rbac\PhpStorage;
+use Yiisoft\Rbac\PhpRepository;
 use Yiisoft\Rbac\Rule;
 
 /**
  * Exposes protected properties and methods to inspect from outside.
  */
-class ExponsedPhpStorage extends PhpStorage
+class ExponsedPhpRepository extends PhpRepository
 {
     /**
      * @var Item[]
