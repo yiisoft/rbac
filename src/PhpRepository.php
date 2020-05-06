@@ -451,7 +451,7 @@ class PhpRepository implements Repository
     private function loadRules(): void
     {
         foreach ($this->loadFromFile($this->ruleFile) as $name => $ruleData) {
-            $this->rules[$name] = unserialize($ruleData);
+            $this->rules[$name] = $this->unsterilizedRule($ruleData);
         }
     }
 
@@ -557,11 +557,7 @@ class PhpRepository implements Repository
      */
     protected function saveRules(): void
     {
-        $rules = [];
-        foreach ($this->rules as $name => $rule) {
-            $rules[$name] = serialize($rule);
-        }
-        $this->saveToFile($rules, $this->ruleFile);
+        $this->saveToFile($this->serializeRules(), $this->ruleFile);
     }
 
     protected function getItemsByType(string $type): array
@@ -643,5 +639,15 @@ class PhpRepository implements Repository
             ->getInstanceByTypeAndName($attributes['type'], $attributes['name'])
             ->withDescription($attributes['description'] ?? '')
             ->withRuleName($attributes['ruleName'] ?? null);
+    }
+
+    private function serializeRules(): array
+    {
+        return array_map(fn(Rule $rule): string => serialize($rule), $this->rules);
+    }
+
+    private function unsterilizedRule(string $data): Rule
+    {
+        return unserialize($data, ['allowed_classes' => true]);
     }
 }

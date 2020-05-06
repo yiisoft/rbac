@@ -199,7 +199,7 @@ class Manager implements AccessCheckerInterface
     /**
      * Revokes a role or a permission from a user.
      *
-     * @param Item $item
+     * @param Item $role
      * @param string $userId the user ID
      *
      * @return void
@@ -347,46 +347,11 @@ class Manager implements AccessCheckerInterface
     }
 
     /**
-     * @param Permission $permission
-     */
-    public function addPermission(Permission $permission): void
-    {
-        $this->createItemRuleIfNotExist($permission);
-        $this->addItem($permission);
-    }
-
-    /**
-     * @param Rule $rule
-     */
-    public function addRule(Rule $rule): void
-    {
-        $this->repository->addRule($rule);
-    }
-
-    /**
      * @param Role $role
      */
     public function removeRole(Role $role): void
     {
         $this->removeItem($role);
-    }
-
-    /**
-     * @param Permission $permission
-     */
-    public function removePermission(Permission $permission): void
-    {
-        $this->removeItem($permission);
-    }
-
-    /**
-     * @param Rule $rule
-     */
-    public function removeRule(Rule $rule): void
-    {
-        if ($this->repository->getRuleByName($rule->getName()) !== null) {
-            $this->repository->removeRule($rule->getName());
-        }
     }
 
     /**
@@ -400,6 +365,23 @@ class Manager implements AccessCheckerInterface
     }
 
     /**
+     * @param Permission $permission
+     */
+    public function addPermission(Permission $permission): void
+    {
+        $this->createItemRuleIfNotExist($permission);
+        $this->addItem($permission);
+    }
+
+    /**
+     * @param Permission $permission
+     */
+    public function removePermission(Permission $permission): void
+    {
+        $this->removeItem($permission);
+    }
+
+    /**
      * @param string $name
      * @param Permission $permission
      */
@@ -407,6 +389,24 @@ class Manager implements AccessCheckerInterface
     {
         $this->createItemRuleIfNotExist($permission);
         $this->repository->updateItem($name, $permission);
+    }
+
+    /**
+     * @param Rule $rule
+     */
+    public function addRule(Rule $rule): void
+    {
+        $this->repository->addRule($rule);
+    }
+
+    /**
+     * @param Rule $rule
+     */
+    public function removeRule(Rule $rule): void
+    {
+        if ($this->repository->getRuleByName($rule->getName()) !== null) {
+            $this->repository->removeRule($rule->getName());
+        }
     }
 
     /**
