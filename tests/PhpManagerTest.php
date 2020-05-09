@@ -17,15 +17,16 @@ function time()
 use PHPUnit\Framework\TestCase;
 use Yiisoft\Files\FileHelper;
 use Yiisoft\Rbac\Assignment;
-use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
-use Yiisoft\Rbac\Exceptions\InvalidValueException;
+use InvalidArgumentException;
+use RuntimeException;
 use Yiisoft\Rbac\Item;
-use Yiisoft\Rbac\Manager\Manager;
+use Yiisoft\Rbac\Manager;
 use Yiisoft\Rbac\Permission;
+use Yiisoft\Rbac\PhpStorage;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\Rule;
 use Yiisoft\Rbac\RuleFactory\ClassNameRuleFactory;
-use Yiisoft\Rbac\Repository;
+use Yiisoft\Rbac\Storage;
 
 /**
  * @group rbac
@@ -35,17 +36,17 @@ final class PhpManagerTest extends TestCase
     public static ?int $time;
     public static ?int $filemtime;
     private string $testDataPath;
-    private ?Repository $repository = null;
+    private ?Storage $repository = null;
     private ?Manager $auth = null;
 
     public function testSaveLoad(): void
     {
         static::$time = static::$filemtime = \time();
         $this->prepareData();
-        $items = $this->repository->items;
-        $children = $this->repository->children;
-        $assignments = $this->repository->assignments;
-        $rules = $this->repository->rules;
+        $items = $this->repository->getItems();
+        $children = $this->repository->getChildren();
+        $assignments = $this->repository->getAssignments();
+        $rules = $this->repository->getRules();
 
         $this->createManager();
 
@@ -108,13 +109,13 @@ final class PhpManagerTest extends TestCase
     public function testReturnUserAssignment(): void
     {
         $this->prepareData();
-        $this->assertInstanceOf(Assignment::class, $this->repository->getUserAssignmentsByName('author B', 'author'));
+        $this->assertInstanceOf(Assignment::class, $this->repository->getUserAssignmentByName('author B', 'author'));
     }
 
     public function testReturnNullForUserWithoutAssignment(): void
     {
         $this->prepareData();
-        $this->assertNull($this->repository->getUserAssignmentsByName('guest', 'author'));
+        $this->assertNull($this->repository->getUserAssignmentByName('guest', 'author'));
     }
 
     public function testReturnEmptyArrayWithNoAssignments(): void
@@ -807,7 +808,7 @@ final class PhpManagerTest extends TestCase
 
     public function testDefaultRolesWithClosureReturningNonArrayValue(): void
     {
-        $this->expectException(InvalidValueException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Default roles closure must return an array');
         $this->auth->setDefaultRoles(
             static function () {
@@ -925,7 +926,7 @@ final class PhpManagerTest extends TestCase
 
     private function createManager(): void
     {
-        $this->repository = new ExponsedPhpRepository($this->testDataPath);
+        $this->repository = new PhpStorage($this->testDataPath);
         $this->auth = (new Manager(
             $this->repository,
             new ClassNameRuleFactory()

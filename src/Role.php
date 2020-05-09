@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac;
 
-class Role extends Item
+final class Role extends Item
 {
     public function getType(): string
     {

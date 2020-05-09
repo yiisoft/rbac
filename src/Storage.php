@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac;
 
-interface Repository
+interface Storage
 {
     public function clear(): void;
 
@@ -82,7 +82,7 @@ interface Repository
      * @param Item $parent
      * @param Item $child
      */
-    public function addChildren(Item $parent, Item $child): void;
+    public function addChild(Item $parent, Item $child): void;
 
     /**
      * @param Item $parent
@@ -111,13 +111,13 @@ interface Repository
      * @param string $name
      * @return Assignment|null
      */
-    public function getUserAssignmentsByName(string $userId, string $name): ?Assignment;
+    public function getUserAssignmentByName(string $userId, string $name): ?Assignment;
 
     /**
      * @param string $userId
      * @param Item $item
      */
-    public function addAssignments(string $userId, Item $item): void;
+    public function addAssignment(string $userId, Item $item): void;
 
     /**
      * @param string $name
@@ -129,7 +129,7 @@ interface Repository
      * @param string $userId
      * @param Item $item
      */
-    public function removeAssignments(string $userId, Item $item): void;
+    public function removeAssignment(string $userId, Item $item): void;
 
     /**
      * @param string $userId

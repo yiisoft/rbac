@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac;
 
-use Yiisoft\Rbac\Exceptions\InvalidArgumentException;
+use InvalidArgumentException;
 use Yiisoft\VarDumper\VarDumper;
 
-class PhpRepository implements Repository
+final class PhpStorage implements Storage
 {
     /**
      * @var string the path of the PHP script that contains the authorization items.
@@ -18,7 +18,7 @@ class PhpRepository implements Repository
      * @see loadFromFile()
      * @see saveToFile()
      */
-    protected string $itemFile;
+    private string $itemFile;
     /**
      * @var string the path of the PHP script that contains the authorization assignments.
      * This can be either a file path or a [path alias](guide:concept-aliases) to the file.
@@ -28,7 +28,7 @@ class PhpRepository implements Repository
      * @see loadFromFile()
      * @see saveToFile()
      */
-    protected string $assignmentFile;
+    private string $assignmentFile;
     /**
      * @var string the path of the PHP script that contains the authorization rules.
      * This can be either a file path or a [path alias](guide:concept-aliases) to the file.
@@ -38,31 +38,31 @@ class PhpRepository implements Repository
      * @see loadFromFile()
      * @see saveToFile()
      */
-    protected string $ruleFile;
+    private string $ruleFile;
 
     /**
      * @var Item[]
      * format [itemName => item]
      */
-    protected array $items = [];
+    private array $items = [];
 
     /**
      * @var array
      * format [itemName => [childName => child]]
      */
-    protected array $children = [];
+    private array $children = [];
 
     /**
      * @var array
      * format [userId => [itemName => assignment]]
      */
-    protected array $assignments = [];
+    private array $assignments = [];
 
     /**
      * @var Rule[]
      * format [ruleName => rule]
      */
-    protected array $rules = [];
+    private array $rules = [];
 
     public function __construct(
         string $directory,
@@ -175,7 +175,7 @@ class PhpRepository implements Repository
      * @param string $name
      * @return Assignment|null
      */
-    public function getUserAssignmentsByName(string $userId, string $name): ?Assignment
+    public function getUserAssignmentByName(string $userId, string $name): ?Assignment
     {
         return $this->getUserAssignments($userId)[$name] ?? null;
     }
@@ -201,7 +201,7 @@ class PhpRepository implements Repository
      * @param Item $parent
      * @param Item $child
      */
-    public function addChildren(Item $parent, Item $child): void
+    public function addChild(Item $parent, Item $child): void
     {
         $this->children[$parent->getName()][$child->getName()] = $this->items[$child->getName()];
         $this->saveItems();
@@ -239,7 +239,7 @@ class PhpRepository implements Repository
      * @param string $userId
      * @param Item $item
      */
-    public function addAssignments(string $userId, Item $item): void
+    public function addAssignment(string $userId, Item $item): void
     {
         $this->assignments[$userId][$item->getName()] = new Assignment($userId, $item->getName(), time());
         $this->saveAssignments();
@@ -265,7 +265,7 @@ class PhpRepository implements Repository
      * @param string $userId
      * @param Item $item
      */
-    public function removeAssignments(string $userId, Item $item): void
+    public function removeAssignment(string $userId, Item $item): void
     {
         unset($this->assignments[$userId][$item->getName()]);
         $this->saveAssignments();
@@ -287,9 +287,9 @@ class PhpRepository implements Repository
      */
     public function removeItem(Item $item): void
     {
-        $this->clearAssigmentForItem($item);
+        $this->clearAssigmentFromItem($item);
         $this->saveAssignments();
-        $this->clearChildrenForItem($item);
+        $this->clearChildrenFromItem($item);
         unset($this->items[$item->getName()]);
         $this->saveItems();
     }
@@ -451,7 +451,7 @@ class PhpRepository implements Repository
     private function loadRules(): void
     {
         foreach ($this->loadFromFile($this->ruleFile) as $name => $ruleData) {
-            $this->rules[$name] = $this->unsterilizedRule($ruleData);
+            $this->rules[$name] = $this->unserializeRule($ruleData);
         }
     }
 
@@ -463,7 +463,7 @@ class PhpRepository implements Repository
         $this->items = [];
     }
 
-    protected function hasItem(string $name): bool
+    private function hasItem(string $name): bool
     {
         return isset($this->items[$name]);
     }
@@ -477,7 +477,7 @@ class PhpRepository implements Repository
      *
      * @see saveToFile()
      */
-    protected function loadFromFile(string $file): array
+    private function loadFromFile(string $file): array
     {
         if (is_file($file)) {
             return require $file;
@@ -489,7 +489,7 @@ class PhpRepository implements Repository
     /**
      * Saves items data into persistent storage.
      */
-    protected function saveItems(): void
+    private function saveItems(): void
     {
         $items = [];
         foreach ($this->items as $name => $item) {
@@ -513,7 +513,7 @@ class PhpRepository implements Repository
      *
      * @see loadFromFile()
      */
-    protected function saveToFile(array $data, string $file): void
+    private function saveToFile(array $data, string $file): void
     {
         if (!file_exists(dirname($file)) && !mkdir($concurrentDirectory = dirname($file)) && !is_dir(
                 $concurrentDirectory
@@ -530,7 +530,7 @@ class PhpRepository implements Repository
      *
      * @param string $file the file path.
      */
-    protected function invalidateScriptCache(string $file): void
+    private function invalidateScriptCache(string $file): void
     {
         if (function_exists('opcache_invalidate')) {
             opcache_invalidate($file, true);
@@ -540,7 +540,7 @@ class PhpRepository implements Repository
     /**
      * Saves assignments data into persistent storage.
      */
-    protected function saveAssignments(): void
+    private function saveAssignments(): void
     {
         $assignmentData = [];
         foreach ($this->assignments as $userId => $assignments) {
@@ -555,22 +555,21 @@ class PhpRepository implements Repository
     /**
      * Saves rules data into persistent storage.
      */
-    protected function saveRules(): void
+    private function saveRules(): void
     {
         $this->saveToFile($this->serializeRules(), $this->ruleFile);
     }
 
-    protected function getItemsByType(string $type): array
+    private function getItemsByType(string $type): array
     {
-        $items = [];
+        return $this->filterItems(
+            fn(Item $item) => $item->getType() === $type
+        );
+    }
 
-        foreach ($this->getItems() as $name => $item) {
-            if ($item->getType() === $type) {
-                $items[$name] = $item;
-            }
-        }
-
-        return $items;
+    private function filterItems(callable $callback): array
+    {
+        return array_filter($this->getItems(), $callback);
     }
 
     /**
@@ -614,14 +613,14 @@ class PhpRepository implements Repository
         $this->saveItems();
     }
 
-    private function clearChildrenForItem(Item $item): void
+    private function clearChildrenFromItem(Item $item): void
     {
         foreach ($this->children as &$children) {
             unset($children[$item->getName()]);
         }
     }
 
-    private function clearAssigmentForItem(Item $item): void
+    private function clearAssigmentFromItem(Item $item): void
     {
         foreach ($this->assignments as &$assignments) {
             unset($assignments[$item->getName()]);
@@ -646,7 +645,7 @@ class PhpRepository implements Repository
         return array_map(fn(Rule $rule): string => serialize($rule), $this->rules);
     }
 
-    private function unsterilizedRule(string $data): Rule
+    private function unserializeRule(string $data): Rule
     {
         return unserialize($data, ['allowed_classes' => true]);
     }
