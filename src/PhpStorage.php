@@ -276,9 +276,7 @@ final class PhpStorage implements Storage
      */
     public function removeAllAssignments(string $userId): void
     {
-        foreach ($this->assignments[$userId] as $itemName => $value) {
-            unset($this->assignments[$userId][$itemName]);
-        }
+        $this->assignments[$userId] = [];
         $this->saveAssignments();
     }
 
@@ -290,7 +288,7 @@ final class PhpStorage implements Storage
         $this->clearAssigmentFromItem($item);
         $this->saveAssignments();
         $this->clearChildrenFromItem($item);
-        unset($this->items[$item->getName()]);
+        $this->removeItemByName($item->getName());
         $this->saveItems();
     }
 
@@ -302,11 +300,10 @@ final class PhpStorage implements Storage
     {
         if (!$item->isEqualName($name)) {
             $this->updateItemName($name, $item);
-            unset($this->items[$name]);
+            $this->removeItemByName($name);
         }
 
-        $this->items[$item->getName()] = $item;
-        $this->saveItems();
+        $this->addItem($item);
     }
 
     private function updateItemName(string $name, Item $item): void
@@ -356,10 +353,7 @@ final class PhpStorage implements Storage
 
     public function clearRules(): void
     {
-        foreach ($this->items as &$item) {
-            $item = $item->withRuleName(null);
-        }
-        unset($item);
+        $this->clearItemsFromRules();
         $this->rules = [];
         $this->saveRules();
     }
@@ -636,6 +630,18 @@ final class PhpStorage implements Storage
                 $children[$item->getName()] = $children[$name];
                 unset($children[$name]);
             }
+        }
+    }
+
+    private function removeItemByName(string $name): void
+    {
+        unset($this->items[$name]);
+    }
+
+    private function clearItemsFromRules(): void
+    {
+        foreach ($this->items as &$item) {
+            $item = $item->withRuleName(null);
         }
     }
 }
