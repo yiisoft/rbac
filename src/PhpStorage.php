@@ -313,7 +313,10 @@ final class PhpStorage implements Storage
     {
         if ($this->hasItem($item->getName())) {
             throw new InvalidArgumentException(
-                "Unable to change the item name. The name '{$item->getName()}' is already used by another item."
+                sprintf(
+                    'Unable to change the item name. The name "%s" is already used by another item.',
+                    $item->getName()
+                )
             );
         }
 

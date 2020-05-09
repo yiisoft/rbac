@@ -86,29 +86,33 @@ final class Manager implements AccessCheckerInterface
     {
         if (!$this->hasItem($parent->getName()) || !$this->hasItem($child->getName())) {
             throw new InvalidArgumentException(
-                "Either \"{$parent->getName()}\" or \"{$child->getName()}\" does not exist."
+                sprintf('Either "%s" or "%s" does not exist.', $parent->getName(), $child->getName())
             );
         }
 
         if ($parent->isEqualName($child->getName())) {
-            throw new InvalidArgumentException("Cannot add \"{$parent->getName()}\" as a child of itself.");
+            throw new InvalidArgumentException(sprintf('Cannot add "%s" as a child of itself.', $parent->getName()));
         }
 
         if (!$parent->canBeParentOfItem($child)) {
             throw new InvalidArgumentException(
-                "Can not add \"{$child->getName()}\" role as a child of \"{$parent->getName()}\" permission."
+                sprintf('Can not add "%s" role as a child of "%s" permission.', $child->getName(), $parent->getName())
             );
         }
 
         if ($this->detectLoop($parent, $child)) {
             throw new RuntimeException(
-                "Cannot add \"{$child->getName()}\" as a child of \"{$parent->getName()}\". A loop has been detected."
+                sprintf(
+                    'Cannot add "%s" as a child of "%s". A loop has been detected.',
+                    $child->getName(),
+                    $parent->getName()
+                )
             );
         }
 
         if (isset($this->storage->getChildrenByName($parent->getName())[$child->getName()])) {
             throw new RuntimeException(
-                "The item \"{$parent->getName()}\" already has a child \"{$child->getName()}\"."
+                sprintf('The item "%s" already has a child "%s".', $parent->getName(), $child->getName())
             );
         }
 
