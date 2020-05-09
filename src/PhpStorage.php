@@ -146,7 +146,7 @@ final class PhpStorage implements Storage
 
     /**
      * @param string $name
-     * @return array
+     * @return array|Item[]
      */
     public function getChildrenByName(string $name): array
     {
@@ -301,41 +301,25 @@ final class PhpStorage implements Storage
     public function updateItem(string $name, Item $item): void
     {
         if (!$item->isEqualName($name)) {
-            if ($this->hasItem($item->getName())) {
-                throw new InvalidArgumentException(
-                    "Unable to change the item name. The name '{$item->getName()}' is already used by another item."
-                );
-            }
-
+            $this->updateItemName($name, $item);
             unset($this->items[$name]);
-
-            if (isset($this->children[$name])) {
-                $this->children[$item->getName()] = $this->children[$name];
-                unset($this->children[$name]);
-            }
-            foreach ($this->children as &$children) {
-                if (isset($children[$name])) {
-                    $children[$item->getName()] = $children[$name];
-                    unset($children[$name]);
-                }
-            }
-
-            unset($children);
-
-            foreach ($this->assignments as &$assignments) {
-                if (isset($assignments[$name])) {
-                    $assignments[$item->getName()] = $assignments[$name]->withItemName($item->getName());
-                    unset($assignments[$name]);
-                }
-            }
-            unset($assignments);
-
-            $this->saveAssignments();
         }
 
         $this->items[$item->getName()] = $item;
-
         $this->saveItems();
+    }
+
+    private function updateItemName(string $name, Item $item): void
+    {
+        if ($this->hasItem($item->getName())) {
+            throw new InvalidArgumentException(
+                "Unable to change the item name. The name '{$item->getName()}' is already used by another item."
+            );
+        }
+
+        $this->updateChildrenForItemName($name, $item);
+        $this->updateAssignmentsForItemName($name, $item);
+        $this->saveAssignments();
     }
 
     /**
@@ -344,11 +328,9 @@ final class PhpStorage implements Storage
     public function removeRule(string $name): void
     {
         unset($this->rules[$name]);
-        foreach ($this->items as $item) {
-            if ($item->getRuleName() === $name) {
-                $item = $item->withRuleName(null);
-                $this->updateItem($item->getName(), $item);
-            }
+        foreach ($this->getItemsByRuleName($name) as $item) {
+            $item = $item->withRuleName(null);
+            $this->updateItem($item->getName(), $item);
         }
 
         $this->saveRules();
@@ -365,7 +347,7 @@ final class PhpStorage implements Storage
 
     public function clear(): void
     {
-        $this->clearLoadFiles();
+        $this->clearLoadedData();
         $this->save();
     }
 
@@ -410,7 +392,7 @@ final class PhpStorage implements Storage
      */
     private function load(): void
     {
-        $this->clearLoadFiles();
+        $this->clearLoadedData();
         $this->loadItems();
         $this->loadAssignments();
         $this->loadRules();
@@ -455,7 +437,7 @@ final class PhpStorage implements Storage
         }
     }
 
-    private function clearLoadFiles(): void
+    private function clearLoadedData(): void
     {
         $this->children = [];
         $this->rules = [];
@@ -492,12 +474,10 @@ final class PhpStorage implements Storage
     private function saveItems(): void
     {
         $items = [];
-        foreach ($this->items as $name => $item) {
-            /* @var $item Item */
+        foreach ($this->getItems() as $name => $item) {
             $items[$name] = array_filter($item->getAttributes());
-            if (isset($this->children[$name])) {
-                foreach ($this->children[$name] as $child) {
-                    /* @var $child Item */
+            if ($this->hasChildren($name)) {
+                foreach ($this->getChildrenByName($name) as $child) {
                     $items[$name]['children'][] = $child->getName();
                 }
             }
@@ -567,6 +547,17 @@ final class PhpStorage implements Storage
         );
     }
 
+    private function getItemsByRuleName(string $ruleName): array
+    {
+        return $this->filterItems(
+            fn(Item $item) => $item->getRuleName() === $ruleName
+        );
+    }
+
+    /**
+     * @param callable $callback
+     * @return array|Item[]
+     */
     private function filterItems(callable $callback): array
     {
         return array_filter($this->getItems(), $callback);
@@ -579,38 +570,9 @@ final class PhpStorage implements Storage
      */
     private function removeAllItems(string $type): void
     {
-        $names = [];
-        foreach ($this->items as $name => $item) {
-            if ($item->getType() === $type) {
-                unset($this->items[$name]);
-                $names[$name] = true;
-            }
+        foreach ($this->getItemsByType($type) as $name => $item) {
+            $this->removeItem($item);
         }
-        if (empty($names)) {
-            return;
-        }
-
-        foreach ($this->assignments as $i => $assignments) {
-            foreach ($assignments as $n => $assignment) {
-                if (isset($names[$assignment->getItemName()])) {
-                    unset($this->assignments[$i][$n]);
-                }
-            }
-        }
-        foreach ($this->children as $name => $children) {
-            if (isset($names[$name])) {
-                unset($this->children[$name]);
-            } else {
-                foreach ($children as $childName => $item) {
-                    if (isset($names[$childName])) {
-                        unset($children[$childName]);
-                    }
-                }
-                $this->children[$name] = $children;
-            }
-        }
-
-        $this->saveItems();
     }
 
     private function clearChildrenFromItem(Item $item): void
@@ -648,5 +610,29 @@ final class PhpStorage implements Storage
     private function unserializeRule(string $data): Rule
     {
         return unserialize($data, ['allowed_classes' => true]);
+    }
+
+    private function updateAssignmentsForItemName(string $name, Item $item): void
+    {
+        foreach ($this->assignments as &$assignments) {
+            if (isset($assignments[$name])) {
+                $assignments[$item->getName()] = $assignments[$name]->withItemName($item->getName());
+                unset($assignments[$name]);
+            }
+        }
+    }
+
+    private function updateChildrenForItemName(string $name, Item $item): void
+    {
+        if ($this->hasChildren($name)) {
+            $this->children[$item->getName()] = $this->children[$name];
+            unset($this->children[$name]);
+        }
+        foreach ($this->children as &$children) {
+            if (isset($children[$name])) {
+                $children[$item->getName()] = $children[$name];
+                unset($children[$name]);
+            }
+        }
     }
 }
