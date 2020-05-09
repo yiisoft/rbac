@@ -176,12 +176,12 @@ final class Manager implements AccessCheckerInterface
     public function assign(Item $item, string $userId): Assignment
     {
         if (!$this->hasItem($item->getName())) {
-            throw new InvalidArgumentException("Unknown {$item->getType()} '{$item->getName()}'.");
+            throw new InvalidArgumentException(sprintf('Unknown %s "%s".', $item->getType(), $item->getName()));
         }
 
         if ($this->storage->getUserAssignmentByName($userId, $item->getName()) !== null) {
             throw new InvalidArgumentException(
-                "'{$item->getName()}' {$item->getType()} has already been assigned to user '$userId'."
+                sprintf('"%s" %s has already been assigned to user %s.', $item->getName(), $item->getType(), $userId)
             );
         }
 
@@ -252,22 +252,13 @@ final class Manager implements AccessCheckerInterface
     {
         $role = $this->storage->getRoleByName($roleName);
         if ($role === null) {
-            throw new InvalidArgumentException("Role \"$roleName\" not found.");
+            throw new InvalidArgumentException(sprintf('Role "%s" not found.', $roleName));
         }
 
         $result = [];
         $this->getChildrenRecursive($roleName, $result);
 
-        $roles = [$roleName => $role];
-
-        $roles += array_filter(
-            $this->storage->getRoles(),
-            static function (Role $roleItem) use ($result) {
-                return array_key_exists($roleItem->getName(), $result);
-            }
-        );
-
-        return $roles;
+        return array_merge([$roleName => $role], $this->getRolesPresentInArray($result));
     }
 
     /**
@@ -320,10 +311,10 @@ final class Manager implements AccessCheckerInterface
         /**
          * @var $assignments Assignment[]
          */
-        foreach ($this->storage->getAssignments() as $userID => $assignments) {
+        foreach ($this->storage->getAssignments() as $userId => $assignments) {
             foreach ($assignments as $userAssignment) {
                 if (in_array($userAssignment->getItemName(), $roles, true)) {
-                    $result[] = (string)$userID;
+                    $result[] = (string)$userId;
                 }
             }
         }
@@ -492,7 +483,7 @@ final class Manager implements AccessCheckerInterface
         }
         $rule = $this->storage->getRuleByName($item->getRuleName());
         if ($rule === null) {
-            throw new RuntimeException("Rule not found: {$item->getRuleName()}");
+            throw new RuntimeException(sprintf('Rule not found: %s', $item->getRuleName()));
         }
 
         return $rule->execute($user, $item, $params);
@@ -539,7 +530,7 @@ final class Manager implements AccessCheckerInterface
          */
         foreach ($this->storage->getChildren() as $parentRole => $items) {
             foreach ($items as $item) {
-                if ($item->getName() === $roleName) {
+                if ($item->isEqualName($roleName)) {
                     $result[] = $parentRole;
                     $this->getParentRolesRecursive($parentRole, $result);
                     break;
@@ -709,5 +700,15 @@ final class Manager implements AccessCheckerInterface
             $result[$childName] = true;
             $this->getChildrenRecursive($childName, $result);
         }
+    }
+
+    private function getRolesPresentInArray(array $array): array
+    {
+        return array_filter(
+            $this->storage->getRoles(),
+            static function (Role $roleItem) use ($array) {
+                return array_key_exists($roleItem->getName(), $array);
+            }
+        );
     }
 }
