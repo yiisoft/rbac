@@ -4,27 +4,14 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac\Tests;
 
-/**
- * Mock for the time() function for RBAC classes. Avoid random test fails.
- *
- * @return int
- */
-function time()
-{
-    return ManagerTest::$time ?: \time();
-}
-
 use PHPUnit\Framework\TestCase;
 use Yiisoft\Files\FileHelper;
-use Yiisoft\Rbac\Assignment;
 use InvalidArgumentException;
 use RuntimeException;
-use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\Manager;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\PhpStorage;
 use Yiisoft\Rbac\Role;
-use Yiisoft\Rbac\Rule;
 use Yiisoft\Rbac\RuleFactory\ClassNameRuleFactory;
 use Yiisoft\Rbac\Storage;
 
@@ -33,292 +20,172 @@ use Yiisoft\Rbac\Storage;
  */
 final class ManagerTest extends TestCase
 {
-    public static ?int $time;
-    public static ?int $filemtime;
+    private const STUB_DIRECTORY = '/Stub/';
     private string $testDataPath;
-    private ?Storage $storage = null;
-    private ?Manager $auth = null;
-
-    public function testSaveLoad(): void
-    {
-        static::$time = static::$filemtime = \time();
-        $this->prepareData();
-        $items = $this->storage->getItems();
-        $children = $this->storage->getChildren();
-        $assignments = $this->storage->getAssignments();
-        $rules = $this->storage->getRules();
-
-        $this->createManager();
-
-        $this->assertEquals($items, $this->storage->getItems());
-        $this->assertNotEmpty($this->storage->getItems());
-
-        $this->assertEquals($children, $this->storage->getChildren());
-        $this->assertNotEmpty($this->storage->getChildren());
-
-        $this->assertEquals($assignments, $this->storage->getAssignments());
-        $this->assertNotEmpty($this->storage->getAssignments());
-
-        $this->assertEquals($rules, $this->storage->getRules());
-        $this->assertNotEmpty($this->storage->getRules());
-    }
-
-    public function testSaveAssignments(): void
-    {
-        $this->storage->clear();
-
-        $role = new Role('Admin');
-        $this->auth->addRole($role);
-        $this->auth->assign($role, '13');
-
-        $this->assertStringContainsString(
-            'Admin',
-            file_get_contents($this->getAssignmentFilePath()),
-            'Role "Admin" was not added when saving'
-        );
-
-        $role = $role->withName('NewAdmin');
-        $this->auth->updateRole('Admin', $role);
-        $this->assertStringContainsString(
-            'NewAdmin',
-            file_get_contents($this->getAssignmentFilePath()),
-            'Role "NewAdmin" was not added when saving'
-        );
-        $this->auth->removeRole($role);
-        $this->assertStringNotContainsString(
-            'Admin',
-            file_get_contents($this->getAssignmentFilePath()),
-            'Role "Admin" was not removed when saving'
-        );
-
-        $this->auth->removeRole($role);
-        $this->assertStringNotContainsString(
-            'NewAdmin',
-            file_get_contents($this->getAssignmentFilePath()),
-            'Role "NewAdmin" was not removed when saving'
-        );
-    }
 
     public function testRevokeAllClearAllUseAssignments(): void
     {
-        $this->prepareData();
-        $this->auth->revokeAll('author B');
-        $this->assertEmpty($this->storage->getUserAssignments('author B'));
-    }
-
-    public function testReturnUserAssignment(): void
-    {
-        $this->prepareData();
-        $this->assertInstanceOf(Assignment::class, $this->storage->getUserAssignmentByName('author B', 'author'));
-    }
-
-    public function testReturnNullForUserWithoutAssignment(): void
-    {
-        $this->prepareData();
-        $this->assertNull($this->storage->getUserAssignmentByName('guest', 'author'));
-    }
-
-    public function testReturnEmptyArrayWithNoAssignments(): void
-    {
-        $this->prepareData();
-        $this->storage->clearAssignments();
-        $this->assertEmpty($this->storage->getUserAssignments('author B'));
-        $this->assertEmpty($this->storage->getUserAssignments('author A'));
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
+        $manager->revokeAll('author B');
+        $this->assertEmpty($storage->getUserAssignments('author B'));
     }
 
     public function testReturnTrueWhenChildExists(): void
     {
-        $this->prepareData();
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
 
-        $reader = $this->storage->getRoleByName('reader');
-        $readPost = $this->storage->getPermissionByName('readPost');
-
-        $this->assertTrue($this->auth->hasChild($reader, $readPost));
+        $reader = $storage->getRoleByName('reader');
+        $readPost = $storage->getPermissionByName('readPost');
+        $this->assertTrue($manager->hasChild($reader, $readPost));
     }
 
     public function testReturnFalseWhenHasNoChild(): void
     {
-        $this->prepareData();
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
 
-        $reader = $this->storage->getRoleByName('reader');
-        $updatePost = $this->storage->getPermissionByName('updatePost');
-
-        $this->assertFalse($this->auth->hasChild($reader, $updatePost));
+        $reader = $storage->getRoleByName('reader');
+        $updatePost = $storage->getPermissionByName('updatePost');
+        $this->assertFalse($manager->hasChild($reader, $updatePost));
     }
 
     public function testRemoveChildren(): void
     {
-        $this->prepareData();
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
 
-        $author = $this->storage->getRoleByName('author');
-        $createPost = $this->storage->getPermissionByName('createPost');
-        $updatePost = $this->storage->getPermissionByName('updatePost');
+        $author = $storage->getRoleByName('author');
+        $createPost = $storage->getPermissionByName('createPost');
+        $updatePost = $storage->getPermissionByName('updatePost');
 
-        $this->auth->removeChildren($author);
+        $manager->removeChildren($author);
 
-        $this->assertFalse($this->auth->hasChild($author, $createPost));
-        $this->assertFalse($this->auth->hasChild($author, $updatePost));
+        $this->assertFalse($manager->hasChild($author, $createPost));
+        $this->assertFalse($manager->hasChild($author, $updatePost));
     }
 
     public function testRemoveChild(): void
     {
-        $this->prepareData();
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
 
-        $author = $this->storage->getRoleByName('author');
-        $createPost = $this->storage->getPermissionByName('createPost');
-        $updatePost = $this->storage->getPermissionByName('updatePost');
+        $author = $storage->getRoleByName('author');
+        $createPost = $storage->getPermissionByName('createPost');
+        $updatePost = $storage->getPermissionByName('updatePost');
 
-        $this->auth->removeChild($author, $createPost);
+        $manager->removeChild($author, $createPost);
 
-        $this->assertFalse($this->auth->hasChild($author, $createPost));
-        $this->assertTrue($this->auth->hasChild($author, $updatePost));
+        $this->assertFalse($manager->hasChild($author, $createPost));
+        $this->assertTrue($manager->hasChild($author, $updatePost));
     }
 
     public function testRuleSetWhenUpdatingItem(): void
     {
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
+
         $newRule = new EasyRule();
 
         $permissionName = 'newPermission';
         $permission = (new Permission($permissionName))
             ->withRuleName($newRule->getName());
 
-        $this->auth->updatePermission($permissionName, $permission);
-        $this->assertNotNull($this->storage->getPermissionByName($permissionName));
-        $this->assertNotNull($this->storage->getRuleByName($newRule->getName()));
+        $manager->updatePermission($permissionName, $permission);
+        $this->assertNotNull($storage->getPermissionByName($permissionName));
+        $this->assertNotNull($storage->getRuleByName($newRule->getName()));
     }
 
     public function testDefaultRolesSetWithClosure(): void
     {
-        $this->auth->setDefaultRoles(
+        $manager = $this->createManager($this->createStorage());
+        $manager->setDefaultRoles(
             static function () {
                 return ['newDefaultRole'];
             }
         );
 
-        $this->assertEquals($this->auth->getDefaultRoles(), ['newDefaultRole']);
+        $this->assertEquals(['newDefaultRole'], $manager->getDefaultRoles());
     }
 
     public function testReturnFalseForNonExistingUserAndNoDefaultRoles(): void
     {
-        $this->auth->setDefaultRoles([]);
-        $this->assertFalse($this->auth->userHasPermission('unknown user', 'createPost'));
+        $manager = $this->createManager($this->createStorage());
+        $manager->setDefaultRoles([]);
+        $this->assertFalse($manager->userHasPermission('unknown user', 'createPost'));
     }
 
     public function testRuleSetWhenAddingItem(): void
     {
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
+
         $newRule = new EasyRule();
         $itemName = 'newPermission';
         $item = (new Permission($itemName))
             ->withRuleName($newRule->getName());
 
-        $this->auth->addPermission($item);
-        $this->assertNotNull($this->storage->getPermissionByName($itemName));
-        $this->assertNotNull($this->storage->getRuleByName($newRule->getName()));
-    }
-
-    public function testGetRuleReturnNullForNonExistingRole(): void
-    {
-        $this->prepareData();
-        $author = $this->storage->getRoleByName('createPost');
-
-        $this->assertNull($author);
+        $manager->addPermission($item);
+        $this->assertNotNull($storage->getPermissionByName($itemName));
+        $this->assertNotNull($storage->getRuleByName($newRule->getName()));
     }
 
     public function testAddRole(): void
     {
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
         $role = (new Role('admin'))
             ->withDescription('administrator');
 
-        $this->auth->addRole($role);
-        $this->assertNotNull($this->storage->getRoleByName('admin'));
+        $manager->addRole($role);
+        $this->assertNotNull($storage->getRoleByName('admin'));
     }
 
     public function testAddPermission(): void
     {
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
         $permission = (new Permission('edit post'))
             ->withDescription('edit a post');
 
-        $this->auth->addPermission($permission);
-        $this->assertNotNull($this->storage->getPermissionByName('edit post'));
+        $manager->addPermission($permission);
+        $this->assertNotNull($storage->getPermissionByName('edit post'));
     }
 
     public function testAddRule(): void
     {
-        $this->prepareData();
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
 
         $ruleName = 'isReallyReallyAuthor';
         $rule = new AuthorRule($ruleName, true);
-        $this->auth->addRule($rule);
+        $manager->addRule($rule);
 
         /** @var AuthorRule $rule */
-        $rule = $this->storage->getRuleByName($ruleName);
+        $rule = $storage->getRuleByName($ruleName);
         $this->assertEquals($ruleName, $rule->getName());
         $this->assertTrue($rule->isReallyReally());
     }
 
     public function testGetChildren(): void
     {
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
+
         $user = new Role('user');
-        $this->auth->addRole($user);
-        $this->assertCount(0, $this->storage->getChildrenByName($user->getName()));
+        $manager->addRole($user);
+        $this->assertCount(0, $storage->getChildrenByName($user->getName()));
 
         $changeName = new Permission('changeName');
-        $this->auth->addPermission($changeName);
-        $this->auth->addChild($user, $changeName);
-        $this->assertCount(1, $this->storage->getChildrenByName($user->getName()));
-    }
-
-    public function testGetRule(): void
-    {
-        $this->prepareData();
-
-        $rule = $this->storage->getRuleByName('isAuthor');
-        $this->assertInstanceOf(Rule::class, $rule);
-        $this->assertEquals('isAuthor', $rule->getName());
-        $this->assertEquals(
-            ['name' => 'isAuthor'],
-            $rule->getAttributes()
-        );
-
-        $rule = $this->storage->getRuleByName('nonExisting');
-        $this->assertNull($rule);
-    }
-
-    public function testGetRules(): void
-    {
-        $this->prepareData();
-
-        $rule = new AuthorRule('isReallyReallyAuthor', true);
-        $this->auth->addRule($rule);
-
-        $rules = $this->storage->getRules();
-
-        $ruleNames = [];
-        foreach ($rules as $rule) {
-            $ruleNames[] = $rule->getName();
-        }
-
-        $this->assertContains('isReallyReallyAuthor', $ruleNames);
-        $this->assertContains('isAuthor', $ruleNames);
-    }
-
-    public function testRemoveRule(): void
-    {
-        $this->prepareData();
-
-        $this->auth->removeRule($this->storage->getRuleByName('isAuthor'));
-        $rules = $this->storage->getRules();
-
-        $this->assertEmpty($rules);
-
-        $this->auth->removePermission($this->storage->getPermissionByName('createPost'));
-        $item = $this->storage->getPermissionByName('createPost');
-        $this->assertNull($item);
+        $manager->addPermission($changeName);
+        $manager->addChild($user, $changeName);
+        $this->assertCount(1, $storage->getChildrenByName($user->getName()));
     }
 
     public function testUserHasPermission(): void
     {
-        $this->prepareData();
+        $manager = $this->createManager($this->createStorage());
 
         $testSuites = [
             'reader A' => [
@@ -326,7 +193,6 @@ final class ManagerTest extends TestCase
                 'readPost' => true,
                 'updatePost' => false,
                 'updateAnyPost' => false,
-                // roles checked directly should return false:
                 'reader' => false,
             ],
             'author B' => [
@@ -345,7 +211,6 @@ final class ManagerTest extends TestCase
                 null => false,
             ],
             'guest' => [
-                // all actions denied for guest (user not exists)
                 'createPost' => false,
                 'readPost' => false,
                 'updatePost' => false,
@@ -362,7 +227,7 @@ final class ManagerTest extends TestCase
             foreach ($tests as $permission => $result) {
                 $this->assertEquals(
                     $result,
-                    $this->auth->userHasPermission($user, $permission, $params),
+                    $manager->userHasPermission($user, $permission, $params),
                     "Checking \"$user\" can \"$permission\""
                 );
             }
@@ -371,8 +236,7 @@ final class ManagerTest extends TestCase
 
     public function testGetPermissionsByRole(): void
     {
-        $this->prepareData();
-        $permissions = $this->auth->getPermissionsByRole('admin');
+        $permissions = $this->createManager($this->createStorage())->getPermissionsByRole('admin');
         $expectedPermissions = ['createPost', 'updatePost', 'readPost', 'updateAnyPost'];
         $this->assertCount(count($expectedPermissions), $permissions);
         foreach ($expectedPermissions as $permissionName) {
@@ -382,8 +246,7 @@ final class ManagerTest extends TestCase
 
     public function testGetPermissionsByUser(): void
     {
-        $this->prepareData();
-        $permissions = $this->auth->getPermissionsByUser('author B');
+        $permissions = $this->createManager($this->createStorage())->getPermissionsByUser('author B');
         $expectedPermissions = ['deletePost', 'createPost', 'updatePost', 'readPost'];
         $this->assertCount(count($expectedPermissions), $permissions);
         foreach ($expectedPermissions as $permissionName) {
@@ -391,86 +254,45 @@ final class ManagerTest extends TestCase
         }
     }
 
-    public function testGetRole(): void
-    {
-        $this->prepareData();
-        $author = $this->storage->getRoleByName('author');
-        $this->assertEquals(Item::TYPE_ROLE, $author->getType());
-        $this->assertEquals('author', $author->getName());
-        $this->assertEquals(
-            [
-                'name' => 'author',
-                'description' => '',
-                'ruleName' => null,
-                'type' => 'role',
-                'updatedAt' => time(),
-                'createdAt' => time(),
-            ],
-            $author->getAttributes()
-        );
-    }
-
-    public function testGetPermission(): void
-    {
-        $this->prepareData();
-        $createPost = $this->storage->getPermissionByName('createPost');
-        $this->assertEquals(Item::TYPE_PERMISSION, $createPost->getType());
-        $this->assertEquals('createPost', $createPost->getName());
-        $this->assertEquals(
-            [
-                'name' => 'createPost',
-                'description' => 'create a post',
-                'ruleName' => null,
-                'type' => 'permission',
-                'updatedAt' => time(),
-                'createdAt' => time(),
-            ],
-            $createPost->getAttributes()
-        );
-    }
-
     public function testGetRolesByUser(): void
     {
-        $this->prepareData();
-        $reader = $this->storage->getRoleByName('reader');
-        $this->auth->assign($reader, '0');
-        $this->auth->assign($reader, '123');
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
 
-        $roles = $this->auth->getRolesByUser('reader A');
-        $this->assertInstanceOf(Role::class, reset($roles));
-        $this->assertEquals($roles['reader']->getName(), 'reader');
+        $reader = $storage->getRoleByName('reader');
+        $manager->assign($reader, '0');
+        $manager->assign($reader, '123');
 
-        $roles = $this->auth->getRolesByUser('0');
-        $this->assertInstanceOf(Role::class, reset($roles));
-        $this->assertEquals($roles['reader']->getName(), 'reader');
+        $roles = $manager->getRolesByUser('reader A');
+        $this->assertEquals(['myDefaultRole', 'reader'], array_keys($roles));
 
-        $roles = $this->auth->getRolesByUser('123');
-        $this->assertInstanceOf(Role::class, reset($roles));
-        $this->assertEquals($roles['reader']->getName(), 'reader');
+        $roles = $manager->getRolesByUser('0');
+        $this->assertEquals(['myDefaultRole', 'reader'], array_keys($roles));
 
-        $this->assertContains('myDefaultRole', array_keys($roles));
+        $roles = $manager->getRolesByUser('123');
+        $this->assertEquals(['myDefaultRole', 'reader'], array_keys($roles));
     }
 
     public function testGetChildRoles(): void
     {
-        $this->prepareData();
+        $manager = $this->createManager($this->createStorage());
 
-        $roles = $this->auth->getChildRoles('withoutChildren');
+        $roles = $manager->getChildRoles('withoutChildren');
         $this->assertCount(1, $roles);
         $this->assertInstanceOf(Role::class, reset($roles));
         $this->assertSame(reset($roles)->getName(), 'withoutChildren');
 
-        $roles = $this->auth->getChildRoles('reader');
+        $roles = $manager->getChildRoles('reader');
         $this->assertCount(1, $roles);
         $this->assertInstanceOf(Role::class, reset($roles));
         $this->assertSame(reset($roles)->getName(), 'reader');
 
-        $roles = $this->auth->getChildRoles('author');
+        $roles = $manager->getChildRoles('author');
         $this->assertCount(2, $roles);
         $this->assertArrayHasKey('author', $roles);
         $this->assertArrayHasKey('reader', $roles);
 
-        $roles = $this->auth->getChildRoles('admin');
+        $roles = $manager->getChildRoles('admin');
         $this->assertCount(3, $roles);
         $this->assertArrayHasKey('admin', $roles);
         $this->assertArrayHasKey('author', $roles);
@@ -479,313 +301,269 @@ final class ManagerTest extends TestCase
 
     public function testAssignMultipleRoles(): void
     {
-        $this->prepareData();
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
 
-        $reader = $this->storage->getRoleByName('reader');
-        $author = $this->storage->getRoleByName('author');
-        $this->auth->assign($reader, 'readingAuthor');
-        $this->auth->assign($author, 'readingAuthor');
+        $reader = $storage->getRoleByName('reader');
+        $author = $storage->getRoleByName('author');
+        $manager->assign($reader, 'readingAuthor');
+        $manager->assign($author, 'readingAuthor');
 
-        $this->createManager();
-
-        $roles = $this->auth->getRolesByUser('readingAuthor');
-        $roleNames = [];
-        foreach ($roles as $role) {
-            $roleNames[] = $role->getName();
-        }
-
-        $this->assertContains(
-            'reader',
-            $roleNames,
-            'Roles should contain reader. Currently it has: ' . implode(', ', $roleNames)
-        );
-        $this->assertContains(
-            'author',
-            $roleNames,
-            'Roles should contain author. Currently it has: ' . implode(', ', $roleNames)
+        $this->assertEquals(
+            [
+                'myDefaultRole',
+                'reader',
+                'author'
+            ],
+            array_keys($manager->getRolesByUser('readingAuthor'))
         );
     }
 
-    public function testHasAssignments(): void
+    public function testUserIdsByRole(): void
     {
-        $this->storage->clear();
-
-        $this->assertFalse(
-            $this->storage->assignmentExist('non_existing'),
-            'Non existing permission should not have assignments'
-        );
-
-        $admin = new Role('admin');
-        $this->auth->addRole($admin);
-        $this->auth->assign($admin, '1');
-
-        $this->assertTrue(
-            $this->storage->assignmentExist('admin'),
-            'Existing assigned role should have assignments'
-        );
-
-        $role = new Role('unassigned');
-        $this->auth->addRole($role);
-        $this->assertFalse(
-            $this->storage->assignmentExist('unassigned'),
-            'Existing not assigned role should not have assignments'
-        );
-    }
-
-    public function testGetAssignmentsByRole(): void
-    {
-        $this->prepareData();
-        $this->createManager();
-
-        $this->assertEqualsCanonicalizing(
+        $manager = $this->createManager($this->createStorage());
+        $this->assertEquals(
             [
                 'reader A',
                 'author B',
                 'admin C'
             ],
-            $this->auth->getUserIdsByRole('reader'),
-            ''
+            $manager->getUserIdsByRole('reader')
         );
-
         $this->assertEquals(
             [
                 'author B',
                 'admin C'
             ],
-            $this->auth->getUserIdsByRole('author')
+            $manager->getUserIdsByRole('author')
         );
-
-        $this->assertEquals(['admin C'], $this->auth->getUserIdsByRole('admin'));
+        $this->assertEquals(['admin C'], $manager->getUserIdsByRole('admin'));
     }
 
     public function testGetAssignmentsByRoleNonExistentRole(): void
     {
-        $this->prepareData();
-        $this->createManager();
-        $this->assertEquals([], $this->auth->getUserIdsByRole('nonexisting'));
+        $manager = $this->createManager($this->createStorage());
+        $this->assertEmpty($manager->getUserIdsByRole('nonExistRole'));
     }
 
     public function testCanAddChild(): void
     {
-        $this->prepareData();
+        $manager = $this->createManager($this->createStorage());
 
         $author = new Role('author');
         $reader = new Role('reader');
 
-        $this->assertTrue($this->auth->canAddChild($author, $reader));
-        $this->assertFalse($this->auth->canAddChild($reader, $author));
+        $this->assertTrue($manager->canAddChild($author, $reader));
+        $this->assertFalse($manager->canAddChild($reader, $author));
     }
 
     public function testCanNotAddRoleToPermission(): void
     {
+        $manager = $this->createManager($this->createStorage());
         $permission = new Permission('test_permission');
         $role = new Role('test_role');
-
-        $this->assertFalse($this->auth->canAddChild($permission, $role));
-        $this->assertTrue($this->auth->canAddChild($role, $permission));
+        $this->assertFalse($manager->canAddChild($permission, $role));
+        $this->assertTrue($manager->canAddChild($role, $permission));
     }
 
-    public function testRemoveAllRules(): void
+    public function testAssignUnknownItem(): void
     {
-        $this->prepareData();
-
-        $this->storage->clearRules();
-
-        $this->assertEmpty($this->storage->getRules());
-        $this->assertNotEmpty($this->storage->getRoles());
-        $this->assertNotEmpty($this->storage->getPermissions());
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unknown role "nonExistRole".');
+        $manager = $this->createManager($this->createStorage());
+        $role = new Role('nonExistRole');
+        $manager->assign($role, 'reader');
     }
 
-    public function testRemoveAllRoles(): void
+    public function testAssignAlreadyAssignedItem(): void
     {
-        $this->prepareData();
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('"reader" role has already been assigned to user reader A.');
 
-        $this->storage->clearRoles();
-
-        $this->assertEmpty($this->storage->getRoles());
-        $this->assertNotEmpty($this->storage->getRules());
-        $this->assertNotEmpty($this->storage->getPermissions());
-    }
-
-    public function testRemoveAllPermissions(): void
-    {
-        $this->prepareData();
-
-        $this->storage->clearPermissions();
-
-        $this->assertEmpty($this->storage->getPermissions());
-        $this->assertNotEmpty($this->storage->getRules());
-        $this->assertNotEmpty($this->storage->getRoles());
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
+        $role = $storage->getRoleByName('reader');
+        $manager->assign($role, 'reader A');
     }
 
     public function testAssignRuleToRoleByName(): void
     {
+        $storage = $this->createStorage();
+        $storage->clear();
+        $manager = $this->createManager($storage);
         $userId = '3';
-        $auth = $this->auth;
-        $this->storage->clear();
+        $storage->clear();
 
         $rule = new ActionRule();
-        $auth->addRule($rule);
+        $manager->addRule($rule);
 
         $role = (new Role('Reader'))
             ->withRuleName($rule->getName());
-        $auth->addRole($role);
+        $manager->addRole($role);
 
         $permission = new Permission('manage');
-        $auth->addPermission($permission);
-        $auth->addChild($role, $permission);
+        $manager->addPermission($permission);
+        $manager->addChild($role, $permission);
 
-        $auth->assign($role, $userId);
+        $manager->assign($role, $userId);
 
-        $this->assertTrue($auth->userHasPermission($userId, 'manage', ['action' => 'read']));
-        $this->assertFalse($auth->userHasPermission($userId, 'manage', ['action' => 'write']));
+        $this->assertTrue($manager->userHasPermission($userId, 'manage', ['action' => 'read']));
+        $this->assertFalse($manager->userHasPermission($userId, 'manage', ['action' => 'write']));
     }
 
     public function testAssignRuleToPermissionByName(): void
     {
+        $storage = $this->createStorage();
+        $storage->clear();
+        $manager = $this->createManager($storage);
         $userId = '3';
-        $auth = $this->auth;
-        $this->storage->clear();
         $rule = new ActionRule();
-        $auth->addRule($rule);
+        $manager->addRule($rule);
         $item = (new Permission('manage'))
             ->withRuleName($rule->getName());
-        $auth->addPermission($item);
+        $manager->addPermission($item);
+        $manager->assign($item, $userId);
 
-        $auth->assign($item, $userId);
-
-        $this->assertTrue($auth->userHasPermission($userId, 'manage', ['action' => 'read']));
-        $this->assertFalse($auth->userHasPermission($userId, 'manage', ['action' => 'write']));
+        $this->assertTrue($manager->userHasPermission($userId, 'manage', ['action' => 'read']));
+        $this->assertFalse($manager->userHasPermission($userId, 'manage', ['action' => 'write']));
     }
 
     public function testUpdateRoleNameAndRule(): void
     {
+        $storage = $this->createStorage();
+        $storage->clear();
+        $manager = $this->createManager($storage);
         $userId = '3';
-        $auth = $this->auth;
-        $this->storage->clear();
 
-        $auth->addRule(new ActionRule());
-        $auth->addRule(new AuthorRule());
+        $manager->addRule(new ActionRule());
+        $manager->addRule(new AuthorRule());
 
         $role = (new Role('Reader'))
             ->withRuleName('action_rule');
-        $auth->addRole($role);
-        $auth->assign($role, $userId);
+        $manager->addRole($role);
+        $manager->assign($role, $userId);
 
         $permission = new Permission('manage');
-        $auth->addPermission($permission);
-        $auth->addChild($role, $permission);
+        $manager->addPermission($permission);
+        $manager->addChild($role, $permission);
 
-        $role = $this->storage->getRoleByName('Reader')
+        $role = $storage->getRoleByName('Reader')
             ->withName('AdminPost')
             ->withRuleName('isAuthor');
-        $auth->updateRole('Reader', $role);
+        $manager->updateRole('Reader', $role);
 
         $this->assertArrayNotHasKey(
             'Reader',
-            $auth->getRolesByUser($userId),
+            $manager->getRolesByUser($userId),
             'Old role should not be assigned'
         );
 
         $this->assertArrayHasKey(
             'AdminPost',
-            $auth->getRolesByUser($userId),
+            $manager->getRolesByUser($userId),
             'New role should be assigned'
         );
 
-        $role = $this->storage->getRoleByName('AdminPost');
+        $role = $storage->getRoleByName('AdminPost');
         $this->assertSame('isAuthor', $role->getRuleName(), 'Rule should have new name');
     }
 
     public function testUpdatePermissionNameAndRule(): void
     {
+        $storage = $this->createStorage();
+        $storage->clear();
+        $manager = $this->createManager($storage);
         $userId = '3';
-        $auth = $this->auth;
-        $this->storage->clear();
 
-        $auth->addRule(new ActionRule());
-        $auth->addRule(new AuthorRule());
+        $manager->addRule(new ActionRule());
+        $manager->addRule(new AuthorRule());
 
         $manage = (new Permission('manage'))
             ->withRuleName('action_rule');
-        $auth->addPermission($manage);
-        $auth->assign($manage, $userId);
+        $manager->addPermission($manage);
+        $manager->assign($manage, $userId);
 
-        $manage = $this->storage->getPermissionByName('manage')
+        $manage = $storage->getPermissionByName('manage')
             ->withName('admin')
             ->withRuleName('isAuthor');
-        $auth->updatePermission('manage', $manage);
+        $manager->updatePermission('manage', $manage);
 
-        $this->assertTrue($auth->userHasPermission($userId, 'admin', ['authorID' => 3]));
-        $this->assertFalse($auth->userHasPermission($userId, 'manage', ['authorID' => 3]));
+        $this->assertTrue($manager->userHasPermission($userId, 'admin', ['authorID' => 3]));
+        $this->assertFalse($manager->userHasPermission($userId, 'manage', ['authorID' => 3]));
     }
 
     public function testRevokeRole(): void
     {
         $userId = '3';
-        $auth = $this->auth;
-        $this->storage->clear();
+        $storage = $this->createStorage();
+        $storage->clear();
+        $manager = $this->createManager($storage);
 
         $role = new Role('Admin');
-        $auth->addRole($role);
-        $auth->assign($role, $userId);
-        $auth->revoke($role, $userId);
+        $manager->addRole($role);
+        $manager->assign($role, $userId);
+        $manager->revoke($role, $userId);
 
-        $this->assertNotContains('Admin', $auth->getRolesByUser($userId));
+        $this->assertNotContains('Admin', $manager->getRolesByUser($userId));
     }
 
     public function testRevokePermission(): void
     {
+        $storage = $this->createStorage();
+        $storage->clear();
+        $manager = $this->createManager($storage);
         $userId = '3';
-        $auth = $this->auth;
-        $this->storage->clear();
+
 
         $permission = new Permission('manage');
-        $auth->addPermission($permission);
-        $auth->assign($permission, $userId);
-        $auth->revoke($permission, $userId);
+        $manager->addPermission($permission);
+        $manager->assign($permission, $userId);
+        $manager->revoke($permission, $userId);
 
-        $this->assertFalse($auth->userHasPermission($userId, 'manage'));
+        $this->assertFalse($manager->userHasPermission($userId, 'manage'));
     }
 
     public function testRevokePermissionWithRule(): void
     {
+        $storage = $this->createStorage();
+        $storage->clear();
+        $manager = $this->createManager($storage);
         $userId = '3';
-        $auth = $this->auth;
-        $this->storage->clear();
 
         $rule = new ActionRule();
-        $auth->addRule($rule);
+        $manager->addRule($rule);
 
         $permission = (new Permission('manage'))
             ->withRuleName($rule->getName());
-        $auth->addPermission($permission);
-        $auth->assign($permission, $userId);
+        $manager->addPermission($permission);
+        $manager->assign($permission, $userId);
 
-        $auth->revoke($permission, $userId);
+        $manager->revoke($permission, $userId);
 
-        $this->assertFalse($auth->userHasPermission($userId, 'manage', ['action' => 'read']));
-        $this->assertFalse($auth->userHasPermission($userId, 'manage', ['action' => 'write']));
+        $this->assertFalse($manager->userHasPermission($userId, 'manage', ['action' => 'read']));
+        $this->assertFalse($manager->userHasPermission($userId, 'manage', ['action' => 'write']));
     }
 
     public function testRevokeRoleWithRule(): void
     {
+        $storage = $this->createStorage();
+        $storage->clear();
+        $manager = $this->createManager($storage);
+
         $userId = '3';
-        $auth = $this->auth;
-        $this->storage->clear();
 
         $rule = new ActionRule();
-        $auth->addRule($rule);
+        $manager->addRule($rule);
 
         $role = (new Role('Admin'))
             ->withRuleName($rule->getName());
-        $auth->addRole($role);
-        $auth->assign($role, $userId);
+        $manager->addRole($role);
+        $manager->assign($role, $userId);
 
-        $auth->revoke($role, $userId);
+        $manager->revoke($role, $userId);
 
-        $this->assertFalse($auth->userHasPermission($userId, 'Admin', ['action' => 'read']));
-        $this->assertFalse($auth->userHasPermission($userId, 'Admin', ['action' => 'write']));
+        $this->assertFalse($manager->userHasPermission($userId, 'Admin', ['action' => 'read']));
+        $this->assertFalse($manager->userHasPermission($userId, 'Admin', ['action' => 'write']));
     }
 
     /**
@@ -794,23 +572,21 @@ final class ManagerTest extends TestCase
      */
     public function testRuleWithPrivateFields(): void
     {
-        $auth = $this->auth;
-
-        $this->storage->clear();
+        $storage = $this->createStorage();
+        $storage->clear();
+        $manager = $this->createManager($storage);
 
         $rule = new ActionRule();
-        $auth->addRule($rule);
-
-        /** @var ActionRule $rule */
-        $rule = $this->storage->getRuleByName('action_rule');
-        $this->assertInstanceOf(ActionRule::class, $rule);
+        $manager->addRule($rule);
+        $this->assertInstanceOf(ActionRule::class, $storage->getRuleByName('action_rule'));
     }
 
     public function testDefaultRolesWithClosureReturningNonArrayValue(): void
     {
+        $manager = $this->createManager($this->createStorage());
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Default roles closure must return an array');
-        $this->auth->setDefaultRoles(
+        $manager->setDefaultRoles(
             static function () {
                 return 'test';
             }
@@ -819,181 +595,211 @@ final class ManagerTest extends TestCase
 
     public function testDefaultRolesWithNonArrayValue(): void
     {
+        $manager = $this->createManager($this->createStorage());
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Default roles must be either an array or a callable');
-        $this->auth->setDefaultRoles('test');
+        $manager->setDefaultRoles('test');
     }
 
     public function testUpdateRule(): void
     {
-        $this->prepareData();
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
 
-        $rule = $this->storage->getRuleByName('isAuthor');
+        $rule = $storage->getRuleByName('isAuthor');
         $rule = $rule
             ->withName('newName')
             ->withReallyReally(false);
 
-        $this->auth->updateRule('isAuthor', $rule);
+        $manager->updateRule('isAuthor', $rule);
 
-        $rule = $this->storage->getRuleByName('isAuthor');
+        $rule = $storage->getRuleByName('isAuthor');
         $this->assertNull($rule);
 
         /** @var AuthorRule $rule */
-        $rule = $this->storage->getRuleByName('newName');
+        $rule = $storage->getRuleByName('newName');
         $this->assertEquals('newName', $rule->getName());
         $this->assertFalse($rule->isReallyReally());
 
         $rule = $rule->withReallyReally(true);
-        $this->auth->updateRule('newName', $rule);
+        $manager->updateRule('newName', $rule);
 
         /** @var AuthorRule $rule */
-        $rule = $this->storage->getRuleByName('newName');
+        $rule = $storage->getRuleByName('newName');
         $this->assertTrue($rule->isReallyReally());
 
-        $item = $this->storage->getPermissionByName('createPost')
+        $item = $storage->getPermissionByName('createPost')
             ->withName('new createPost');
-        $this->auth->updatePermission('createPost', $item);
+        $manager->updatePermission('createPost', $item);
 
-        $item = $this->storage->getPermissionByName('createPost');
+        $item = $storage->getPermissionByName('createPost');
         $this->assertNull($item);
 
-        $item = $this->storage->getPermissionByName('new createPost');
+        $item = $storage->getPermissionByName('new createPost');
         $this->assertEquals('new createPost', $item->getName());
     }
 
     public function testUpdateItemName(): void
     {
-        $this->prepareData();
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
+
 
         $name = 'readPost';
-        $permission = $this->storage->getPermissionByName($name);
+        $permission = $storage->getPermissionByName($name);
         $permission = $permission->withName('UPDATED-NAME');
-        $this->auth->updatePermission($name, $permission);
+        $manager->updatePermission($name, $permission);
 
-        $this->assertNull($this->storage->getPermissionByName('readPost'));
-        $this->assertNotNull($this->storage->getPermissionByName('UPDATED-NAME'));
+        $this->assertNull($storage->getPermissionByName('readPost'));
+        $this->assertNotNull($storage->getPermissionByName('UPDATED-NAME'));
     }
 
     public function testUpdateDescription(): void
     {
-        $this->prepareData();
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
+
         $name = 'readPost';
-        $permission = $this->storage->getPermissionByName($name);
+        $permission = $storage->getPermissionByName($name);
         $newDescription = 'UPDATED-DESCRIPTION';
         $permission = $permission->withDescription($newDescription);
-        $this->auth->updatePermission($name, $permission);
+        $manager->updatePermission($name, $permission);
 
-        $permission = $this->storage->getPermissionByName('readPost');
+        $permission = $storage->getPermissionByName('readPost');
         $this->assertEquals($newDescription, $permission->getDescription());
     }
 
     public function testOverwriteName(): void
     {
-        $this->prepareData();
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
         $name = 'readPost';
-        $permission = $this->storage->getPermissionByName($name);
+        $permission = $storage->getPermissionByName($name);
         $permission = $permission->withName('createPost');
         $this->expectException(InvalidArgumentException::class);
-        $this->auth->updatePermission($name, $permission);
+        $manager->updatePermission($name, $permission);
+    }
+
+    public function testAddChild(): void
+    {
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
+
+        $role = $storage->getRoleByName('reader');
+        $permission = $storage->getPermissionByName('createPost');
+
+        $manager->addChild($role, $permission);
+        $this->assertEquals(
+            [
+                'readPost',
+                'createPost'
+            ],
+            array_keys($storage->getChildrenByName('reader'))
+        );
+    }
+
+    public function testAddChildNotHasItem(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Either "new reader" or "createPost" does not exist.');
+
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
+
+        $manager->addChild(
+            new Role('new reader'),
+            $storage->getPermissionByName('createPost')
+        );
+    }
+
+    public function testAddChildEqualName(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Cannot add "createPost" as a child of itself.');
+
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
+
+        $manager->addChild(
+            new Role('createPost'),
+            $storage->getPermissionByName('createPost')
+        );
+    }
+
+    public function testAddChildCanBeParentOfItem(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Can not add "reader" role as a child of "createPost" permission.');
+
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
+
+        $manager->addChild(
+            $storage->getPermissionByName('createPost'),
+            $storage->getRoleByName('reader')
+        );
+    }
+
+    public function testAddChildAlreadyAdded(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('The item "reader" already has a child "readPost".');
+
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
+
+        $manager->addChild(
+            $storage->getRoleByName('reader'),
+            $storage->getPermissionByName('readPost')
+        );
+    }
+
+    private function createManager(Storage $storage): Manager
+    {
+        return (new Manager($storage, new ClassNameRuleFactory()))
+            ->setDefaultRoles(['myDefaultRole']);
     }
 
     protected function tearDown(): void
     {
-        FileHelper::removeDirectory($this->testDataPath);
-        static::$filemtime = null;
+        $this->clearStudFiles();
         parent::tearDown();
-        $this->storage->clear();
-        static::$time = null;
     }
 
     protected function setUp(): void
     {
-        static::$filemtime = null;
-        $this->testDataPath = sys_get_temp_dir() . '/' . str_replace('\\', '_', get_class($this)) . uniqid('', false);
-        if (FileHelper::createDirectory($this->testDataPath) === false) {
-            throw new \RuntimeException('Unable to create directory: ' . $this->testDataPath);
-        }
-
+        $this->setDataPath();
+        $this->addStudFiles();
         parent::setUp();
-        $this->createManager();
-        static::$time = null;
     }
 
-    private function getAssignmentFilePath(): string
+    private function createStorage(): PhpStorage
     {
-        return $this->testDataPath . '/assignments.php';
+        return new PhpStorage($this->testDataPath);
     }
 
-    private function createManager(): void
+    private function setDataPath(): void
     {
-        $this->storage = new PhpStorage($this->testDataPath);
-        $this->auth = (new Manager(
-            $this->storage,
-            new ClassNameRuleFactory()
-        ))->setDefaultRoles(['myDefaultRole']);
+        $this->testDataPath = $this->createDataPath();
     }
 
-    /**
-     * See hierarchy.png in tests directory for a quick overview
-     *
-     * @throws \Exception
-     */
-    private function prepareData(): void
+    private function createDataPath(): string
     {
-        $rule = new AuthorRule();
-        $this->auth->addRule($rule);
-
-        $uniqueTrait = (new Permission('Fast Metabolism'))
-            ->withDescription(
-                'Your metabolic rate is twice normal. This means that you are much less resistant to radiation and poison, but your body heals faster.'
-            );
-        $this->auth->addPermission($uniqueTrait);
-
-        $createPost = (new Permission('createPost'))
-            ->withDescription('create a post');
-        $this->auth->addPermission($createPost);
-
-        $readPost = (new Permission('readPost'))
-            ->withDescription('read a post');
-        $this->auth->addPermission($readPost);
-
-        $deletePost = (new Permission('deletePost'))
-            ->withDescription('delete a post');
-        $this->auth->addPermission($deletePost);
-
-        $updatePost = (new Permission('updatePost'))
-            ->withDescription('update a post')
-            ->withRuleName($rule->getName());
-        $this->auth->addPermission($updatePost);
-
-        $updateAnyPost = (new Permission('updateAnyPost'))
-            ->withDescription('update any post');
-        $this->auth->addPermission($updateAnyPost);
-
-        $withoutChildren = new Role('withoutChildren');
-        $this->auth->addRole($withoutChildren);
-
-        $reader = new Role('reader');
-        $this->auth->addRole($reader);
-        $this->auth->addChild($reader, $readPost);
-
-        $author = new Role('author');
-        $this->auth->addRole($author);
-        $this->auth->addChild($author, $createPost);
-        $this->auth->addChild($author, $updatePost);
-        $this->auth->addChild($author, $reader);
-
-        $admin = new Role('admin');
-        $this->auth->addRole($admin);
-        $this->auth->addChild($admin, $author);
-        $this->auth->addChild($admin, $updateAnyPost);
-
-        $this->auth->assign($uniqueTrait, 'reader A');
-
-        $this->auth->assign($reader, 'reader A');
-        $this->auth->assign($author, 'author B');
-        $this->auth->assign($deletePost, 'author B');
-        $this->auth->assign($admin, 'admin C');
+        return sys_get_temp_dir() . '/' . str_replace('\\', '_', get_class($this)) . uniqid('', false);
     }
 
+    private function getStubDirectory(): string
+    {
+        return __DIR__ . static::STUB_DIRECTORY;
+    }
+
+    private function addStudFiles(): void
+    {
+        FileHelper::copyDirectory($this->getStubDirectory(), $this->testDataPath);
+    }
+
+    private function clearStudFiles(): void
+    {
+        FileHelper::removeDirectory($this->testDataPath);
+    }
 }

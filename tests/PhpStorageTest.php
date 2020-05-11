@@ -10,7 +10,6 @@ use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\PhpStorage;
 use Yiisoft\Rbac\Role;
-use Yiisoft\Rbac\Tests\EasyRule;
 
 /**
  * @group rbac
@@ -450,10 +449,5 @@ final class PhpStorageTest extends TestCase
     private function clearStudFiles(): void
     {
         FileHelper::removeDirectory($this->testDataPath);
-    }
-
-    private function getCreateTime(): int
-    {
-        return @filemtime($this->testDataPath . '/assignments.php');
     }
 }
