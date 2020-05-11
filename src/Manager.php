@@ -627,11 +627,10 @@ final class Manager implements AccessCheckerInterface
         array $params,
         array $assignments
     ): bool {
-        if (!$this->hasItem($itemName)) {
+        $item = $this->storage->getItemByName($itemName);
+        if ($item === null) {
             return false;
         }
-
-        $item = $this->storage->getItems()[$itemName];
 
         if (!$this->executeRule($user, $item, $params)) {
             return false;

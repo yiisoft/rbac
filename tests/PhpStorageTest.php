@@ -16,8 +16,7 @@ use Yiisoft\Rbac\Role;
  */
 final class PhpStorageTest extends TestCase
 {
-    private const STUB_DIRECTORY = '/Stub/';
-    private string $testDataPath;
+    use FixtureTrait;
 
     public function testGetItems(): void
     {
@@ -410,44 +409,18 @@ final class PhpStorageTest extends TestCase
 
     protected function tearDown(): void
     {
-        $this->clearStudFiles();
+        $this->clearFixturesFiles();
         parent::tearDown();
     }
 
     protected function setUp(): void
     {
-        $this->setDataPath();
-        $this->addStudFiles();
+        $this->addFixturesFiles();
         parent::setUp();
     }
 
     private function createStorage(): PhpStorage
     {
-        return new PhpStorage($this->testDataPath);
-    }
-
-    private function setDataPath(): void
-    {
-        $this->testDataPath = $this->createDataPath();
-    }
-
-    private function createDataPath(): string
-    {
-        return sys_get_temp_dir() . '/' . str_replace('\\', '_', get_class($this)) . uniqid('', false);
-    }
-
-    private function getStubDirectory(): string
-    {
-        return __DIR__ . static::STUB_DIRECTORY;
-    }
-
-    private function addStudFiles(): void
-    {
-        FileHelper::copyDirectory($this->getStubDirectory(), $this->testDataPath);
-    }
-
-    private function clearStudFiles(): void
-    {
-        FileHelper::removeDirectory($this->testDataPath);
+        return new PhpStorage($this->dataPath);
     }
 }
