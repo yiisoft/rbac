@@ -11,7 +11,7 @@ namespace Yiisoft\Rbac\Tests;
  */
 function time()
 {
-    return PhpManagerTest::$time ?: \time();
+    return ManagerTest::$time ?: \time();
 }
 
 use PHPUnit\Framework\TestCase;
@@ -31,7 +31,7 @@ use Yiisoft\Rbac\Storage;
 /**
  * @group rbac
  */
-final class PhpManagerTest extends TestCase
+final class ManagerTest extends TestCase
 {
     public static ?int $time;
     public static ?int $filemtime;
