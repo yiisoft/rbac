@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Yiisoft\Files\FileHelper;
 use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\PhpStorage;
 use Yiisoft\Rbac\Role;
+use InvalidArgumentException;
 
 /**
  * @group rbac
@@ -386,6 +386,14 @@ final class PhpStorageTest extends TestCase
         $this->assertNull($storage->getRoleByName('reader'));
     }
 
+    public function testUpdateItemNameAlreadyUsed(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unable to change the item name. The name "author" is already used by another item.');
+
+        $storage = $this->createStorage();
+        $storage->updateItem('reader', $storage->getItemByName('reader')->withName('author'));
+    }
 
     public function testRemoveRule(): void
     {

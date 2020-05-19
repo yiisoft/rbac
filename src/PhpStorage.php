@@ -7,6 +7,17 @@ namespace Yiisoft\Rbac;
 use InvalidArgumentException;
 use Yiisoft\VarDumper\VarDumper;
 
+/**
+ * Class PhpStorage
+ * @package Yiisoft\Rbac *
+ *
+ * The authorization data will be saved to and loaded from three files
+ * specified by [[itemFile]], [[assignmentFile]] and [[ruleFile]].
+ *
+ * Manager is mainly suitable for authorization data that is not too big
+ * (for example, the authorization data for a personal blog system).
+ * Use [[DbManager]] for more complex authorization data.
+ */
 final class PhpStorage implements Storage
 {
     /**

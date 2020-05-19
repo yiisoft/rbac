@@ -10,15 +10,6 @@ use RuntimeException;
 
 /**
  * Manager represents an authorization manager that stores authorization
- * information in terms of a PHP script file.
- *
- * The authorization data will be saved to and loaded from three files
- * specified by [[itemFile]], [[assignmentFile]] and [[ruleFile]].
- *
- * Manager is mainly suitable for authorization data that is not too big
- * (for example, the authorization data for a personal blog system).
- * Use [[DbManager]] for more complex authorization data.
- *
  * For more details and usage information on Manager, see the [guide article on security authorization](guide:security-authorization).
  */
 final class Manager implements AccessCheckerInterface
