@@ -18,7 +18,7 @@ final class Manager implements AccessCheckerInterface
     private RuleFactoryInterface $ruleFactory;
 
     /**
-     * @var array a list of role names that are assigned to every user automatically without calling [[assign()]].
+     * @var array a list of role names that are assigned to every user automatically without calling {@see assign()}.
      * Note that these roles are applied to users, regardless of their state of authentication.
      */
     private array $defaultRoles = [];
@@ -209,7 +209,7 @@ final class Manager implements AccessCheckerInterface
     }
 
     /**
-     * Returns the roles that are assigned to the user via [[assign()]].
+     * Returns the roles that are assigned to the user via {@see assign()}.
      * Note that child roles that are not assigned directly to the user will not be returned.
      *
      * @param string $userId the user ID
@@ -455,7 +455,7 @@ final class Manager implements AccessCheckerInterface
      * Executes the rule associated with the specified auth item.
      *
      * If the item does not specify a rule, this method will return true. Otherwise, it will
-     * return the value of [[Rule::execute()]].
+     * return the value of {@see Rule::execute()()}.
      *
      * @param string $user the user ID. This should be a string representing
      * the unique identifier of a user.
@@ -552,7 +552,7 @@ final class Manager implements AccessCheckerInterface
     /**
      * Returns all permissions that are directly assigned to user.
      *
-     * @param string $userId the user ID (see [[\yii\web\User::id]])
+     * @param string $userId the user ID
      *
      * @return Permission[] all direct permissions that the user has. The array is indexed by the permission names.
      */
@@ -572,7 +572,7 @@ final class Manager implements AccessCheckerInterface
     /**
      * Returns all permissions that the user inherits from the roles assigned to him.
      *
-     * @param string $userId the user ID (see [[\yii\web\User::id]])
+     * @param string $userId the user ID
      *
      * @return Permission[] all inherited permissions that the user has. The array is indexed by the permission names.
      */
@@ -600,7 +600,6 @@ final class Manager implements AccessCheckerInterface
 
     /**
      * Performs access check for the specified user.
-     * This method is internally called by [[checkAccess()]].
      *
      * @param string $user the user ID. This should br a string representing the unique identifier of a user.
      * @param string $itemName the name of the permission or role that need access check
