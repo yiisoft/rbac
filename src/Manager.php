@@ -633,11 +633,11 @@ final class Manager implements AccessCheckerInterface
 
         foreach ($this->storage->getChildren() as $parentName => $children) {
             if (isset($children[$itemName]) && $this->userHasPermissionRecursive(
-                    $user,
-                    $parentName,
-                    $params,
-                    $assignments
-                )) {
+                $user,
+                $parentName,
+                $params,
+                $assignments
+            )) {
                 return true;
             }
         }

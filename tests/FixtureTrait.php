@@ -6,8 +6,8 @@ namespace Yiisoft\Rbac\Tests;
 
 use Yiisoft\Files\FileHelper;
 
-trait FixtureTrait {
-
+trait FixtureTrait
+{
     private string $dataPath;
 
     private function getDataPath(): string
