@@ -504,8 +504,8 @@ final class PhpStorage implements Storage
     private function saveToFile(array $data, string $file): void
     {
         if (!file_exists(dirname($file)) && !mkdir($concurrentDirectory = dirname($file)) && !is_dir(
-                $concurrentDirectory
-            )) {
+            $concurrentDirectory
+        )) {
             throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
         }
 
