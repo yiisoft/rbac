@@ -51,11 +51,6 @@ abstract class Item implements ItemInterface
         return $this->name;
     }
 
-    public function isEqualName(string $name): bool
-    {
-        return $this->name === $name;
-    }
-
     public function withName(string $name): self
     {
         $new = clone $this;

@@ -81,7 +81,7 @@ final class Manager implements AccessCheckerInterface
             );
         }
 
-        if ($parent->isEqualName($child->getName())) {
+        if ($parent->getName() === $child->getName()) {
             throw new InvalidArgumentException(sprintf('Cannot add "%s" as a child of itself.', $parent->getName()));
         }
 
@@ -521,7 +521,7 @@ final class Manager implements AccessCheckerInterface
          */
         foreach ($this->storage->getChildren() as $parentRole => $items) {
             foreach ($items as $item) {
-                if ($item->isEqualName($roleName)) {
+                if ($item->getName() === $roleName) {
                     $result[] = $parentRole;
                     $this->getParentRolesRecursive($parentRole, $result);
                     break;
@@ -654,7 +654,7 @@ final class Manager implements AccessCheckerInterface
      */
     private function detectLoop(Item $parent, Item $child): bool
     {
-        if ($child->isEqualName($parent->getName())) {
+        if ($child->getName() === $parent->getName()) {
             return true;
         }
 
