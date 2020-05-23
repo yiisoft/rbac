@@ -61,7 +61,7 @@ final class Manager implements AccessCheckerInterface
      */
     public function canAddChild(Item $parent, Item $child): bool
     {
-        return $parent->canBeParentOfItem($child) && !$this->detectLoop($parent, $child);
+        return $parent->canBeParentOf($child) && !$this->detectLoop($parent, $child);
     }
 
     /**
@@ -85,7 +85,7 @@ final class Manager implements AccessCheckerInterface
             throw new InvalidArgumentException(sprintf('Cannot add "%s" as a child of itself.', $parent->getName()));
         }
 
-        if (!$parent->canBeParentOfItem($child)) {
+        if (!$parent->canBeParentOf($child)) {
             throw new InvalidArgumentException(
                 sprintf('Can not add "%s" role as a child of "%s" permission.', $child->getName(), $parent->getName())
             );
