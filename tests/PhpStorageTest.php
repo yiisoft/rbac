@@ -386,15 +386,6 @@ final class PhpStorageTest extends TestCase
         $this->assertNull($storage->getRoleByName('reader'));
     }
 
-    public function testUpdateItemNameAlreadyUsed(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Unable to change the item name. The name "author" is already used by another item.');
-
-        $storage = $this->createStorage();
-        $storage->updateItem('reader', $storage->getItemByName('reader')->withName('author'));
-    }
-
     public function testRemoveRule(): void
     {
         $storage = $this->createStorage();

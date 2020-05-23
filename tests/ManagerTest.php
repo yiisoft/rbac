@@ -476,6 +476,20 @@ final class ManagerTest extends TestCase
         $this->assertNotNull($storage->getPermissionByName('newUpdatePost'));
     }
 
+    public function testUpdatePermissionNameAlreadyUsed(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unable to change the item name. The name "createPost" is already used by another item.');
+
+        $storage = $this->createStorage();
+        $manager = $this->createManager($storage);
+
+        $permission = $storage->getPermissionByName('updatePost')
+            ->withName('createPost');
+
+        $manager->updatePermission('updatePost', $permission);
+    }
+
     public function testAddRule(): void
     {
         $storage = $this->createStorage();

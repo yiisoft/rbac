@@ -342,6 +342,7 @@ final class Manager implements AccessCheckerInterface
      */
     public function updateRole(string $name, Role $role): void
     {
+        $this->checkItemNameForUpdate($role, $name);
         $this->createItemRuleIfNotExist($role);
         $this->storage->updateItem($name, $role);
     }
@@ -369,6 +370,7 @@ final class Manager implements AccessCheckerInterface
      */
     public function updatePermission(string $name, Permission $permission): void
     {
+        $this->checkItemNameForUpdate($permission, $name);
         $this->createItemRuleIfNotExist($permission);
         $this->storage->updateItem($name, $permission);
     }
@@ -710,5 +712,19 @@ final class Manager implements AccessCheckerInterface
     private function canBeParent(Item $parent, Item $child): bool
     {
         return $parent->getType() !== Item::TYPE_PERMISSION || $child->getType() !== Item::TYPE_ROLE;
+    }
+
+    private function checkItemNameForUpdate(Item $item, string $name): void
+    {
+        if ($item->getName() === $name || !$this->hasItem($item->getName())) {
+            return;
+        }
+
+        throw new InvalidArgumentException(
+            sprintf(
+                'Unable to change the item name. The name "%s" is already used by another item.',
+                $item->getName()
+            )
+        );
     }
 }

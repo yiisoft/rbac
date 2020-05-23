@@ -277,15 +277,6 @@ final class PhpStorage implements Storage
 
     private function updateItemName(string $name, Item $item): void
     {
-        if ($this->hasItem($item->getName())) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    'Unable to change the item name. The name "%s" is already used by another item.',
-                    $item->getName()
-                )
-            );
-        }
-
         $this->updateChildrenForItemName($name, $item);
         $this->updateAssignmentsForItemName($name, $item);
         $this->saveAssignments();
