@@ -75,9 +75,15 @@ final class Manager implements AccessCheckerInterface
      */
     public function addChild(Item $parent, Item $child): void
     {
-        if (!$this->hasItem($parent->getName()) || !$this->hasItem($child->getName())) {
+        if (!$this->hasItem($parent->getName())) {
             throw new InvalidArgumentException(
-                sprintf('Either "%s" or "%s" does not exist.', $parent->getName(), $child->getName())
+                sprintf('Either "%s" does not exist.', $parent->getName())
+            );
+        }
+
+        if (!$this->hasItem($child->getName())) {
+            throw new InvalidArgumentException(
+                sprintf('Either "%s" does not exist.', $child->getName())
             );
         }
 
