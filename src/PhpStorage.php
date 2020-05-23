@@ -86,179 +86,106 @@ final class PhpStorage implements Storage
         $this->load();
     }
 
-    /**
-     * @return Item[]
-     */
     public function getItems(): array
     {
         return $this->items;
     }
 
-    /**
-     * @param string $name
-     * @return Item|null
-     */
     public function getItemByName(string $name): ?Item
     {
         return $this->items[$name] ?? null;
     }
 
-    /**
-     * @param Item $item
-     */
     public function addItem(Item $item): void
     {
         $this->items[$item->getName()] = $item;
         $this->saveItems();
     }
 
-    /**
-     * @param string $name
-     * @return Role|null
-     */
     public function getRoleByName(string $name): ?Role
     {
         return $this->getItemsByType(Item::TYPE_ROLE)[$name] ?? null;
     }
 
-    /**
-     * @return array|Role[]
-     */
     public function getRoles(): array
     {
         return $this->getItemsByType(Item::TYPE_ROLE);
     }
 
-    /**
-     * @param string $name
-     * @return Permission|null
-     */
     public function getPermissionByName(string $name): ?Permission
     {
         return $this->getItemsByType(Item::TYPE_PERMISSION)[$name] ?? null;
     }
 
-    /**
-     * @return array
-     */
     public function getPermissions(): array
     {
         return $this->getItemsByType(Item::TYPE_PERMISSION);
     }
 
-    /**
-     * @return array
-     */
     public function getChildren(): array
     {
         return $this->children;
     }
 
-    /**
-     * @param string $name
-     * @return array|Item[]
-     */
     public function getChildrenByName(string $name): array
     {
         return $this->children[$name] ?? [];
     }
 
-    /**
-     * @return array
-     */
     public function getAssignments(): array
     {
         return $this->assignments;
     }
 
-    /**
-     * @param string $userId
-     * @return array
-     */
     public function getUserAssignments(string $userId): array
     {
         return $this->assignments[$userId] ?? [];
     }
 
-    /**
-     * @param string $userId
-     * @param string $name
-     * @return Assignment|null
-     */
     public function getUserAssignmentByName(string $userId, string $name): ?Assignment
     {
         return $this->getUserAssignments($userId)[$name] ?? null;
     }
 
-    /**
-     * @return Rule[]
-     */
     public function getRules(): array
     {
         return $this->rules;
     }
 
-    /**
-     * @param string $name
-     * @return Rule|null
-     */
     public function getRuleByName(string $name): ?Rule
     {
         return $this->rules[$name] ?? null;
     }
 
-    /**
-     * @param Item $parent
-     * @param Item $child
-     */
     public function addChild(Item $parent, Item $child): void
     {
         $this->children[$parent->getName()][$child->getName()] = $this->items[$child->getName()];
         $this->saveItems();
     }
 
-    /**
-     * @param string $name
-     * @return bool
-     */
     public function hasChildren(string $name): bool
     {
         return isset($this->children[$name]);
     }
 
-    /**
-     * @param Item $parent
-     * @param Item $child
-     */
     public function removeChild(Item $parent, Item $child): void
     {
         unset($this->children[$parent->getName()][$child->getName()]);
         $this->saveItems();
     }
 
-    /**
-     * @param Item $parent
-     */
     public function removeChildren(Item $parent): void
     {
         unset($this->children[$parent->getName()]);
         $this->saveItems();
     }
 
-    /**
-     * @param string $userId
-     * @param Item $item
-     */
     public function addAssignment(string $userId, Item $item): void
     {
         $this->assignments[$userId][$item->getName()] = new Assignment($userId, $item->getName(), time());
         $this->saveAssignments();
     }
 
-    /**
-     * @param string $name
-     * @return bool
-     */
     public function assignmentExist(string $name): bool
     {
         foreach ($this->getAssignments() as $assignment) {
@@ -271,28 +198,18 @@ final class PhpStorage implements Storage
         return false;
     }
 
-    /**
-     * @param string $userId
-     * @param Item $item
-     */
     public function removeAssignment(string $userId, Item $item): void
     {
         unset($this->assignments[$userId][$item->getName()]);
         $this->saveAssignments();
     }
 
-    /**
-     * @param string $userId
-     */
     public function removeAllAssignments(string $userId): void
     {
         $this->assignments[$userId] = [];
         $this->saveAssignments();
     }
 
-    /**
-     * @param Item $item
-     */
     public function removeItem(Item $item): void
     {
         $this->clearAssigmentFromItem($item);
@@ -302,10 +219,6 @@ final class PhpStorage implements Storage
         $this->saveItems();
     }
 
-    /**
-     * @param string $name
-     * @param Item $item
-     */
     public function updateItem(string $name, Item $item): void
     {
         if ($item->getName() !== $name) {
@@ -316,25 +229,6 @@ final class PhpStorage implements Storage
         $this->addItem($item);
     }
 
-    private function updateItemName(string $name, Item $item): void
-    {
-        if ($this->hasItem($item->getName())) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    'Unable to change the item name. The name "%s" is already used by another item.',
-                    $item->getName()
-                )
-            );
-        }
-
-        $this->updateChildrenForItemName($name, $item);
-        $this->updateAssignmentsForItemName($name, $item);
-        $this->saveAssignments();
-    }
-
-    /**
-     * @param string $name
-     */
     public function removeRule(string $name): void
     {
         unset($this->rules[$name]);
@@ -346,9 +240,6 @@ final class PhpStorage implements Storage
         $this->saveRules();
     }
 
-    /**
-     * @param Rule $rule
-     */
     public function addRule(Rule $rule): void
     {
         $this->rules[$rule->getName()] = $rule;
@@ -382,6 +273,22 @@ final class PhpStorage implements Storage
     public function clearRoles(): void
     {
         $this->removeAllItems(Item::TYPE_ROLE);
+    }
+
+    private function updateItemName(string $name, Item $item): void
+    {
+        if ($this->hasItem($item->getName())) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Unable to change the item name. The name "%s" is already used by another item.',
+                    $item->getName()
+                )
+            );
+        }
+
+        $this->updateChildrenForItemName($name, $item);
+        $this->updateAssignmentsForItemName($name, $item);
+        $this->saveAssignments();
     }
 
     /**
