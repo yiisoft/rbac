@@ -82,11 +82,6 @@ abstract class Item implements ItemInterface
         return $this->ruleName;
     }
 
-    public function hasRuleName(): bool
-    {
-        return $this->ruleName !== null;
-    }
-
     public function withCreatedAt(int $createdAt): self
     {
         $new = clone $this;

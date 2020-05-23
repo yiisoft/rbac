@@ -469,7 +469,7 @@ final class Manager implements AccessCheckerInterface
      */
     private function executeRule(string $user, Item $item, array $params): bool
     {
-        if (!$item->hasRuleName()) {
+        if ($item->getRuleName() === null) {
             return true;
         }
         $rule = $this->storage->getRuleByName($item->getRuleName());
@@ -490,7 +490,7 @@ final class Manager implements AccessCheckerInterface
 
     private function createItemRuleIfNotExist(Item $item): void
     {
-        if ($item->hasRuleName() && $this->storage->getRuleByName($item->getRuleName()) === null) {
+        if ($item->getRuleName() !== null && $this->storage->getRuleByName($item->getRuleName()) === null) {
             $rule = $this->createRule($item->getRuleName());
             $this->addRule($rule);
         }
@@ -632,11 +632,11 @@ final class Manager implements AccessCheckerInterface
 
         foreach ($this->storage->getChildren() as $parentName => $children) {
             if (isset($children[$itemName]) && $this->userHasPermissionRecursive(
-                $user,
-                $parentName,
-                $params,
-                $assignments
-            )) {
+                    $user,
+                    $parentName,
+                    $params,
+                    $assignments
+                )) {
                 return true;
             }
         }
