@@ -401,8 +401,8 @@ final class PhpStorage implements Storage
     private function saveToFile(array $data, string $file): void
     {
         if (!file_exists(dirname($file)) && !mkdir($concurrentDirectory = dirname($file)) && !is_dir(
-                $concurrentDirectory
-            )) {
+            $concurrentDirectory
+        )) {
             throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
         }
 
@@ -448,14 +448,14 @@ final class PhpStorage implements Storage
     private function getItemsByType(string $type): array
     {
         return $this->filterItems(
-            fn(Item $item) => $item->getType() === $type
+            fn (Item $item) => $item->getType() === $type
         );
     }
 
     private function getItemsByRuleName(string $ruleName): array
     {
         return $this->filterItems(
-            fn(Item $item) => $item->getRuleName() === $ruleName
+            fn (Item $item) => $item->getRuleName() === $ruleName
         );
     }
 
@@ -509,7 +509,7 @@ final class PhpStorage implements Storage
 
     private function serializeRules(): array
     {
-        return array_map(fn(Rule $rule): string => serialize($rule), $this->rules);
+        return array_map(fn (Rule $rule): string => serialize($rule), $this->rules);
     }
 
     private function unserializeRule(string $data): Rule
