@@ -44,8 +44,6 @@ abstract class Item implements ItemInterface
 
     abstract public function getType(): string;
 
-    abstract public function canBeParentOf(Item $child): bool;
-
     public function getName(): string
     {
         return $this->name;

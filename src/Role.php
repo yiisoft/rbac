@@ -10,9 +10,4 @@ final class Role extends Item
     {
         return self::TYPE_ROLE;
     }
-
-    public function canBeParentOf(Item $child): bool
-    {
-        return true;
-    }
 }

@@ -136,7 +136,7 @@ final class ManagerTest extends TestCase
     public function testAddChildNotHasItem(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Either "new reader" or "createPost" does not exist.');
+        $this->expectExceptionMessage('Either "new reader" does not exist.');
 
         $storage = $this->createStorage();
         $manager = $this->createManager($storage);

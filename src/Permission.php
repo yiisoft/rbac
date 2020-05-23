@@ -10,9 +10,4 @@ final class Permission extends Item
     {
         return self::TYPE_PERMISSION;
     }
-
-    public function canBeParentOf(Item $child): bool
-    {
-        return $child->getType() !== self::TYPE_ROLE;
-    }
 }

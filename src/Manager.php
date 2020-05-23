@@ -61,7 +61,7 @@ final class Manager implements AccessCheckerInterface
      */
     public function canAddChild(Item $parent, Item $child): bool
     {
-        return $parent->canBeParentOf($child) && !$this->detectLoop($parent, $child);
+        return $this->canBeParent($parent, $child) && !$this->detectLoop($parent, $child);
     }
 
     /**
@@ -91,7 +91,7 @@ final class Manager implements AccessCheckerInterface
             throw new InvalidArgumentException(sprintf('Cannot add "%s" as a child of itself.', $parent->getName()));
         }
 
-        if (!$parent->canBeParentOf($child)) {
+        if (!$this->canBeParent($parent, $child)) {
             throw new InvalidArgumentException(
                 sprintf('Can not add "%s" role as a child of "%s" permission.', $child->getName(), $parent->getName())
             );
@@ -705,5 +705,10 @@ final class Manager implements AccessCheckerInterface
                 return array_key_exists($roleItem->getName(), $array);
             }
         );
+    }
+
+    private function canBeParent(Item $parent, Item $child): bool
+    {
+        return $parent->getType() !== Item::TYPE_PERMISSION || $child->getType() !== Item::TYPE_ROLE;
     }
 }
