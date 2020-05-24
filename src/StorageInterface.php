@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac;
 
-interface Storage
+interface StorageInterface
 {
     public function clear(): void;
 

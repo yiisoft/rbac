@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac;
 
-use InvalidArgumentException;
 use Yiisoft\VarDumper\VarDumper;
 
 /**
@@ -17,7 +16,7 @@ use Yiisoft\VarDumper\VarDumper;
  * Manager is mainly suitable for authorization data that is not too big
  * (for example, the authorization data for a personal blog system).
  */
-final class PhpStorage implements Storage
+final class PhpStorage implements StorageInterface
 {
     /**
      * @var string the path of the PHP script that contains the authorization items.

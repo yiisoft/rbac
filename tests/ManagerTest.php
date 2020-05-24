@@ -12,7 +12,7 @@ use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\PhpStorage;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\RuleFactory\ClassNameRuleFactory;
-use Yiisoft\Rbac\Storage;
+use Yiisoft\Rbac\StorageInterface;
 
 /**
  * @group rbac
@@ -580,7 +580,7 @@ final class ManagerTest extends TestCase
         parent::setUp();
     }
 
-    private function createManager(Storage $storage): Manager
+    private function createManager(StorageInterface $storage): Manager
     {
         return (new Manager($storage, new ClassNameRuleFactory()))
             ->setDefaultRoles(['myDefaultRole']);

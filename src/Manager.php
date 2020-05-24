@@ -14,7 +14,7 @@ use RuntimeException;
  */
 final class Manager implements AccessCheckerInterface
 {
-    private Storage $storage;
+    private StorageInterface $storage;
     private RuleFactoryInterface $ruleFactory;
 
     /**
@@ -23,7 +23,7 @@ final class Manager implements AccessCheckerInterface
      */
     private array $defaultRoles = [];
 
-    public function __construct(Storage $storage, RuleFactoryInterface $ruleFactory)
+    public function __construct(StorageInterface $storage, RuleFactoryInterface $ruleFactory)
     {
         $this->storage = $storage;
         $this->ruleFactory = $ruleFactory;
@@ -157,7 +157,7 @@ final class Manager implements AccessCheckerInterface
      */
     public function hasChild(Item $parent, Item $child): bool
     {
-        return isset($this->storage->getChildrenByName($parent->getName())[$child->getName()]);
+        return array_key_exists($child->getName(), $this->storage->getChildrenByName($parent->getName()));
     }
 
     /**
