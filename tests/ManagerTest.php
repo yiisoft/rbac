@@ -203,7 +203,7 @@ final class ManagerTest extends TestCase
         );
     }
 
-    public function testRemoveChild()
+    public function testRemoveChild(): void
     {
         $storage = $this->createStorage();
         $manager = $this->createManager($storage);

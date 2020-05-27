@@ -9,7 +9,6 @@ use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\PhpStorage;
 use Yiisoft\Rbac\Role;
-use InvalidArgumentException;
 
 /**
  * @group rbac

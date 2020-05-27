@@ -80,7 +80,7 @@ interface StorageInterface
 
     /**
      * Returns the named permission.
-     * @param string $name The permisson name.
+     * @param string $name The permission name.
      * @return Permission|null The permission corresponding to the specified name. Null is returned if no such permission.
      */
     public function getPermissionByName(string $name): ?Permission;

@@ -7,9 +7,6 @@ namespace Yiisoft\Rbac\Tests;
 use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\Rule;
 
-/**
- * Description of ActionRule.
- */
 class ActionRule extends Rule
 {
     private const NAME = 'action_rule';
