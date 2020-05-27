@@ -9,8 +9,7 @@ use InvalidArgumentException;
 use RuntimeException;
 
 /**
- * Manager represents an authorization manager that stores authorization
- * For more details and usage information on Manager, see the [guide article on security authorization](guide:security-authorization).
+ * An authorization manager that helps with building RBAC hierarchy and checking for permissions.
  */
 final class Manager implements AccessCheckerInterface
 {
@@ -29,18 +28,11 @@ final class Manager implements AccessCheckerInterface
         $this->ruleFactory = $ruleFactory;
     }
 
-    /**
-     * @param mixed $userId
-     * @param string $permissionName
-     * @param array $parameters
-     * @return bool
-     * @throws RuntimeException
-     */
     public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
     {
         $assignments = $this->storage->getUserAssignments($userId);
 
-        if (empty($assignments) && $this->defaultRolesIsEmpty()) {
+        if (empty($assignments) && empty($this->defaultRoles)) {
             return false;
         }
 
@@ -424,13 +416,13 @@ final class Manager implements AccessCheckerInterface
         if ($roles instanceof \Closure) {
             $roles = $roles();
             if (!is_array($roles)) {
-                throw new RuntimeException('Default roles closure must return an array');
+                throw new RuntimeException('Default roles closure must return an array.');
             }
             $this->defaultRoles = $roles;
             return $this;
         }
 
-        throw new InvalidArgumentException('Default roles must be either an array or a callable');
+        throw new InvalidArgumentException('Default roles must be either an array or a callable.');
     }
 
     /**
@@ -482,18 +474,10 @@ final class Manager implements AccessCheckerInterface
         }
         $rule = $this->storage->getRuleByName($item->getRuleName());
         if ($rule === null) {
-            throw new RuntimeException(sprintf('Rule not found: %s', $item->getRuleName()));
+            throw new RuntimeException(sprintf('Rule not found: %s.', $item->getRuleName()));
         }
 
         return $rule->execute($user, $item, $params);
-    }
-
-    /**
-     * @return bool
-     */
-    private function defaultRolesIsEmpty(): bool
-    {
-        return empty($this->defaultRoles);
     }
 
     private function createItemRuleIfNotExist(Item $item): void
