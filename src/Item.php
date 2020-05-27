@@ -13,27 +13,27 @@ abstract class Item implements ItemInterface
     public const TYPE_PERMISSION = 'permission';
 
     /**
-     * @var string the name of the item. This must be globally unique.
+     * @var string The name of the item. This must be globally unique.
      */
     private string $name;
 
     /**
-     * @var string the item description
+     * @var string The item description.
      */
     private string $description = '';
 
     /**
-     * @var string name of the rule associated with this item
+     * @var string Name of the rule associated with this item.
      */
     private ?string $ruleName = null;
 
     /**
-     * @var int UNIX timestamp representing the item creation time
+     * @var int UNIX timestamp representing the item creation time.
      */
     private ?int $createdAt = null;
 
     /**
-     * @var int UNIX timestamp representing the item updating time
+     * @var int UNIX timestamp representing the item updating time.
      */
     private ?int $updatedAt = null;
 

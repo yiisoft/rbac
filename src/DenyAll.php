@@ -7,7 +7,7 @@ namespace Yiisoft\Rbac;
 use Yiisoft\Access\AccessCheckerInterface;
 
 /**
- * Deny all access control.
+ * Deny all access.
  */
 class DenyAll implements AccessCheckerInterface
 {

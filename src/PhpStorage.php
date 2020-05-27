@@ -18,7 +18,7 @@ use Yiisoft\VarDumper\VarDumper;
 final class PhpStorage implements StorageInterface
 {
     /**
-     * @var string the path of the PHP script that contains the authorization items.
+     * @var string The path of the PHP script that contains the authorization items.
      * This can be either a file path or a [path alias](guide:concept-aliases) to the file.
      * Make sure this file is writable by the Web server process if the authorization needs to be changed
      * online.
@@ -28,7 +28,7 @@ final class PhpStorage implements StorageInterface
      */
     private string $itemFile;
     /**
-     * @var string the path of the PHP script that contains the authorization assignments.
+     * @var string The path of the PHP script that contains the authorization assignments.
      * This can be either a file path or a [path alias](guide:concept-aliases) to the file.
      * Make sure this file is writable by the Web server process if the authorization needs to be changed
      * online.
@@ -38,7 +38,7 @@ final class PhpStorage implements StorageInterface
      */
     private string $assignmentFile;
     /**
-     * @var string the path of the PHP script that contains the authorization rules.
+     * @var string The path of the PHP script that contains the authorization rules.
      * This can be either a file path or a [path alias](guide:concept-aliases) to the file.
      * Make sure this file is writable by the Web server process if the authorization needs to be changed
      * online.
@@ -50,25 +50,25 @@ final class PhpStorage implements StorageInterface
 
     /**
      * @var Item[]
-     * format [itemName => item]
+     * Format is [itemName => item].
      */
     private array $items = [];
 
     /**
      * @var array
-     * format [itemName => [childName => child]]
+     * Format is [itemName => [childName => child]].
      */
     private array $children = [];
 
     /**
      * @var array
-     * format [userId => [itemName => assignment]]
+     * Format is [userId => [itemName => assignment]].
      */
     private array $assignments = [];
 
     /**
      * @var Rule[]
-     * format [ruleName => rule]
+     * Format is [ruleName => rule].
      */
     private array $rules = [];
 
@@ -356,9 +356,9 @@ final class PhpStorage implements StorageInterface
     /**
      * Loads the authorization data from a PHP script file.
      *
-     * @param string $file the file path.
+     * @param string $file The file path.
      *
-     * @return array the authorization data
+     * @return array The authorization data.
      *
      * @see saveToFile()
      */
@@ -391,8 +391,8 @@ final class PhpStorage implements StorageInterface
     /**
      * Saves the authorization data to a PHP script file.
      *
-     * @param array $data the authorization data
-     * @param string $file the file path.
+     * @param array $data The authorization data
+     * @param string $file The file path.
      *
      * @see loadFromFile()
      */
@@ -411,7 +411,7 @@ final class PhpStorage implements StorageInterface
     /**
      * Invalidates precompiled script cache (such as OPCache) for the given file.
      *
-     * @param string $file the file path.
+     * @param string $file The file path.
      */
     private function invalidateScriptCache(string $file): void
     {
@@ -469,7 +469,7 @@ final class PhpStorage implements StorageInterface
     /**
      * Removes all auth items of the specified type.
      *
-     * @param string $type the auth item type (either Item::TYPE_PERMISSION or Item::TYPE_ROLE)
+     * @param string $type The auth item type (either {@see Item::TYPE_PERMISSION} or {@see Item::TYPE_ROLE}).
      */
     private function removeAllItems(string $type): void
     {

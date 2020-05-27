@@ -46,10 +46,10 @@ final class Manager implements AccessCheckerInterface
     /**
      * Checks the possibility of adding a child to parent.
      *
-     * @param Item $parent the parent item
-     * @param Item $child the child item to be added to the hierarchy
+     * @param Item $parent The parent item.
+     * @param Item $child The child item to be added to the hierarchy.
      *
-     * @return bool possibility of adding
+     * @return bool Whether it is possible to add the child to the parent.
      */
     public function canAddChild(Item $parent, Item $child): bool
     {
@@ -145,7 +145,7 @@ final class Manager implements AccessCheckerInterface
      * @param Item $parent
      * @param Item $child
      *
-     * @return bool whether `$child` is already a child of `$parent`
+     * @return bool Whether `$child` is already a child of `$parent`
      */
     public function hasChild(Item $parent, Item $child): bool
     {
@@ -156,10 +156,10 @@ final class Manager implements AccessCheckerInterface
      * Assigns a role or permission to a user.
      *
      * @param Item $item
-     * @param string $userId the user ID
+     * @param string $userId The user ID.
      *
-     * @return Assignment the role or permission assignment information.
-     * @throws \Exception if the role has already been assigned to the user
+     * @return Assignment The role or permission assignment information.
+     * @throws \Exception If the role has already been assigned to the user.
      *
      */
     public function assign(Item $item, string $userId): Assignment
@@ -183,7 +183,7 @@ final class Manager implements AccessCheckerInterface
      * Revokes a role or a permission from a user.
      *
      * @param Item $role
-     * @param string $userId the user ID
+     * @param string $userId The user ID.
      *
      * @return void
      */
@@ -197,7 +197,7 @@ final class Manager implements AccessCheckerInterface
     /**
      * Revokes all roles and permissions from a user.
      *
-     * @param string $userId the user ID
+     * @param string $userId The user ID.
      *
      * @return void
      */
@@ -210,9 +210,9 @@ final class Manager implements AccessCheckerInterface
      * Returns the roles that are assigned to the user via {@see assign()}.
      * Note that child roles that are not assigned directly to the user will not be returned.
      *
-     * @param string $userId the user ID
+     * @param string $userId The user ID.
      *
-     * @return Role[] all roles directly assigned to the user. The array is indexed by the role names.
+     * @return Role[] All roles directly assigned to the user. The array is indexed by the role names.
      */
     public function getRolesByUser(string $userId): array
     {
@@ -235,7 +235,7 @@ final class Manager implements AccessCheckerInterface
      * @return Role[] Child roles. The array is indexed by the role names.
      * First element is an instance of the parent Role itself.
      *
-     * @throws InvalidArgumentException if Role was not found that are getting by $roleName
+     * @throws InvalidArgumentException If Role was not found that are getting by $roleName
      */
     public function getChildRoles(string $roleName): array
     {
@@ -253,9 +253,9 @@ final class Manager implements AccessCheckerInterface
     /**
      * Returns all permissions that the specified role represents.
      *
-     * @param string $roleName the role name
+     * @param string $roleName The role name.
      *
-     * @return Permission[] all permissions that the role represents. The array is indexed by the permission names.
+     * @return Permission[] All permissions that the role represents. The array is indexed by the permission names.
      */
     public function getPermissionsByRole(string $roleName): array
     {
@@ -272,9 +272,9 @@ final class Manager implements AccessCheckerInterface
     /**
      * Returns all permissions that the user has.
      *
-     * @param string $userId the user ID
+     * @param string $userId The user ID.
      *
-     * @return Permission[] all permissions that the user has. The array is indexed by the permission names.
+     * @return Permission[] All permissions that the user has. The array is indexed by the permission names.
      */
     public function getPermissionsByUser(string $userId): array
     {
@@ -289,7 +289,7 @@ final class Manager implements AccessCheckerInterface
      *
      * @param string $roleName
      *
-     * @return array array of user ID strings
+     * @return array Array of user ID strings.
      */
     public function getUserIdsByRole(string $roleName): array
     {
@@ -403,8 +403,8 @@ final class Manager implements AccessCheckerInterface
      * @param string[]|callable $roles either array of roles or a callable returning it
      *
      * @return $this
-     * @throws InvalidArgumentException when $roles is neither array nor Closure
-     * @throws RuntimeException when Closure return is not an array
+     * @throws InvalidArgumentException When $roles is neither array nor callable.
+     * @throws RuntimeException When callable returns non array.
      */
     public function setDefaultRoles($roles): self
     {
@@ -428,7 +428,7 @@ final class Manager implements AccessCheckerInterface
     /**
      * Get default roles.
      *
-     * @return string[] default roles
+     * @return string[] Default roles.
      */
     public function getDefaultRoles(): array
     {
@@ -438,7 +438,7 @@ final class Manager implements AccessCheckerInterface
     /**
      * Returns defaultRoles as array of Role objects.
      *
-     * @return Role[] default roles. The array is indexed by the role names
+     * @return Role[] Default roles. The array is indexed by the role names.
      *
      */
     public function getDefaultRoleInstances(): array
@@ -457,10 +457,11 @@ final class Manager implements AccessCheckerInterface
      * If the item does not specify a rule, this method will return true. Otherwise, it will
      * return the value of {@see Rule::execute()()}.
      *
-     * @param string $user the user ID. This should be a string representing
+     * @param string $user The user ID. This should be a string representing
      * the unique identifier of a user.
-     * @param Item $item the auth item that needs to execute its rule
-     * @param array $params parameters passed to {@see AccessCheckerInterface::userHasPermission()} and will be passed to the rule
+     * @param Item $item The auth item that needs to execute its rule.
+     * @param array $params Parameters passed to {@see AccessCheckerInterface::userHasPermission()} and will be passed
+     * to the rule.
      *
      * @return bool the return value of {@see Rule::execute()}. If the auth item does not specify a rule, true will be
      * returned.
@@ -544,9 +545,9 @@ final class Manager implements AccessCheckerInterface
     /**
      * Returns all permissions that are directly assigned to user.
      *
-     * @param string $userId the user ID
+     * @param string $userId The user ID.
      *
-     * @return Permission[] all direct permissions that the user has. The array is indexed by the permission names.
+     * @return Permission[] All direct permissions that the user has. The array is indexed by the permission names.
      */
     private function getDirectPermissionsByUser(string $userId): array
     {
@@ -564,9 +565,9 @@ final class Manager implements AccessCheckerInterface
     /**
      * Returns all permissions that the user inherits from the roles assigned to him.
      *
-     * @param string $userId the user ID
+     * @param string $userId The user ID.
      *
-     * @return Permission[] all inherited permissions that the user has. The array is indexed by the permission names.
+     * @return Permission[] All inherited permissions that the user has. The array is indexed by the permission names.
      */
     private function getInheritedPermissionsByUser(string $userId): array
     {
@@ -593,14 +594,14 @@ final class Manager implements AccessCheckerInterface
     /**
      * Performs access check for the specified user.
      *
-     * @param string $user the user ID. This should br a string representing the unique identifier of a user.
-     * @param string $itemName the name of the permission or role that need access check
-     * @param array $params name-value pairs that would be passed to rules associated
+     * @param string $user The user ID. This should br a string representing the unique identifier of a user.
+     * @param string $itemName The name of the permission or role that need access check.
+     * @param array $params Name-value pairs that would be passed to rules associated
      * with the permissions and roles assigned to the user. A param with name 'user' is
      * added to this array, which holds the value of `$userId`.
-     * @param Assignment[] $assignments the assignments to the specified user
+     * @param Assignment[] $assignments The assignments to the specified user.
      *
-     * @return bool whether the operations can be performed by the user.
+     * @return bool Whether the operations can be performed by the user.
      * @throws RuntimeException
      */
     private function userHasPermissionRecursive(
@@ -639,10 +640,10 @@ final class Manager implements AccessCheckerInterface
     /**
      * Checks whether there is a loop in the authorization item hierarchy.
      *
-     * @param Item $parent parent item
-     * @param Item $child the child item that is to be added to the hierarchy
+     * @param Item $parent Parent item.
+     * @param Item $child The child item that is to be added to the hierarchy.
      *
-     * @return bool whether a loop exists
+     * @return bool Whether a loop exists.
      */
     private function detectLoop(Item $parent, Item $child): bool
     {
@@ -667,8 +668,8 @@ final class Manager implements AccessCheckerInterface
     /**
      * Recursively finds all children and grand children of the specified item.
      *
-     * @param string $name the name of the item whose children are to be looked for.
-     * @param array $result the children and grand children (in array keys)
+     * @param string $name The name of the item whose children are to be looked for.
+     * @param array $result The children and grand children (in array keys).
      */
     private function getChildrenRecursive(string $name, &$result): void
     {
