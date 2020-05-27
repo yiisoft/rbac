@@ -7,14 +7,13 @@ namespace Yiisoft\Rbac;
 use Yiisoft\VarDumper\VarDumper;
 
 /**
- * Class PhpStorage
+ * PhpStorage stores authorization data in three PHP files specified by {@see PhpStorage::itemFile},
+ * {@see PhpStorage::assignmentFile} and {@see PhpStorage::ruleFile}.
+ *
+ * It is mainly suitable for authorization data that is not too big (for example, the authorization data for
+ * a personal blog system).
+ *
  * @package Yiisoft\Rbac
- *
- * The authorization data will be saved to and loaded from three files
- * specified by {@see PhpStorage::itemFile}, {@see PhpStorage::assignmentFile} and {@see PhpStorage::ruleFile}.
- *
- * Manager is mainly suitable for authorization data that is not too big
- * (for example, the authorization data for a personal blog system).
  */
 final class PhpStorage implements StorageInterface
 {
