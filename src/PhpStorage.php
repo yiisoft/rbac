@@ -186,9 +186,9 @@ final class PhpStorage implements StorageInterface
 
     public function assignmentExist(string $name): bool
     {
-        foreach ($this->getAssignments() as $assignment) {
-            foreach ($assignment as $assignmentName => $object) {
-                if ($assignmentName === $name) {
+        foreach ($this->getAssignments() as $assignmentInfo) {
+            foreach ($assignmentInfo as $itemName => $assignment) {
+                if ($itemName === $name) {
                     return true;
                 }
             }
