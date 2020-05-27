@@ -10,11 +10,11 @@ namespace Yiisoft\Rbac;
 class Assignment
 {
     /**
-     * @var string the user ID. This should be a string representing the unique identifier of a user.
+     * @var string The user ID. This should be a string representing the unique identifier of a user.
      */
     private string $userId;
     /**
-     * @var string the role or permission name
+     * @var string The role or permission name.
      */
     private string $itemName;
 
@@ -24,8 +24,8 @@ class Assignment
     private int $createdAt;
 
     /**
-     * @param string $userId the user ID. This should be a string representing the unique identifier of a user.
-     * @param string $itemName the role or permission name.
+     * @param string $userId The user ID. This should be a string representing the unique identifier of a user.
+     * @param string $itemName The role or permission name.
      * @param int $createdAt UNIX timestamp representing the assignment creation time.
      */
     public function __construct(string $userId, string $itemName, int $createdAt)

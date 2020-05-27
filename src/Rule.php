@@ -19,12 +19,12 @@ abstract class Rule implements ItemInterface
     /**
      * Executes the rule.
      *
-     * @param string $userId the user ID. This should be a string representing
+     * @param string $userId The user ID. This should be a string representing
      * the unique identifier of a user.
-     * @param Item $item the role or permission that this rule is associated with
-     * @param array $parameters parameters passed to {@see CheckAccessInterface::userHasPermission()}.
+     * @param Item $item The role or permission that this rule is associated with.
+     * @param array $parameters Parameters passed to {@see CheckAccessInterface::userHasPermission()}.
      *
-     * @return bool whether the rule permits the auth item it is associated with.
+     * @return bool Whether the rule permits the auth item it is associated with.
      */
     public function execute(string $userId, Item $item, array $parameters = []): bool
     {

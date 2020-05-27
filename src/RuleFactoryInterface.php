@@ -7,9 +7,9 @@ namespace Yiisoft\Rbac;
 interface RuleFactoryInterface
 {
     /**
-     * @param string $name class name or other rule definition.
+     * @param string $name Class name or other rule definition.
      *
-     * @return Rule created rule.
+     * @return Rule Rule created.
      */
     public function create(string $name): Rule;
 }

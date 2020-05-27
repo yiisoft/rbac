@@ -29,7 +29,8 @@ composer require yiisoft/rbac
 #### create instance
 
 ```php
-$manager = new PhpManager(new ClassNameRuleFactory(), '../config/');
+$storage = new PhpStorage('../config/');
+$manager = new Manager($storage, new ClassNameRuleFactory());
 ```
 In the directory config will contain permissions and rules. 
 
@@ -37,9 +38,9 @@ In the directory config will contain permissions and rules.
 
 ```php
 
-$manager->add(new Permission('createPost'));
-$manager->add(new Permission('readPost'));
-$manager->add(new Permission('deletePost'));
+$manager->addPermission(new Permission('createPost'));
+$manager->addPermission(new Permission('readPost'));
+$manager->addPermission(new Permission('deletePost'));
 
 ```
 
@@ -48,8 +49,8 @@ After executing this code, this configuration will be saved in ../config/items.p
 #### Create roles
 
 ```php
-$manager->add(new Role('author'));
-$manager->add(new Role('reader'));
+$manager->addRule(new Role('author'));
+$manager->addRule(new Role('reader'));
 ```
 
 
@@ -92,8 +93,8 @@ if ($manager->userHasPermission(100, 'createPost')) {
 
 ```php
 
-$manager->add(new ActionRule());
-$manager->add(
+$manager->addRule(new ActionRule());
+$manager->addPermission(
     (new Permission('viewList'))->withRuleName('action_rule')
 );
 
