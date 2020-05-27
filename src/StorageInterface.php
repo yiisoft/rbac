@@ -158,8 +158,9 @@ interface StorageInterface
     public function addAssignment(string $userId, Item $item): void;
 
     /**
-     * @param string $name
-     * @return bool
+     * Returns whether there is assignment for a named role or permission.
+     * @param string $name Name of the role or the permission.
+     * @return bool Whether there is assignment.
      */
     public function assignmentExist(string $name): bool;
 
