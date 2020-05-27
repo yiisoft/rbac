@@ -400,10 +400,10 @@ final class Manager implements AccessCheckerInterface
     /**
      * Set default roles.
      *
-     * @param string[]|callable $roles either array of roles or a callable returning it
+     * @param string[]|\Closure $roles either array of roles or a closure returning it
      *
      * @return $this
-     * @throws InvalidArgumentException When $roles is neither array nor callable.
+     * @throws InvalidArgumentException When $roles is neither array nor closure.
      * @throws RuntimeException When callable returns non array.
      */
     public function setDefaultRoles($roles): self
@@ -422,7 +422,7 @@ final class Manager implements AccessCheckerInterface
             return $this;
         }
 
-        throw new InvalidArgumentException('Default roles must be either an array or a callable.');
+        throw new InvalidArgumentException('Default roles must be either an array or a closure.');
     }
 
     /**

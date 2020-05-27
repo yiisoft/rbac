@@ -558,7 +558,7 @@ final class ManagerTest extends TestCase
     {
         $manager = $this->createManager($this->createStorage());
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Default roles must be either an array or a callable');
+        $this->expectExceptionMessage('Default roles must be either an array or a closure');
         $manager->setDefaultRoles('test');
     }
 
