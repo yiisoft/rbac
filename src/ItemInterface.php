@@ -13,7 +13,13 @@ namespace Yiisoft\Rbac;
  */
 interface ItemInterface
 {
+    /**
+     * @return string Authorization item name.
+     */
     public function getName(): string;
 
+    /**
+     * @return array Authorization item attribute values indexed by attribute names.
+     */
     public function getAttributes(): array;
 }
