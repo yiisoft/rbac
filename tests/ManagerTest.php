@@ -23,9 +23,37 @@ final class ManagerTest extends TestCase
         $manager = $this->createManager($this->createStorage());
 
         $testSuites = [
-            'admin C' => [
+            'reader A' => [
+                'createPost' => false,
+                'readPost' => true,
                 'updatePost' => false,
-            ]
+                'updateAnyPost' => false,
+                'reader' => false,
+            ],
+            'author B' => [
+                'createPost' => true,
+                'readPost' => true,
+                'updatePost' => true,
+                'deletePost' => true,
+                'updateAnyPost' => false,
+            ],
+            'admin C' => [
+                'createPost' => true,
+                'readPost' => true,
+                'updatePost' => false,
+                'updateAnyPost' => true,
+                'nonExistingPermission' => false,
+                null => false,
+            ],
+            'guest' => [
+                'createPost' => false,
+                'readPost' => false,
+                'updatePost' => false,
+                'deletePost' => false,
+                'updateAnyPost' => false,
+                'blablabla' => false,
+                null => false,
+            ],
         ];
 
         $params = ['authorID' => 'author B'];
