@@ -9,7 +9,6 @@ use InvalidArgumentException;
 use RuntimeException;
 use Yiisoft\Rbac\Manager;
 use Yiisoft\Rbac\Permission;
-use Yiisoft\Rbac\PhpStorage;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\RuleFactory\ClassNameRuleFactory;
 use Yiisoft\Rbac\StorageInterface;
@@ -19,44 +18,14 @@ use Yiisoft\Rbac\StorageInterface;
  */
 final class ManagerTest extends TestCase
 {
-    use FixtureTrait;
-
     public function testUserHasPermission(): void
     {
         $manager = $this->createManager($this->createStorage());
 
         $testSuites = [
-            'reader A' => [
-                'createPost' => false,
-                'readPost' => true,
-                'updatePost' => false,
-                'updateAnyPost' => false,
-                'reader' => false,
-            ],
-            'author B' => [
-                'createPost' => true,
-                'readPost' => true,
-                'updatePost' => true,
-                'deletePost' => true,
-                'updateAnyPost' => false,
-            ],
             'admin C' => [
-                'createPost' => true,
-                'readPost' => true,
                 'updatePost' => false,
-                'updateAnyPost' => true,
-                'nonExistingPermission' => false,
-                null => false,
-            ],
-            'guest' => [
-                'createPost' => false,
-                'readPost' => false,
-                'updatePost' => false,
-                'deletePost' => false,
-                'updateAnyPost' => false,
-                'blablabla' => false,
-                null => false,
-            ],
+            ]
         ];
 
         $params = ['authorID' => 'author B'];
@@ -479,7 +448,9 @@ final class ManagerTest extends TestCase
     public function testUpdatePermissionNameAlreadyUsed(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Unable to change the item name. The name "createPost" is already used by another item.');
+        $this->expectExceptionMessage(
+            'Unable to change the item name. The name "createPost" is already used by another item.'
+        );
 
         $storage = $this->createStorage();
         $manager = $this->createManager($storage);
@@ -568,26 +539,41 @@ final class ManagerTest extends TestCase
         $this->assertEquals(['myDefaultRole'], $manager->getDefaultRoles());
     }
 
-    protected function tearDown(): void
-    {
-        $this->clearFixturesFiles();
-        parent::tearDown();
-    }
-
-    protected function setUp(): void
-    {
-        $this->addFixturesFiles();
-        parent::setUp();
-    }
-
     private function createManager(StorageInterface $storage): Manager
     {
         return (new Manager($storage, new ClassNameRuleFactory()))
             ->setDefaultRoles(['myDefaultRole']);
     }
 
-    private function createStorage(): PhpStorage
+    private function createStorage(): StorageInterface
     {
-        return new PhpStorage($this->dataPath);
+        $storage = new FakeStorage();
+        $storage->addItem(new Permission('Fast Metabolism'));
+        $storage->addItem(new Permission('createPost'));
+        $storage->addItem(new Permission('readPost'));
+        $storage->addItem(new Permission('deletePost'));
+        $storage->addItem((new Permission('updatePost'))->withRuleName('isAuthor'));
+        $storage->addItem(new Permission('updateAnyPost'));
+        $storage->addItem(new Role('withoutChildren'));
+        $storage->addItem(new Role('reader'));
+        $storage->addItem(new Role('author'));
+        $storage->addItem(new Role('admin'));
+
+        $storage->addChild(new Role('reader'), new Permission('readPost'));
+        $storage->addChild(new Role('author'), new Permission('createPost'));
+        $storage->addChild(new Role('author'), new Permission('updatePost'));
+        $storage->addChild(new Role('author'), new Role('reader'));
+        $storage->addChild(new Role('admin'), new Role('author'));
+        $storage->addChild(new Role('admin'), new Permission('updateAnyPost'));
+
+        $storage->addAssignment('reader A', new Permission('Fast Metabolism'));
+        $storage->addAssignment('reader A', new Role('reader'));
+        $storage->addAssignment('author B', new Role('author'));
+        $storage->addAssignment('author B', new Permission('deletePost'));
+        $storage->addAssignment('admin C', new Role('admin'));
+
+        $storage->addRule(new AuthorRule('isAuthor'));
+
+        return $storage;
     }
 }
