@@ -211,14 +211,14 @@ final class FakeStorage implements StorageInterface
     private function getItemsByType(string $type): array
     {
         return $this->filterItems(
-            fn(Item $item) => $item->getType() === $type
+            fn (Item $item) => $item->getType() === $type
         );
     }
 
     private function getItemsByRuleName(string $ruleName): array
     {
         return $this->filterItems(
-            fn(Item $item) => $item->getRuleName() === $ruleName
+            fn (Item $item) => $item->getRuleName() === $ruleName
         );
     }
 
