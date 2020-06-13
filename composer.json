@@ -19,15 +19,10 @@
     "prefer-stable": true,
     "require": {
         "php": "^7.4",
-        "yiisoft/access": "^3.0@dev",
-        "yiisoft/var-dumper": "^3.0@dev"
+        "yiisoft/access": "^3.0@dev"
     },
     "require-dev": {
-        "psr/log": "~1.1.0",
-        "yiisoft/log": "^3.0@dev",
-        "yiisoft/cache": "^3.0@dev",
-        "phpunit/phpunit": "^9.0",
-        "yiisoft/files": "^3.0@dev"
+        "phpunit/phpunit": "^9.0"
     },
     "suggest": {
         "yiisoft/rbac-php": "To store rules in PHP files",
