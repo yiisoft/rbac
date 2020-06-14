@@ -130,4 +130,4 @@ if (!$manager->userHasPermission(103, 'viewList', ['action' => 'home'])) {
 
 | Storage                                              | Description      |
 | ---------------------------------------------------- |----------------- | 
-| [PhpStorage]((https://github.com/yiisoft/rbac-php))  | PHP file storage |
+| [PhpStorage](https://github.com/yiisoft/rbac-php)    | PHP file storage |
