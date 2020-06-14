@@ -29,7 +29,6 @@ composer require yiisoft/rbac
 #### create instance
 
 ```php
-$storage = new PhpStorage('../config/');
 $manager = new Manager($storage, new ClassNameRuleFactory());
 ```
 In the directory config will contain permissions and rules. 
@@ -126,3 +125,9 @@ if (!$manager->userHasPermission(103, 'viewList', ['action' => 'home'])) {
     echo 'reader not has permission index';
 }
 ```
+
+## Storage:
+
+| Storage                                              | Description      |
+| ---------------------------------------------------- |----------------- | 
+| [PhpStorage]((https://github.com/yiisoft/rbac-php))  | PHP file storage |
