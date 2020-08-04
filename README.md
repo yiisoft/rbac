@@ -48,8 +48,8 @@ After executing this code, this configuration will be saved in ../config/items.p
 #### Create roles
 
 ```php
-$manager->addRule(new Role('author'));
-$manager->addRule(new Role('reader'));
+$manager->addRole(new Role('author'));
+$manager->addRole(new Role('reader'));
 ```
 
 
