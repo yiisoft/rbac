@@ -6,7 +6,7 @@
     <br>
 </p>
 
-This library provides [RBAC] (Role-Based Access Control) library.
+This package provides [RBAC] (Role-Based Access Control) library.
 It is used in [Yii Framework] but is supposed to be usable separately.
 
 [RBAC]: https://en.wikipedia.org/wiki/Role-based_access_control
@@ -26,14 +26,14 @@ composer require yiisoft/rbac
 
 ## Basic usage:
 
-#### create instance
+#### Сreate instance
 
 ```php
 $manager = new Manager($storage, new ClassNameRuleFactory());
 ```
 In the directory config will contain permissions and rules. 
 
-#### create permissions
+#### Сreate permissions
 
 ```php
 
