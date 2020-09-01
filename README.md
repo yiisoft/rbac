@@ -75,7 +75,8 @@ $manager->addChild(
 #### Assign role to user
 
 ```php
-$manager->assign($manager->getRole('author'), 100);
+$userId = 100;
+$manager->assign($manager->getRole('author'), $userId);
 ```
 After executing this code, this configuration will be saved in ../config/assignments.php
 
@@ -83,7 +84,7 @@ After executing this code, this configuration will be saved in ../config/assignm
 #### Check permissions
 
 ```php
-if ($manager->userHasPermission(100, 'createPost')) {
+if ($manager->userHasPermission($userId, 'createPost')) {
     echo 'author has permission createPost';
 }
 ```
@@ -121,7 +122,8 @@ class ActionRule extends Rule
 
 
 ```php
-if (!$manager->userHasPermission(103, 'viewList', ['action' => 'home'])) {
+$anotherUserId = 103;
+if (!$manager->userHasPermission($anotherUserId, 'viewList', ['action' => 'home'])) {
     echo 'reader not has permission index';
 }
 ```
