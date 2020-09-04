@@ -57,18 +57,18 @@ $manager->addRole(new Role('reader'));
 
 ```php
 $manager->addChild(
-    $manager->getRole('reader'),
-    $manager->getPermission('readPost')
+    $storage->getRoleByName('reader'),
+    $storage->getPermissionByName('readPost')
 );
 
 $manager->addChild(
-    $manager->getRole('author'),
-    $manager->getPermission('createPost')
+    $storage->getRoleByName('author'),
+    $storage->getPermissionByName('createPost')
 );
 
 $manager->addChild(
-    $manager->getRole('author'),
-    $manager->getRole('reader')
+    $storage->getRoleByName('author'),
+    $storage->getRoleByName('reader')
 );
 ```
 
@@ -76,7 +76,7 @@ $manager->addChild(
 
 ```php
 $userId = 100;
-$manager->assign($manager->getRole('author'), $userId);
+$manager->assign($storage->getRoleByName('author'), $userId);
 ```
 After executing this code, this configuration will be saved in ../config/assignments.php
 
