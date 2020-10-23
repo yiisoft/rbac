@@ -133,3 +133,19 @@ if (!$manager->userHasPermission($anotherUserId, 'viewList', ['action' => 'home'
 | Storage                                              | Description      |
 | ---------------------------------------------------- |----------------- | 
 | [PhpStorage](https://github.com/yiisoft/rbac-php)    | PHP file storage |
+
+## Unit testing
+
+The package is tested with [PHPUnit](https://phpunit.de/). To run tests:
+
+```php
+./vendor/bin/phpunit
+```
+
+## Static analysis
+
+The code is statically analyzed with [Psalm](https://psalm.dev/). To run static analysis:
+
+```php
+./vendor/bin/psalm
+```

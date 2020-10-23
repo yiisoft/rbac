@@ -162,7 +162,7 @@ final class Manager implements AccessCheckerInterface
      * @throws \Exception If the role has already been assigned to the user.
      *
      */
-    public function assign(Item $item, string $userId): Assignment
+    public function assign(Item $item, string $userId): ?Assignment
     {
         if (!$this->hasItem($item->getName())) {
             throw new InvalidArgumentException(sprintf('Unknown %s "%s".', $item->getType(), $item->getName()));
@@ -671,7 +671,7 @@ final class Manager implements AccessCheckerInterface
      * @param string $name The name of the item whose children are to be looked for.
      * @param array $result The children and grand children (in array keys).
      */
-    private function getChildrenRecursive(string $name, &$result): void
+    private function getChildrenRecursive(string $name, array &$result): void
     {
         $children = $this->storage->getChildrenByName($name);
         if (empty($children)) {
