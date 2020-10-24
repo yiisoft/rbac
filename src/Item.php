@@ -23,17 +23,17 @@ abstract class Item implements ItemInterface
     private string $description = '';
 
     /**
-     * @var ?string Name of the rule associated with this item.
+     * @var string|null Name of the rule associated with this item.
      */
     private ?string $ruleName = null;
 
     /**
-     * @var ?int UNIX timestamp representing the item creation time.
+     * @var int|null UNIX timestamp representing the item creation time.
      */
     private ?int $createdAt = null;
 
     /**
-     * @var ?int UNIX timestamp representing the item updating time.
+     * @var int|null UNIX timestamp representing the item updating time.
      */
     private ?int $updatedAt = null;
 
