@@ -130,7 +130,8 @@ interface StorageInterface
 
     /**
      * Returns all role assignment information.
-     * @return Assignment[]
+     * @psalm-return array<string,array<string, Assignment>>
+     * @return array
      */
     public function getAssignments(): array;
 
