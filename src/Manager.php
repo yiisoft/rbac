@@ -158,7 +158,7 @@ final class Manager implements AccessCheckerInterface
      * @param Item $item
      * @param string $userId The user ID.
      *
-     * @return Assignment The role or permission assignment information.
+     * @return Assignment|null The role or permission assignment information.
      * @throws \Exception If the role has already been assigned to the user.
      *
      */
