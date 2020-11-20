@@ -17,7 +17,7 @@ It is used in [Yii Framework] but is supposed to be usable separately.
 [![Build status](https://github.com/yiisoft/rbac/workflows/build/badge.svg)](https://github.com/yiisoft/rbac/actions?query=workflow%3Abuild)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/yiisoft/rbac/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/yiisoft/rbac/?branch=master)
 [![Code Coverage](https://scrutinizer-ci.com/g/yiisoft/rbac/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/yiisoft/rbac/?branch=master)
-[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fyiisoft%2Flog-target-file%2Fmaster)](https://dashboard.stryker-mutator.io/reports/github.com/yiisoft/log-target-file/master)
+[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fyiisoft%2Frbac%2Fmaster)](https://dashboard.stryker-mutator.io/reports/github.com/yiisoft/rbac/master)
 [![static analysis](https://github.com/yiisoft/rbac/workflows/static%20analysis/badge.svg)](https://github.com/yiisoft/rbac/actions?query=workflow%3A%22static+analysis%22)
 [![type-coverage](https://shepherd.dev/github/yiisoft/rbac/coverage.svg)](https://shepherd.dev/github/yiisoft/rbac)
 
