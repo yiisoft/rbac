@@ -46,7 +46,7 @@ abstract class Rule implements ItemInterface
     public function getAttributes(): array
     {
         return [
-            'name' => $this->getName()
+            'name' => $this->getName(),
         ];
     }
 }

@@ -224,6 +224,7 @@ final class FakeStorage implements StorageInterface
 
     /**
      * @param callable $callback
+     *
      * @return array|Item[]
      */
     private function filterItems(callable $callback): array
