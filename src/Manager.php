@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac;
 
-use Yiisoft\Access\AccessCheckerInterface;
 use InvalidArgumentException;
 use RuntimeException;
+use Yiisoft\Access\AccessCheckerInterface;
 
 /**
  * An authorization manager that helps with building RBAC hierarchy and checking for permissions.
@@ -114,8 +114,6 @@ final class Manager implements AccessCheckerInterface
      *
      * @param Item $parent
      * @param Item $child
-     *
-     * @return void
      */
     public function removeChild(Item $parent, Item $child): void
     {
@@ -129,8 +127,6 @@ final class Manager implements AccessCheckerInterface
      * Note, the children items are not deleted. Only the parent-child relationships are removed.
      *
      * @param Item $parent
-     *
-     * @return void
      */
     public function removeChildren(Item $parent): void
     {
@@ -158,9 +154,9 @@ final class Manager implements AccessCheckerInterface
      * @param Item $item
      * @param string $userId The user ID.
      *
-     * @return Assignment|null The role or permission assignment information.
      * @throws \Exception If the role has already been assigned to the user.
      *
+     * @return Assignment|null The role or permission assignment information.
      */
     public function assign(Item $item, string $userId): ?Assignment
     {
@@ -184,8 +180,6 @@ final class Manager implements AccessCheckerInterface
      *
      * @param Item $role
      * @param string $userId The user ID.
-     *
-     * @return void
      */
     public function revoke(Item $role, string $userId): void
     {
@@ -198,8 +192,6 @@ final class Manager implements AccessCheckerInterface
      * Revokes all roles and permissions from a user.
      *
      * @param string $userId The user ID.
-     *
-     * @return void
      */
     public function revokeAll(string $userId): void
     {
@@ -232,10 +224,10 @@ final class Manager implements AccessCheckerInterface
      *
      * @param string $roleName name of the role to file child roles for
      *
+     * @throws InvalidArgumentException If Role was not found that are getting by $roleName
+     *
      * @return Role[] Child roles. The array is indexed by the role names.
      * First element is an instance of the parent Role itself.
-     *
-     * @throws InvalidArgumentException If Role was not found that are getting by $roleName
      */
     public function getChildRoles(string $roleName): array
     {
@@ -400,11 +392,12 @@ final class Manager implements AccessCheckerInterface
     /**
      * Set default roles.
      *
-     * @param string[]|\Closure $roles either array of roles or a closure returning it
+     * @param \Closure|string[] $roles either array of roles or a closure returning it
      *
-     * @return $this
      * @throws InvalidArgumentException When $roles is neither array nor closure.
      * @throws RuntimeException When callable returns non array.
+     *
+     * @return $this
      */
     public function setDefaultRoles($roles): self
     {
@@ -439,7 +432,6 @@ final class Manager implements AccessCheckerInterface
      * Returns defaultRoles as array of Role objects.
      *
      * @return Role[] Default roles. The array is indexed by the role names.
-     *
      */
     public function getDefaultRoleInstances(): array
     {
@@ -463,10 +455,10 @@ final class Manager implements AccessCheckerInterface
      * @param array $params Parameters passed to {@see AccessCheckerInterface::userHasPermission()} and will be passed
      * to the rule.
      *
-     * @return bool the return value of {@see Rule::execute()}. If the auth item does not specify a rule, true will be
-     * returned.
      * @throws RuntimeException if the auth item has an invalid rule.
      *
+     * @return bool the return value of {@see Rule::execute()}. If the auth item does not specify a rule, true will be
+     * returned.
      */
     private function executeRule(string $user, Item $item, array $params): bool
     {
@@ -541,7 +533,6 @@ final class Manager implements AccessCheckerInterface
         return $normalizePermissions;
     }
 
-
     /**
      * Returns all permissions that are directly assigned to user.
      *
@@ -601,8 +592,9 @@ final class Manager implements AccessCheckerInterface
      * added to this array, which holds the value of `$userId`.
      * @param Assignment[] $assignments The assignments to the specified user.
      *
-     * @return bool Whether the operations can be performed by the user.
      * @throws RuntimeException
+     *
+     * @return bool Whether the operations can be performed by the user.
      */
     private function userHasPermissionRecursive(
         string $user,

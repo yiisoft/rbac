@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac\Tests;
 
-use PHPUnit\Framework\TestCase;
 use InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Yiisoft\Rbac\Manager;
 use Yiisoft\Rbac\Permission;
@@ -124,7 +124,7 @@ final class ManagerTest extends TestCase
         $this->assertEquals(
             [
                 'readPost',
-                'createPost'
+                'createPost',
             ],
             array_keys($storage->getChildrenByName('reader'))
         );
@@ -213,7 +213,7 @@ final class ManagerTest extends TestCase
         $this->assertEquals(
             [
                 'updatePost',
-                'reader'
+                'reader',
             ],
             array_keys($storage->getChildrenByName('author'))
         );
@@ -260,7 +260,7 @@ final class ManagerTest extends TestCase
             [
                 'myDefaultRole',
                 'reader',
-                'author'
+                'author',
             ],
             array_keys($manager->getRolesByUser('readingAuthor'))
         );
@@ -291,7 +291,6 @@ final class ManagerTest extends TestCase
             'reader A'
         );
     }
-
 
     public function testRevokeRole(): void
     {
@@ -326,7 +325,6 @@ final class ManagerTest extends TestCase
         $manager->revokeAll('author B');
         $this->assertEmpty($storage->getUserAssignments('author B'));
     }
-
 
     public function testGetRolesByUser(): void
     {
@@ -370,7 +368,6 @@ final class ManagerTest extends TestCase
         $this->assertEmpty($manager->getPermissionsByRole('guest'));
     }
 
-
     public function testGetPermissionsByUser(): void
     {
         $manager = $this->createManager($this->createStorage());
@@ -388,14 +385,14 @@ final class ManagerTest extends TestCase
             [
                 'reader A',
                 'author B',
-                'admin C'
+                'admin C',
             ],
             $manager->getUserIdsByRole('reader')
         );
         $this->assertEquals(
             [
                 'author B',
-                'admin C'
+                'admin C',
             ],
             $manager->getUserIdsByRole('author')
         );
@@ -457,7 +454,6 @@ final class ManagerTest extends TestCase
         $manager->removePermission($storage->getPermissionByName('updatePost'));
         $this->assertNull($storage->getPermissionByName('updatePost'));
     }
-
 
     public function testUpdatePermission(): void
     {
