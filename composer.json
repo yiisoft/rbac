@@ -25,7 +25,7 @@
         "phpunit/phpunit": "^9.4",
         "roave/infection-static-analysis-plugin": "^1.5",
         "spatie/phpunit-watcher": "^1.23",
-        "vimeo/psalm": "^4.2"
+        "vimeo/psalm": "^4.3"
     },
     "suggest": {
         "yiisoft/rbac-php": "To store rules in PHP files",
