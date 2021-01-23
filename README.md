@@ -30,14 +30,14 @@ composer require yiisoft/rbac
 
 ## Basic usage:
 
-#### Сreate instance
+#### Create an instance
 
 ```php
 $manager = new Manager($storage, new ClassNameRuleFactory());
 ```
 In the directory config will contain permissions and rules. 
 
-#### Сreate permissions
+#### Create permissions
 
 ```php
 
@@ -87,9 +87,16 @@ After executing this code, this configuration will be saved in ../config/assignm
 
 #### Check permissions
 
+In order to check permissions, obtain an instance of `\Yiisoft\Access\AccessCheckerInterface` and use it:
+
 ```php
-if ($manager->userHasPermission($userId, 'createPost')) {
-    echo 'author has permission createPost';
+public function actionCreate(\Yiisoft\Access\AccessCheckerInterface $accessChecker): ResponseInterface
+{
+    $userId = getUserId();
+
+    if ($accessChecker->userHasPermission($userId, 'createPost')) {
+        // author has permission createPost
+    }
 }
 ```
 
@@ -162,13 +169,6 @@ The code is statically analyzed with [Psalm](https://psalm.dev/). To run static 
 ./vendor/bin/psalm
 ```
 
-## License
-
-The Yii Role-Based Access Control Library is free software. It is released under the terms of the BSD License.
-Please see [`LICENSE`](./LICENSE.md) for more information.
-
-Maintained by [Yii Software](https://www.yiiframework.com/).
-
 ## Support the project
 
 [![Open Collective](https://img.shields.io/badge/Open%20Collective-sponsor-7eadf1?logo=open%20collective&logoColor=7eadf1&labelColor=555555)](https://opencollective.com/yiisoft)
@@ -180,3 +180,10 @@ Maintained by [Yii Software](https://www.yiiframework.com/).
 [![Telegram](https://img.shields.io/badge/telegram-join-1DA1F2?style=flat&logo=telegram)](https://t.me/yii3en)
 [![Facebook](https://img.shields.io/badge/facebook-join-1DA1F2?style=flat&logo=facebook&logoColor=ffffff)](https://www.facebook.com/groups/yiitalk)
 [![Slack](https://img.shields.io/badge/slack-join-1DA1F2?style=flat&logo=slack)](https://yiiframework.com/go/slack)
+
+## License
+
+The Yii Role-Based Access Control Library is free software. It is released under the terms of the BSD License.
+Please see [`LICENSE`](./LICENSE.md) for more information.
+
+Maintained by [Yii Software](https://www.yiiframework.com/).
