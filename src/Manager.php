@@ -31,7 +31,7 @@ final class Manager implements AccessCheckerInterface
     public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
     {
         if (!is_string($userId)) {
-            throw new \InvalidArgumentException(sprintf('userId must be string, %s given.', gettype($userId)));
+            throw new \InvalidArgumentException(sprintf('userId must be a string, %s given.', gettype($userId)));
         }
 
         $assignments = $this->storage->getUserAssignments($userId);
