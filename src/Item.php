@@ -24,6 +24,7 @@ abstract class Item implements ItemInterface
 
     /**
      * @var string|null Name of the rule associated with this item.
+     * @psalm-var class-string<Rule>|null
      */
     private ?string $ruleName = null;
 
@@ -68,6 +69,7 @@ abstract class Item implements ItemInterface
         return $this->description;
     }
 
+    /** @psalm-param class-string<Rule>|null $ruleName */
     public function withRuleName(?string $ruleName): self
     {
         $new = clone $this;
@@ -75,6 +77,7 @@ abstract class Item implements ItemInterface
         return $new;
     }
 
+    /** @psalm-return class-string<Rule>|null */
     public function getRuleName(): ?string
     {
         return $this->ruleName;
