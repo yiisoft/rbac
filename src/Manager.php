@@ -30,6 +30,11 @@ final class Manager implements AccessCheckerInterface
 
     public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
     {
+        if (!is_string($userId) && !is_int($userId)) {
+            throw new \InvalidArgumentException(sprintf('userId must be a string or an int, %s given.', gettype($userId)));
+        }
+
+        $userId = (string) $userId;
         $assignments = $this->storage->getUserAssignments($userId);
 
         if (empty($assignments) && empty($this->defaultRoles)) {
@@ -290,12 +295,12 @@ final class Manager implements AccessCheckerInterface
         $this->getParentRolesRecursive($roleName, $roles);
 
         /**
-         * @var $assignments Assignment[]
+         * @var Assignment[] $assignments
          */
         foreach ($this->storage->getAssignments() as $userId => $assignments) {
             foreach ($assignments as $userAssignment) {
                 if (in_array($userAssignment->getItemName(), $roles, true)) {
-                    $result[] = (string)$userId;
+                    $result[] = $userId;
                 }
             }
         }
@@ -406,6 +411,7 @@ final class Manager implements AccessCheckerInterface
             return $this;
         }
 
+        /** @psalm-suppress RedundantConditionGivenDocblockType */
         if ($roles instanceof \Closure) {
             $roles = $roles();
             if (!is_array($roles)) {
@@ -465,8 +471,10 @@ final class Manager implements AccessCheckerInterface
         if ($item->getRuleName() === null) {
             return true;
         }
+        /** @psalm-suppress PossiblyNullArgument */
         $rule = $this->storage->getRuleByName($item->getRuleName());
         if ($rule === null) {
+            /** @psalm-suppress PossiblyNullArgument */
             throw new RuntimeException(sprintf('Rule not found: %s.', $item->getRuleName()));
         }
 
@@ -475,6 +483,7 @@ final class Manager implements AccessCheckerInterface
 
     private function createItemRuleIfNotExist(Item $item): void
     {
+        /** @psalm-suppress PossiblyNullArgument */
         if ($item->getRuleName() !== null && $this->storage->getRuleByName($item->getRuleName()) === null) {
             $rule = $this->createRule($item->getRuleName());
             $this->addRule($rule);
@@ -494,15 +503,16 @@ final class Manager implements AccessCheckerInterface
         $this->storage->addItem($item);
     }
 
+    /** @psalm-param class-string<Rule> $name */
     private function createRule(string $name): Rule
     {
         return $this->ruleFactory->create($name);
     }
 
-    private function getParentRolesRecursive(string $roleName, &$result): void
+    private function getParentRolesRecursive(string $roleName, array &$result): void
     {
         /**
-         * @var $items Item[]
+         * @var Item[] $items
          */
         foreach ($this->storage->getChildren() as $parentRole => $items) {
             foreach ($items as $item) {

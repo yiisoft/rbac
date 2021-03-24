@@ -8,6 +8,7 @@ interface RuleFactoryInterface
 {
     /**
      * @param string $name Class name or other rule definition.
+     * @psalm-param class-string<Rule> $name
      *
      * @return Rule Rule created.
      */
