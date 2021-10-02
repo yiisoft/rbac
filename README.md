@@ -139,17 +139,16 @@ if (!$manager->userHasPermission($anotherUserId, 'viewList', ['action' => 'home'
 }
 ```
 
-## Advanced usage:
+## Advanced usage
 
-### Using a separate storage for roles assignments
+### Using a separate storage for role assignments
 
-Sometimes, it can be more convenient to separate roles assignments into a different storage than roles and permissions definitions, in order to allow more flexibility :
+Sometimes, it makes sense to have role assignments in a different storage than roles and permission definitions:
 
-- Roles and permissions can be considered as "semi-static", as they only change when you update your application code, and are somehow tightly coupled to your code.
+- Roles and permissions could be considered "semi-static", as they only change when you update your application code.
+- Assignments, on the other hand, could be considered "dynamic". They change more often: when creating a new user, or when updating user role from within your application.
 
-- Assignments, on the other hand, can be considered as "dynamic", and much more prone to changes, like when creating a new user, or updating its role, from within your app.
-
-In order to handle assignments in your database, for example, you can use the following code:
+In order to store assignments in a database you can use the following code:
 
 ```php
 $manager = new Manager($phpStorage, new ClassNameRuleFactory());
