@@ -143,7 +143,13 @@ if (!$manager->userHasPermission($anotherUserId, 'viewList', ['action' => 'home'
 
 ### Using a separate storage for roles assignments
 
-if you want store user assignments in db or other storage
+Sometimes, it can be more convenient to separate roles assignments into a different storage than roles and permissions definitions, in order to allow more flexibility :
+
+- Roles and permissions can be considered as "semi-static", as they only change when you update your application code, and are somehow tightly coupled to your code.
+
+- Assignments, on the other hand, can be considered as "dynamic", and much more prone to changes, like when creating a new user, or updating its role, from within your app.
+
+In order to handle assignments in your database, for example, you can use the following code:
 
 For detail information - see [Issue 49](https://github.com/yiisoft/rbac/issues/49)
 
