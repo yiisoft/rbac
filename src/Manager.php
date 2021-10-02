@@ -14,6 +14,7 @@ use Yiisoft\Access\AccessCheckerInterface;
 final class Manager implements AccessCheckerInterface
 {
     private StorageInterface $storage;
+    private StorageInterface $assignmentStorage;
     private RuleFactoryInterface $ruleFactory;
 
     /**
@@ -24,8 +25,13 @@ final class Manager implements AccessCheckerInterface
 
     public function __construct(StorageInterface $storage, RuleFactoryInterface $ruleFactory)
     {
-        $this->storage = $storage;
+        $this->storage = $this->assignmentStorage = $storage;
         $this->ruleFactory = $ruleFactory;
+    }
+
+    public function setAssignmentStorage(StorageInterface $storage): void
+    {
+        $this->assignmentStorage = $storage;
     }
 
     public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
@@ -35,7 +41,7 @@ final class Manager implements AccessCheckerInterface
         }
 
         $userId = (string) $userId;
-        $assignments = $this->storage->getUserAssignments($userId);
+        $assignments = $this->assignmentStorage->getUserAssignments($userId);
 
         if (empty($assignments) && empty($this->defaultRoles)) {
             return false;
@@ -169,15 +175,15 @@ final class Manager implements AccessCheckerInterface
             throw new InvalidArgumentException(sprintf('Unknown %s "%s".', $item->getType(), $item->getName()));
         }
 
-        if ($this->storage->getUserAssignmentByName($userId, $item->getName()) !== null) {
+        if ($this->assignmentStorage->getUserAssignmentByName($userId, $item->getName()) !== null) {
             throw new InvalidArgumentException(
                 sprintf('"%s" %s has already been assigned to user %s.', $item->getName(), $item->getType(), $userId)
             );
         }
 
-        $this->storage->addAssignment($userId, $item);
+        $this->assignmentStorage->addAssignment($userId, $item);
 
-        return $this->storage->getUserAssignmentByName($userId, $item->getName());
+        return $this->assignmentStorage->getUserAssignmentByName($userId, $item->getName());
     }
 
     /**
@@ -188,8 +194,8 @@ final class Manager implements AccessCheckerInterface
      */
     public function revoke(Item $role, string $userId): void
     {
-        if ($this->storage->getUserAssignmentByName($userId, $role->getName()) !== null) {
-            $this->storage->removeAssignment($userId, $role);
+        if ($this->assignmentStorage->getUserAssignmentByName($userId, $role->getName()) !== null) {
+            $this->assignmentStorage->removeAssignment($userId, $role);
         }
     }
 
@@ -200,7 +206,7 @@ final class Manager implements AccessCheckerInterface
      */
     public function revokeAll(string $userId): void
     {
-        $this->storage->removeAllAssignments($userId);
+        $this->assignmentStorage->removeAllAssignments($userId);
     }
 
     /**
@@ -214,7 +220,7 @@ final class Manager implements AccessCheckerInterface
     public function getRolesByUser(string $userId): array
     {
         $roles = $this->getDefaultRoleInstances();
-        foreach ($this->storage->getUserAssignments($userId) as $name => $assignment) {
+        foreach ($this->assignmentStorage->getUserAssignments($userId) as $name => $assignment) {
             $role = $this->storage->getRoleByName($assignment->getItemName());
             if ($role !== null) {
                 $roles[$name] = $role;
@@ -297,7 +303,7 @@ final class Manager implements AccessCheckerInterface
         /**
          * @var Assignment[] $assignments
          */
-        foreach ($this->storage->getAssignments() as $userId => $assignments) {
+        foreach ($this->assignmentStorage->getAssignments() as $userId => $assignments) {
             foreach ($assignments as $userAssignment) {
                 if (in_array($userAssignment->getItemName(), $roles, true)) {
                     $result[] = $userId;
@@ -553,7 +559,7 @@ final class Manager implements AccessCheckerInterface
     private function getDirectPermissionsByUser(string $userId): array
     {
         $permissions = [];
-        foreach ($this->storage->getUserAssignments($userId) as $name => $assignment) {
+        foreach ($this->assignmentStorage->getUserAssignments($userId) as $name => $assignment) {
             $permission = $this->storage->getPermissionByName($assignment->getItemName());
             if ($permission !== null) {
                 $permissions[$name] = $permission;
@@ -572,7 +578,7 @@ final class Manager implements AccessCheckerInterface
      */
     private function getInheritedPermissionsByUser(string $userId): array
     {
-        $assignments = $this->storage->getUserAssignments($userId);
+        $assignments = $this->assignmentStorage->getUserAssignments($userId);
         $result = [];
         foreach (array_keys($assignments) as $roleName) {
             $this->getChildrenRecursive($roleName, $result);

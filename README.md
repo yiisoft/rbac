@@ -139,6 +139,20 @@ if (!$manager->userHasPermission($anotherUserId, 'viewList', ['action' => 'home'
 }
 ```
 
+## Advanced usage:
+
+#### Create an instance and using other storage for user assignments
+
+if you want store user assignments in db or other storage
+
+For detail information - see [Issue 49](https://github.com/yiisoft/rbac/issues/49)
+
+```php
+$manager = new Manager($storage, new ClassNameRuleFactory());
+$manager->setAssignmentStorage($otherStorage);
+```
+
+
 ## Storage:
 
 | Storage                                              | Description      |
