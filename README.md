@@ -151,7 +151,6 @@ Sometimes, it can be more convenient to separate roles assignments into a differ
 
 In order to handle assignments in your database, for example, you can use the following code:
 
-For detail information - see [Issue 49](https://github.com/yiisoft/rbac/issues/49)
 
 ```php
 $manager = new Manager($storage, new ClassNameRuleFactory());
