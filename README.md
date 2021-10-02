@@ -141,7 +141,7 @@ if (!$manager->userHasPermission($anotherUserId, 'viewList', ['action' => 'home'
 
 ## Advanced usage:
 
-#### Create an instance and using other storage for user assignments
+### Using a separate storage for roles assignments
 
 if you want store user assignments in db or other storage
 
