@@ -25,7 +25,8 @@ final class Manager implements AccessCheckerInterface
 
     public function __construct(StorageInterface $storage, RuleFactoryInterface $ruleFactory)
     {
-        $this->storage = $this->assignmentStorage = $storage;
+        $this->storage = $storage;
+        $this->assignmentStorage = $storage;
         $this->ruleFactory = $ruleFactory;
     }
 
