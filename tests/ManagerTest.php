@@ -68,7 +68,7 @@ class ManagerTest extends TestCase
                     'updatePost' => true,
                     'deletePost' => true,
                     'updateAnyPost' => false,
-                ]
+                ],
             ],
             [
                 'admin C',
@@ -91,7 +91,7 @@ class ManagerTest extends TestCase
                     'updateAnyPost' => false,
                     'blablabla' => false,
                     null => false,
-                ]
+                ],
             ],
             [
                 12,
@@ -103,7 +103,7 @@ class ManagerTest extends TestCase
                     'updateAnyPost' => false,
                     'blablabla' => false,
                     null => false,
-                ]
+                ],
             ],
         ];
     }
