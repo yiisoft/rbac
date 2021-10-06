@@ -13,8 +13,8 @@ use Yiisoft\Access\AccessCheckerInterface;
  */
 final class Manager implements AccessCheckerInterface
 {
-    private StorageInterface $storage;
-    private StorageInterface $assignmentStorage;
+    private RolesStorageInterface $rolesStorage;
+    private AssignmentsStorageInterface $assignmentsStorage;
     private RuleFactoryInterface $ruleFactory;
 
     /**
@@ -23,16 +23,11 @@ final class Manager implements AccessCheckerInterface
      */
     private array $defaultRoles = [];
 
-    public function __construct(StorageInterface $storage, RuleFactoryInterface $ruleFactory)
+    public function __construct(RolesStorageInterface $rolesStorage, AssignmentsStorageInterface $assignmentsStorage, RuleFactoryInterface $ruleFactory)
     {
-        $this->storage = $storage;
-        $this->assignmentStorage = $storage;
+        $this->rolesStorage = $rolesStorage;
+        $this->assignmentsStorage = $assignmentsStorage;
         $this->ruleFactory = $ruleFactory;
-    }
-
-    public function setAssignmentStorage(StorageInterface $storage): void
-    {
-        $this->assignmentStorage = $storage;
     }
 
     public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
@@ -42,13 +37,13 @@ final class Manager implements AccessCheckerInterface
         }
 
         $userId = (string) $userId;
-        $assignments = $this->assignmentStorage->getUserAssignments($userId);
+        $assignments = $this->assignmentsStorage->getUserAssignments($userId);
 
         if (empty($assignments) && empty($this->defaultRoles)) {
             return false;
         }
 
-        if ($this->storage->getPermissionByName($permissionName) === null) {
+        if ($this->rolesStorage->getPermissionByName($permissionName) === null) {
             return false;
         }
 
@@ -111,13 +106,13 @@ final class Manager implements AccessCheckerInterface
             );
         }
 
-        if (isset($this->storage->getChildrenByName($parent->getName())[$child->getName()])) {
+        if (isset($this->rolesStorage->getChildrenByName($parent->getName())[$child->getName()])) {
             throw new RuntimeException(
                 sprintf('The item "%s" already has a child "%s".', $parent->getName(), $child->getName())
             );
         }
 
-        $this->storage->addChild($parent, $child);
+        $this->rolesStorage->addChild($parent, $child);
     }
 
     /**
@@ -130,7 +125,7 @@ final class Manager implements AccessCheckerInterface
     public function removeChild(Item $parent, Item $child): void
     {
         if ($this->hasChild($parent, $child)) {
-            $this->storage->removeChild($parent, $child);
+            $this->rolesStorage->removeChild($parent, $child);
         }
     }
 
@@ -142,8 +137,8 @@ final class Manager implements AccessCheckerInterface
      */
     public function removeChildren(Item $parent): void
     {
-        if ($this->storage->hasChildren($parent->getName())) {
-            $this->storage->removeChildren($parent);
+        if ($this->rolesStorage->hasChildren($parent->getName())) {
+            $this->rolesStorage->removeChildren($parent);
         }
     }
 
@@ -157,7 +152,7 @@ final class Manager implements AccessCheckerInterface
      */
     public function hasChild(Item $parent, Item $child): bool
     {
-        return array_key_exists($child->getName(), $this->storage->getChildrenByName($parent->getName()));
+        return array_key_exists($child->getName(), $this->rolesStorage->getChildrenByName($parent->getName()));
     }
 
     /**
@@ -176,15 +171,15 @@ final class Manager implements AccessCheckerInterface
             throw new InvalidArgumentException(sprintf('Unknown %s "%s".', $item->getType(), $item->getName()));
         }
 
-        if ($this->assignmentStorage->getUserAssignmentByName($userId, $item->getName()) !== null) {
+        if ($this->assignmentsStorage->getUserAssignmentByName($userId, $item->getName()) !== null) {
             throw new InvalidArgumentException(
                 sprintf('"%s" %s has already been assigned to user %s.', $item->getName(), $item->getType(), $userId)
             );
         }
 
-        $this->assignmentStorage->addAssignment($userId, $item);
+        $this->assignmentsStorage->addAssignment($userId, $item);
 
-        return $this->assignmentStorage->getUserAssignmentByName($userId, $item->getName());
+        return $this->assignmentsStorage->getUserAssignmentByName($userId, $item->getName());
     }
 
     /**
@@ -195,8 +190,8 @@ final class Manager implements AccessCheckerInterface
      */
     public function revoke(Item $role, string $userId): void
     {
-        if ($this->assignmentStorage->getUserAssignmentByName($userId, $role->getName()) !== null) {
-            $this->assignmentStorage->removeAssignment($userId, $role);
+        if ($this->assignmentsStorage->getUserAssignmentByName($userId, $role->getName()) !== null) {
+            $this->assignmentsStorage->removeAssignment($userId, $role);
         }
     }
 
@@ -207,7 +202,7 @@ final class Manager implements AccessCheckerInterface
      */
     public function revokeAll(string $userId): void
     {
-        $this->assignmentStorage->removeAllAssignments($userId);
+        $this->assignmentsStorage->removeAllAssignments($userId);
     }
 
     /**
@@ -221,8 +216,8 @@ final class Manager implements AccessCheckerInterface
     public function getRolesByUser(string $userId): array
     {
         $roles = $this->getDefaultRoleInstances();
-        foreach ($this->assignmentStorage->getUserAssignments($userId) as $name => $assignment) {
-            $role = $this->storage->getRoleByName($assignment->getItemName());
+        foreach ($this->assignmentsStorage->getUserAssignments($userId) as $name => $assignment) {
+            $role = $this->rolesStorage->getRoleByName($assignment->getItemName());
             if ($role !== null) {
                 $roles[$name] = $role;
             }
@@ -243,7 +238,7 @@ final class Manager implements AccessCheckerInterface
      */
     public function getChildRoles(string $roleName): array
     {
-        $role = $this->storage->getRoleByName($roleName);
+        $role = $this->rolesStorage->getRoleByName($roleName);
         if ($role === null) {
             throw new InvalidArgumentException(sprintf('Role "%s" not found.', $roleName));
         }
@@ -304,7 +299,7 @@ final class Manager implements AccessCheckerInterface
         /**
          * @var Assignment[] $assignments
          */
-        foreach ($this->assignmentStorage->getAssignments() as $userId => $assignments) {
+        foreach ($this->assignmentsStorage->getAssignments() as $userId => $assignments) {
             foreach ($assignments as $userAssignment) {
                 if (in_array($userAssignment->getItemName(), $roles, true)) {
                     $result[] = $userId;
@@ -340,7 +335,8 @@ final class Manager implements AccessCheckerInterface
     {
         $this->checkItemNameForUpdate($role, $name);
         $this->createItemRuleIfNotExist($role);
-        $this->storage->updateItem($name, $role);
+        $this->rolesStorage->updateItem($name, $role);
+        $this->assignmentsStorage->updateAssignmentsForItemName($name, $role);
     }
 
     /**
@@ -368,7 +364,8 @@ final class Manager implements AccessCheckerInterface
     {
         $this->checkItemNameForUpdate($permission, $name);
         $this->createItemRuleIfNotExist($permission);
-        $this->storage->updateItem($name, $permission);
+        $this->rolesStorage->updateItem($name, $permission);
+        $this->assignmentsStorage->updateAssignmentsForItemName($name, $permission);
     }
 
     /**
@@ -376,7 +373,7 @@ final class Manager implements AccessCheckerInterface
      */
     public function addRule(Rule $rule): void
     {
-        $this->storage->addRule($rule);
+        $this->rolesStorage->addRule($rule);
     }
 
     /**
@@ -384,8 +381,8 @@ final class Manager implements AccessCheckerInterface
      */
     public function removeRule(Rule $rule): void
     {
-        if ($this->storage->getRuleByName($rule->getName()) !== null) {
-            $this->storage->removeRule($rule->getName());
+        if ($this->rolesStorage->getRuleByName($rule->getName()) !== null) {
+            $this->rolesStorage->removeRule($rule->getName());
         }
     }
 
@@ -396,9 +393,9 @@ final class Manager implements AccessCheckerInterface
     public function updateRule(string $name, Rule $rule): void
     {
         if ($rule->getName() !== $name) {
-            $this->storage->removeRule($name);
+            $this->rolesStorage->removeRule($name);
         }
-        $this->storage->addRule($rule);
+        $this->rolesStorage->addRule($rule);
     }
 
     /**
@@ -479,7 +476,7 @@ final class Manager implements AccessCheckerInterface
             return true;
         }
         /** @psalm-suppress PossiblyNullArgument */
-        $rule = $this->storage->getRuleByName($item->getRuleName());
+        $rule = $this->rolesStorage->getRuleByName($item->getRuleName());
         if ($rule === null) {
             /** @psalm-suppress PossiblyNullArgument */
             throw new RuntimeException(sprintf('Rule not found: %s.', $item->getRuleName()));
@@ -491,7 +488,7 @@ final class Manager implements AccessCheckerInterface
     private function createItemRuleIfNotExist(Item $item): void
     {
         /** @psalm-suppress PossiblyNullArgument */
-        if ($item->getRuleName() !== null && $this->storage->getRuleByName($item->getRuleName()) === null) {
+        if ($item->getRuleName() !== null && $this->rolesStorage->getRuleByName($item->getRuleName()) === null) {
             $rule = $this->createRule($item->getRuleName());
             $this->addRule($rule);
         }
@@ -507,7 +504,7 @@ final class Manager implements AccessCheckerInterface
             $item = $item->withUpdatedAt($time);
         }
 
-        $this->storage->addItem($item);
+        $this->rolesStorage->addItem($item);
     }
 
     /** @psalm-param class-string<Rule> $name */
@@ -521,7 +518,7 @@ final class Manager implements AccessCheckerInterface
         /**
          * @var Item[] $items
          */
-        foreach ($this->storage->getChildren() as $parentRole => $items) {
+        foreach ($this->rolesStorage->getChildren() as $parentRole => $items) {
             foreach ($items as $item) {
                 if ($item->getName() === $roleName) {
                     $result[] = $parentRole;
@@ -534,14 +531,14 @@ final class Manager implements AccessCheckerInterface
 
     private function hasItem(string $name): bool
     {
-        return $this->storage->getItemByName($name) !== null;
+        return $this->rolesStorage->getItemByName($name) !== null;
     }
 
     private function normalizePermissions(array $permissions): array
     {
         $normalizePermissions = [];
         foreach (array_keys($permissions) as $itemName) {
-            $permission = $this->storage->getPermissionByName($itemName);
+            $permission = $this->rolesStorage->getPermissionByName($itemName);
             if ($permission !== null) {
                 $normalizePermissions[$itemName] = $permission;
             }
@@ -560,8 +557,8 @@ final class Manager implements AccessCheckerInterface
     private function getDirectPermissionsByUser(string $userId): array
     {
         $permissions = [];
-        foreach ($this->assignmentStorage->getUserAssignments($userId) as $name => $assignment) {
-            $permission = $this->storage->getPermissionByName($assignment->getItemName());
+        foreach ($this->assignmentsStorage->getUserAssignments($userId) as $name => $assignment) {
+            $permission = $this->rolesStorage->getPermissionByName($assignment->getItemName());
             if ($permission !== null) {
                 $permissions[$name] = $permission;
             }
@@ -579,7 +576,7 @@ final class Manager implements AccessCheckerInterface
      */
     private function getInheritedPermissionsByUser(string $userId): array
     {
-        $assignments = $this->assignmentStorage->getUserAssignments($userId);
+        $assignments = $this->assignmentsStorage->getUserAssignments($userId);
         $result = [];
         foreach (array_keys($assignments) as $roleName) {
             $this->getChildrenRecursive($roleName, $result);
@@ -595,7 +592,7 @@ final class Manager implements AccessCheckerInterface
     private function removeItem(Item $item): void
     {
         if ($this->hasItem($item->getName())) {
-            $this->storage->removeItem($item);
+            $this->rolesStorage->removeItem($item);
         }
     }
 
@@ -619,7 +616,7 @@ final class Manager implements AccessCheckerInterface
         array $params,
         array $assignments
     ): bool {
-        $item = $this->storage->getItemByName($itemName);
+        $item = $this->rolesStorage->getItemByName($itemName);
         if ($item === null) {
             return false;
         }
@@ -632,7 +629,7 @@ final class Manager implements AccessCheckerInterface
             return true;
         }
 
-        foreach ($this->storage->getChildren() as $parentName => $children) {
+        foreach ($this->rolesStorage->getChildren() as $parentName => $children) {
             if (isset($children[$itemName]) && $this->userHasPermissionRecursive(
                 $user,
                 $parentName,
@@ -660,7 +657,7 @@ final class Manager implements AccessCheckerInterface
             return true;
         }
 
-        $children = $this->storage->getChildrenByName($child->getName());
+        $children = $this->rolesStorage->getChildrenByName($child->getName());
         if (empty($children)) {
             return false;
         }
@@ -682,7 +679,7 @@ final class Manager implements AccessCheckerInterface
      */
     private function getChildrenRecursive(string $name, array &$result): void
     {
-        $children = $this->storage->getChildrenByName($name);
+        $children = $this->rolesStorage->getChildrenByName($name);
         if (empty($children)) {
             return;
         }
@@ -696,7 +693,7 @@ final class Manager implements AccessCheckerInterface
     private function getRolesPresentInArray(array $array): array
     {
         return array_filter(
-            $this->storage->getRoles(),
+            $this->rolesStorage->getRoles(),
             static function (Role $roleItem) use ($array) {
                 return array_key_exists($roleItem->getName(), $array);
             }

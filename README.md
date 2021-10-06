@@ -33,9 +33,20 @@ composer require yiisoft/rbac
 #### Create an instance
 
 ```php
-$manager = new Manager($storage, new ClassNameRuleFactory());
+/**
+* @var \Yiisoft\Rbac\RolesStorageInterface $rolesStorage
+* @var \Yiisoft\Rbac\AssignmentsStorageInterface $assignmentsStorage
+*/
+$manager = new Manager($rolesStorage, $assignmentsStorage, new ClassNameRuleFactory());
 ```
-In the directory config will contain permissions and rules. 
+In the directory config will contain permissions and rules.
+
+Sometimes, it makes sense to have role assignments in a different storage than roles and permission definitions:
+
+- Roles and permissions could be considered "semi-static", as they only change when you update your application code.
+- Assignments, on the other hand, could be considered "dynamic". They change more often: when creating a new user, or when updating user role from within your application.
+
+You can store assignments in a database by passing database adapter in `$assignmentsStorage`.
 
 #### Create permissions
 
@@ -138,23 +149,6 @@ if (!$manager->userHasPermission($anotherUserId, 'viewList', ['action' => 'home'
     echo 'reader not has permission index';
 }
 ```
-
-## Advanced usage
-
-### Using a separate storage for role assignments
-
-Sometimes, it makes sense to have role assignments in a different storage than roles and permission definitions:
-
-- Roles and permissions could be considered "semi-static", as they only change when you update your application code.
-- Assignments, on the other hand, could be considered "dynamic". They change more often: when creating a new user, or when updating user role from within your application.
-
-In order to store assignments in a database you can use the following code:
-
-```php
-$manager = new Manager($phpStorage, new ClassNameRuleFactory());
-$manager->setAssignmentStorage($dbStorage);
-```
-
 
 ## Storage:
 

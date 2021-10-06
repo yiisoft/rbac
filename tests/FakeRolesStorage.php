@@ -4,20 +4,17 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac\Tests;
 
-use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\Rule;
-use Yiisoft\Rbac\StorageInterface;
+use Yiisoft\Rbac\RolesStorageInterface;
 
-final class FakeStorage implements StorageInterface
+final class FakeRolesStorage implements RolesStorageInterface
 {
     private array $items = [];
 
     private array $children = [];
-
-    private array $assignments = [];
 
     private array $rules = [];
 
@@ -66,21 +63,6 @@ final class FakeStorage implements StorageInterface
         return $this->children[$name] ?? [];
     }
 
-    public function getAssignments(): array
-    {
-        return $this->assignments;
-    }
-
-    public function getUserAssignments(string $userId): array
-    {
-        return $this->assignments[$userId] ?? [];
-    }
-
-    public function getUserAssignmentByName(string $userId, string $name): ?Assignment
-    {
-        return $this->getUserAssignments($userId)[$name] ?? null;
-    }
-
     public function getRules(): array
     {
         return $this->rules;
@@ -111,40 +93,8 @@ final class FakeStorage implements StorageInterface
         unset($this->children[$parent->getName()]);
     }
 
-    public function addAssignment(string $userId, Item $item): void
-    {
-        $this->assignments[$userId][$item->getName()] = new Assignment(
-            $userId,
-            $item->getName(),
-            time()
-        );
-    }
-
-    public function assignmentExist(string $name): bool
-    {
-        foreach ($this->getAssignments() as $assignmentInfo) {
-            foreach ($assignmentInfo as $itemName => $assignment) {
-                if ($itemName === $name) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    public function removeAssignment(string $userId, Item $item): void
-    {
-        unset($this->assignments[$userId][$item->getName()]);
-    }
-
-    public function removeAllAssignments(string $userId): void
-    {
-        $this->assignments[$userId] = [];
-    }
-
     public function removeItem(Item $item): void
     {
-        $this->clearAssigmentFromItem($item);
         $this->clearChildrenFromItem($item);
         $this->removeItemByName($item->getName());
     }
@@ -177,7 +127,6 @@ final class FakeStorage implements StorageInterface
     {
         $this->children = [];
         $this->rules = [];
-        $this->assignments = [];
         $this->items = [];
     }
 
@@ -185,11 +134,6 @@ final class FakeStorage implements StorageInterface
     {
         $this->clearItemsFromRules();
         $this->rules = [];
-    }
-
-    public function clearAssignments(): void
-    {
-        $this->assignments = [];
     }
 
     public function clearPermissions(): void
@@ -205,7 +149,6 @@ final class FakeStorage implements StorageInterface
     private function updateItemName(string $name, Item $item): void
     {
         $this->updateChildrenForItemName($name, $item);
-        $this->updateAssignmentsForItemName($name, $item);
     }
 
     private function getItemsByType(string $type): array
@@ -243,23 +186,6 @@ final class FakeStorage implements StorageInterface
     {
         foreach ($this->children as &$children) {
             unset($children[$item->getName()]);
-        }
-    }
-
-    private function clearAssigmentFromItem(Item $item): void
-    {
-        foreach ($this->assignments as &$assignments) {
-            unset($assignments[$item->getName()]);
-        }
-    }
-
-    private function updateAssignmentsForItemName(string $name, Item $item): void
-    {
-        foreach ($this->assignments as &$assignments) {
-            if (isset($assignments[$name])) {
-                $assignments[$item->getName()] = $assignments[$name]->withItemName($item->getName());
-                unset($assignments[$name]);
-            }
         }
     }
 
