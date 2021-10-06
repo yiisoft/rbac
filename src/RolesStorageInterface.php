@@ -12,7 +12,7 @@ namespace Yiisoft\Rbac;
 interface RolesStorageInterface
 {
     /**
-     * Removes all authorization data, including roles, permissions, and rules
+     * Removes all authorization data, including roles, permissions, and rules.
      */
     public function clear(): void;
 

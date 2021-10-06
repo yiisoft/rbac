@@ -46,7 +46,7 @@ Sometimes, it makes sense to have role assignments in a different storage than r
 - Roles and permissions could be considered "semi-static", as they only change when you update your application code.
 - Assignments, on the other hand, could be considered "dynamic". They change more often: when creating a new user, or when updating user role from within your application.
 
-You can store assignments in a database using db-instance of $assignmentsStorage
+You can store assignments in a database by passing database adapter in `$assignmentsStorage`.
 
 #### Create permissions
 
