@@ -539,8 +539,7 @@ final class ManagerTest extends TestCase
         RolesStorageInterface $rolesStorage,
         AssignmentsStorageInterface $assignmentsStorage,
         bool $enableDirectPermissions = false
-    ): Manager
-    {
+    ): Manager {
         return (new Manager($rolesStorage, $assignmentsStorage, new ClassNameRuleFactory(), $enableDirectPermissions))
             ->setDefaultRoles(['myDefaultRole']);
     }

@@ -40,8 +40,7 @@ final class Manager implements AccessCheckerInterface
         AssignmentsStorageInterface $assignmentsStorage,
         RuleFactoryInterface $ruleFactory,
         bool $enableDirectPermissions = false
-    )
-    {
+    ) {
         $this->rolesStorage = $rolesStorage;
         $this->assignmentsStorage = $assignmentsStorage;
         $this->ruleFactory = $ruleFactory;
