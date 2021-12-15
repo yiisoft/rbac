@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac;
 
+use Exception;
 use InvalidArgumentException;
 use RuntimeException;
 use Yiisoft\Access\AccessCheckerInterface;
@@ -23,17 +24,33 @@ final class Manager implements AccessCheckerInterface
      */
     private array $defaultRoles = [];
 
-    public function __construct(RolesStorageInterface $rolesStorage, AssignmentsStorageInterface $assignmentsStorage, RuleFactoryInterface $ruleFactory)
-    {
+    /**
+     * @var bool Whether to enable assigning permissions directly to user. Prefer assigning roles only.
+     */
+    private bool $enableDirectPermissions;
+
+    /**
+     * @param RolesStorageInterface $rolesStorage Roles storage.
+     * @param AssignmentsStorageInterface $assignmentsStorage Assignments storage.
+     * @param RuleFactoryInterface $ruleFactory Rule factory.
+     * @param bool $enableDirectPermissions Whether to enable assigning permissions directly to user. Prefer assigning roles only.
+     */
+    public function __construct(
+        RolesStorageInterface $rolesStorage,
+        AssignmentsStorageInterface $assignmentsStorage,
+        RuleFactoryInterface $ruleFactory,
+        bool $enableDirectPermissions = false
+    ) {
         $this->rolesStorage = $rolesStorage;
         $this->assignmentsStorage = $assignmentsStorage;
         $this->ruleFactory = $ruleFactory;
+        $this->enableDirectPermissions = $enableDirectPermissions;
     }
 
     public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
     {
         if (!is_string($userId) && !is_int($userId)) {
-            throw new \InvalidArgumentException(sprintf('userId must be a string or an int, %s given.', gettype($userId)));
+            throw new InvalidArgumentException(sprintf('userId must be a string or an int, %s given.', gettype($userId)));
         }
 
         $userId = (string) $userId;
@@ -161,7 +178,7 @@ final class Manager implements AccessCheckerInterface
      * @param Item $item
      * @param string $userId The user ID.
      *
-     * @throws \Exception If the role has already been assigned to the user.
+     * @throws Exception If the role has already been assigned to the user.
      *
      * @return Assignment|null The role or permission assignment information.
      */
@@ -169,6 +186,10 @@ final class Manager implements AccessCheckerInterface
     {
         if (!$this->hasItem($item->getName())) {
             throw new InvalidArgumentException(sprintf('Unknown %s "%s".', $item->getType(), $item->getName()));
+        }
+
+        if (!$this->enableDirectPermissions && $item->getType() === Item::TYPE_PERMISSION) {
+            throw new InvalidArgumentException('Assigning permissions directly is disabled. Prefer assigning roles only.');
         }
 
         if ($this->assignmentsStorage->getUserAssignmentByName($userId, $item->getName()) !== null) {

@@ -17,13 +17,13 @@ use Yiisoft\Rbac\RuleFactory\ClassNameRuleFactory;
 /**
  * @group rbac
  */
-class ManagerTest extends TestCase
+final class ManagerTest extends TestCase
 {
-    protected Manager $manager;
+    private Manager $manager;
 
-    protected RolesStorageInterface $rolesStorage;
+    private RolesStorageInterface $rolesStorage;
 
-    protected AssignmentsStorageInterface $assignmentsStorage;
+    private AssignmentsStorageInterface $assignmentsStorage;
 
     protected function setUp(): void
     {
@@ -316,6 +316,29 @@ class ManagerTest extends TestCase
         );
     }
 
+    public function testAssignPermissionDirectlyWhenItIsDisabled(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Assigning permissions directly is disabled. Prefer assigning roles only.');
+
+        $this->manager->assign(
+            $this->rolesStorage->getPermissionByName('updateAnyPost'),
+            'reader'
+        );
+    }
+
+    public function testAssignPermissionDirectlyWhenItIsEnabled(): void
+    {
+        $this->manager = $this->createManager($this->rolesStorage, $this->assignmentsStorage, true);
+
+        $this->manager->assign(
+            $this->rolesStorage->getPermissionByName('updateAnyPost'),
+            'reader'
+        );
+
+        $this->assertTrue($this->manager->userHasPermission('reader', 'updateAnyPost'));
+    }
+
     public function testGetRolesByUser(): void
     {
         $this->assertEquals(
@@ -512,9 +535,12 @@ class ManagerTest extends TestCase
         $this->assertEquals(['myDefaultRole'], $this->manager->getDefaultRoles());
     }
 
-    protected function createManager(RolesStorageInterface $rolesStorage, AssignmentsStorageInterface $assignmentsStorage): Manager
-    {
-        return (new Manager($rolesStorage, $assignmentsStorage, new ClassNameRuleFactory()))
+    protected function createManager(
+        RolesStorageInterface $rolesStorage,
+        AssignmentsStorageInterface $assignmentsStorage,
+        bool $enableDirectPermissions = false
+    ): Manager {
+        return (new Manager($rolesStorage, $assignmentsStorage, new ClassNameRuleFactory(), $enableDirectPermissions))
             ->setDefaultRoles(['myDefaultRole']);
     }
 
