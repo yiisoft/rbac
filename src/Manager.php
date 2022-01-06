@@ -49,6 +49,10 @@ final class Manager implements AccessCheckerInterface
 
     public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
     {
+        if ($userId === null) {
+            return false;
+        }
+        
         if (!is_string($userId) && !is_int($userId)) {
             throw new InvalidArgumentException(sprintf('userId must be a string or an int, %s given.', gettype($userId)));
         }
