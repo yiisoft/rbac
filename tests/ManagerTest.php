@@ -107,6 +107,18 @@ final class ManagerTest extends TestCase
                     null => false,
                 ],
             ],
+            [
+                null,
+                [
+                    'createPost' => false,
+                    'readPost' => false,
+                    'updatePost' => false,
+                    'deletePost' => false,
+                    'updateAnyPost' => false,
+                    'blablabla' => false,
+                    null => false,
+                ],
+            ],
         ];
     }
 
@@ -164,7 +176,7 @@ final class ManagerTest extends TestCase
     {
         return [
             [true],
-            [null],
+            [(object)[]],
             [['test' => 1]],
         ];
     }
