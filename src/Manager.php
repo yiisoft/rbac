@@ -490,7 +490,7 @@ final class Manager implements AccessCheckerInterface
      *
      * @return $this
      */
-    public function setGuestRole(string $guestRole): self
+    public function setGuestRole(?string $guestRole): self
     {
         $this->guestRole = $guestRole;
 
