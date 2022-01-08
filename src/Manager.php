@@ -29,6 +29,8 @@ final class Manager implements AccessCheckerInterface
      */
     private bool $enableDirectPermissions;
 
+    private ?string $guestRole = null;
+
     /**
      * @param RolesStorageInterface $rolesStorage Roles storage.
      * @param AssignmentsStorageInterface $assignmentsStorage Assignments storage.
@@ -49,8 +51,14 @@ final class Manager implements AccessCheckerInterface
 
     public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
     {
+        if ($userId === null && $this->guestRole !== null) {
+            return $this->guestHasPermission($permissionName);
+        }
+
         if (!is_string($userId) && !is_int($userId)) {
-            throw new InvalidArgumentException(sprintf('userId must be a string or an int, %s given.', gettype($userId)));
+            throw new InvalidArgumentException(
+                sprintf('userId must be a string or an int, %s given.', gettype($userId))
+            );
         }
 
         $userId = (string) $userId;
@@ -475,6 +483,20 @@ final class Manager implements AccessCheckerInterface
     }
 
     /**
+     * Set guest role.
+     *
+     * @param string $guestRole
+     *
+     * @return $this
+     */
+    public function setGuestRole(string $guestRole): self
+    {
+        $this->guestRole = $guestRole;
+
+        return $this;
+    }
+
+    /**
      * Executes the rule associated with the specified auth item.
      *
      * If the item does not specify a rule, this method will return true. Otherwise, it will
@@ -662,6 +684,20 @@ final class Manager implements AccessCheckerInterface
         }
 
         return false;
+    }
+
+    private function guestHasPermission(string $permissionName): bool
+    {
+        /** @psalm-suppress PossiblyNullArgument */
+        if (
+            $this->rolesStorage->getRoleByName($this->guestRole) === null
+            || $this->rolesStorage->hasChildren($this->guestRole) === false
+        ) {
+            return false;
+        }
+        $permissions = $this->rolesStorage->getChildrenByName($this->guestRole);
+
+        return isset($permissions[$permissionName]);
     }
 
     /**
