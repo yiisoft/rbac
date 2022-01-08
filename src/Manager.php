@@ -52,9 +52,6 @@ final class Manager implements AccessCheckerInterface
     public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
     {
         if ($userId === null) {
-            if ($this->guestRole === null) {
-                return false;
-            }
             return $this->guestHasPermission($permissionName);
         }
 
@@ -692,15 +689,17 @@ final class Manager implements AccessCheckerInterface
 
     private function guestHasPermission(string $permissionName): bool
     {
-        /** @var string $guestRole */
-        $guestRole = $this->guestRole;
+        if ($this->guestRole === null) {
+            return false;
+        }
+
         if (
-            $this->rolesStorage->getRoleByName($guestRole) === null
-            || $this->rolesStorage->hasChildren($guestRole) === false
+            $this->rolesStorage->getRoleByName($this->guestRole) === null
+            || $this->rolesStorage->hasChildren($this->guestRole) === false
         ) {
             return false;
         }
-        $permissions = $this->rolesStorage->getChildrenByName($guestRole);
+        $permissions = $this->rolesStorage->getChildrenByName($this->guestRole);
 
         return isset($permissions[$permissionName]);
     }
