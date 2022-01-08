@@ -692,14 +692,15 @@ final class Manager implements AccessCheckerInterface
 
     private function guestHasPermission(string $permissionName): bool
     {
-        /** @psalm-suppress PossiblyNullArgument */
+        /** @var string $guestRole */
+        $guestRole = $this->guestRole;
         if (
-            $this->rolesStorage->getRoleByName($this->guestRole) === null
-            || $this->rolesStorage->hasChildren($this->guestRole) === false
+            $this->rolesStorage->getRoleByName($guestRole) === null
+            || $this->rolesStorage->hasChildren($guestRole) === false
         ) {
             return false;
         }
-        $permissions = $this->rolesStorage->getChildrenByName($this->guestRole);
+        $permissions = $this->rolesStorage->getChildrenByName($guestRole);
 
         return isset($permissions[$permissionName]);
     }
