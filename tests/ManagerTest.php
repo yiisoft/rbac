@@ -107,6 +107,55 @@ final class ManagerTest extends TestCase
                     null => false,
                 ],
             ],
+            [
+                null,
+                [
+                    'createPost' => false,
+                    'readPost' => false,
+                    'updatePost' => false,
+                    'deletePost' => false,
+                    'updateAnyPost' => false,
+                    'blablabla' => false,
+                    null => false,
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider dataProviderUserHasPermissionWithGuest
+     */
+    public function testUserHasPermissionWithGuest($userId, array $tests): void
+    {
+        $this->manager->setGuestRole('guest');
+        $this->rolesStorage->addItem(new Role('guest'));
+        $this->rolesStorage->addItem(new Permission('signup'));
+        $this->rolesStorage->addChild(new Role('guest'), new Permission('signup'));
+
+        foreach ($tests as $permission => $result) {
+            $this->assertEquals(
+                $result,
+                $this->manager->userHasPermission($userId, $permission),
+                sprintf('Checking "%s" can "%s"', $userId, $permission)
+            );
+        }
+    }
+
+    public function dataProviderUserHasPermissionWithGuest()
+    {
+        return [
+            [
+                null,
+                [
+                    'createPost' => false,
+                    'readPost' => false,
+                    'updatePost' => false,
+                    'deletePost' => false,
+                    'updateAnyPost' => false,
+                    'signup' => true,
+                    null => false,
+                ],
+            ],
         ];
     }
 
@@ -127,7 +176,7 @@ final class ManagerTest extends TestCase
     {
         return [
             [true],
-            [null],
+            [(object)[]],
             [['test' => 1]],
         ];
     }
