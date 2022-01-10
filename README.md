@@ -111,6 +111,26 @@ public function actionCreate(\Yiisoft\Access\AccessCheckerInterface $accessCheck
 }
 ```
 
+#### Check permissions for a guest user
+
+Sometimes you need to add guest-only permission, which is not assigned to any user. In this case, you can specify a role which is assigned to guest user:
+
+```php
+$manager->setGuestRole('guest');
+$manager->addPermission(new Permission('signup'));
+$manager->addRole(new Role('guest'));
+$manager->addChild(
+    $rolesStorage->getRoleByName('guest'), 
+    $rolesStorage->getPermissionByName('signup')
+);
+
+$guestId = null;
+if ($accessChecker->userHasPermission($guestId, 'signup')) {
+    // guest has permission signup
+}
+
+```
+
 ### Usage rules
 
 ```php
