@@ -160,6 +160,18 @@ class ActionRule extends Rule
 }
 ```
 
+#### Composite rule
+
+Composite rule allows combining multiple rules and assigning them to a single RBAC item:
+
+```php
+// Fresh and owned
+$compositeRule = new CompositeRule('fresh_and_owned', CompositeRule::AND, [new FreshRule(), new OwnedRule()]);
+
+// Fresh or owned
+$compositeRule = new CompositeRule('fresh_and_owned', CompositeRule::OR, [new FreshRule(), new OwnedRule()]);
+```
+
 #### Check permissions with rule
 
 
