@@ -336,7 +336,7 @@ final class Manager implements AccessCheckerInterface
      */
     public function addRole(Role $role): void
     {
-        $this->createItemRuleIfNotExist($role);
+        $this->createItemRulesIfNotExist($role);
         $this->addItem($role);
     }
 
@@ -355,7 +355,7 @@ final class Manager implements AccessCheckerInterface
     public function updateRole(string $name, Role $role): void
     {
         $this->checkItemNameForUpdate($role, $name);
-        $this->createItemRuleIfNotExist($role);
+        $this->createItemRulesIfNotExist($role);
         $this->rolesStorage->updateItem($name, $role);
         $this->assignmentsStorage->updateAssignmentsForItemName($name, $role);
     }
@@ -365,7 +365,7 @@ final class Manager implements AccessCheckerInterface
      */
     public function addPermission(Permission $permission): void
     {
-        $this->createItemRuleIfNotExist($permission);
+        $this->createItemRulesIfNotExist($permission);
         $this->addItem($permission);
     }
 
@@ -384,7 +384,7 @@ final class Manager implements AccessCheckerInterface
     public function updatePermission(string $name, Permission $permission): void
     {
         $this->checkItemNameForUpdate($permission, $name);
-        $this->createItemRuleIfNotExist($permission);
+        $this->createItemRulesIfNotExist($permission);
         $this->rolesStorage->updateItem($name, $permission);
         $this->assignmentsStorage->updateAssignmentsForItemName($name, $permission);
     }
@@ -475,42 +475,52 @@ final class Manager implements AccessCheckerInterface
     }
 
     /**
-     * Executes the rule associated with the specified auth item.
+     * Executes rules associated with the specified auth item.
      *
-     * If the item does not specify a rule, this method will return true. Otherwise, it will
-     * return the value of {@see Rule::execute()()}.
+     * If the item does not have rules, this method will return true. Otherwise, it will
+     * return true if any {@see Rule::execute()()} returns true.
      *
      * @param string $user The user ID. This should be a string representing
      * the unique identifier of a user.
-     * @param Item $item The auth item that needs to execute its rule.
+     * @param Item $item The auth item that needs to execute its rules.
      * @param array $params Parameters passed to {@see AccessCheckerInterface::userHasPermission()} and will be passed
-     * to the rule.
+     * to each rule.
      *
-     * @throws RuntimeException if the auth item has an invalid rule.
+     * @throws RuntimeException If the auth item has an invalid rule.
      *
-     * @return bool the return value of {@see Rule::execute()}. If the auth item does not specify a rule, true will be
-     * returned.
+     * @return bool If the auth item does not specify a rule, true will be returned.  Otherwise, it will
+     * return true if any {@see Rule::execute()()} returns true.
      */
-    private function executeRule(string $user, Item $item, array $params): bool
+    private function executeRules(string $user, Item $item, array $params): bool
     {
-        if ($item->getRuleName() === null) {
+        if ($item->getRuleNames() === []) {
             return true;
         }
-        /** @psalm-suppress PossiblyNullArgument */
-        $rule = $this->rolesStorage->getRuleByName($item->getRuleName());
-        if ($rule === null) {
+
+        foreach ($item->getRuleNames() as $ruleName) {
             /** @psalm-suppress PossiblyNullArgument */
-            throw new RuntimeException(sprintf('Rule not found: %s.', $item->getRuleName()));
+            $rule = $this->rolesStorage->getRuleByName($ruleName);
+            if ($rule === null) {
+                /** @psalm-suppress PossiblyNullArgument */
+                throw new RuntimeException(sprintf('Rule not found: %s.', $ruleName));
+            }
+
+            if ($rule->execute($user, $item, $params)) {
+                return true;
+            }
         }
 
-        return $rule->execute($user, $item, $params);
+        return false;
     }
 
-    private function createItemRuleIfNotExist(Item $item): void
+    private function createItemRulesIfNotExist(Item $item): void
     {
-        /** @psalm-suppress PossiblyNullArgument */
-        if ($item->getRuleName() !== null && $this->rolesStorage->getRuleByName($item->getRuleName()) === null) {
-            $rule = $this->createRule($item->getRuleName());
+        foreach ($item->getRuleNames() as $ruleName) {
+            /** @psalm-suppress PossiblyNullArgument */
+            if ($this->rolesStorage->getRuleByName($ruleName) !== null) {
+                continue;
+            }
+            $rule = $this->createRule($ruleName);
             $this->addRule($rule);
         }
     }
@@ -642,7 +652,7 @@ final class Manager implements AccessCheckerInterface
             return false;
         }
 
-        if (!$this->executeRule($user, $item, $params)) {
+        if (!$this->executeRules($user, $item, $params)) {
             return false;
         }
 

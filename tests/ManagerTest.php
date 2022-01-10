@@ -403,11 +403,11 @@ final class ManagerTest extends TestCase
 
     public function testAddRole(): void
     {
-        $rule = new EasyRule();
+        $rule = new TrueRule();
 
         $role = (new Role('new role'))
             ->withDescription('new role description')
-            ->withRuleName($rule->getName());
+            ->withRuleNames([TrueRule::class]);
 
         $this->manager->addRole($role);
         $this->assertNotNull($this->rolesStorage->getRoleByName('new role'));
@@ -535,7 +535,7 @@ final class ManagerTest extends TestCase
         $this->assertEquals(['myDefaultRole'], $this->manager->getDefaultRoles());
     }
 
-    protected function createManager(
+    private function createManager(
         RolesStorageInterface $rolesStorage,
         AssignmentsStorageInterface $assignmentsStorage,
         bool $enableDirectPermissions = false
@@ -544,7 +544,7 @@ final class ManagerTest extends TestCase
             ->setDefaultRoles(['myDefaultRole']);
     }
 
-    protected function createRolesStorage(): RolesStorageInterface
+    private function createRolesStorage(): RolesStorageInterface
     {
         $storage = new FakeRolesStorage();
 
@@ -552,7 +552,7 @@ final class ManagerTest extends TestCase
         $storage->addItem(new Permission('createPost'));
         $storage->addItem(new Permission('readPost'));
         $storage->addItem(new Permission('deletePost'));
-        $storage->addItem((new Permission('updatePost'))->withRuleName('isAuthor'));
+        $storage->addItem((new Permission('updatePost'))->withRuleNames(['isAuthor']));
         $storage->addItem(new Permission('updateAnyPost'));
         $storage->addItem(new Role('withoutChildren'));
         $storage->addItem(new Role('reader'));
@@ -571,7 +571,7 @@ final class ManagerTest extends TestCase
         return $storage;
     }
 
-    protected function createAssignmentsStorage(): AssignmentsStorageInterface
+    private function createAssignmentsStorage(): AssignmentsStorageInterface
     {
         $storage = new FakeAssignmentsStorage();
 
@@ -608,5 +608,53 @@ final class ManagerTest extends TestCase
     {
         $this->manager->revokeAll('author B');
         $this->assertEmpty($this->assignmentsStorage->getUserAssignments('author B'));
+    }
+
+    public function testLastTrueRule(): void
+    {
+        $role = new Role('user');
+
+        $permission = (new Permission('permission'))
+            ->withRuleNames(['false1', 'true2']);
+
+        $rolesStorage = new FakeRolesStorage();
+
+        $rolesStorage->addItem(($permission));
+
+        $rolesStorage->addItem($role);
+        $rolesStorage->addChild($role, $permission);
+        $rolesStorage->addRule((new FalseRule())->withName('false1'));
+        $rolesStorage->addRule((new TrueRule())->withName('true2'));
+
+        $assignmentsStorage = new FakeAssignmentsStorage();
+        $assignmentsStorage->addAssignment('user', $permission);
+
+        $manager = $this->createManager($rolesStorage, $assignmentsStorage);
+
+        $this->assertTrue($manager->userHasPermission('user', 'permission'));
+    }
+
+    public function testAllFalseRules(): void
+    {
+        $role = new Role('user');
+
+        $permission = (new Permission('permission'))
+            ->withRuleNames(['false1', 'false2']);
+
+        $rolesStorage = new FakeRolesStorage();
+
+        $rolesStorage->addItem(($permission));
+
+        $rolesStorage->addItem($role);
+        $rolesStorage->addChild($role, $permission);
+        $rolesStorage->addRule((new FalseRule())->withName('false1'));
+        $rolesStorage->addRule((new FalseRule())->withName('false2'));
+
+        $assignmentsStorage = new FakeAssignmentsStorage();
+        $assignmentsStorage->addAssignment('user', $permission);
+
+        $manager = $this->createManager($rolesStorage, $assignmentsStorage);
+
+        $this->assertFalse($manager->userHasPermission('user', 'permission'));
     }
 }

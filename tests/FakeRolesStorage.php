@@ -113,7 +113,7 @@ final class FakeRolesStorage implements RolesStorageInterface
     {
         unset($this->rules[$name]);
         foreach ($this->getItemsByRuleName($name) as $item) {
-            $item = $item->withRuleName(null);
+            $item = $item->withRuleNames([]);
             $this->updateItem($item->getName(), $item);
         }
     }
@@ -161,7 +161,7 @@ final class FakeRolesStorage implements RolesStorageInterface
     private function getItemsByRuleName(string $ruleName): array
     {
         return $this->filterItems(
-            fn (Item $item) => $item->getRuleName() === $ruleName
+            fn (Item $item) => in_array($ruleName, $item->getRuleNames(), true)
         );
     }
 
@@ -177,7 +177,7 @@ final class FakeRolesStorage implements RolesStorageInterface
 
     private function removeAllItems(string $type): void
     {
-        foreach ($this->getItemsByType($type) as $name => $item) {
+        foreach ($this->getItemsByType($type) as $item) {
             $this->removeItem($item);
         }
     }

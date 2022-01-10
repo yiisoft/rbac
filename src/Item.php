@@ -23,10 +23,10 @@ abstract class Item implements ItemInterface
     private string $description = '';
 
     /**
-     * @var string|null Name of the rule associated with this item.
-     * @psalm-var class-string<Rule>|null
+     * @var string[] Names of the rules associated with this item.
+     * @psalm-var array<class-string<Rule>>
      */
-    private ?string $ruleName = null;
+    private array $ruleNames = [];
 
     /**
      * @var int|null UNIX timestamp representing the item creation time.
@@ -69,18 +69,18 @@ abstract class Item implements ItemInterface
         return $this->description;
     }
 
-    /** @psalm-param class-string<Rule>|null $ruleName */
-    public function withRuleName(?string $ruleName): self
+    public function withRuleNames(array $ruleNames): self
     {
+        // TODO: validate?
         $new = clone $this;
-        $new->ruleName = $ruleName;
+        $new->ruleNames = $ruleNames;
         return $new;
     }
 
-    /** @psalm-return class-string<Rule>|null */
-    public function getRuleName(): ?string
+    /** @psalm-return array<class-string<Rule>> */
+    public function getRuleNames(): array
     {
-        return $this->ruleName;
+        return $this->ruleNames;
     }
 
     public function withCreatedAt(int $createdAt): self
@@ -122,7 +122,7 @@ abstract class Item implements ItemInterface
         return [
             'name' => $this->getName(),
             'description' => $this->getDescription(),
-            'ruleName' => $this->getRuleName(),
+            'ruleNames' => $this->getRuleNames(),
             'type' => $this->getType(),
             'updatedAt' => $this->getUpdatedAt(),
             'createdAt' => $this->getCreatedAt(),
