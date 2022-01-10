@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Yiisoft\Rbac\Tests;
 
 use InvalidArgumentException;
@@ -14,7 +16,7 @@ final class CompositeRuleTest extends TestCase
         return [
             'AND empty' => [CompositeRule::AND, [], true],
             'AND all true' => [CompositeRule::AND, [new EasyRule(true), new EasyRule(true)], true],
-            'AND last false' =>  [CompositeRule::AND, [new EasyRule(true), new EasyRule(false)], false],
+            'AND last false' => [CompositeRule::AND, [new EasyRule(true), new EasyRule(false)], false],
 
             'OR empty' => [CompositeRule::OR, [], true],
             'OR all false' => [CompositeRule::OR, [new EasyRule(false), new EasyRule(false)], false],
