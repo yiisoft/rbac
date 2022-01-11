@@ -7,6 +7,9 @@ namespace Yiisoft\Rbac\RuleFactory;
 use Yiisoft\Rbac\Rule;
 use Yiisoft\Rbac\RuleFactoryInterface;
 
+/**
+ * Creates rule instance based on its class name.
+ */
 class ClassNameRuleFactory implements RuleFactoryInterface
 {
     /**

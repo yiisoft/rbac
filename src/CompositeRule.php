@@ -29,6 +29,11 @@ final class CompositeRule extends Rule
      */
     private array $rules;
 
+    /**
+     * @param string $name Rule name.
+     * @param string $operator Operator to be used. Could be `CompositeRule::AND` or `CompositeRule::OR`.
+     * @param Rule[] $rules Array of rule instances.
+     */
     public function __construct(string $name, string $operator, array $rules)
     {
         if (!in_array($operator, [self::AND, self::OR])) {

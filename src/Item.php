@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac;
 
 /**
- * For more details and usage information on Item, see the [guide article on security authorization](guide:security-authorization).
+ * Items are RBAC hierarchy entities that could be assigned to the user.
+ * Both roles and permissions are items.
  */
 abstract class Item implements ItemInterface
 {
@@ -38,11 +39,17 @@ abstract class Item implements ItemInterface
      */
     private ?int $updatedAt = null;
 
+    /**
+     * @param string $name The name of the item. This must be globally unique.
+     */
     public function __construct(string $name)
     {
         $this->name = $name;
     }
 
+    /**
+     * @return string Type of the item.
+     */
     abstract public function getType(): string;
 
     public function getName(): string

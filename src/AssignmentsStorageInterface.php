@@ -6,8 +6,6 @@ namespace Yiisoft\Rbac;
 
 /**
  * StorageInterface represents a storage for RBAC items used in {@see Manager}.
- *
- * @package Yiisoft\Rbac
  */
 interface AssignmentsStorageInterface
 {
