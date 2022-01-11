@@ -390,7 +390,7 @@ final class Manager implements AccessCheckerInterface
         }
     }
 
-     public function updateRule(string $name, Rule $rule): void
+    public function updateRule(string $name, Rule $rule): void
     {
         if ($rule->getName() !== $name) {
             $this->rolesStorage->removeRule($name);
