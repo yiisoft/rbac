@@ -10,7 +10,7 @@ use RuntimeException;
 use Yiisoft\Access\AccessCheckerInterface;
 
 /**
- * An authorization manager that helps with building RBAC hierarchy and checking for permissions.
+ * An authorization manager that helps with building RBAC hierarchy and check for permissions.
  */
 final class Manager implements AccessCheckerInterface
 {
@@ -19,7 +19,7 @@ final class Manager implements AccessCheckerInterface
     private RuleFactoryInterface $ruleFactory;
 
     /**
-     * @var array a list of role names that are assigned to every user automatically without calling {@see assign()}.
+     * @var array A list of role names that are assigned to every user automatically without calling {@see assign()}.
      * Note that these roles are applied to users, regardless of their state of authentication.
      */
     private array $defaultRoles = [];
@@ -92,8 +92,8 @@ final class Manager implements AccessCheckerInterface
     /**
      * Adds an item as a child of another item.
      *
-     * @param Item $parent
-     * @param Item $child
+     * @param Item $parent The parent item.
+     * @param Item $child The child item.
      *
      * @throws RuntimeException
      * @throws InvalidArgumentException
@@ -145,8 +145,8 @@ final class Manager implements AccessCheckerInterface
      * Removes a child from its parent.
      * Note, the child item is not deleted. Only the parent-child relationship is removed.
      *
-     * @param Item $parent
-     * @param Item $child
+     * @param Item $parent The parent item.
+     * @param Item $child The child item.
      */
     public function removeChild(Item $parent, Item $child): void
     {
@@ -156,10 +156,10 @@ final class Manager implements AccessCheckerInterface
     }
 
     /**
-     * Removed all children form their parent.
+     * Removes all children form their parent.
      * Note, the children items are not deleted. Only the parent-child relationships are removed.
      *
-     * @param Item $parent
+     * @param Item $parent The parent item.
      */
     public function removeChildren(Item $parent): void
     {
@@ -171,8 +171,8 @@ final class Manager implements AccessCheckerInterface
     /**
      * Returns a value indicating whether the child already exists for the parent.
      *
-     * @param Item $parent
-     * @param Item $child
+     * @param Item $parent The parent item.
+     * @param Item $child The child item.
      *
      * @return bool Whether `$child` is already a child of `$parent`
      */
@@ -184,7 +184,7 @@ final class Manager implements AccessCheckerInterface
     /**
      * Assigns a role or permission to a user.
      *
-     * @param Item $item
+     * @param Item $item Item to be assigned.
      * @param string $userId The user ID.
      *
      * @throws Exception If the role has already been assigned to the user.
@@ -215,7 +215,7 @@ final class Manager implements AccessCheckerInterface
     /**
      * Revokes a role or a permission from a user.
      *
-     * @param Item $role
+     * @param Item $role Item to be revoked.
      * @param string $userId The user ID.
      */
     public function revoke(Item $role, string $userId): void
@@ -259,9 +259,9 @@ final class Manager implements AccessCheckerInterface
     /**
      * Returns child roles of the role specified. Depth isn't limited.
      *
-     * @param string $roleName name of the role to file child roles for
+     * @param string $roleName Name of the role to get child roles for.
      *
-     * @throws InvalidArgumentException If Role was not found that are getting by $roleName
+     * @throws InvalidArgumentException If Role was not found by $roleName.
      *
      * @return Role[] Child roles. The array is indexed by the role names.
      * First element is an instance of the parent Role itself.
@@ -340,27 +340,17 @@ final class Manager implements AccessCheckerInterface
         return $result;
     }
 
-    /**
-     * @param Role $role
-     */
     public function addRole(Role $role): void
     {
         $this->createItemRuleIfNotExist($role);
         $this->addItem($role);
     }
 
-    /**
-     * @param Role $role
-     */
     public function removeRole(Role $role): void
     {
         $this->removeItem($role);
     }
 
-    /**
-     * @param string $name
-     * @param Role $role
-     */
     public function updateRole(string $name, Role $role): void
     {
         $this->checkItemNameForUpdate($role, $name);
@@ -369,27 +359,17 @@ final class Manager implements AccessCheckerInterface
         $this->assignmentsStorage->updateAssignmentsForItemName($name, $role);
     }
 
-    /**
-     * @param Permission $permission
-     */
     public function addPermission(Permission $permission): void
     {
         $this->createItemRuleIfNotExist($permission);
         $this->addItem($permission);
     }
 
-    /**
-     * @param Permission $permission
-     */
     public function removePermission(Permission $permission): void
     {
         $this->removeItem($permission);
     }
 
-    /**
-     * @param string $name
-     * @param Permission $permission
-     */
     public function updatePermission(string $name, Permission $permission): void
     {
         $this->checkItemNameForUpdate($permission, $name);
@@ -398,17 +378,11 @@ final class Manager implements AccessCheckerInterface
         $this->assignmentsStorage->updateAssignmentsForItemName($name, $permission);
     }
 
-    /**
-     * @param Rule $rule
-     */
     public function addRule(Rule $rule): void
     {
         $this->rolesStorage->addRule($rule);
     }
 
-    /**
-     * @param Rule $rule
-     */
     public function removeRule(Rule $rule): void
     {
         if ($this->rolesStorage->getRuleByName($rule->getName()) !== null) {
@@ -416,10 +390,6 @@ final class Manager implements AccessCheckerInterface
         }
     }
 
-    /**
-     * @param string $name
-     * @param Rule $rule
-     */
     public function updateRule(string $name, Rule $rule): void
     {
         if ($rule->getName() !== $name) {
@@ -431,7 +401,7 @@ final class Manager implements AccessCheckerInterface
     /**
      * Set default roles.
      *
-     * @param \Closure|string[] $roles either array of roles or a closure returning it
+     * @param \Closure|string[] $roles Either array of roles or a closure returning it.
      *
      * @throws InvalidArgumentException When $roles is neither array nor closure.
      * @throws RuntimeException When callable returns non array.
@@ -486,7 +456,7 @@ final class Manager implements AccessCheckerInterface
     /**
      * Set guest role.
      *
-     * @param string $guestRole
+     * @param string|null $guestRole
      *
      * @return $this
      */
@@ -509,9 +479,9 @@ final class Manager implements AccessCheckerInterface
      * @param array $params Parameters passed to {@see AccessCheckerInterface::userHasPermission()} and will be passed
      * to the rule.
      *
-     * @throws RuntimeException if the auth item has an invalid rule.
+     * @throws RuntimeException If the auth item has an invalid rule.
      *
-     * @return bool the return value of {@see Rule::execute()}. If the auth item does not specify a rule, true will be
+     * @return bool The return value of {@see Rule::execute()}. If the auth item does not specify a rule, true will be
      * returned.
      */
     private function executeRule(string $user, Item $item, array $params): bool

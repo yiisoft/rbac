@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac;
 
+/**
+ * Having a rule name creates an instance of it.
+ */
 interface RuleFactoryInterface
 {
     /**

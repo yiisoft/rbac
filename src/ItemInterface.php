@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac;
 
 /**
- * Common interface for authorization items:
+ * Common interface for RBAC hierarchy items:
  *
  * - Role
  * - Permission
