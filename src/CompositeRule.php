@@ -33,6 +33,7 @@ final class CompositeRule extends Rule
      * @param string $name Rule name.
      * @param string $operator Operator to be used. Could be `CompositeRule::AND` or `CompositeRule::OR`.
      * @param Rule[] $rules Array of rule instances.
+     * @psalm-param array $rules
      */
     public function __construct(string $name, string $operator, array $rules)
     {
@@ -49,6 +50,7 @@ final class CompositeRule extends Rule
 
         parent::__construct($name);
         $this->operator = $operator;
+        /** @var Rule[] $rules */
         $this->rules = $rules;
     }
 
