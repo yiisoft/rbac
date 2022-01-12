@@ -18,7 +18,6 @@ final class FakeAssignmentsStorage implements AssignmentsStorageInterface
         $this->now = $now;
     }
 
-
     public function getAssignments(): array
     {
         return $this->assignments;

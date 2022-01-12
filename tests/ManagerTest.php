@@ -485,7 +485,7 @@ final class ManagerTest extends TestCase
                 'ruleName' => EasyRule::class,
                 'type' => 'role',
                 'updatedAt' => 1642026148,
-                'createdAt' => 1642026147
+                'createdAt' => 1642026147,
             ],
             $storedRole->getAttributes()
         );
@@ -554,7 +554,6 @@ final class ManagerTest extends TestCase
         $this->assertNotNull($newPermission);
         $this->assertSame(1642026149, $newPermission->getCreatedAt());
         $this->assertSame(1642026150, $newPermission->getUpdatedAt());
-
     }
 
     public function testUpdatePermissionNameAlreadyUsed(): void
