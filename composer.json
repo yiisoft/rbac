@@ -6,17 +6,15 @@
         "yii",
         "rbac"
     ],
-    "homepage": "http://www.yiiframework.com/",
+    "homepage": "https://www.yiiframework.com/",
     "license": "BSD-3-Clause",
     "support": {
         "source": "https://github.com/yiisoft/rbac",
         "issues": "https://github.com/yiisoft/rbac/issues",
-        "forum": "http://www.yiiframework.com/forum/",
-        "wiki": "http://www.yiiframework.com/wiki/",
+        "forum": "https://www.yiiframework.com/forum/",
+        "wiki": "https://www.yiiframework.com/wiki/",
         "irc": "irc://irc.freenode.net/yii"
     },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
     "require": {
         "php": "^7.4|^8.0",
         "yiisoft/access": "^1.0"
