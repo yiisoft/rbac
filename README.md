@@ -2,15 +2,9 @@
     <a href="https://github.com/yiisoft" target="_blank">
         <img src="https://yiisoft.github.io/docs/images/yii_logo.svg" height="100px">
     </a>
-    <h1 align="center">Yii Role-Based Access Control Library</h1>
+    <h1 align="center">Yii Role-Based Access Control</h1>
     <br>
 </p>
-
-This package provides [RBAC] (Role-Based Access Control) library.
-It is used in [Yii Framework] but is supposed to be usable separately.
-
-[RBAC]: https://en.wikipedia.org/wiki/Role-based_access_control
-[Yii Framework]: https://yiiframework.com
 
 [![Latest Stable Version](https://poser.pugx.org/yiisoft/rbac/v/stable.png)](https://packagist.org/packages/yiisoft/rbac)
 [![Total Downloads](https://poser.pugx.org/yiisoft/rbac/downloads.png)](https://packagist.org/packages/yiisoft/rbac)
@@ -21,16 +15,41 @@ It is used in [Yii Framework] but is supposed to be usable separately.
 [![static analysis](https://github.com/yiisoft/rbac/workflows/static%20analysis/badge.svg)](https://github.com/yiisoft/rbac/actions?query=workflow%3A%22static+analysis%22)
 [![type-coverage](https://shepherd.dev/github/yiisoft/rbac/coverage.svg)](https://shepherd.dev/github/yiisoft/rbac)
 
+This package provides [RBAC] (Role-Based Access Control) library.
+It is used in [Yii Framework] but is usable separately as well.
 
-## Install:
+[RBAC]: https://en.wikipedia.org/wiki/Role-based_access_control
+[Yii Framework]: https://yiiframework.com
 
+## Features
+
+- Flexible RBAC hierarchy with roles, permissions and rules.
+- Role inheritance.
+- Data could be passed to rules when checking access.
+- Multiple storage adapters.
+- Separate storages could be used for user-role assignments and role hierarchy.
+- API to manage RBAC hierarchy.
+
+## Requirements
+
+- PHP 7.4 or higher.
+
+## Installation
+
+The package could be installed with composer:
+
+```shell
+composer require yiisoft/rbac --prefer-dist
 ```
-composer require yiisoft/rbac
-```
 
-## Basic usage:
+One of the following storages should be installed as well:
 
-#### Create an instance
+- [PHP storage](https://github.com/yiisoft/rbac-php) - PHP file storage.
+- [DB storage](https://github.com/yiisoft/rbac-db) - database storage based on [yiisoft/db](https://github.com/yiisoft/db).
+
+## Setting up manager
+
+First step when using RBAC is to configure an instance of `Manager`:
 
 ```php
 /**
@@ -39,36 +58,40 @@ composer require yiisoft/rbac
 */
 $manager = new Manager($rolesStorage, $assignmentsStorage, new ClassNameRuleFactory());
 ```
-In the directory config will contain permissions and rules.
 
-Sometimes, it makes sense to have role assignments in a different storage than roles and permission definitions:
+It requires specifying roles storage (hierarchy itself) and assignment storage where user IDs are mapped to roles. Also,
+rule factory is requires. Given a rule name stored in roles storage it can create an instance of `Rule`.
 
-- Roles and permissions could be considered "semi-static", as they only change when you update your application code.
-- Assignments, on the other hand, could be considered "dynamic". They change more often: when creating a new user, or when updating user role from within your application.
+- Roles and permissions could usually be considered "semi-static", as they only change when you update your application
+  code, so it may make sense to use PHP storage for it. 
+- Assignments, on the other hand, could be considered "dynamic". They change more often: when creating a new user,
+  or when updating user role from within your application. It may make sense to use database storage for assignments.
 
-You can store assignments in a database by passing database adapter in `$assignmentsStorage`.
+## Managing RBAC hierarchy
 
-#### Create permissions
+Before being able to check for permissions, a RBAC hierarchy should be defined. Usually it is done via either console
+commands or migrations. Hierarchy consists of permissions, roles and rules:
+
+- Permissions are granules of access such as "create a post" or "read a post".
+- A role is what is assigned to the user. Role is granted one or more permissions. Typical roles are "manager" or "admin".
+- Rule is a PHP class that given some data answers a single question "given the data, has the user the permission asked for".
+
+In order to create permission, use the following code:
 
 ```php
-
 $manager->addPermission(new Permission('createPost'));
 $manager->addPermission(new Permission('readPost'));
 $manager->addPermission(new Permission('deletePost'));
-
 ```
 
-After executing this code, this configuration will be saved in ../config/items.php
-
-#### Create roles
+To add some roles:
 
 ```php
 $manager->addRole(new Role('author'));
 $manager->addRole(new Role('reader'));
 ```
 
-
-#### Attach permissions to roles
+Next, we need to attach permissions to roles:
 
 ```php
 $manager->addChild(
@@ -87,65 +110,31 @@ $manager->addChild(
 );
 ```
 
-#### Assign role to user
+Sometimes, basic permissions are not enough. In this case, rules are helpful. Rules are PHP classes that could be
+added to permissions and roles. In this case, the role or permission is considered only when rule's `execute()` method
+returns `true`.
 
 ```php
-$userId = 100;
-$manager->assign($storage->getRoleByName('author'), $userId);
-```
-After executing this code, this configuration will be saved in ../config/assignments.php
-
-
-#### Check permissions
-
-In order to check permissions, obtain an instance of `\Yiisoft\Access\AccessCheckerInterface` and use it:
-
-```php
-public function actionCreate(\Yiisoft\Access\AccessCheckerInterface $accessChecker): ResponseInterface
-{
-    $userId = getUserId();
-
-    if ($accessChecker->userHasPermission($userId, 'createPost')) {
-        // author has permission createPost
-    }
-}
-```
-
-#### Check permissions for a guest user
-
-Sometimes you need to add guest-only permission, which is not assigned to any user. In this case, you can specify a role which is assigned to guest user:
-
-```php
-$manager->setGuestRole('guest');
-$manager->addPermission(new Permission('signup'));
-$manager->addRole(new Role('guest'));
-$manager->addChild(
-    $rolesStorage->getRoleByName('guest'), 
-    $rolesStorage->getPermissionByName('signup')
-);
-
-$guestId = null;
-if ($accessChecker->userHasPermission($guestId, 'signup')) {
-    // guest has permission signup
-}
-
-```
-
-### Usage rules
-
-```php
+/** @var \Yiisoft\Rbac\Manager $manager */
 
 $manager->addRule(new ActionRule());
 $manager->addPermission(
     (new Permission('viewList'))->withRuleName('action_rule')
 );
 
-```
-The role will also support the rules.
+// or
 
-#### Rule example 
+$manager->addRule(new NewYearOnlyRule());
+$manager->addRole(
+    (new Role('NewYearMaintainer'))->withRuleName('new_year_only_rule')
+);
+```
+
+The rule itself implementation is usually quite simple:
 
 ```php
+use Yiisoft\Rbac\Rule;
+
 class ActionRule extends Rule
 {
     public function __construct()
@@ -160,9 +149,10 @@ class ActionRule extends Rule
 }
 ```
 
-#### Composite rule
+In the above `$userId` that permission is checked by, `$item` is RBAC hierarchy item rule is attached to, and
+`$parameters` is extra data supplied when checking for permission.
 
-Composite rule allows combining multiple rules and assigning them to a single RBAC item:
+If you need to consider multiple rules at once, use composite rule:
 
 ```php
 // Fresh and owned
@@ -172,8 +162,52 @@ $compositeRule = new CompositeRule('fresh_and_owned', CompositeRule::AND, [new F
 $compositeRule = new CompositeRule('fresh_and_owned', CompositeRule::OR, [new FreshRule(), new OwnedRule()]);
 ```
 
-#### Check permissions with rule
+## Assigning roles to users
 
+In order to assign a certain role to a user with a given ID, use the following code:
+
+```php
+$userId = 100;
+$manager->assign($storage->getRoleByName('author'), $userId);
+```
+
+It could be done in an admin panel, via console command, or it could be built into the application business logic itself.
+
+
+## Check for permission
+
+In order to check for permission, obtain an instance of `\Yiisoft\Access\AccessCheckerInterface` and use it:
+
+```php
+public function actionCreate(\Yiisoft\Access\AccessCheckerInterface $accessChecker): ResponseInterface
+{
+    $userId = getUserId();
+
+    if ($accessChecker->userHasPermission($userId, 'createPost')) {
+        // author has permission to create post
+    }
+}
+```
+
+Sometimes you need to add guest-only permission, which is not assigned to any user ID. In this case, you can specify
+a role which is assigned to guest user:
+
+```php
+$manager->setGuestRole('guest');
+$manager->addPermission(new Permission('signup'));
+$manager->addRole(new Role('guest'));
+$manager->addChild(
+    $rolesStorage->getRoleByName('guest'), 
+    $rolesStorage->getPermissionByName('signup')
+);
+
+$guestId = null;
+if ($accessChecker->userHasPermission($guestId, 'signup')) {
+    // Guest has "signup" permission.
+}
+```
+
+If there is a rule involved, you may pass extra parameters:
 
 ```php
 $anotherUserId = 103;
@@ -182,11 +216,7 @@ if (!$manager->userHasPermission($anotherUserId, 'viewList', ['action' => 'home'
 }
 ```
 
-## Storage:
-
-| Storage                                              | Description      |
-| ---------------------------------------------------- |----------------- | 
-| [PhpStorage](https://github.com/yiisoft/rbac-php)    | PHP file storage |
+## Testing
 
 ### Unit testing
 
@@ -198,10 +228,11 @@ The package is tested with [PHPUnit](https://phpunit.de/). To run tests:
 
 ### Mutation testing
 
-The package tests are checked with [Infection](https://infection.github.io/) mutation framework. To run it:
+The package tests are checked with [Infection](https://infection.github.io/) mutation framework with
+[Infection Static Analysis Plugin](https://github.com/Roave/infection-static-analysis-plugin). To run it:
 
 ```shell
-./vendor/bin/infection
+./vendor/bin/roave-infection-static-analysis-plugin
 ```
 
 ### Static analysis
@@ -211,6 +242,13 @@ The code is statically analyzed with [Psalm](https://psalm.dev/). To run static 
 ```shell
 ./vendor/bin/psalm
 ```
+
+## License
+
+The Yii Dependency Injection is free software. It is released under the terms of the BSD License.
+Please see [`LICENSE`](./LICENSE.md) for more information.
+
+Maintained by [Yii Software](https://www.yiiframework.com/).
 
 ## Support the project
 
@@ -223,10 +261,3 @@ The code is statically analyzed with [Psalm](https://psalm.dev/). To run static 
 [![Telegram](https://img.shields.io/badge/telegram-join-1DA1F2?style=flat&logo=telegram)](https://t.me/yii3en)
 [![Facebook](https://img.shields.io/badge/facebook-join-1DA1F2?style=flat&logo=facebook&logoColor=ffffff)](https://www.facebook.com/groups/yiitalk)
 [![Slack](https://img.shields.io/badge/slack-join-1DA1F2?style=flat&logo=slack)](https://yiiframework.com/go/slack)
-
-## License
-
-The Yii Role-Based Access Control Library is free software. It is released under the terms of the BSD License.
-Please see [`LICENSE`](./LICENSE.md) for more information.
-
-Maintained by [Yii Software](https://www.yiiframework.com/).
