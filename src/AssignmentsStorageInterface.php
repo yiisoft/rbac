@@ -56,7 +56,7 @@ interface AssignmentsStorageInterface
     public function assignmentExist(string $name): bool;
 
     /**
-     * Updates assignments for the specified role, permission or rule in the system.
+     * Updates assignments for the specified role or permission.
      *
      * @param string $name
      * @param Item $item
@@ -67,7 +67,7 @@ interface AssignmentsStorageInterface
      * Removes assignment of a role to the user with ID specified.
      *
      * @param string $userId The user ID.
-     * @param Item $item Role to remove assignment to.
+     * @param Item $item Role to remove assignment from.
      */
     public function removeAssignment(string $userId, Item $item): void;
 
@@ -79,7 +79,7 @@ interface AssignmentsStorageInterface
     public function removeAllAssignments(string $userId): void;
 
     /**
-     * Removes a assignments for role, permission or rule.
+     * Removes all assignments for role or permission.
      *
      * @param Item $item Item to remove.
      */

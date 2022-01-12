@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac;
 
+use Closure;
 use Exception;
 use InvalidArgumentException;
 use RuntimeException;
@@ -401,7 +402,7 @@ final class Manager implements AccessCheckerInterface
     /**
      * Set default roles.
      *
-     * @param \Closure|string[] $roles Either array of roles or a closure returning it.
+     * @param Closure|string[] $roles Either array of roles or a closure returning it.
      *
      * @throws InvalidArgumentException When $roles is neither array nor closure.
      * @throws RuntimeException When callable returns non array.
@@ -416,7 +417,7 @@ final class Manager implements AccessCheckerInterface
         }
 
         /** @psalm-suppress RedundantConditionGivenDocblockType */
-        if ($roles instanceof \Closure) {
+        if ($roles instanceof Closure) {
             $roles = $roles();
             if (!is_array($roles)) {
                 throw new RuntimeException('Default roles closure must return an array.');
@@ -665,7 +666,7 @@ final class Manager implements AccessCheckerInterface
 
         if (
             $this->rolesStorage->getRoleByName($this->guestRole) === null
-            || $this->rolesStorage->hasChildren($this->guestRole) === false
+            || !$this->rolesStorage->hasChildren($this->guestRole)
         ) {
             return false;
         }

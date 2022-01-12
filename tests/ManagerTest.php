@@ -141,7 +141,7 @@ final class ManagerTest extends TestCase
         }
     }
 
-    public function dataProviderUserHasPermissionWithGuest()
+    public function dataProviderUserHasPermissionWithGuest(): array
     {
         return [
             [
@@ -584,7 +584,7 @@ final class ManagerTest extends TestCase
         $this->assertEquals(['myDefaultRole'], $this->manager->getDefaultRoles());
     }
 
-    protected function createManager(
+    private function createManager(
         RolesStorageInterface $rolesStorage,
         AssignmentsStorageInterface $assignmentsStorage,
         bool $enableDirectPermissions = false
@@ -593,7 +593,7 @@ final class ManagerTest extends TestCase
             ->setDefaultRoles(['myDefaultRole']);
     }
 
-    protected function createRolesStorage(): RolesStorageInterface
+    private function createRolesStorage(): RolesStorageInterface
     {
         $storage = new FakeRolesStorage();
 
@@ -620,7 +620,7 @@ final class ManagerTest extends TestCase
         return $storage;
     }
 
-    protected function createAssignmentsStorage(): AssignmentsStorageInterface
+    private function createAssignmentsStorage(): AssignmentsStorageInterface
     {
         $storage = new FakeAssignmentsStorage();
 
