@@ -19,6 +19,6 @@ class EasyRule extends Rule
 
     public function execute(string $userId, Item $item, array $parameters = []): bool
     {
-        return $this->expected;
+        return $this->expected && parent::execute($userId, $item, $parameters);
     }
 }

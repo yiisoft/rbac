@@ -77,6 +77,12 @@ final class CompositeRule extends Rule
 
     public function getAttributes(): array
     {
+        $subRulesAttributes = [];
+
+        foreach ($this->rules as $rule) {
+            $subRulesAttributes[] = $rule->getAttributes();
+        }
+
         return [
             'name' => $this->getName(),
             'operator' => $this->operator,

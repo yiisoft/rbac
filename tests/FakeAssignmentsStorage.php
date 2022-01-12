@@ -11,6 +11,13 @@ use Yiisoft\Rbac\Item;
 final class FakeAssignmentsStorage implements AssignmentsStorageInterface
 {
     private array $assignments = [];
+    private int $now;
+
+    public function __construct(int $now)
+    {
+        $this->now = $now;
+    }
+
 
     public function getAssignments(): array
     {
@@ -32,7 +39,7 @@ final class FakeAssignmentsStorage implements AssignmentsStorageInterface
         $this->assignments[$userId][$item->getName()] = new Assignment(
             $userId,
             $item->getName(),
-            time()
+            $this->now
         );
     }
 

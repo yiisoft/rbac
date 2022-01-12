@@ -57,6 +57,9 @@ abstract class Item implements ItemInterface
         return $this->name;
     }
 
+    /**
+     * @return static
+     */
     public function withName(string $name): self
     {
         $new = clone $this;
@@ -64,6 +67,9 @@ abstract class Item implements ItemInterface
         return $new;
     }
 
+    /**
+     * @return static
+     */
     public function withDescription(string $description): self
     {
         $new = clone $this;
@@ -90,6 +96,9 @@ abstract class Item implements ItemInterface
         return $this->ruleName;
     }
 
+    /**
+     * @return static
+     */
     public function withCreatedAt(int $createdAt): self
     {
         $new = clone $this;
@@ -102,6 +111,9 @@ abstract class Item implements ItemInterface
         return $this->createdAt;
     }
 
+    /**
+     * @return static
+     */
     public function withUpdatedAt(int $updatedAt): self
     {
         $new = clone $this;

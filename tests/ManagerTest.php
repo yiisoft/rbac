@@ -19,6 +19,8 @@ use Yiisoft\Rbac\RuleFactory\ClassNameRuleFactory;
  */
 final class ManagerTest extends TestCase
 {
+    private const NOW = 1642027031;
+
     private Manager $manager;
 
     private RolesStorageInterface $rolesStorage;
@@ -324,11 +326,11 @@ final class ManagerTest extends TestCase
 
     public function testAssign(): void
     {
-        $this->manager->assign(
+        $readerAssignment = $this->manager->assign(
             $this->rolesStorage->getRoleByName('reader'),
             'readingAuthor'
         );
-        $this->manager->assign(
+        $authorAssignment = $this->manager->assign(
             $this->rolesStorage->getRoleByName('author'),
             'readingAuthor'
         );
@@ -341,6 +343,14 @@ final class ManagerTest extends TestCase
             ],
             array_keys($this->manager->getRolesByUser('readingAuthor'))
         );
+
+        $this->assertSame('readingAuthor', $readerAssignment->getUserId());
+        $this->assertSame('reader', $readerAssignment->getItemName());
+        $this->assertSame(self::NOW, $readerAssignment->getCreatedAt());
+
+        $this->assertSame('readingAuthor', $authorAssignment->getUserId());
+        $this->assertSame('author', $authorAssignment->getItemName());
+        $this->assertSame(self::NOW, $authorAssignment->getCreatedAt());
     }
 
     public function testAssignUnknownItem(): void
@@ -456,10 +466,29 @@ final class ManagerTest extends TestCase
 
         $role = (new Role('new role'))
             ->withDescription('new role description')
-            ->withRuleName($rule->getName());
+            ->withRuleName($rule->getName())
+            ->withCreatedAt(1642026147)
+            ->withUpdatedAt(1642026148);
 
         $this->manager->addRole($role);
-        $this->assertNotNull($this->rolesStorage->getRoleByName('new role'));
+
+        $storedRole = $this->rolesStorage->getRoleByName('new role');
+
+        $this->assertNotNull($storedRole);
+        $this->assertSame('new role description', $storedRole->getDescription());
+        $this->assertSame(1642026147, $storedRole->getCreatedAt());
+        $this->assertSame(1642026148, $storedRole->getUpdatedAt());
+        $this->assertSame(
+            [
+                'name' => 'new role',
+                'description' => 'new role description',
+                'ruleName' => EasyRule::class,
+                'type' => 'role',
+                'updatedAt' => 1642026148,
+                'createdAt' => 1642026147
+            ],
+            $storedRole->getAttributes()
+        );
     }
 
     public function testRemoveRole(): void
@@ -480,10 +509,29 @@ final class ManagerTest extends TestCase
     public function testAddPermission(): void
     {
         $permission = (new Permission('edit post'))
-            ->withDescription('edit a post');
+            ->withDescription('edit a post')
+            ->withCreatedAt(1642026147)
+            ->withUpdatedAt(1642026148);
 
         $this->manager->addPermission($permission);
-        $this->assertNotNull($this->rolesStorage->getPermissionByName('edit post'));
+
+        $storedPermission = $this->rolesStorage->getPermissionByName('edit post');
+
+        $this->assertNotNull($storedPermission);
+        $this->assertSame('edit a post', $storedPermission->getDescription());
+        $this->assertSame(1642026147, $storedPermission->getCreatedAt());
+        $this->assertSame(1642026148, $storedPermission->getUpdatedAt());
+        $this->assertSame(
+            [
+                'name' => 'edit post',
+                'description' => 'edit a post',
+                'ruleName' => null,
+                'type' => 'permission',
+                'updatedAt' => 1642026148,
+                'createdAt' => 1642026147,
+            ],
+            $storedPermission->getAttributes()
+        );
     }
 
     public function testRemovePermission(): void
@@ -495,12 +543,18 @@ final class ManagerTest extends TestCase
     public function testUpdatePermission(): void
     {
         $permission = $this->rolesStorage->getPermissionByName('updatePost')
-            ->withName('newUpdatePost');
+            ->withName('newUpdatePost')
+            ->withCreatedAt(1642026149)
+            ->withUpdatedAt(1642026150);
 
         $this->manager->updatePermission('updatePost', $permission);
 
         $this->assertNull($this->rolesStorage->getPermissionByName('updatePost'));
-        $this->assertNotNull($this->rolesStorage->getPermissionByName('newUpdatePost'));
+        $newPermission = $this->rolesStorage->getPermissionByName('newUpdatePost');
+        $this->assertNotNull($newPermission);
+        $this->assertSame(1642026149, $newPermission->getCreatedAt());
+        $this->assertSame(1642026150, $newPermission->getUpdatedAt());
+
     }
 
     public function testUpdatePermissionNameAlreadyUsed(): void
@@ -622,7 +676,7 @@ final class ManagerTest extends TestCase
 
     private function createAssignmentsStorage(): AssignmentsStorageInterface
     {
-        $storage = new FakeAssignmentsStorage();
+        $storage = new FakeAssignmentsStorage(self::NOW);
 
         $storage->addAssignment('reader A', new Permission('Fast Metabolism'));
         $storage->addAssignment('reader A', new Role('reader'));
