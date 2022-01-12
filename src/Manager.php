@@ -554,6 +554,7 @@ final class Manager implements AccessCheckerInterface
 
     /**
      * @param array $permissions
+     *
      * @return Permission[]
      */
     private function normalizePermissions(array $permissions): array
@@ -738,6 +739,7 @@ final class Manager implements AccessCheckerInterface
 
     /**
      * @param Role[] $array
+     *
      * @return Role[]
      */
     private function getRolesPresentInArray(array $array): array
