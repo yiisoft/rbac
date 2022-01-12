@@ -14,6 +14,7 @@ class ClassNameRuleFactory implements RuleFactoryInterface
 {
     /**
      * @psalm-param class-string<Rule> $name
+     * @psalm-suppress UnsafeInstantiation
      */
     public function create(string $name): Rule
     {

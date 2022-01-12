@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac;
 
+use Closure;
 use Exception;
 use InvalidArgumentException;
 use RuntimeException;
@@ -19,7 +20,7 @@ final class Manager implements AccessCheckerInterface
     private RuleFactoryInterface $ruleFactory;
 
     /**
-     * @var array A list of role names that are assigned to every user automatically without calling {@see assign()}.
+     * @var string[] A list of role names that are assigned to every user automatically without calling {@see assign()}.
      * Note that these roles are applied to users, regardless of their state of authentication.
      */
     private array $defaultRoles = [];
@@ -276,6 +277,7 @@ final class Manager implements AccessCheckerInterface
         $result = [];
         $this->getChildrenRecursive($roleName, $result);
 
+        /** @psalm-suppress MixedArgumentTypeCoercion */
         return array_merge([$roleName => $role], $this->getRolesPresentInArray($result));
     }
 
@@ -401,7 +403,7 @@ final class Manager implements AccessCheckerInterface
     /**
      * Set default roles.
      *
-     * @param \Closure|string[] $roles Either array of roles or a closure returning it.
+     * @param Closure|string[] $roles Either array of roles or a closure returning it.
      *
      * @throws InvalidArgumentException When $roles is neither array nor closure.
      * @throws RuntimeException When callable returns non array.
@@ -416,12 +418,13 @@ final class Manager implements AccessCheckerInterface
         }
 
         /** @psalm-suppress RedundantConditionGivenDocblockType */
-        if ($roles instanceof \Closure) {
-            $roles = $roles();
-            if (!is_array($roles)) {
+        if ($roles instanceof Closure) {
+            $defaultRoles = $roles();
+            if (!is_array($defaultRoles)) {
                 throw new RuntimeException('Default roles closure must return an array.');
             }
-            $this->defaultRoles = $roles;
+            /** @var string[] $defaultRoles */
+            $this->defaultRoles = $defaultRoles;
             return $this;
         }
 
@@ -530,6 +533,7 @@ final class Manager implements AccessCheckerInterface
     private function getParentRolesRecursive(string $roleName, array &$result): void
     {
         /**
+         * @var string $parentRole
          * @var Item[] $items
          */
         foreach ($this->rolesStorage->getChildren() as $parentRole => $items) {
@@ -548,9 +552,15 @@ final class Manager implements AccessCheckerInterface
         return $this->rolesStorage->getItemByName($name) !== null;
     }
 
+    /**
+     * @param array $permissions
+     *
+     * @return Permission[]
+     */
     private function normalizePermissions(array $permissions): array
     {
         $normalizePermissions = [];
+        /** @var string $itemName */
         foreach (array_keys($permissions) as $itemName) {
             $permission = $this->rolesStorage->getPermissionByName($itemName);
             if ($permission !== null) {
@@ -592,6 +602,7 @@ final class Manager implements AccessCheckerInterface
     {
         $assignments = $this->assignmentsStorage->getUserAssignments($userId);
         $result = [];
+        /** @var string $roleName */
         foreach (array_keys($assignments) as $roleName) {
             $this->getChildrenRecursive($roleName, $result);
         }
@@ -643,6 +654,10 @@ final class Manager implements AccessCheckerInterface
             return true;
         }
 
+        /**
+         * @var string $parentName
+         * @var array $children
+         */
         foreach ($this->rolesStorage->getChildren() as $parentName => $children) {
             if (isset($children[$itemName]) && $this->userHasPermissionRecursive(
                 $user,
@@ -665,7 +680,7 @@ final class Manager implements AccessCheckerInterface
 
         if (
             $this->rolesStorage->getRoleByName($this->guestRole) === null
-            || $this->rolesStorage->hasChildren($this->guestRole) === false
+            || !$this->rolesStorage->hasChildren($this->guestRole)
         ) {
             return false;
         }
@@ -715,12 +730,18 @@ final class Manager implements AccessCheckerInterface
             return;
         }
 
-        foreach ($children as $childName => $child) {
+        /** @var string $childName */
+        foreach ($children as $childName => $_child) {
             $result[$childName] = true;
             $this->getChildrenRecursive($childName, $result);
         }
     }
 
+    /**
+     * @param Role[] $array
+     *
+     * @return Role[]
+     */
     private function getRolesPresentInArray(array $array): array
     {
         return array_filter(

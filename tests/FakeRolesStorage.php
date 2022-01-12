@@ -177,7 +177,7 @@ final class FakeRolesStorage implements RolesStorageInterface
 
     private function removeAllItems(string $type): void
     {
-        foreach ($this->getItemsByType($type) as $name => $item) {
+        foreach ($this->getItemsByType($type) as $item) {
             $this->removeItem($item);
         }
     }
