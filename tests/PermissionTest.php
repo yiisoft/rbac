@@ -3,6 +3,7 @@
 namespace Yiisoft\Rbac\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\Permission;
 
 final class PermissionTest extends TestCase
@@ -21,5 +22,18 @@ final class PermissionTest extends TestCase
         $this->assertNotSame($original, $new3);
         $this->assertNotSame($original, $new4);
         $this->assertNotSame($original, $new5);
+    }
+
+    public function testDefaultAttributes(): void
+    {
+        $permission = new Permission('test');
+        $this->assertSame([
+            'name' => 'test',
+            'description' => '',
+            'ruleName' => null,
+            'type' => Item::TYPE_PERMISSION,
+            'updatedAt' => null,
+            'createdAt' => null,
+        ], $permission->getAttributes());
     }
 }

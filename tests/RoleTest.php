@@ -3,6 +3,7 @@
 namespace Yiisoft\Rbac\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\Role;
 
 final class RoleTest extends TestCase
@@ -22,5 +23,18 @@ final class RoleTest extends TestCase
         $this->assertNotSame($original, $new3);
         $this->assertNotSame($original, $new4);
         $this->assertNotSame($original, $new5);
+    }
+
+    public function testDefaultAttributes(): void
+    {
+        $permission = new Role('test');
+        $this->assertSame([
+            'name' => 'test',
+            'description' => '',
+            'ruleName' => null,
+            'type' => Item::TYPE_ROLE,
+            'updatedAt' => null,
+            'createdAt' => null,
+        ], $permission->getAttributes());
     }
 }
