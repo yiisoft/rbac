@@ -7,7 +7,7 @@ namespace Yiisoft\Rbac;
 /**
  * Assignment represents an assignment of a role or a permission to a user.
  */
-class Assignment
+final class Assignment
 {
     /**
      * @var string The user ID. This should be a string representing the unique identifier of a user.

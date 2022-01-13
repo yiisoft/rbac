@@ -42,7 +42,7 @@ abstract class Item implements ItemInterface
     /**
      * @param string $name The name of the item. This must be globally unique.
      */
-    public function __construct(string $name)
+    final public function __construct(string $name)
     {
         $this->name = $name;
     }
@@ -52,7 +52,7 @@ abstract class Item implements ItemInterface
      */
     abstract public function getType(): string;
 
-    public function getName(): string
+    final public function getName(): string
     {
         return $this->name;
     }
@@ -60,7 +60,7 @@ abstract class Item implements ItemInterface
     /**
      * @return static
      */
-    public function withName(string $name): self
+    final public function withName(string $name): self
     {
         $new = clone $this;
         $new->name = $name;
@@ -70,20 +70,20 @@ abstract class Item implements ItemInterface
     /**
      * @return static
      */
-    public function withDescription(string $description): self
+    final public function withDescription(string $description): self
     {
         $new = clone $this;
         $new->description = $description;
         return $new;
     }
 
-    public function getDescription(): string
+    final public function getDescription(): string
     {
         return $this->description;
     }
 
     /** @psalm-param class-string<Rule>|null $ruleName */
-    public function withRuleName(?string $ruleName): self
+    final public function withRuleName(?string $ruleName): self
     {
         $new = clone $this;
         $new->ruleName = $ruleName;
@@ -91,7 +91,7 @@ abstract class Item implements ItemInterface
     }
 
     /** @psalm-return class-string<Rule>|null */
-    public function getRuleName(): ?string
+    final public function getRuleName(): ?string
     {
         return $this->ruleName;
     }
@@ -99,14 +99,14 @@ abstract class Item implements ItemInterface
     /**
      * @return static
      */
-    public function withCreatedAt(int $createdAt): self
+    final public function withCreatedAt(int $createdAt): self
     {
         $new = clone $this;
         $new->createdAt = $createdAt;
         return $new;
     }
 
-    public function getCreatedAt(): ?int
+    final public function getCreatedAt(): ?int
     {
         return $this->createdAt;
     }
@@ -114,29 +114,29 @@ abstract class Item implements ItemInterface
     /**
      * @return static
      */
-    public function withUpdatedAt(int $updatedAt): self
+    final public function withUpdatedAt(int $updatedAt): self
     {
         $new = clone $this;
         $new->updatedAt = $updatedAt;
         return $new;
     }
 
-    public function getUpdatedAt(): ?int
+    final public function getUpdatedAt(): ?int
     {
         return $this->updatedAt;
     }
 
-    public function hasCreatedAt(): bool
+    final public function hasCreatedAt(): bool
     {
         return $this->createdAt !== null;
     }
 
-    public function hasUpdatedAt(): bool
+    final public function hasUpdatedAt(): bool
     {
         return $this->updatedAt !== null;
     }
 
-    public function getAttributes(): array
+    final public function getAttributes(): array
     {
         return [
             'name' => $this->getName(),
