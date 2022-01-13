@@ -277,7 +277,6 @@ final class Manager implements AccessCheckerInterface
         $result = [];
         $this->getChildrenRecursive($roleName, $result);
 
-        /** @psalm-suppress MixedArgumentTypeCoercion */
         return array_merge([$roleName => $role], $this->getRolesPresentInArray($result));
     }
 
@@ -492,10 +491,9 @@ final class Manager implements AccessCheckerInterface
         if ($item->getRuleName() === null) {
             return true;
         }
-        /** @psalm-suppress PossiblyNullArgument */
+
         $rule = $this->rolesStorage->getRuleByName($item->getRuleName());
         if ($rule === null) {
-            /** @psalm-suppress PossiblyNullArgument */
             throw new RuntimeException(sprintf('Rule not found: %s.', $item->getRuleName()));
         }
 
@@ -504,7 +502,6 @@ final class Manager implements AccessCheckerInterface
 
     private function createItemRuleIfNotExist(Item $item): void
     {
-        /** @psalm-suppress PossiblyNullArgument */
         if ($item->getRuleName() !== null && $this->rolesStorage->getRuleByName($item->getRuleName()) === null) {
             $rule = $this->createRule($item->getRuleName());
             $this->addRule($rule);
@@ -721,7 +718,9 @@ final class Manager implements AccessCheckerInterface
      * Recursively finds all children and grand children of the specified item.
      *
      * @param string $name The name of the item whose children are to be looked for.
-     * @param array $result The children and grand children (in array keys).
+     * @param true[] $result The children and grand children (in array keys).
+     *
+     * @psalm-param array<string,true> $result
      */
     private function getChildrenRecursive(string $name, array &$result): void
     {
@@ -730,7 +729,6 @@ final class Manager implements AccessCheckerInterface
             return;
         }
 
-        /** @var string $childName */
         foreach ($children as $childName => $_child) {
             $result[$childName] = true;
             $this->getChildrenRecursive($childName, $result);
@@ -738,7 +736,9 @@ final class Manager implements AccessCheckerInterface
     }
 
     /**
-     * @param Role[] $array
+     * @param true[] $array
+     *
+     * @psalm-param array<string,true> $array
      *
      * @return Role[]
      */
