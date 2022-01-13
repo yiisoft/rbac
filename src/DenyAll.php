@@ -9,7 +9,7 @@ use Yiisoft\Access\AccessCheckerInterface;
 /**
  * Deny all access.
  */
-class DenyAll implements AccessCheckerInterface
+final class DenyAll implements AccessCheckerInterface
 {
     public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
     {

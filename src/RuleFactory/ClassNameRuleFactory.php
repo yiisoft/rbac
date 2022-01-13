@@ -10,7 +10,7 @@ use Yiisoft\Rbac\RuleFactoryInterface;
 /**
  * Creates rule instance based on its class name.
  */
-class ClassNameRuleFactory implements RuleFactoryInterface
+final class ClassNameRuleFactory implements RuleFactoryInterface
 {
     /**
      * @psalm-param class-string<Rule> $name
