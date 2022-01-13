@@ -109,6 +109,8 @@ interface RolesStorageInterface
      * @param string $name The parent name.
      *
      * @return Item[] The child permissions and/or roles.
+     *
+     * @psalm-return array<string,Item>
      */
     public function getChildrenByName(string $name): array;
 
