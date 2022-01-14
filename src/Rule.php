@@ -11,9 +11,9 @@ abstract class Rule implements RuleInterface
 {
     private string $name;
 
-    public function __construct(string $name)
+    public function __construct(?string $name = null)
     {
-        $this->name = $name;
+        $this->name = $name ?? static::class;
     }
 
     /**

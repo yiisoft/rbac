@@ -51,6 +51,8 @@ final class Manager implements AccessCheckerInterface
     }
 
     /**
+     * @inheritdoc
+     *
      * @psalm-suppress DocblockTypeContradiction
      */
     public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
