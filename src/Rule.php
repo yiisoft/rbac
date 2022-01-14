@@ -11,9 +11,9 @@ abstract class Rule implements ItemInterface
 {
     private string $name;
 
-    public function __construct(string $name)
+    public function __construct(?string $name = null)
     {
-        $this->name = $name;
+        $this->name = $name ?? static::class;
     }
 
     /**

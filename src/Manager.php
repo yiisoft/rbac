@@ -50,6 +50,11 @@ final class Manager implements AccessCheckerInterface
         $this->enableDirectPermissions = $enableDirectPermissions;
     }
 
+    /**
+     * @inheritdoc
+     *
+     * @psalm-suppress DocblockTypeContradiction
+     */
     public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
     {
         if ($userId === null) {
