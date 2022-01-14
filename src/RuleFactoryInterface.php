@@ -11,9 +11,9 @@ interface RuleFactoryInterface
 {
     /**
      * @param string $name Class name or other rule definition.
-     * @psalm-param class-string<Rule> $name
+     * @psalm-param class-string<RuleInterface> $name
      *
-     * @return Rule Rule created.
+     * @return RuleInterface Rule created.
      */
-    public function create(string $name): Rule;
+    public function create(string $name): RuleInterface;
 }

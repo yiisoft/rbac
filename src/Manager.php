@@ -382,19 +382,19 @@ final class Manager implements AccessCheckerInterface
         $this->assignmentsStorage->updateAssignmentsForItemName($name, $permission);
     }
 
-    public function addRule(Rule $rule): void
+    public function addRule(RuleInterface $rule): void
     {
         $this->rolesStorage->addRule($rule);
     }
 
-    public function removeRule(Rule $rule): void
+    public function removeRule(RuleInterface $rule): void
     {
         if ($this->rolesStorage->getRuleByName($rule->getName()) !== null) {
             $this->rolesStorage->removeRule($rule->getName());
         }
     }
 
-    public function updateRule(string $name, Rule $rule): void
+    public function updateRule(string $name, RuleInterface $rule): void
     {
         if ($rule->getName() !== $name) {
             $this->rolesStorage->removeRule($name);
@@ -476,7 +476,7 @@ final class Manager implements AccessCheckerInterface
      * Executes the rule associated with the specified auth item.
      *
      * If the item does not specify a rule, this method will return true. Otherwise, it will
-     * return the value of {@see Rule::execute()()}.
+     * return the value of {@see RuleInterface::execute()()}.
      *
      * @param string $user The user ID. This should be a string representing
      * the unique identifier of a user.
@@ -486,7 +486,7 @@ final class Manager implements AccessCheckerInterface
      *
      * @throws RuntimeException If the auth item has an invalid rule.
      *
-     * @return bool The return value of {@see Rule::execute()}. If the auth item does not specify a rule, true will be
+     * @return bool The return value of {@see RuleInterface::execute()}. If the auth item does not specify a rule, true will be
      * returned.
      */
     private function executeRule(string $user, Item $item, array $params): bool
@@ -506,7 +506,7 @@ final class Manager implements AccessCheckerInterface
     private function createItemRuleIfNotExist(Item $item): void
     {
         if ($item->getRuleName() !== null && $this->rolesStorage->getRuleByName($item->getRuleName()) === null) {
-            $rule = $this->createRule($item->getRuleName());
+            $rule = $this->ruleFactory->create($item->getRuleName());
             $this->addRule($rule);
         }
     }
@@ -522,12 +522,6 @@ final class Manager implements AccessCheckerInterface
         }
 
         $this->rolesStorage->addItem($item);
-    }
-
-    /** @psalm-param class-string<Rule> $name */
-    private function createRule(string $name): Rule
-    {
-        return $this->ruleFactory->create($name);
     }
 
     private function getParentRolesRecursive(string $roleName, array &$result): void

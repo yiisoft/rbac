@@ -47,32 +47,4 @@ final class CompositeRuleTest extends TestCase
         $this->expectExceptionMessage('Each rule should be an instance of \Yiisoft\Rbac\Rule, "string" given.');
         new CompositeRule('rule', CompositeRule::OR, ['invalid_rule']);
     }
-
-    public function testNameOperationAndAttributes(): void
-    {
-        $positiveRule = new EasyRule(true);
-        $negativeRule = new EasyRule(true);
-
-        $rule = new CompositeRule(
-            'composite',
-            CompositeRule::AND,
-            [
-                $positiveRule,
-                $negativeRule,
-            ]
-        );
-
-        $this->assertSame('composite', $rule->getName());
-        $this->assertSame(
-            [
-                'name' => 'composite',
-                'operator' => CompositeRule::AND,
-                'rules' => [
-                    $positiveRule,
-                    $negativeRule,
-                ],
-            ],
-            $rule->getAttributes()
-        );
-    }
 }
