@@ -136,6 +136,16 @@ abstract class Item implements ItemInterface
         return $this->updatedAt !== null;
     }
 
+    /**
+     * @psalm-return array{
+     *     name:string,
+     *     description:string,
+     *     ruleName:class-string<Rule>|null,
+     *     type:string,
+     *     updatedAt:int|null,
+     *     createdAt:int|null,
+     * }
+     */
     final public function getAttributes(): array
     {
         return [
