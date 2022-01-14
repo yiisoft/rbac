@@ -7,7 +7,7 @@ namespace Yiisoft\Rbac\Tests;
 use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
-use Yiisoft\Rbac\Rule;
+use Yiisoft\Rbac\RuleInterface;
 use Yiisoft\Rbac\RolesStorageInterface;
 
 final class FakeRolesStorage implements RolesStorageInterface
@@ -68,7 +68,7 @@ final class FakeRolesStorage implements RolesStorageInterface
         return $this->rules;
     }
 
-    public function getRuleByName(string $name): ?Rule
+    public function getRuleByName(string $name): ?RuleInterface
     {
         return $this->rules[$name] ?? null;
     }
@@ -118,7 +118,7 @@ final class FakeRolesStorage implements RolesStorageInterface
         }
     }
 
-    public function addRule(Rule $rule): void
+    public function addRule(RuleInterface $rule): void
     {
         $this->rules[$rule->getName()] = $rule;
     }

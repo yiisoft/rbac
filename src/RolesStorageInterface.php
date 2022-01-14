@@ -151,7 +151,7 @@ interface RolesStorageInterface
     /**
      * Returns all rules available in the system.
      *
-     * @return Rule[] The rules indexed by the rule names.
+     * @return RuleInterface[] The rules indexed by the rule names.
      */
     public function getRules(): array;
 
@@ -160,9 +160,9 @@ interface RolesStorageInterface
      *
      * @param string $name The rule name.
      *
-     * @return Rule|null The rule object, or null if the specified name does not correspond to a rule.
+     * @return RuleInterface|null The rule object, or null if the specified name does not correspond to a rule.
      */
-    public function getRuleByName(string $name): ?Rule;
+    public function getRuleByName(string $name): ?RuleInterface;
 
     /**
      * Removes the rule of the specified name from RBAC system.
@@ -174,9 +174,9 @@ interface RolesStorageInterface
     /**
      * Adds the rule to RBAC system.
      *
-     * @param Rule $rule The rule to add.
+     * @param RuleInterface $rule The rule to add.
      */
-    public function addRule(Rule $rule): void;
+    public function addRule(RuleInterface $rule): void;
 
     /**
      * Removes all rules.

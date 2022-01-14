@@ -25,15 +25,14 @@ final class CompositeRule extends Rule
     private string $operator;
 
     /**
-     * @var Rule[]
+     * @var RuleInterface[]
      */
     private array $rules;
 
     /**
      * @param string $name Rule name.
      * @param string $operator Operator to be used. Could be `CompositeRule::AND` or `CompositeRule::OR`.
-     * @param Rule[] $rules Array of rule instances.
-     * @psalm-param array $rules
+     * @param RuleInterface[] $rules Array of rule instances.
      */
     public function __construct(string $name, string $operator, array $rules)
     {
@@ -42,7 +41,8 @@ final class CompositeRule extends Rule
         }
 
         foreach ($rules as $rule) {
-            if (!$rule instanceof Rule) {
+            if (!$rule instanceof RuleInterface) {
+                /** @psalm-suppress RedundantConditionGivenDocblockType,DocblockTypeContradiction */
                 $type = is_object($rule) ? get_class($rule) : gettype($rule);
                 throw new InvalidArgumentException(sprintf('Each rule should be an instance of \Yiisoft\Rbac\Rule, "%s" given.', $type));
             }
@@ -50,7 +50,6 @@ final class CompositeRule extends Rule
 
         parent::__construct($name);
         $this->operator = $operator;
-        /** @var Rule[] $rules */
         $this->rules = $rules;
     }
 
@@ -73,14 +72,5 @@ final class CompositeRule extends Rule
         }
 
         return $this->operator === self::AND;
-    }
-
-    public function getAttributes(): array
-    {
-        return [
-            'name' => $this->getName(),
-            'operator' => $this->operator,
-            'rules' => $this->rules,
-        ];
     }
 }
