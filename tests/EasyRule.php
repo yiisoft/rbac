@@ -7,7 +7,7 @@ namespace Yiisoft\Rbac\Tests;
 use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\Rule;
 
-class EasyRule extends Rule
+final class EasyRule extends Rule
 {
     private bool $expected;
 
@@ -19,6 +19,6 @@ class EasyRule extends Rule
 
     public function execute(string $userId, Item $item, array $parameters = []): bool
     {
-        return $this->expected && parent::execute($userId, $item, $parameters);
+        return $this->expected;
     }
 }

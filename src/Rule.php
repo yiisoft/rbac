@@ -7,7 +7,7 @@ namespace Yiisoft\Rbac;
 /**
  * Rule represents a business constraint that may be associated with a role, permission or assignment.
  */
-abstract class Rule implements ItemInterface
+abstract class Rule implements RuleInterface
 {
     private string $name;
 
@@ -17,36 +17,19 @@ abstract class Rule implements ItemInterface
     }
 
     /**
-     * Executes the rule.
-     *
-     * @param string $userId The user ID. This should be a string representing
-     * the unique identifier of a user.
-     * @param Item $item The role or permission that this rule is associated with.
-     * @param array $parameters Parameters passed to {@see CheckAccessInterface::userHasPermission()}.
-     *
-     * @return bool Whether the rule permits the auth item it is associated with.
+     * @inheritdoc
      */
-    public function execute(string $userId, Item $item, array $parameters = []): bool
-    {
-        return true;
-    }
+    abstract public function execute(string $userId, Item $item, array $parameters = []): bool;
 
-    public function getName(): string
+    final public function getName(): string
     {
         return $this->name;
     }
 
-    public function withName(string $name): self
+    final public function withName(string $name): self
     {
         $new = clone $this;
         $new->name = $name;
         return $new;
-    }
-
-    public function getAttributes(): array
-    {
-        return [
-            'name' => $this->getName(),
-        ];
     }
 }
