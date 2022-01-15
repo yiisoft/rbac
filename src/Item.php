@@ -8,7 +8,7 @@ namespace Yiisoft\Rbac;
  * Items are RBAC hierarchy entities that could be assigned to the user.
  * Both roles and permissions are items.
  */
-abstract class Item implements ItemInterface
+abstract class Item
 {
     public const TYPE_ROLE = 'role';
     public const TYPE_PERMISSION = 'permission';
@@ -52,6 +52,9 @@ abstract class Item implements ItemInterface
      */
     abstract public function getType(): string;
 
+    /**
+     * @return string Authorization item name.
+     */
     final public function getName(): string
     {
         return $this->name;
@@ -137,6 +140,8 @@ abstract class Item implements ItemInterface
     }
 
     /**
+     * @return array Authorization item attribute values indexed by attribute names.
+     *
      * @psalm-return array{
      *     name:string,
      *     description:string,
