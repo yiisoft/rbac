@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac;
 
 /**
- * Rule represents a business constraint that may be associated with a role, permission or assignment.
+ * Rule represents a business constraint that may be associated with a role or a permission.
  */
 interface RuleInterface
 {
@@ -17,8 +17,7 @@ interface RuleInterface
     /**
      * Executes the rule.
      *
-     * @param string $userId The user ID. This should be a string representing
-     * the unique identifier of a user.
+     * @param string $userId The user ID. This should be a string representing the unique identifier of a user.
      * @param Item $item The role or permission that this rule is associated with.
      * @param array $parameters Parameters passed to {@see CheckAccessInterface::userHasPermission()}.
      *

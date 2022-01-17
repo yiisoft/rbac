@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac;
 
 /**
- * Assignment represents an assignment of a role or a permission to a user.
+ * `Assignment` represents an assignment of a role or a permission to a user.
  */
 final class Assignment
 {
@@ -13,6 +13,7 @@ final class Assignment
      * @var string The user ID. This should be a string representing the unique identifier of a user.
      */
     private string $userId;
+
     /**
      * @var string The role or permission name.
      */

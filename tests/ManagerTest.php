@@ -12,7 +12,11 @@ use Yiisoft\Rbac\Manager;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\RolesStorageInterface;
-use Yiisoft\Rbac\RuleFactory\ClassNameRuleFactory;
+use Yiisoft\Rbac\ClassNameRuleFactory;
+use Yiisoft\Rbac\Tests\Support\AuthorRule;
+use Yiisoft\Rbac\Tests\Support\EasyRule;
+use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
+use Yiisoft\Rbac\Tests\Support\FakeRolesStorage;
 
 /**
  * @group rbac
@@ -129,7 +133,7 @@ final class ManagerTest extends TestCase
      */
     public function testUserHasPermissionWithGuest($userId, array $tests): void
     {
-        $this->manager->setGuestRole('guest');
+        $this->manager->setGuestRoleName('guest');
         $this->rolesStorage->addItem(new Role('guest'));
         $this->rolesStorage->addItem(new Permission('signup'));
         $this->rolesStorage->addChild(new Role('guest'), new Permission('signup'));
@@ -161,6 +165,15 @@ final class ManagerTest extends TestCase
         ];
     }
 
+    public function testUserHasPermissionWithNonExistGuestRole(): void
+    {
+        $this->manager->setGuestRoleName('non-exist-guest');
+
+        $this->assertFalse(
+            $this->manager->userHasPermission(null, 'readPost')
+        );
+    }
+
     /**
      * @dataProvider dataProviderUserHasPermissionWithFailUserId
      */
@@ -178,7 +191,7 @@ final class ManagerTest extends TestCase
     {
         return [
             [true],
-            [(object)[]],
+            [(object) []],
             [['test' => 1]],
         ];
     }
@@ -187,6 +200,19 @@ final class ManagerTest extends TestCase
     {
         $this->manager->setDefaultRoles([]);
         $this->assertFalse($this->manager->userHasPermission('unknown user', 'createPost'));
+    }
+
+    public function testUserHasPermissionWithNonExistsRule(): void
+    {
+        $permission = (new Permission('test-permission'))->withRuleName('non-exist-rule');
+        $role = (new Role('test'));
+        $this->rolesStorage->addItem($role);
+        $this->rolesStorage->addItem($permission);
+        $this->rolesStorage->addChild($role, $permission);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectErrorMessage('Rule "non-exist-rule" not found.');
+        $this->manager->userHasPermission('reader A', 'test-permission');
     }
 
     public function testCanAddChildReturnTrue(): void
@@ -288,6 +314,16 @@ final class ManagerTest extends TestCase
             $this->rolesStorage->getRoleByName('reader'),
             $this->rolesStorage->getRoleByName('author'),
         );
+    }
+
+    public function testAddChildWithNonExistChild(): void
+    {
+        $parent = $this->rolesStorage->getRoleByName('reader');
+        $child = new Role('new reader');
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Either "new reader" does not exist.');
+        $this->manager->addChild($parent, $child);
     }
 
     public function testRemoveChild(): void
@@ -434,9 +470,17 @@ final class ManagerTest extends TestCase
 
     public function testGetPermissionsByUser(): void
     {
-        $this->assertEquals(
+        $this->assertSame(
             ['deletePost', 'createPost', 'updatePost', 'readPost'],
             array_keys($this->manager->getPermissionsByUser('author B'))
+        );
+    }
+
+    public function testGetPermissionsByUserForUserWithoutPermissions(): void
+    {
+        $this->assertSame(
+            [],
+            array_keys($this->manager->getPermissionsByUser('guest'))
         );
     }
 
@@ -534,6 +578,18 @@ final class ManagerTest extends TestCase
         );
     }
 
+    public function testAddPermissionWithoutTime(): void
+    {
+        $permission = new Permission('test');
+        $this->manager->addPermission($permission);
+
+        $storedPermission = $this->rolesStorage->getPermissionByName('test');
+
+        $this->assertNotNull($storedPermission);
+        $this->assertNotNull($storedPermission->getCreatedAt());
+        $this->assertNotNull($storedPermission->getUpdatedAt());
+    }
+
     public function testRemovePermission(): void
     {
         $this->manager->removePermission($this->rolesStorage->getPermissionByName('updatePost'));
@@ -560,7 +616,8 @@ final class ManagerTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(
-            'Unable to change the item name. The name "createPost" is already used by another item.'
+            'Unable to change the role or the permission name. ' .
+            'The name "createPost" is already used by another role or permission.'
         );
 
         $permission = $this->rolesStorage->getPermissionByName('updatePost')

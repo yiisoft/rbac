@@ -2,12 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Rbac\RuleFactory;
+namespace Yiisoft\Rbac;
 
 use RuntimeException;
 use Throwable;
-use Yiisoft\Rbac\RuleInterface;
-use Yiisoft\Rbac\RuleFactoryInterface;
 
 use function get_class;
 
