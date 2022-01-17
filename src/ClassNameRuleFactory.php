@@ -6,8 +6,6 @@ namespace Yiisoft\Rbac;
 
 use RuntimeException;
 use Throwable;
-use Yiisoft\Rbac\RuleInterface;
-use Yiisoft\Rbac\RuleFactoryInterface;
 
 use function get_class;
 
