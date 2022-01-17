@@ -161,6 +161,15 @@ final class ManagerTest extends TestCase
         ];
     }
 
+    public function testUserHasPermissionWithNonExistGuestRole(): void
+    {
+        $this->manager->setGuestRoleName('non-exist-guest');
+
+        $this->assertFalse(
+            $this->manager->userHasPermission(null, 'readPost')
+        );
+    }
+
     /**
      * @dataProvider dataProviderUserHasPermissionWithFailUserId
      */
