@@ -202,6 +202,19 @@ final class ManagerTest extends TestCase
         $this->assertFalse($this->manager->userHasPermission('unknown user', 'createPost'));
     }
 
+    public function testUserHasPermissionWithNonExistsRule(): void
+    {
+        $permission = (new Permission('test-permission'))->withRuleName('non-exist-rule');
+        $role = (new Role('test'));
+        $this->rolesStorage->addItem($role);
+        $this->rolesStorage->addItem($permission);
+        $this->rolesStorage->addChild($role, $permission);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectErrorMessage('Rule "non-exist-rule" not found.');
+        $this->manager->userHasPermission('reader A', 'test-permission');
+    }
+
     public function testCanAddChildReturnTrue(): void
     {
         $this->assertTrue(
