@@ -21,7 +21,7 @@ final class ClassNameRuleFactory implements RuleFactoryInterface
         if (!class_exists($name)) {
             throw new RuntimeException(
                 sprintf(
-                    '%s supports create rules by class name only, "%s" given.',
+                    '%s supports creating rules by class name only, "%s" given.',
                     self::class,
                     $name
                 )
@@ -33,7 +33,7 @@ final class ClassNameRuleFactory implements RuleFactoryInterface
             $rule = new $name();
         } catch (Throwable $e) {
             throw new RuntimeException(
-                sprintf('Can not instantiate rule "%s"', $name),
+                sprintf('Can not instantiate rule "%s".', $name),
                 0,
                 $e
             );
@@ -42,7 +42,7 @@ final class ClassNameRuleFactory implements RuleFactoryInterface
         if (!$rule instanceof RuleInterface) {
             throw new RuntimeException(
                 sprintf(
-                    'Rule "%s" must be instance of %s.',
+                    'Rule "%s" must be an instance of %s.',
                     get_class($rule),
                     RuleInterface::class
                 )

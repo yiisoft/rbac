@@ -27,15 +27,15 @@ final class ClassNameRuleFactoryTest extends TestCase
     {
         return [
             [
-                ClassNameRuleFactory::class . ' supports create rules by class name only, "non-exists-class" given.',
+                ClassNameRuleFactory::class . ' supports creating rules by class name only, "non-exists-class" given.',
                 'non-exists-class',
             ],
             [
-                'Can not instantiate rule "' . RuleWithRequiredName::class . '"',
+                'Can not instantiate rule "' . RuleWithRequiredName::class . '".',
                 RuleWithRequiredName::class,
             ],
             [
-                'Rule "' . stdClass::class . '" must be instance of ' . RuleInterface::class . '.',
+                'Rule "' . stdClass::class . '" must be an instance of ' . RuleInterface::class . '.',
                 stdClass::class,
             ],
         ];
