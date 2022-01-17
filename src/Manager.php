@@ -85,11 +85,12 @@ final class Manager implements AccessCheckerInterface
             return false;
         }
 
-        if ($this->rolesStorage->getPermissionByName($permissionName) === null) {
-            return false;
-        }
-
-        return $this->userHasPermissionRecursive($userId, $permissionName, $parameters, $assignments);
+        return $this->userHasItem(
+            $userId,
+            $this->rolesStorage->getPermissionByName($permissionName),
+            $parameters,
+            $assignments
+        );
     }
 
     /**
@@ -621,7 +622,7 @@ final class Manager implements AccessCheckerInterface
      * Performs access check for the specified user.
      *
      * @param string $user The user ID. This should br a string representing the unique identifier of a user.
-     * @param string $itemName The name of the permission or the role that need access check.
+     * @param Item|null $item The permission or the role that need access check.
      * @param array $params Name-value pairs that would be passed to rules associated with the permissions and roles
      * assigned to the user. A param with name 'user' is added to this array, which holds the value of `$userId`.
      * @param Assignment[] $assignments The assignments to the specified user.
@@ -630,13 +631,12 @@ final class Manager implements AccessCheckerInterface
      *
      * @return bool Whether the operations can be performed by the user.
      */
-    private function userHasPermissionRecursive(
+    private function userHasItem(
         string $user,
-        string $itemName,
+        ?Item $item,
         array $params,
         array $assignments
     ): bool {
-        $item = $this->rolesStorage->getItemByName($itemName);
         if ($item === null) {
             return false;
         }
@@ -645,17 +645,20 @@ final class Manager implements AccessCheckerInterface
             return false;
         }
 
-        if (isset($assignments[$itemName])) {
+        if (isset($assignments[$item->getName()])) {
             return true;
         }
 
         foreach ($this->rolesStorage->getChildren() as $parentName => $children) {
-            if (isset($children[$itemName]) && $this->userHasPermissionRecursive(
-                $user,
-                $parentName,
-                $params,
-                $assignments
-            )) {
+            if (
+                isset($children[$item->getName()])
+                && $this->userHasItem(
+                    $user,
+                    $this->rolesStorage->getItemByName($parentName),
+                    $params,
+                    $assignments
+                )
+            ) {
                 return true;
             }
         }
