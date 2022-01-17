@@ -15,11 +15,8 @@
 [![static analysis](https://github.com/yiisoft/rbac/workflows/static%20analysis/badge.svg)](https://github.com/yiisoft/rbac/actions?query=workflow%3A%22static+analysis%22)
 [![type-coverage](https://shepherd.dev/github/yiisoft/rbac/coverage.svg)](https://shepherd.dev/github/yiisoft/rbac)
 
-This package provides [RBAC] (Role-Based Access Control) library.
-It is used in [Yii Framework] but is usable separately as well.
-
-[RBAC]: https://en.wikipedia.org/wiki/Role-based_access_control
-[Yii Framework]: https://yiiframework.com
+This package provides [RBAC](https://en.wikipedia.org/wiki/Role-based_access_control) (Role-Based Access Control)
+library. It is used in [Yii Framework](https://yiiframework.com) but is usable separately as well.
 
 ## Features
 
@@ -45,9 +42,12 @@ composer require yiisoft/rbac --prefer-dist
 One of the following storages should be installed as well:
 
 - [PHP storage](https://github.com/yiisoft/rbac-php) - PHP file storage.
-- [DB storage](https://github.com/yiisoft/rbac-db) - database storage based on [yiisoft/db](https://github.com/yiisoft/db).
+- [DB storage](https://github.com/yiisoft/rbac-db) - database storage based on 
+  [yiisoft/db](https://github.com/yiisoft/db).
 
-## Setting up manager
+## General usage
+
+### Setting up manager
 
 First step when using RBAC is to configure an instance of `Manager`:
 
@@ -67,14 +67,16 @@ rule factory is requires. Given a rule name stored in roles storage it can creat
 - Assignments, on the other hand, could be considered "dynamic". They change more often: when creating a new user,
   or when updating user role from within your application. It may make sense to use database storage for assignments.
 
-## Managing RBAC hierarchy
+### Managing RBAC hierarchy
 
 Before being able to check for permissions, a RBAC hierarchy should be defined. Usually it is done via either console
 commands or migrations. Hierarchy consists of permissions, roles and rules:
 
 - Permissions are granules of access such as "create a post" or "read a post".
-- A role is what is assigned to the user. Role is granted one or more permissions. Typical roles are "manager" or "admin".
-- Rule is a PHP class that given some data answers a single question "given the data, has the user the permission asked for".
+- A role is what is assigned to the user. Role is granted one or more permissions. Typical roles are "manager" or
+  "admin".
+- Rule is a PHP class that given some data answers a single question "given the data, has the user the permission asked
+  for".
 
 In order to create permission, use the following code:
 
@@ -162,7 +164,7 @@ $compositeRule = new CompositeRule('fresh_and_owned', CompositeRule::AND, [new F
 $compositeRule = new CompositeRule('fresh_and_owned', CompositeRule::OR, [new FreshRule(), new OwnedRule()]);
 ```
 
-## Assigning roles to users
+### Assigning roles to users
 
 In order to assign a certain role to a user with a given ID, use the following code:
 
@@ -171,10 +173,10 @@ $userId = 100;
 $manager->assign($storage->getRoleByName('author'), $userId);
 ```
 
-It could be done in an admin panel, via console command, or it could be built into the application business logic itself.
+It could be done in an admin panel, via console command, or it could be built into the application business logic
+itself.
 
-
-## Check for permission
+### Check for permission
 
 In order to check for permission, obtain an instance of `\Yiisoft\Access\AccessCheckerInterface` and use it:
 
