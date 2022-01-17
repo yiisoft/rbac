@@ -444,9 +444,17 @@ final class ManagerTest extends TestCase
 
     public function testGetPermissionsByUser(): void
     {
-        $this->assertEquals(
+        $this->assertSame(
             ['deletePost', 'createPost', 'updatePost', 'readPost'],
             array_keys($this->manager->getPermissionsByUser('author B'))
+        );
+    }
+
+    public function testGetPermissionsByUserForUserWithoutPermissions(): void
+    {
+        $this->assertSame(
+            [],
+            array_keys($this->manager->getPermissionsByUser('guest'))
         );
     }
 
@@ -542,6 +550,18 @@ final class ManagerTest extends TestCase
             ],
             $storedPermission->getAttributes()
         );
+    }
+
+    public function testAddPermissionWithoutTime(): void
+    {
+        $permission = new Permission('test');
+        $this->manager->addPermission($permission);
+
+        $storedPermission = $this->rolesStorage->getPermissionByName('test');
+
+        $this->assertNotNull($storedPermission);
+        $this->assertNotNull($storedPermission->getCreatedAt());
+        $this->assertNotNull($storedPermission->getUpdatedAt());
     }
 
     public function testRemovePermission(): void
