@@ -9,6 +9,7 @@ use PHPUnit\Framework\TestCase;
 use Yiisoft\Rbac\CompositeRule;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Rule;
+use Yiisoft\Rbac\Tests\Support\EasyRule;
 
 final class CompositeRuleTest extends TestCase
 {

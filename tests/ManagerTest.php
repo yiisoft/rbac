@@ -13,6 +13,10 @@ use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\RolesStorageInterface;
 use Yiisoft\Rbac\ClassNameRuleFactory;
+use Yiisoft\Rbac\Tests\Support\AuthorRule;
+use Yiisoft\Rbac\Tests\Support\EasyRule;
+use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
+use Yiisoft\Rbac\Tests\Support\FakeRolesStorage;
 
 /**
  * @group rbac
