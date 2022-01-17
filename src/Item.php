@@ -84,6 +84,9 @@ abstract class Item
         return $this->description;
     }
 
+    /**
+     * @return static
+     */
     final public function withRuleName(?string $ruleName): self
     {
         $new = clone $this;

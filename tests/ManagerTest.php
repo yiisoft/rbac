@@ -178,7 +178,7 @@ final class ManagerTest extends TestCase
     {
         return [
             [true],
-            [(object)[]],
+            [(object) []],
             [['test' => 1]],
         ];
     }
@@ -288,6 +288,16 @@ final class ManagerTest extends TestCase
             $this->rolesStorage->getRoleByName('reader'),
             $this->rolesStorage->getRoleByName('author'),
         );
+    }
+
+    public function testAddChildWithNonExistChild(): void
+    {
+        $parent = $this->rolesStorage->getRoleByName('reader');
+        $child = new Role('new reader');
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Either "new reader" does not exist.');
+        $this->manager->addChild($parent, $child);
     }
 
     public function testRemoveChild(): void
