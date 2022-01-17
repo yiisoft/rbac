@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Rbac\Tests\RuleFactory;
+namespace Yiisoft\Rbac\Tests;
 
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use stdClass;
-use Yiisoft\Rbac\RuleFactory\ClassNameRuleFactory;
+use Yiisoft\Rbac\ClassNameRuleFactory;
 use Yiisoft\Rbac\RuleInterface;
 use Yiisoft\Rbac\Tests\Support\AllowRule;
 use Yiisoft\Rbac\Tests\Support\RuleWithRequiredName;

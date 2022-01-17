@@ -12,7 +12,7 @@ use Yiisoft\Rbac\Manager;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\RolesStorageInterface;
-use Yiisoft\Rbac\RuleFactory\ClassNameRuleFactory;
+use Yiisoft\Rbac\ClassNameRuleFactory;
 
 /**
  * @group rbac
@@ -129,7 +129,7 @@ final class ManagerTest extends TestCase
      */
     public function testUserHasPermissionWithGuest($userId, array $tests): void
     {
-        $this->manager->setGuestRole('guest');
+        $this->manager->setGuestRoleName('guest');
         $this->rolesStorage->addItem(new Role('guest'));
         $this->rolesStorage->addItem(new Permission('signup'));
         $this->rolesStorage->addChild(new Role('guest'), new Permission('signup'));
@@ -560,7 +560,8 @@ final class ManagerTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(
-            'Unable to change the item name. The name "createPost" is already used by another item.'
+            'Unable to change the role or the permission name. ' .
+            'The name "createPost" is already used by another role or permission.'
         );
 
         $permission = $this->rolesStorage->getPermissionByName('updatePost')

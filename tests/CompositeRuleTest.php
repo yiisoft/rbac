@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Yiisoft\Rbac\CompositeRule;
 use Yiisoft\Rbac\Permission;
+use Yiisoft\Rbac\Rule;
 
 final class CompositeRuleTest extends TestCase
 {
@@ -37,14 +38,20 @@ final class CompositeRuleTest extends TestCase
     public function testInvalidOperator(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Operator could be either \Yiisoft\Rbac\CompositeRule::AND or \Yiisoft\Rbac\CompositeRule::OR, "no_such_operation" given.');
+        $this->expectExceptionMessage(
+            'Operator could be either ' .
+            CompositeRule::class .
+            '::AND or ' .
+            CompositeRule::class .
+            '::OR, "no_such_operation" given.'
+        );
         new CompositeRule('rule', 'no_such_operation', []);
     }
 
     public function testInvalidRule(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Each rule should be an instance of \Yiisoft\Rbac\Rule, "string" given.');
+        $this->expectExceptionMessage('Each rule should be an instance of ' . Rule::class . ', "string" given.');
         new CompositeRule('rule', CompositeRule::OR, ['invalid_rule']);
     }
 }

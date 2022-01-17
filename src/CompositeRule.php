@@ -6,6 +6,11 @@ namespace Yiisoft\Rbac;
 
 use InvalidArgumentException;
 
+use function get_class;
+use function gettype;
+use function in_array;
+use function is_object;
+
 /**
  * Composite rule allows combining multiple rules.
  *
@@ -36,15 +41,27 @@ final class CompositeRule extends Rule
      */
     public function __construct(string $name, string $operator, array $rules)
     {
-        if (!in_array($operator, [self::AND, self::OR])) {
-            throw new InvalidArgumentException(sprintf('Operator could be either \Yiisoft\Rbac\CompositeRule::AND or \Yiisoft\Rbac\CompositeRule::OR, "%s" given.', $operator));
+        if (!in_array($operator, [self::AND, self::OR], true)) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Operator could be either %1$s::AND or %1$s::OR, "%2$s" given.',
+                    self::class,
+                    $operator
+                )
+            );
         }
 
         foreach ($rules as $rule) {
             if (!$rule instanceof RuleInterface) {
                 /** @psalm-suppress RedundantConditionGivenDocblockType,DocblockTypeContradiction */
                 $type = is_object($rule) ? get_class($rule) : gettype($rule);
-                throw new InvalidArgumentException(sprintf('Each rule should be an instance of \Yiisoft\Rbac\Rule, "%s" given.', $type));
+                throw new InvalidArgumentException(
+                    sprintf(
+                        'Each rule should be an instance of %s, "%s" given.',
+                        Rule::class,
+                        $type
+                    )
+                );
             }
         }
 

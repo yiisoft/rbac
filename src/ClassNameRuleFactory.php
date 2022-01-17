@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Rbac\RuleFactory;
+namespace Yiisoft\Rbac;
 
 use RuntimeException;
 use Throwable;
