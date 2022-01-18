@@ -32,7 +32,7 @@ final class Manager implements AccessCheckerInterface
      * @var string[] A list of role names that are assigned to every user automatically without calling {@see assign()}.
      * Note that these roles are applied to users, regardless of their state of authentication.
      */
-    private array $defaultRoles = [];
+    private array $defaultRoleNames = [];
 
     /**
      * @var bool Whether to enable assigning permissions directly to user. Prefer assigning roles only.
@@ -81,7 +81,7 @@ final class Manager implements AccessCheckerInterface
         $userId = (string) $userId;
         $assignments = $this->assignmentsStorage->getUserAssignments($userId);
 
-        if (empty($assignments) && empty($this->defaultRoles)) {
+        if (empty($assignments) && empty($this->defaultRoleNames)) {
             return false;
         }
 
@@ -264,7 +264,7 @@ final class Manager implements AccessCheckerInterface
      */
     public function getRolesByUser(string $userId): array
     {
-        $roles = $this->getDefaultRoleInstances();
+        $roles = $this->getDefaultRoles();
         foreach ($this->assignmentsStorage->getUserAssignments($userId) as $name => $assignment) {
             $role = $this->rolesStorage->getRoleByName($assignment->getItemName());
             if ($role !== null) {
@@ -416,57 +416,57 @@ final class Manager implements AccessCheckerInterface
     }
 
     /**
-     * Set default roles.
+     * Set default role names.
      *
-     * @param Closure|string[] $roles Either array of roles or a closure returning it.
+     * @param Closure|string[] $roleNames Either array of role names or a closure returning it.
      *
      * @throws InvalidArgumentException When `$roles` is neither array nor closure.
-     * @throws RuntimeException When callable returns non array.
+     * @throws RuntimeException When callable returns not array.
      */
-    public function setDefaultRoles($roles): self
+    public function setDefaultRoleNames($roleNames): self
     {
-        if (is_array($roles)) {
-            $this->defaultRoles = $roles;
+        if (is_array($roleNames)) {
+            $this->defaultRoleNames = $roleNames;
             return $this;
         }
 
         /** @psalm-suppress RedundantConditionGivenDocblockType */
-        if ($roles instanceof Closure) {
-            $defaultRoles = $roles();
-            if (!is_array($defaultRoles)) {
-                throw new RuntimeException('Default roles closure must return an array.');
+        if ($roleNames instanceof Closure) {
+            $defaultRoleNames = $roleNames();
+            if (!is_array($defaultRoleNames)) {
+                throw new RuntimeException('Default role names closure must return an array.');
             }
-            /** @var string[] $defaultRoles */
-            $this->defaultRoles = $defaultRoles;
+            /** @var string[] $defaultRoleNames */
+            $this->defaultRoleNames = $defaultRoleNames;
             return $this;
         }
 
-        throw new InvalidArgumentException('Default roles must be either an array or a closure.');
+        throw new InvalidArgumentException('Default role names must be either an array or a closure.');
     }
 
     /**
-     * Get default roles.
+     * Returns default role names.
      *
-     * @return string[] Default roles.
+     * @return string[] Default role names.
      */
-    public function getDefaultRoles(): array
+    public function getDefaultRoleNames(): array
     {
-        return $this->defaultRoles;
+        return $this->defaultRoleNames;
     }
 
     /**
-     * Returns defaultRoles as array of Role objects.
+     * Returns default roles.
      *
      * @return Role[] Default roles. The array is indexed by the role names.
      */
-    public function getDefaultRoleInstances(): array
+    public function getDefaultRoles(): array
     {
-        $result = [];
-        foreach ($this->defaultRoles as $roleName) {
-            $result[$roleName] = new Role($roleName);
+        $roles = [];
+        foreach ($this->defaultRoleNames as $roleName) {
+            $roles[$roleName] = new Role($roleName);
         }
 
-        return $result;
+        return $roles;
     }
 
     /**
