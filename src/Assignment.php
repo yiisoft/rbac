@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac;
 
 /**
- * `Assignment` represents an assignment of a role or a permission to a user.
+ * `Assignment` represents an assignment of a role to a user.
  */
 final class Assignment
 {
@@ -15,9 +15,9 @@ final class Assignment
     private string $userId;
 
     /**
-     * @var string The role or permission name.
+     * @var string The role name.
      */
-    private string $itemName;
+    private string $roleName;
 
     /**
      * @var int UNIX timestamp representing the assignment creation time.
@@ -26,13 +26,13 @@ final class Assignment
 
     /**
      * @param string $userId The user ID. This should be a string representing the unique identifier of a user.
-     * @param string $itemName The role or permission name.
+     * @param string $roleName The role name.
      * @param int $createdAt UNIX timestamp representing the assignment creation time.
      */
-    public function __construct(string $userId, string $itemName, int $createdAt)
+    public function __construct(string $userId, string $roleName, int $createdAt)
     {
         $this->userId = $userId;
-        $this->itemName = $itemName;
+        $this->roleName = $roleName;
         $this->createdAt = $createdAt;
     }
 
@@ -41,15 +41,15 @@ final class Assignment
         return $this->userId;
     }
 
-    public function getItemName(): string
+    public function getRoleName(): string
     {
-        return $this->itemName;
+        return $this->roleName;
     }
 
-    public function withItemName(string $roleName): self
+    public function withRoleName(string $roleName): self
     {
         $new = clone $this;
-        $new->itemName = $roleName;
+        $new->roleName = $roleName;
         return $new;
     }
 

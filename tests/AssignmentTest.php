@@ -12,7 +12,7 @@ final class AssignmentTest extends TestCase
     public function testImmutability(): void
     {
         $original = new Assignment('42', 'test1', 1642029084);
-        $new = $original->withItemName('test2');
+        $new = $original->withRoleName('test2');
 
         $this->assertNotSame($original, $new);
     }

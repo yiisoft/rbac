@@ -73,7 +73,7 @@ final class FakeAssignmentsStorage implements AssignmentsStorageInterface
     {
         foreach ($this->assignments as &$assignments) {
             if (isset($assignments[$name])) {
-                $assignments[$item->getName()] = $assignments[$name]->withItemName($item->getName());
+                $assignments[$item->getName()] = $assignments[$name]->withRoleName($item->getName());
                 unset($assignments[$name]);
             }
         }

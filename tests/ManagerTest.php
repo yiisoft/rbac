@@ -39,93 +39,59 @@ final class ManagerTest extends TestCase
         $this->manager = $this->createManager($this->rolesStorage, $this->assignmentsStorage);
     }
 
-    /**
-     * @dataProvider dataProviderUserHasPermission
-     */
-    public function testUserHasPermission($user, array $tests): void
-    {
-        $params = ['authorID' => 'author B'];
-
-        foreach ($tests as $permission => $result) {
-            $this->assertEquals(
-                $result,
-                $this->manager->userHasPermission($user, $permission, $params),
-                "Checking \"$user\" can \"$permission\""
-            );
-        }
-    }
-
-    public function dataProviderUserHasPermission(): array
+    public function dataUserHasPermission(): array
     {
         return [
-            [
-                'reader A',
-                [
-                    'createPost' => false,
-                    'readPost' => true,
-                    'updatePost' => false,
-                    'updateAnyPost' => false,
-                    'reader' => false,
-                ],
-            ],
-            [
-                'author B',
-                [
-                    'createPost' => true,
-                    'readPost' => true,
-                    'updatePost' => true,
-                    'deletePost' => true,
-                    'updateAnyPost' => false,
-                ],
-            ],
-            [
-                'admin C',
-                [
-                    'createPost' => true,
-                    'readPost' => true,
-                    'updatePost' => false,
-                    'updateAnyPost' => true,
-                    'nonExistingPermission' => false,
-                    null => false,
-                ],
-            ],
-            [
-                'guest',
-                [
-                    'createPost' => false,
-                    'readPost' => false,
-                    'updatePost' => false,
-                    'deletePost' => false,
-                    'updateAnyPost' => false,
-                    'blablabla' => false,
-                    null => false,
-                ],
-            ],
-            [
-                12,
-                [
-                    'createPost' => false,
-                    'readPost' => false,
-                    'updatePost' => false,
-                    'deletePost' => false,
-                    'updateAnyPost' => false,
-                    'blablabla' => false,
-                    null => false,
-                ],
-            ],
-            [
-                null,
-                [
-                    'createPost' => false,
-                    'readPost' => false,
-                    'updatePost' => false,
-                    'deletePost' => false,
-                    'updateAnyPost' => false,
-                    'blablabla' => false,
-                    null => false,
-                ],
-            ],
+            // reader A
+            [false, 'reader A', 'createPost'],
+            [true, 'reader A', 'readPost'],
+            [false, 'reader A', 'updatePost', ['authorID' => 'author B']],
+            [false, 'reader A', 'updateAnyPost'],
+            [false, 'reader A', 'reader'],
+            [false, 'reader A', 'withoutChildren'],
+            [false, 'reader A', 'nonExistingPermission'],
+
+            // author B
+            [true, 'author B', 'createPost'],
+            [true, 'author B', 'readPost'],
+            [true, 'author B', 'updatePost', ['authorID' => 'author B']],
+            [false, 'author B', 'updateAnyPost'],
+
+            // admin C
+            [true, 'admin C', 'createPost'],
+            [true, 'admin C', 'readPost'],
+            [false, 'admin C', 'updatePost', ['authorID' => 'author B']],
+            [true, 'admin C', 'updateAnyPost'],
+
+            // non-exist-user
+            [false, 'non-exist-user', 'createPost'],
+            [false, 'non-exist-user', 'readPost'],
+            [false, 'non-exist-user', 'updatePost', ['authorID' => 'author B']],
+            [false, 'non-exist-user', 'updateAnyPost'],
+            [false, 'non-exist-user', 'reader'],
+            [false, 'non-exist-user', 'withoutChildren'],
+            [false, 'non-exist-user', 'nonExistingPermission'],
+
+            // guest
+            [false, null, 'createPost'],
+            [false, null, 'readPost'],
+            [false, null, 'updatePost', ['authorID' => 'author B']],
+            [false, null, 'updateAnyPost'],
+            [false, null, 'reader'],
+            [false, null, 'withoutChildren'],
+            [false, null, 'nonExistingPermission'],
         ];
+    }
+
+    /**
+     * @dataProvider dataUserHasPermission
+     */
+    public function testUserHasPermission(bool $expected, $user, string $permissionName, array $parameters = []): void
+    {
+        $this->assertSame(
+            $expected,
+            $this->manager->userHasPermission($user, $permissionName, $parameters),
+        );
     }
 
     /**
@@ -381,11 +347,11 @@ final class ManagerTest extends TestCase
         );
 
         $this->assertSame('readingAuthor', $readerAssignment->getUserId());
-        $this->assertSame('reader', $readerAssignment->getItemName());
+        $this->assertSame('reader', $readerAssignment->getRoleName());
         $this->assertSame(self::NOW, $readerAssignment->getCreatedAt());
 
         $this->assertSame('readingAuthor', $authorAssignment->getUserId());
-        $this->assertSame('author', $authorAssignment->getItemName());
+        $this->assertSame('author', $authorAssignment->getRoleName());
         $this->assertSame(self::NOW, $authorAssignment->getCreatedAt());
     }
 
@@ -436,9 +402,11 @@ final class ManagerTest extends TestCase
 
     public function testGetRolesByUser(): void
     {
-        $this->assertEquals(
-            ['myDefaultRole', 'reader'],
-            array_keys($this->manager->getRolesByUser('reader A'))
+        $roleNames = array_keys($this->manager->getRolesByUser('reader A'));
+
+        $this->assertSame(
+            ['myDefaultRole', 'reader', 'observer'],
+            $roleNames
         );
     }
 
@@ -470,9 +438,11 @@ final class ManagerTest extends TestCase
 
     public function testGetPermissionsByUser(): void
     {
+        $permissionNames = array_keys($this->manager->getPermissionsByUser('author B'));
+
         $this->assertSame(
-            ['deletePost', 'createPost', 'updatePost', 'readPost'],
-            array_keys($this->manager->getPermissionsByUser('author B'))
+            ['createPost', 'updatePost', 'readPost'],
+            $permissionNames
         );
     }
 
@@ -707,16 +677,15 @@ final class ManagerTest extends TestCase
     {
         $storage = new FakeRolesStorage();
 
-        $storage->addItem(new Permission('Fast Metabolism'));
         $storage->addItem(new Permission('createPost'));
         $storage->addItem(new Permission('readPost'));
-        $storage->addItem(new Permission('deletePost'));
         $storage->addItem((new Permission('updatePost'))->withRuleName('isAuthor'));
         $storage->addItem(new Permission('updateAnyPost'));
         $storage->addItem(new Role('withoutChildren'));
         $storage->addItem(new Role('reader'));
         $storage->addItem(new Role('author'));
         $storage->addItem(new Role('admin'));
+        $storage->addItem(new Role('observer'));
 
         $storage->addChild(new Role('reader'), new Permission('readPost'));
         $storage->addChild(new Role('author'), new Permission('createPost'));
@@ -734,10 +703,9 @@ final class ManagerTest extends TestCase
     {
         $storage = new FakeAssignmentsStorage(self::NOW);
 
-        $storage->addAssignment('reader A', new Permission('Fast Metabolism'));
         $storage->addAssignment('reader A', new Role('reader'));
+        $storage->addAssignment('reader A', new Role('observer'));
         $storage->addAssignment('author B', new Role('author'));
-        $storage->addAssignment('author B', new Permission('deletePost'));
         $storage->addAssignment('admin C', new Role('admin'));
 
         return $storage;
@@ -750,17 +718,7 @@ final class ManagerTest extends TestCase
             'reader A'
         );
 
-        $this->assertEquals(['Fast Metabolism'], array_keys($this->assignmentsStorage->getUserAssignments('reader A')));
-    }
-
-    public function testRevokePermission(): void
-    {
-        $this->manager->revoke(
-            $this->rolesStorage->getPermissionByName('deletePost'),
-            'author B'
-        );
-
-        $this->assertEquals(['author'], array_keys($this->assignmentsStorage->getUserAssignments('author B')));
+        $this->assertSame(['observer'], array_keys($this->assignmentsStorage->getUserAssignments('reader A')));
     }
 
     public function testRevokeAll(): void

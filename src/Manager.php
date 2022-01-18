@@ -266,7 +266,7 @@ final class Manager implements AccessCheckerInterface
     {
         $roles = $this->getDefaultRoles();
         foreach ($this->assignmentsStorage->getUserAssignments($userId) as $name => $assignment) {
-            $role = $this->rolesStorage->getRoleByName($assignment->getItemName());
+            $role = $this->rolesStorage->getRoleByName($assignment->getRoleName());
             if ($role !== null) {
                 $roles[$name] = $role;
             }
@@ -327,10 +327,17 @@ final class Manager implements AccessCheckerInterface
      */
     public function getPermissionsByUser(string $userId): array
     {
-        return array_merge(
-            $this->getDirectPermissionsByUser($userId),
-            $this->getInheritedPermissionsByUser($userId)
-        );
+        $assignments = $this->assignmentsStorage->getUserAssignments($userId);
+        $result = [];
+        foreach (array_keys($assignments) as $roleName) {
+            $this->getChildrenRecursive($roleName, $result);
+        }
+
+        if (empty($result)) {
+            return [];
+        }
+
+        return $this->normalizePermissions($result);
     }
 
     /**
@@ -343,12 +350,13 @@ final class Manager implements AccessCheckerInterface
     public function getUserIdsByRole(string $roleName): array
     {
         $result = [];
-        $roles = [$roleName];
-        $this->getParentRolesRecursive($roleName, $roles);
+
+        $roleNames = [$roleName];
+        $this->getParentRolesRecursive($roleName, $roleNames);
 
         foreach ($this->assignmentsStorage->getAssignments() as $userId => $assignments) {
             foreach ($assignments as $userAssignment) {
-                if (in_array($userAssignment->getItemName(), $roles, true)) {
+                if (in_array($userAssignment->getRoleName(), $roleNames, true)) {
                     $result[] = $userId;
                 }
             }
@@ -566,49 +574,6 @@ final class Manager implements AccessCheckerInterface
         }
 
         return $normalizePermissions;
-    }
-
-    /**
-     * Returns all permissions that are directly assigned to user.
-     *
-     * @param string $userId The user ID.
-     *
-     * @return Permission[] All direct permissions that the user has. The array is indexed by the permission names.
-     * @psalm-return array<string,Permission>
-     */
-    private function getDirectPermissionsByUser(string $userId): array
-    {
-        $permissions = [];
-        foreach ($this->assignmentsStorage->getUserAssignments($userId) as $name => $assignment) {
-            $permission = $this->rolesStorage->getPermissionByName($assignment->getItemName());
-            if ($permission !== null) {
-                $permissions[$name] = $permission;
-            }
-        }
-
-        return $permissions;
-    }
-
-    /**
-     * Returns all permissions that the user inherits from the roles assigned to him.
-     *
-     * @param string $userId The user ID.
-     *
-     * @return Permission[] All inherited permissions that the user has. The array is indexed by the permission names.
-     */
-    private function getInheritedPermissionsByUser(string $userId): array
-    {
-        $assignments = $this->assignmentsStorage->getUserAssignments($userId);
-        $result = [];
-        foreach (array_keys($assignments) as $roleName) {
-            $this->getChildrenRecursive($roleName, $result);
-        }
-
-        if (empty($result)) {
-            return [];
-        }
-
-        return $this->normalizePermissions($result);
     }
 
     private function removeItem(Item $item): void
