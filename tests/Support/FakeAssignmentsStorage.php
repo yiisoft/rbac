@@ -18,7 +18,7 @@ final class FakeAssignmentsStorage implements AssignmentsStorageInterface
         $this->now = $now;
     }
 
-    public function getAssignments(): array
+    public function getAll(): array
     {
         return $this->assignments;
     }
@@ -28,23 +28,23 @@ final class FakeAssignmentsStorage implements AssignmentsStorageInterface
         return $this->assignments[$userId] ?? [];
     }
 
-    public function getUserAssignmentByName(string $userId, string $name): ?Assignment
+    public function get(string $userId, string $name): ?Assignment
     {
         return $this->getUserAssignments($userId)[$name] ?? null;
     }
 
-    public function addAssignment(string $userId, Item $item): void
+    public function add(string $userId, string $itemName): void
     {
-        $this->assignments[$userId][$item->getName()] = new Assignment(
+        $this->assignments[$userId][$itemName] = new Assignment(
             $userId,
-            $item->getName(),
+            $itemName,
             $this->now
         );
     }
 
-    public function assignmentExist(string $name): bool
+    public function hasItem(string $name): bool
     {
-        foreach ($this->getAssignments() as $assignmentInfo) {
+        foreach ($this->getAll() as $assignmentInfo) {
             foreach ($assignmentInfo as $itemName => $assignment) {
                 if ($itemName === $name) {
                     return true;
@@ -54,40 +54,40 @@ final class FakeAssignmentsStorage implements AssignmentsStorageInterface
         return false;
     }
 
-    public function removeAssignment(string $userId, Item $item): void
+    public function remove(string $userId, string $itemName): void
     {
-        unset($this->assignments[$userId][$item->getName()]);
+        unset($this->assignments[$userId][$itemName]);
     }
 
-    public function removeAllAssignments(string $userId): void
+    public function removeUserAssignments(string $userId): void
     {
         $this->assignments[$userId] = [];
     }
 
-    public function clearAssignments(): void
+    public function clear(): void
     {
         $this->assignments = [];
     }
 
-    public function updateAssignmentsForItemName(string $name, Item $item): void
+    public function renameItem(string $oldName, string $newName): void
     {
         foreach ($this->assignments as &$assignments) {
-            if (isset($assignments[$name])) {
-                $assignments[$item->getName()] = $assignments[$name]->withItemName($item->getName());
-                unset($assignments[$name]);
+            if (isset($assignments[$oldName])) {
+                $assignments[$newName] = $assignments[$oldName]->withItemName($newName);
+                unset($assignments[$oldName]);
             }
         }
     }
 
-    public function removeAssignmentsFromItem(Item $item): void
+    public function removeItemAssignments(string $itemName): void
     {
-        $this->clearAssignmentsFromItem($item);
+        $this->clearAssignmentsFromItemWithName($itemName);
     }
 
-    private function clearAssignmentsFromItem(Item $item): void
+    private function clearAssignmentsFromItemWithName(string $itemName): void
     {
         foreach ($this->assignments as &$assignments) {
-            unset($assignments[$item->getName()]);
+            unset($assignments[$item]);
         }
     }
 }

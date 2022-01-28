@@ -220,15 +220,15 @@ final class Manager implements AccessCheckerInterface
             );
         }
 
-        if ($this->assignmentsStorage->getUserAssignmentByName($userId, $item->getName()) !== null) {
+        if ($this->assignmentsStorage->get($userId, $item->getName()) !== null) {
             throw new InvalidArgumentException(
                 sprintf('"%s" %s has already been assigned to user %s.', $item->getName(), $item->getType(), $userId)
             );
         }
 
-        $this->assignmentsStorage->addAssignment($userId, $item);
+        $this->assignmentsStorage->add($userId, $item->getName());
 
-        return $this->assignmentsStorage->getUserAssignmentByName($userId, $item->getName());
+        return $this->assignmentsStorage->get($userId, $item->getName());
     }
 
     /**
@@ -239,8 +239,8 @@ final class Manager implements AccessCheckerInterface
      */
     public function revoke(Item $role, string $userId): void
     {
-        if ($this->assignmentsStorage->getUserAssignmentByName($userId, $role->getName()) !== null) {
-            $this->assignmentsStorage->removeAssignment($userId, $role);
+        if ($this->assignmentsStorage->get($userId, $role->getName()) !== null) {
+            $this->assignmentsStorage->remove($userId, $role->getName());
         }
     }
 
@@ -251,7 +251,7 @@ final class Manager implements AccessCheckerInterface
      */
     public function revokeAll(string $userId): void
     {
-        $this->assignmentsStorage->removeAllAssignments($userId);
+        $this->assignmentsStorage->removeUserAssignments($userId);
     }
 
     /**
@@ -346,7 +346,7 @@ final class Manager implements AccessCheckerInterface
         $roles = [$roleName];
         $this->getParentRolesRecursive($roleName, $roles);
 
-        foreach ($this->assignmentsStorage->getAssignments() as $userId => $assignments) {
+        foreach ($this->assignmentsStorage->getAll() as $userId => $assignments) {
             foreach ($assignments as $userAssignment) {
                 if (in_array($userAssignment->getItemName(), $roles, true)) {
                     $result[] = $userId;
@@ -373,7 +373,7 @@ final class Manager implements AccessCheckerInterface
         $this->checkItemNameForUpdate($role, $name);
         $this->createItemRuleIfNotExist($role);
         $this->rolesStorage->updateItem($name, $role);
-        $this->assignmentsStorage->updateAssignmentsForItemName($name, $role);
+        $this->assignmentsStorage->renameItem($name, $role->getName());
     }
 
     public function addPermission(Permission $permission): void
@@ -392,7 +392,7 @@ final class Manager implements AccessCheckerInterface
         $this->checkItemNameForUpdate($permission, $name);
         $this->createItemRuleIfNotExist($permission);
         $this->rolesStorage->updateItem($name, $permission);
-        $this->assignmentsStorage->updateAssignmentsForItemName($name, $permission);
+        $this->assignmentsStorage->renameItem($name, $permission->getName());
     }
 
     public function addRule(RuleInterface $rule): void

@@ -11,12 +11,12 @@ namespace Yiisoft\Rbac;
 interface AssignmentsStorageInterface
 {
     /**
-     * Returns all role or permission assignment information.
+     * Returns all role and permission assignment information.
      *
      * @return array
      * @psalm-return array<string,array<string, Assignment>>
      */
-    public function getAssignments(): array;
+    public function getAll(): array;
 
     /**
      * Returns all role or permission assignment information for the specified user.
@@ -38,15 +38,15 @@ interface AssignmentsStorageInterface
      *
      * @return Assignment|null Assignment or null if there is no role or permission assigned to the user.
      */
-    public function getUserAssignmentByName(string $userId, string $name): ?Assignment;
+    public function get(string $userId, string $name): ?Assignment;
 
     /**
      * Adds assignment of the role or permission to the user with ID specified.
      *
      * @param string $userId The user ID.
-     * @param Item $item Role to assign.
+     * @param string $itemName Item name to assign.
      */
-    public function addAssignment(string $userId, Item $item): void;
+    public function add(string $userId, string $itemName): void;
 
     /**
      * Returns whether there is assignment for a named role or permission.
@@ -55,40 +55,40 @@ interface AssignmentsStorageInterface
      *
      * @return bool Whether there is assignment.
      */
-    public function assignmentExist(string $name): bool;
+    public function hasItem(string $name): bool;
 
     /**
-     * Updates assignments for the specified role or permission.
+     * Change name of an item in assignments.
      *
-     * @param string $name Name of the role or the permission.
-     * @param Item $item Role or permission.
+     * @param string $oldName Old name of the role or the permission.
+     * @param string $newName New name of the role or permission.
      */
-    public function updateAssignmentsForItemName(string $name, Item $item): void;
+    public function renameItem(string $oldName, string $newName): void;
 
     /**
      * Removes assignment of a role or a permission to the user with ID specified.
      *
      * @param string $userId The user ID.
-     * @param Item $item Role or permission to remove assignment from.
+     * @param string $itemName Name of a role or permission to remove assignment from.
      */
-    public function removeAssignment(string $userId, Item $item): void;
+    public function remove(string $userId, string $itemName): void;
 
     /**
      * Removes all role or permission assignments for a user with ID specified.
      *
      * @param string $userId The user ID.
      */
-    public function removeAllAssignments(string $userId): void;
+    public function removeUserAssignments(string $userId): void;
 
     /**
      * Removes all assignments for role or permission.
      *
-     * @param Item $item Role or permission to remove.
+     * @param string $itemName Name of a role or permission to remove.
      */
-    public function removeAssignmentsFromItem(Item $item): void;
+    public function removeItemAssignments(string $itemName): void;
 
     /**
      * Removes all role and permission assignments.
      */
-    public function clearAssignments(): void;
+    public function clear(): void;
 }
