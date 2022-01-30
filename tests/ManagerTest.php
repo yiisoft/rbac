@@ -734,11 +734,11 @@ final class ManagerTest extends TestCase
     {
         $storage = new FakeAssignmentsStorage(self::NOW);
 
-        $storage->addAssignment('reader A', new Permission('Fast Metabolism'));
-        $storage->addAssignment('reader A', new Role('reader'));
-        $storage->addAssignment('author B', new Role('author'));
-        $storage->addAssignment('author B', new Permission('deletePost'));
-        $storage->addAssignment('admin C', new Role('admin'));
+        $storage->add('reader A', 'Fast Metabolism');
+        $storage->add('reader A', 'reader');
+        $storage->add('author B', 'author');
+        $storage->add('author B', 'deletePost');
+        $storage->add('admin C', 'admin');
 
         return $storage;
     }
