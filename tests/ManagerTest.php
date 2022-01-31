@@ -695,9 +695,9 @@ final class ManagerTest extends TestCase
     }
 
     private function createManager(
-        ItemsStorageInterface       $rolesStorage,
+        ItemsStorageInterface $rolesStorage,
         AssignmentsStorageInterface $assignmentsStorage,
-        bool                        $enableDirectPermissions = false
+        bool $enableDirectPermissions = false
     ): Manager {
         return (new Manager($rolesStorage, $assignmentsStorage, new ClassNameRuleFactory(), $enableDirectPermissions))
             ->setDefaultRoleNames(['myDefaultRole']);

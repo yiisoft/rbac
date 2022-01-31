@@ -49,10 +49,10 @@ final class Manager implements AccessCheckerInterface
      * roles only.
      */
     public function __construct(
-        ItemsStorageInterface       $rolesStorage,
+        ItemsStorageInterface $rolesStorage,
         AssignmentsStorageInterface $assignmentsStorage,
-        RuleFactoryInterface        $ruleFactory,
-        bool                        $enableDirectPermissions = false
+        RuleFactoryInterface $ruleFactory,
+        bool $enableDirectPermissions = false
     ) {
         $this->rolesStorage = $rolesStorage;
         $this->assignmentsStorage = $assignmentsStorage;
