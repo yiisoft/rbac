@@ -204,9 +204,9 @@ final class Manager implements AccessCheckerInterface
      * @param string $itemName Name of the role or the permission to be assigned.
      * @param string $userId The user ID.
      *
-     * @return Assignment|null The role or permission assignment information.
      *@throws Exception If the role or permission has already been assigned to the user.
      *
+     * @return Assignment|null The role or permission assignment information.
      */
     public function assign(string $itemName, string $userId): ?Assignment
     {
