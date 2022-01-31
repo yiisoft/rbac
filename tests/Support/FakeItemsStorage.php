@@ -178,7 +178,7 @@ final class FakeItemsStorage implements ItemsStorageInterface
     private function removeAllItems(string $type): void
     {
         foreach ($this->getItemsByType($type) as $item) {
-            $this->remove($item);
+            $this->remove($item->getName());
         }
     }
 

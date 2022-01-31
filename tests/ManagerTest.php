@@ -708,6 +708,7 @@ final class ManagerTest extends TestCase
         $storage->add(new Role('reader'));
         $storage->add(new Role('author'));
         $storage->add(new Role('admin'));
+        $storage->add(new Role('myDefaultRole'));
 
         $storage->addChild('reader', 'readPost');
         $storage->addChild('author', 'createPost');
