@@ -79,7 +79,7 @@ final class Manager implements AccessCheckerInterface
         }
 
         $userId = (string) $userId;
-        $assignments = $this->assignmentsStorage->getAllByUser($userId);
+        $assignments = $this->assignmentsStorage->getByUserId($userId);
 
         if (empty($assignments) && empty($this->defaultRoleNames)) {
             return false;
@@ -97,7 +97,7 @@ final class Manager implements AccessCheckerInterface
      * Checks the possibility of adding a child to parent.
      *
      * @param string $parentName The name of the parent item.
-     * @param string $childName'' The name of the child item to be added to the hierarchy.
+     * @param string $childName The name of the child item to be added to the hierarchy.
      *
      * @return bool Whether it is possible to add the child to the parent.
      */
@@ -253,7 +253,7 @@ final class Manager implements AccessCheckerInterface
      */
     public function revokeAll(string $userId): void
     {
-        $this->assignmentsStorage->removeAllByUserId($userId);
+        $this->assignmentsStorage->removeByUserId($userId);
     }
 
     /**
@@ -267,7 +267,7 @@ final class Manager implements AccessCheckerInterface
     public function getRolesByUserId(string $userId): array
     {
         $roles = $this->getDefaultRoles();
-        foreach ($this->assignmentsStorage->getAllByUser($userId) as $name => $assignment) {
+        foreach ($this->assignmentsStorage->getByUserId($userId) as $name => $assignment) {
             $role = $this->itemsStorage->getRole($assignment->getItemName());
             if ($role !== null) {
                 $roles[$name] = $role;
@@ -585,7 +585,7 @@ final class Manager implements AccessCheckerInterface
     private function getDirectPermissionsByUser(string $userId): array
     {
         $permissions = [];
-        foreach ($this->assignmentsStorage->getAllByUser($userId) as $name => $assignment) {
+        foreach ($this->assignmentsStorage->getByUserId($userId) as $name => $assignment) {
             $permission = $this->itemsStorage->getPermission($assignment->getItemName());
             if ($permission !== null) {
                 $permissions[$name] = $permission;
@@ -604,7 +604,7 @@ final class Manager implements AccessCheckerInterface
      */
     private function getInheritedPermissionsByUser(string $userId): array
     {
-        $assignments = $this->assignmentsStorage->getAllByUser($userId);
+        $assignments = $this->assignmentsStorage->getByUserId($userId);
         $result = [];
         foreach (array_keys($assignments) as $roleName) {
             $this->getChildrenRecursive($roleName, $result);

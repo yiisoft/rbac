@@ -28,17 +28,17 @@ interface AssignmentsStorageInterface
      *
      * @psalm-return array<string, Assignment>
      */
-    public function getAllByUser(string $userId): array;
+    public function getByUserId(string $userId): array;
 
     /**
      * Returns role or permission assignment for the specified item name that belongs to user with the specified ID.
      *
      * @param string $userId The user ID.
-     * @param string $name Role name.
+     * @param string $itemName Item name.
      *
      * @return Assignment|null Assignment or null if there is no role or permission assigned to the user.
      */
-    public function get(string $userId, string $name): ?Assignment;
+    public function get(string $userId, string $itemName): ?Assignment;
 
     /**
      * Adds assignment of the role or permission to the user with ID specified.
@@ -78,14 +78,14 @@ interface AssignmentsStorageInterface
      *
      * @param string $userId The user ID.
      */
-    public function removeAllByUserId(string $userId): void;
+    public function removeByUserId(string $userId): void;
 
     /**
      * Removes all assignments for role or permission.
      *
      * @param string $itemName Name of a role or permission to remove.
      */
-    public function removeAllByItemName(string $itemName): void;
+    public function removeByItemName(string $itemName): void;
 
     /**
      * Removes all role and permission assignments.

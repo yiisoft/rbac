@@ -22,14 +22,14 @@ final class FakeAssignmentsStorage implements AssignmentsStorageInterface
         return $this->assignments;
     }
 
-    public function getAllByUser(string $userId): array
+    public function getByUserId(string $userId): array
     {
         return $this->assignments[$userId] ?? [];
     }
 
-    public function get(string $userId, string $name): ?Assignment
+    public function get(string $userId, string $itemName): ?Assignment
     {
-        return $this->getAllByUser($userId)[$name] ?? null;
+        return $this->getByUserId($userId)[$itemName] ?? null;
     }
 
     public function add(string $userId, string $itemName): void
@@ -58,7 +58,7 @@ final class FakeAssignmentsStorage implements AssignmentsStorageInterface
         unset($this->assignments[$userId][$itemName]);
     }
 
-    public function removeAllByUserId(string $userId): void
+    public function removeByUserId(string $userId): void
     {
         $this->assignments[$userId] = [];
     }
@@ -78,7 +78,7 @@ final class FakeAssignmentsStorage implements AssignmentsStorageInterface
         }
     }
 
-    public function removeAllByItemName(string $itemName): void
+    public function removeByItemName(string $itemName): void
     {
         $this->clearAssignmentsFromItemWithName($itemName);
     }

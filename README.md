@@ -53,14 +53,14 @@ First step when using RBAC is to configure an instance of `Manager`:
 
 ```php
 /**
-* @var \Yiisoft\Rbac\ItemsStorageInterface $rolesStorage
+* @var \Yiisoft\Rbac\ItemsStorageInterface $itemsStorage
 * @var \Yiisoft\Rbac\AssignmentsStorageInterface $assignmentsStorage
 */
-$manager = new Manager($rolesStorage, $assignmentsStorage, new ClassNameRuleFactory());
+$manager = new Manager($itemsStorage, $assignmentsStorage, new ClassNameRuleFactory());
 ```
 
-It requires specifying roles storage (hierarchy itself) and assignment storage where user IDs are mapped to roles. Also,
-rule factory is requires. Given a rule name stored in roles storage it can create an instance of `Rule`.
+It requires specifying items storage (hierarchy itself) and assignment storage where user IDs are mapped to roles. Also,
+rule factory is requires. Given a rule name stored in items storage it can create an instance of `Rule`.
 
 - Roles and permissions could usually be considered "semi-static", as they only change when you update your application
   code, so it may make sense to use PHP storage for it. 
@@ -96,20 +96,9 @@ $manager->addRole(new Role('reader'));
 Next, we need to attach permissions to roles:
 
 ```php
-$manager->addChild(
-    $storage->getRoleByName('reader'),
-    $storage->getPermissionByName('readPost')
-);
-
-$manager->addChild(
-    $storage->getRoleByName('author'),
-    $storage->getPermissionByName('createPost')
-);
-
-$manager->addChild(
-    $storage->getRoleByName('author'),
-    $storage->getRoleByName('reader')
-);
+$manager->addChild('reader', 'readPost');
+$manager->addChild('author', 'createPost');
+$manager->addChild('author', 'reader');
 ```
 
 Sometimes, basic permissions are not enough. In this case, rules are helpful. Rules are PHP classes that could be
@@ -170,7 +159,7 @@ In order to assign a certain role to a user with a given ID, use the following c
 
 ```php
 $userId = 100;
-$manager->assign($storage->getRoleByName('author'), $userId);
+$manager->assign('author', $userId);
 ```
 
 It could be done in an admin panel, via console command, or it could be built into the application business logic
@@ -198,10 +187,7 @@ a role which is assigned to guest user:
 $manager->setGuestRole('guest');
 $manager->addPermission(new Permission('signup'));
 $manager->addRole(new Role('guest'));
-$manager->addChild(
-    $rolesStorage->getRoleByName('guest'), 
-    $rolesStorage->getPermissionByName('signup')
-);
+$manager->addChild('guest', 'signup');
 
 $guestId = null;
 if ($accessChecker->userHasPermission($guestId, 'signup')) {
