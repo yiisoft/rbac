@@ -465,7 +465,11 @@ final class Manager implements AccessCheckerInterface
     {
         $roles = [];
         foreach ($this->defaultRoleNames as $roleName) {
-            $roles[$roleName] = new Role($roleName);
+            $role = $this->itemsStorage->getRole($roleName);
+            if ($role === null) {
+                throw new RuntimeException("Default role \"$roleName\" not found.");
+            }
+            $roles[$roleName] = $role;
         }
 
         return $roles;
