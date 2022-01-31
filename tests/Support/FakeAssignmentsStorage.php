@@ -86,7 +86,7 @@ final class FakeAssignmentsStorage implements AssignmentsStorageInterface
     private function clearAssignmentsFromItemWithName(string $itemName): void
     {
         foreach ($this->assignments as &$assignments) {
-            unset($assignments[$item]);
+            unset($assignments[$itemName]);
         }
     }
 }

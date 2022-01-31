@@ -8,9 +8,9 @@ use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\RuleInterface;
-use Yiisoft\Rbac\RolesStorageInterface;
+use Yiisoft\Rbac\ItemsStorageInterface;
 
-final class FakeRolesStorage implements RolesStorageInterface
+final class FakeItemsStorage implements ItemsStorageInterface
 {
     private array $items = [];
 
@@ -18,17 +18,17 @@ final class FakeRolesStorage implements RolesStorageInterface
 
     private array $rules = [];
 
-    public function getItems(): array
+    public function getAll(): array
     {
         return $this->items;
     }
 
-    public function getItemByName(string $name): ?Item
+    public function getByName(string $name): ?Item
     {
         return $this->items[$name] ?? null;
     }
 
-    public function addItem(Item $item): void
+    public function add(Item $item): void
     {
         $this->items[$item->getName()] = $item;
     }
@@ -93,20 +93,20 @@ final class FakeRolesStorage implements RolesStorageInterface
         unset($this->children[$parent->getName()]);
     }
 
-    public function removeItem(Item $item): void
+    public function remove(Item $item): void
     {
         $this->clearChildrenFromItem($item);
         $this->removeItemByName($item->getName());
     }
 
-    public function updateItem(string $name, Item $item): void
+    public function update(string $name, Item $item): void
     {
         if ($item->getName() !== $name) {
             $this->updateItemName($name, $item);
             $this->removeItemByName($name);
         }
 
-        $this->addItem($item);
+        $this->add($item);
     }
 
     public function removeRule(string $name): void
@@ -114,7 +114,7 @@ final class FakeRolesStorage implements RolesStorageInterface
         unset($this->rules[$name]);
         foreach ($this->getItemsByRuleName($name) as $item) {
             $item = $item->withRuleName(null);
-            $this->updateItem($item->getName(), $item);
+            $this->update($item->getName(), $item);
         }
     }
 
@@ -172,13 +172,13 @@ final class FakeRolesStorage implements RolesStorageInterface
      */
     private function filterItems(callable $callback): array
     {
-        return array_filter($this->getItems(), $callback);
+        return array_filter($this->getAll(), $callback);
     }
 
     private function removeAllItems(string $type): void
     {
         foreach ($this->getItemsByType($type) as $item) {
-            $this->removeItem($item);
+            $this->remove($item);
         }
     }
 

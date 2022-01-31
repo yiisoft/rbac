@@ -11,12 +11,12 @@ use Yiisoft\Rbac\AssignmentsStorageInterface;
 use Yiisoft\Rbac\Manager;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
-use Yiisoft\Rbac\RolesStorageInterface;
+use Yiisoft\Rbac\ItemsStorageInterface;
 use Yiisoft\Rbac\ClassNameRuleFactory;
 use Yiisoft\Rbac\Tests\Support\AuthorRule;
 use Yiisoft\Rbac\Tests\Support\EasyRule;
 use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
-use Yiisoft\Rbac\Tests\Support\FakeRolesStorage;
+use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
 
 /**
  * @group rbac
@@ -27,7 +27,7 @@ final class ManagerTest extends TestCase
 
     private Manager $manager;
 
-    private RolesStorageInterface $rolesStorage;
+    private ItemsStorageInterface $rolesStorage;
 
     private AssignmentsStorageInterface $assignmentsStorage;
 
@@ -134,8 +134,8 @@ final class ManagerTest extends TestCase
     public function testUserHasPermissionWithGuest($userId, array $tests): void
     {
         $this->manager->setGuestRoleName('guest');
-        $this->rolesStorage->addItem(new Role('guest'));
-        $this->rolesStorage->addItem(new Permission('signup'));
+        $this->rolesStorage->add(new Role('guest'));
+        $this->rolesStorage->add(new Permission('signup'));
         $this->rolesStorage->addChild(new Role('guest'), new Permission('signup'));
 
         foreach ($tests as $permission => $result) {
@@ -206,8 +206,8 @@ final class ManagerTest extends TestCase
     {
         $permission = (new Permission('test-permission'))->withRuleName('non-exist-rule');
         $role = (new Role('test'));
-        $this->rolesStorage->addItem($role);
-        $this->rolesStorage->addItem($permission);
+        $this->rolesStorage->add($role);
+        $this->rolesStorage->add($permission);
         $this->rolesStorage->addChild($role, $permission);
 
         $this->expectException(RuntimeException::class);
@@ -695,28 +695,28 @@ final class ManagerTest extends TestCase
     }
 
     private function createManager(
-        RolesStorageInterface $rolesStorage,
+        ItemsStorageInterface       $rolesStorage,
         AssignmentsStorageInterface $assignmentsStorage,
-        bool $enableDirectPermissions = false
+        bool                        $enableDirectPermissions = false
     ): Manager {
         return (new Manager($rolesStorage, $assignmentsStorage, new ClassNameRuleFactory(), $enableDirectPermissions))
             ->setDefaultRoleNames(['myDefaultRole']);
     }
 
-    private function createRolesStorage(): RolesStorageInterface
+    private function createRolesStorage(): ItemsStorageInterface
     {
-        $storage = new FakeRolesStorage();
+        $storage = new FakeItemsStorage();
 
-        $storage->addItem(new Permission('Fast Metabolism'));
-        $storage->addItem(new Permission('createPost'));
-        $storage->addItem(new Permission('readPost'));
-        $storage->addItem(new Permission('deletePost'));
-        $storage->addItem((new Permission('updatePost'))->withRuleName('isAuthor'));
-        $storage->addItem(new Permission('updateAnyPost'));
-        $storage->addItem(new Role('withoutChildren'));
-        $storage->addItem(new Role('reader'));
-        $storage->addItem(new Role('author'));
-        $storage->addItem(new Role('admin'));
+        $storage->add(new Permission('Fast Metabolism'));
+        $storage->add(new Permission('createPost'));
+        $storage->add(new Permission('readPost'));
+        $storage->add(new Permission('deletePost'));
+        $storage->add((new Permission('updatePost'))->withRuleName('isAuthor'));
+        $storage->add(new Permission('updateAnyPost'));
+        $storage->add(new Role('withoutChildren'));
+        $storage->add(new Role('reader'));
+        $storage->add(new Role('author'));
+        $storage->add(new Role('admin'));
 
         $storage->addChild(new Role('reader'), new Permission('readPost'));
         $storage->addChild(new Role('author'), new Permission('createPost'));

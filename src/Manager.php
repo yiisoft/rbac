@@ -24,7 +24,7 @@ use function is_string;
  */
 final class Manager implements AccessCheckerInterface
 {
-    private RolesStorageInterface $rolesStorage;
+    private ItemsStorageInterface $rolesStorage;
     private AssignmentsStorageInterface $assignmentsStorage;
     private RuleFactoryInterface $ruleFactory;
 
@@ -42,17 +42,17 @@ final class Manager implements AccessCheckerInterface
     private ?string $guestRoleName = null;
 
     /**
-     * @param RolesStorageInterface $rolesStorage Roles storage.
+     * @param ItemsStorageInterface $rolesStorage Roles storage.
      * @param AssignmentsStorageInterface $assignmentsStorage Assignments storage.
      * @param RuleFactoryInterface $ruleFactory Rule factory.
      * @param bool $enableDirectPermissions Whether to enable assigning permissions directly to user. Prefer assigning
      * roles only.
      */
     public function __construct(
-        RolesStorageInterface $rolesStorage,
+        ItemsStorageInterface       $rolesStorage,
         AssignmentsStorageInterface $assignmentsStorage,
-        RuleFactoryInterface $ruleFactory,
-        bool $enableDirectPermissions = false
+        RuleFactoryInterface        $ruleFactory,
+        bool                        $enableDirectPermissions = false
     ) {
         $this->rolesStorage = $rolesStorage;
         $this->assignmentsStorage = $assignmentsStorage;
@@ -372,7 +372,7 @@ final class Manager implements AccessCheckerInterface
     {
         $this->checkItemNameForUpdate($role, $name);
         $this->createItemRuleIfNotExist($role);
-        $this->rolesStorage->updateItem($name, $role);
+        $this->rolesStorage->update($name, $role);
         $this->assignmentsStorage->renameItem($name, $role->getName());
     }
 
@@ -391,7 +391,7 @@ final class Manager implements AccessCheckerInterface
     {
         $this->checkItemNameForUpdate($permission, $name);
         $this->createItemRuleIfNotExist($permission);
-        $this->rolesStorage->updateItem($name, $permission);
+        $this->rolesStorage->update($name, $permission);
         $this->assignmentsStorage->renameItem($name, $permission->getName());
     }
 
@@ -528,7 +528,7 @@ final class Manager implements AccessCheckerInterface
             $item = $item->withUpdatedAt($time);
         }
 
-        $this->rolesStorage->addItem($item);
+        $this->rolesStorage->add($item);
     }
 
     private function getParentRolesRecursive(string $roleName, array &$result): void
@@ -546,7 +546,7 @@ final class Manager implements AccessCheckerInterface
 
     private function hasItem(string $name): bool
     {
-        return $this->rolesStorage->getItemByName($name) !== null;
+        return $this->rolesStorage->getByName($name) !== null;
     }
 
     /**
@@ -614,7 +614,7 @@ final class Manager implements AccessCheckerInterface
     private function removeItem(Item $item): void
     {
         if ($this->hasItem($item->getName())) {
-            $this->rolesStorage->removeItem($item);
+            $this->rolesStorage->remove($item);
         }
     }
 
@@ -654,7 +654,7 @@ final class Manager implements AccessCheckerInterface
                 isset($children[$item->getName()])
                 && $this->userHasItem(
                     $user,
-                    $this->rolesStorage->getItemByName($parentName),
+                    $this->rolesStorage->getByName($parentName),
                     $params,
                     $assignments
                 )

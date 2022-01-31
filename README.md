@@ -53,7 +53,7 @@ First step when using RBAC is to configure an instance of `Manager`:
 
 ```php
 /**
-* @var \Yiisoft\Rbac\RolesStorageInterface $rolesStorage
+* @var \Yiisoft\Rbac\ItemsStorageInterface $rolesStorage
 * @var \Yiisoft\Rbac\AssignmentsStorageInterface $assignmentsStorage
 */
 $manager = new Manager($rolesStorage, $assignmentsStorage, new ClassNameRuleFactory());
