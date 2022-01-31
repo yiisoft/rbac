@@ -53,12 +53,12 @@ final class FakeItemsStorage implements ItemsStorageInterface
         return $this->getItemsByType(Item::TYPE_PERMISSION);
     }
 
-    public function getChildren(): array
+    public function getAllChildren(): array
     {
         return $this->children;
     }
 
-    public function getChildrenByName(string $name): array
+    public function getChildren(string $name): array
     {
         return $this->children[$name] ?? [];
     }

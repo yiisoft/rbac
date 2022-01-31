@@ -57,7 +57,7 @@ interface ItemsStorageInterface
      * @return array
      * @psalm-return array<string,Item[]>
      */
-    public function getChildren(): array;
+    public function getAllChildren(): array;
 
     /**
      * Returns all roles in the system.
@@ -113,7 +113,7 @@ interface ItemsStorageInterface
      *
      * @psalm-return array<string,Item>
      */
-    public function getChildrenByName(string $name): array;
+    public function getChildren(string $name): array;
 
     /**
      * Returns whether named parent has children.
