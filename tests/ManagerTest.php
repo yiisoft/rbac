@@ -136,7 +136,7 @@ final class ManagerTest extends TestCase
         $this->manager->setGuestRoleName('guest');
         $this->rolesStorage->add(new Role('guest'));
         $this->rolesStorage->add(new Permission('signup'));
-        $this->rolesStorage->addChild(new Role('guest'), new Permission('signup'));
+        $this->rolesStorage->addChild('guest', 'signup');
 
         foreach ($tests as $permission => $result) {
             $this->assertEquals(
@@ -208,7 +208,7 @@ final class ManagerTest extends TestCase
         $role = (new Role('test'));
         $this->rolesStorage->add($role);
         $this->rolesStorage->add($permission);
-        $this->rolesStorage->addChild($role, $permission);
+        $this->rolesStorage->addChild('test', 'test-permission');
 
         $this->expectException(RuntimeException::class);
         $this->expectErrorMessage('Rule "non-exist-rule" not found.');
@@ -248,8 +248,8 @@ final class ManagerTest extends TestCase
     public function testAddChild(): void
     {
         $this->manager->addChild(
-            $this->rolesStorage->getRoleByName('reader'),
-            $this->rolesStorage->getPermissionByName('createPost')
+            $this->rolesStorage->getRole('reader'),
+            $this->rolesStorage->getPermission('createPost')
         );
 
         $this->assertEquals(
@@ -268,7 +268,7 @@ final class ManagerTest extends TestCase
 
         $this->manager->addChild(
             new Role('new reader'),
-            $this->rolesStorage->getPermissionByName('createPost')
+            $this->rolesStorage->getPermission('createPost')
         );
     }
 
@@ -279,7 +279,7 @@ final class ManagerTest extends TestCase
 
         $this->manager->addChild(
             new Role('createPost'),
-            $this->rolesStorage->getPermissionByName('createPost')
+            $this->rolesStorage->getPermission('createPost')
         );
     }
 
@@ -289,8 +289,8 @@ final class ManagerTest extends TestCase
         $this->expectExceptionMessage('Can not add "reader" role as a child of "createPost" permission.');
 
         $this->manager->addChild(
-            $this->rolesStorage->getPermissionByName('createPost'),
-            $this->rolesStorage->getRoleByName('reader')
+            $this->rolesStorage->getPermission('createPost'),
+            $this->rolesStorage->getRole('reader')
         );
     }
 
@@ -300,8 +300,8 @@ final class ManagerTest extends TestCase
         $this->expectExceptionMessage('The item "reader" already has a child "readPost".');
 
         $this->manager->addChild(
-            $this->rolesStorage->getRoleByName('reader'),
-            $this->rolesStorage->getPermissionByName('readPost')
+            $this->rolesStorage->getRole('reader'),
+            $this->rolesStorage->getPermission('readPost')
         );
     }
 
@@ -311,14 +311,14 @@ final class ManagerTest extends TestCase
         $this->expectExceptionMessage('Cannot add "author" as a child of "reader". A loop has been detected.');
 
         $this->manager->addChild(
-            $this->rolesStorage->getRoleByName('reader'),
-            $this->rolesStorage->getRoleByName('author'),
+            $this->rolesStorage->getRole('reader'),
+            $this->rolesStorage->getRole('author'),
         );
     }
 
     public function testAddChildWithNonExistChild(): void
     {
-        $parent = $this->rolesStorage->getRoleByName('reader');
+        $parent = $this->rolesStorage->getRole('reader');
         $child = new Role('new reader');
 
         $this->expectException(InvalidArgumentException::class);
@@ -329,8 +329,8 @@ final class ManagerTest extends TestCase
     public function testRemoveChild(): void
     {
         $this->manager->removeChild(
-            $this->rolesStorage->getRoleByName('author'),
-            $this->rolesStorage->getPermissionByName('createPost'),
+            $this->rolesStorage->getRole('author'),
+            $this->rolesStorage->getPermission('createPost'),
         );
 
         $this->assertEquals(
@@ -344,17 +344,15 @@ final class ManagerTest extends TestCase
 
     public function testRemoveChildren(): void
     {
-        $author = $this->rolesStorage->getRoleByName('author');
-
-        $this->manager->removeChildren($author);
+        $this->manager->removeChildren('author');
         $this->assertFalse($this->rolesStorage->hasChildren('author'));
     }
 
     public function testHasChild(): void
     {
-        $author = $this->rolesStorage->getRoleByName('author');
-        $reader = $this->rolesStorage->getRoleByName('reader');
-        $permission = $this->rolesStorage->getPermissionByName('createPost');
+        $author = $this->rolesStorage->getRole('author');
+        $reader = $this->rolesStorage->getRole('reader');
+        $permission = $this->rolesStorage->getPermission('createPost');
 
         $this->assertTrue($this->manager->hasChild($author, $permission));
         $this->assertFalse($this->manager->hasChild($reader, $permission));
@@ -363,11 +361,11 @@ final class ManagerTest extends TestCase
     public function testAssign(): void
     {
         $readerAssignment = $this->manager->assign(
-            $this->rolesStorage->getRoleByName('reader'),
+            $this->rolesStorage->getRole('reader'),
             'readingAuthor'
         );
         $authorAssignment = $this->manager->assign(
-            $this->rolesStorage->getRoleByName('author'),
+            $this->rolesStorage->getRole('author'),
             'readingAuthor'
         );
 
@@ -406,7 +404,7 @@ final class ManagerTest extends TestCase
         $this->expectExceptionMessage('"reader" role has already been assigned to user reader A.');
 
         $this->manager->assign(
-            $this->rolesStorage->getRoleByName('reader'),
+            $this->rolesStorage->getRole('reader'),
             'reader A'
         );
     }
@@ -417,7 +415,7 @@ final class ManagerTest extends TestCase
         $this->expectExceptionMessage('Assigning permissions directly is disabled. Prefer assigning roles only.');
 
         $this->manager->assign(
-            $this->rolesStorage->getPermissionByName('updateAnyPost'),
+            $this->rolesStorage->getPermission('updateAnyPost'),
             'reader'
         );
     }
@@ -427,7 +425,7 @@ final class ManagerTest extends TestCase
         $this->manager = $this->createManager($this->rolesStorage, $this->assignmentsStorage, true);
 
         $this->manager->assign(
-            $this->rolesStorage->getPermissionByName('updateAnyPost'),
+            $this->rolesStorage->getPermission('updateAnyPost'),
             'reader'
         );
 
@@ -516,7 +514,7 @@ final class ManagerTest extends TestCase
 
         $this->manager->addRole($role);
 
-        $storedRole = $this->rolesStorage->getRoleByName('new role');
+        $storedRole = $this->rolesStorage->getRole('new role');
 
         $this->assertNotNull($storedRole);
         $this->assertSame('new role description', $storedRole->getDescription());
@@ -537,17 +535,17 @@ final class ManagerTest extends TestCase
 
     public function testRemoveRole(): void
     {
-        $this->manager->removeRole($this->rolesStorage->getRoleByName('reader'));
-        $this->assertNull($this->rolesStorage->getRoleByName('new role'));
+        $this->manager->removeRole('reader');
+        $this->assertNull($this->rolesStorage->getRole('new role'));
     }
 
     public function testUpdateRoleNameAndRule(): void
     {
-        $role = $this->rolesStorage->getRoleByName('reader')->withName('new reader');
+        $role = $this->rolesStorage->getRole('reader')->withName('new reader');
         $this->manager->updateRole('reader', $role);
 
-        $this->assertNull($this->rolesStorage->getRoleByName('reader'));
-        $this->assertNotNull($this->rolesStorage->getRoleByName('new reader'));
+        $this->assertNull($this->rolesStorage->getRole('reader'));
+        $this->assertNotNull($this->rolesStorage->getRole('new reader'));
     }
 
     public function testAddPermission(): void
@@ -559,7 +557,7 @@ final class ManagerTest extends TestCase
 
         $this->manager->addPermission($permission);
 
-        $storedPermission = $this->rolesStorage->getPermissionByName('edit post');
+        $storedPermission = $this->rolesStorage->getPermission('edit post');
 
         $this->assertNotNull($storedPermission);
         $this->assertSame('edit a post', $storedPermission->getDescription());
@@ -583,7 +581,7 @@ final class ManagerTest extends TestCase
         $permission = new Permission('test');
         $this->manager->addPermission($permission);
 
-        $storedPermission = $this->rolesStorage->getPermissionByName('test');
+        $storedPermission = $this->rolesStorage->getPermission('test');
 
         $this->assertNotNull($storedPermission);
         $this->assertNotNull($storedPermission->getCreatedAt());
@@ -592,21 +590,21 @@ final class ManagerTest extends TestCase
 
     public function testRemovePermission(): void
     {
-        $this->manager->removePermission($this->rolesStorage->getPermissionByName('updatePost'));
-        $this->assertNull($this->rolesStorage->getPermissionByName('updatePost'));
+        $this->manager->removePermission('updatePost');
+        $this->assertNull($this->rolesStorage->getPermission('updatePost'));
     }
 
     public function testUpdatePermission(): void
     {
-        $permission = $this->rolesStorage->getPermissionByName('updatePost')
+        $permission = $this->rolesStorage->getPermission('updatePost')
             ->withName('newUpdatePost')
             ->withCreatedAt(1642026149)
             ->withUpdatedAt(1642026150);
 
         $this->manager->updatePermission('updatePost', $permission);
 
-        $this->assertNull($this->rolesStorage->getPermissionByName('updatePost'));
-        $newPermission = $this->rolesStorage->getPermissionByName('newUpdatePost');
+        $this->assertNull($this->rolesStorage->getPermission('updatePost'));
+        $newPermission = $this->rolesStorage->getPermission('newUpdatePost');
         $this->assertNotNull($newPermission);
         $this->assertSame(1642026149, $newPermission->getCreatedAt());
         $this->assertSame(1642026150, $newPermission->getUpdatedAt());
@@ -620,7 +618,7 @@ final class ManagerTest extends TestCase
             'The name "createPost" is already used by another role or permission.'
         );
 
-        $permission = $this->rolesStorage->getPermissionByName('updatePost')
+        $permission = $this->rolesStorage->getPermission('updatePost')
             ->withName('createPost');
 
         $this->manager->updatePermission('updatePost', $permission);
@@ -633,7 +631,7 @@ final class ManagerTest extends TestCase
 
         $this->manager->addRule($rule);
 
-        $rule = $this->rolesStorage->getRuleByName($ruleName);
+        $rule = $this->rolesStorage->getRule($ruleName);
         $this->assertEquals($ruleName, $rule->getName());
         $this->assertTrue($rule->isReallyReally());
     }
@@ -641,21 +639,21 @@ final class ManagerTest extends TestCase
     public function testRemoveRule(): void
     {
         $this->manager->removeRule(
-            $this->rolesStorage->getRuleByName('isAuthor')
+            $this->rolesStorage->getRule('isAuthor')
         );
 
-        $this->assertNull($this->rolesStorage->getRuleByName('isAuthor'));
+        $this->assertNull($this->rolesStorage->getRule('isAuthor'));
     }
 
     public function testUpdateRule(): void
     {
-        $rule = $this->rolesStorage->getRuleByName('isAuthor')
+        $rule = $this->rolesStorage->getRule('isAuthor')
             ->withName('newName')
             ->withReallyReally(false);
 
         $this->manager->updateRule('isAuthor', $rule);
-        $this->assertNull($this->rolesStorage->getRuleByName('isAuthor'));
-        $this->assertNotNull($this->rolesStorage->getRuleByName('newName'));
+        $this->assertNull($this->rolesStorage->getRule('isAuthor'));
+        $this->assertNotNull($this->rolesStorage->getRule('newName'));
     }
 
     public function testDefaultRolesSetWithClosure(): void
@@ -718,12 +716,12 @@ final class ManagerTest extends TestCase
         $storage->add(new Role('author'));
         $storage->add(new Role('admin'));
 
-        $storage->addChild(new Role('reader'), new Permission('readPost'));
-        $storage->addChild(new Role('author'), new Permission('createPost'));
-        $storage->addChild(new Role('author'), new Permission('updatePost'));
-        $storage->addChild(new Role('author'), new Role('reader'));
-        $storage->addChild(new Role('admin'), new Role('author'));
-        $storage->addChild(new Role('admin'), new Permission('updateAnyPost'));
+        $storage->addChild('reader', 'readPost');
+        $storage->addChild('author', 'createPost');
+        $storage->addChild('author', 'updatePost');
+        $storage->addChild('author', 'reader');
+        $storage->addChild('admin', 'author');
+        $storage->addChild('admin', 'updateAnyPost');
 
         $storage->addRule(new AuthorRule('isAuthor'));
 
@@ -746,7 +744,7 @@ final class ManagerTest extends TestCase
     public function testRevokeRole(): void
     {
         $this->manager->revoke(
-            $this->rolesStorage->getRoleByName('reader'),
+            $this->rolesStorage->getRole('reader'),
             'reader A'
         );
 
@@ -756,7 +754,7 @@ final class ManagerTest extends TestCase
     public function testRevokePermission(): void
     {
         $this->manager->revoke(
-            $this->rolesStorage->getPermissionByName('deletePost'),
+            $this->rolesStorage->getPermission('deletePost'),
             'author B'
         );
 
