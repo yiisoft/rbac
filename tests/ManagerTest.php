@@ -726,11 +726,11 @@ final class ManagerTest extends TestCase
     {
         $storage = new FakeAssignmentsStorage(self::NOW);
 
-        $storage->add('reader A', 'Fast Metabolism');
-        $storage->add('reader A', 'reader');
-        $storage->add('author B', 'author');
-        $storage->add('author B', 'deletePost');
-        $storage->add('admin C', 'admin');
+        $storage->add('Fast Metabolism', 'reader A');
+        $storage->add('reader', 'reader A');
+        $storage->add('author', 'author B');
+        $storage->add('deletePost', 'author B');
+        $storage->add('admin', 'admin C');
 
         return $storage;
     }

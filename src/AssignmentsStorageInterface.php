@@ -33,20 +33,20 @@ interface AssignmentsStorageInterface
     /**
      * Returns role or permission assignment for the specified item name that belongs to user with the specified ID.
      *
-     * @param string $userId The user ID.
      * @param string $itemName Item name.
+     * @param string $userId The user ID.
      *
      * @return Assignment|null Assignment or null if there is no role or permission assigned to the user.
      */
-    public function get(string $userId, string $itemName): ?Assignment;
+    public function get(string $itemName, string $userId): ?Assignment;
 
     /**
      * Adds assignment of the role or permission to the user with ID specified.
      *
-     * @param string $userId The user ID.
      * @param string $itemName Item name to assign.
+     * @param string $userId The user ID.
      */
-    public function add(string $userId, string $itemName): void;
+    public function add(string $itemName, string $userId): void;
 
     /**
      * Returns whether there is assignment for a named role or permission.

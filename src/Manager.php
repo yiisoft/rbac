@@ -222,15 +222,15 @@ final class Manager implements AccessCheckerInterface
             );
         }
 
-        if ($this->assignmentsStorage->get($userId, $itemName) !== null) {
+        if ($this->assignmentsStorage->get($itemName, $userId) !== null) {
             throw new InvalidArgumentException(
                 sprintf('"%s" %s has already been assigned to user %s.', $itemName, $item->getType(), $userId)
             );
         }
 
-        $this->assignmentsStorage->add($userId, $itemName);
+        $this->assignmentsStorage->add($itemName, $userId);
 
-        return $this->assignmentsStorage->get($userId, $itemName);
+        return $this->assignmentsStorage->get($itemName, $userId);
     }
 
     /**
@@ -241,7 +241,7 @@ final class Manager implements AccessCheckerInterface
      */
     public function revoke(string $itemName, string $userId): void
     {
-        if ($this->assignmentsStorage->get($userId, $itemName) !== null) {
+        if ($this->assignmentsStorage->get($itemName, $userId) !== null) {
             $this->assignmentsStorage->remove($itemName, $userId);
         }
     }
