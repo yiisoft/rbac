@@ -8,9 +8,9 @@ use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\RuleInterface;
-use Yiisoft\Rbac\RolesStorageInterface;
+use Yiisoft\Rbac\ItemsStorageInterface;
 
-final class FakeRolesStorage implements RolesStorageInterface
+final class FakeItemsStorage implements ItemsStorageInterface
 {
     private array $items = [];
 
@@ -18,22 +18,22 @@ final class FakeRolesStorage implements RolesStorageInterface
 
     private array $rules = [];
 
-    public function getItems(): array
+    public function getAll(): array
     {
         return $this->items;
     }
 
-    public function getItemByName(string $name): ?Item
+    public function get(string $name): ?Item
     {
         return $this->items[$name] ?? null;
     }
 
-    public function addItem(Item $item): void
+    public function add(Item $item): void
     {
         $this->items[$item->getName()] = $item;
     }
 
-    public function getRoleByName(string $name): ?Role
+    public function getRole(string $name): ?Role
     {
         return $this->getItemsByType(Item::TYPE_ROLE)[$name] ?? null;
     }
@@ -43,7 +43,7 @@ final class FakeRolesStorage implements RolesStorageInterface
         return $this->getItemsByType(Item::TYPE_ROLE);
     }
 
-    public function getPermissionByName(string $name): ?Permission
+    public function getPermission(string $name): ?Permission
     {
         return $this->getItemsByType(Item::TYPE_PERMISSION)[$name] ?? null;
     }
@@ -53,12 +53,12 @@ final class FakeRolesStorage implements RolesStorageInterface
         return $this->getItemsByType(Item::TYPE_PERMISSION);
     }
 
-    public function getChildren(): array
+    public function getAllChildren(): array
     {
         return $this->children;
     }
 
-    public function getChildrenByName(string $name): array
+    public function getChildren(string $name): array
     {
         return $this->children[$name] ?? [];
     }
@@ -68,14 +68,14 @@ final class FakeRolesStorage implements RolesStorageInterface
         return $this->rules;
     }
 
-    public function getRuleByName(string $name): ?RuleInterface
+    public function getRule(string $name): ?RuleInterface
     {
         return $this->rules[$name] ?? null;
     }
 
-    public function addChild(Item $parent, Item $child): void
+    public function addChild(string $parentName, string $childName): void
     {
-        $this->children[$parent->getName()][$child->getName()] = $this->items[$child->getName()];
+        $this->children[$parentName][$childName] = $this->items[$childName];
     }
 
     public function hasChildren(string $name): bool
@@ -83,30 +83,30 @@ final class FakeRolesStorage implements RolesStorageInterface
         return isset($this->children[$name]);
     }
 
-    public function removeChild(Item $parent, Item $child): void
+    public function removeChild(string $parentName, string $childName): void
     {
-        unset($this->children[$parent->getName()][$child->getName()]);
+        unset($this->children[$parentName][$childName]);
     }
 
-    public function removeChildren(Item $parent): void
+    public function removeChildren(string $parentName): void
     {
-        unset($this->children[$parent->getName()]);
+        unset($this->children[$parentName]);
     }
 
-    public function removeItem(Item $item): void
+    public function remove(string $name): void
     {
-        $this->clearChildrenFromItem($item);
-        $this->removeItemByName($item->getName());
+        $this->clearChildrenFromItem($name);
+        $this->removeItemByName($name);
     }
 
-    public function updateItem(string $name, Item $item): void
+    public function update(string $name, Item $item): void
     {
         if ($item->getName() !== $name) {
             $this->updateItemName($name, $item);
             $this->removeItemByName($name);
         }
 
-        $this->addItem($item);
+        $this->add($item);
     }
 
     public function removeRule(string $name): void
@@ -114,7 +114,7 @@ final class FakeRolesStorage implements RolesStorageInterface
         unset($this->rules[$name]);
         foreach ($this->getItemsByRuleName($name) as $item) {
             $item = $item->withRuleName(null);
-            $this->updateItem($item->getName(), $item);
+            $this->update($item->getName(), $item);
         }
     }
 
@@ -172,20 +172,20 @@ final class FakeRolesStorage implements RolesStorageInterface
      */
     private function filterItems(callable $callback): array
     {
-        return array_filter($this->getItems(), $callback);
+        return array_filter($this->getAll(), $callback);
     }
 
     private function removeAllItems(string $type): void
     {
         foreach ($this->getItemsByType($type) as $item) {
-            $this->removeItem($item);
+            $this->remove($item->getName());
         }
     }
 
-    private function clearChildrenFromItem(Item $item): void
+    private function clearChildrenFromItem(string $itemName): void
     {
         foreach ($this->children as &$children) {
-            unset($children[$item->getName()]);
+            unset($children[$itemName]);
         }
     }
 

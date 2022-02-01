@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac;
 
 /**
- * `RolesStorageInterface` represents a storage for RBAC items used in {@see Manager}.
+ * A storage for RBAC items used in {@see Manager}.
  */
-interface RolesStorageInterface
+interface ItemsStorageInterface
 {
     /**
      * Removes all authorization data, including roles, permissions, and rules.
@@ -19,7 +19,7 @@ interface RolesStorageInterface
      *
      * @return Item[] All roles and permissions in the system.
      */
-    public function getItems(): array;
+    public function getAll(): array;
 
     /**
      * Returns the named role or permission.
@@ -29,14 +29,14 @@ interface RolesStorageInterface
      * @return Item|null The role or the permission corresponding to the specified name. `null` is returned if no such
      * item.
      */
-    public function getItemByName(string $name): ?Item;
+    public function get(string $name): ?Item;
 
     /**
      * Adds the role or the permission to RBAC system.
      *
      * @param Item $item The role or the permission to add.
      */
-    public function addItem(Item $item): void;
+    public function add(Item $item): void;
 
     /**
      * Updates the specified role or permission in the system.
@@ -44,20 +44,20 @@ interface RolesStorageInterface
      * @param string $name The old name of the role or permission.
      * @param Item $item Modified role or permission.
      */
-    public function updateItem(string $name, Item $item): void;
+    public function update(string $name, Item $item): void;
 
     /**
      * Removes a role or permission from the RBAC system.
      *
-     * @param Item $item Role or permission to remove.
+     * @param string $name Name of a role or a permission to remove.
      */
-    public function removeItem(Item $item): void;
+    public function remove(string $name): void;
 
     /**
      * @return array
      * @psalm-return array<string,Item[]>
      */
-    public function getChildren(): array;
+    public function getAllChildren(): array;
 
     /**
      * Returns all roles in the system.
@@ -73,7 +73,7 @@ interface RolesStorageInterface
      *
      * @return Role|null The role corresponding to the specified name. `null` is returned if no such role.
      */
-    public function getRoleByName(string $name): ?Role;
+    public function getRole(string $name): ?Role;
 
     /**
      * Removes all roles.
@@ -96,7 +96,7 @@ interface RolesStorageInterface
      * @return Permission|null The permission corresponding to the specified name. `null` is returned if no such
      * permission.
      */
-    public function getPermissionByName(string $name): ?Permission;
+    public function getPermission(string $name): ?Permission;
 
     /**
      * Removes all permissions.
@@ -113,7 +113,7 @@ interface RolesStorageInterface
      *
      * @psalm-return array<string,Item>
      */
-    public function getChildrenByName(string $name): array;
+    public function getChildren(string $name): array;
 
     /**
      * Returns whether named parent has children.
@@ -125,29 +125,29 @@ interface RolesStorageInterface
     public function hasChildren(string $name): bool;
 
     /**
-     * Adds an role or an permission as a child of another role or permission.
+     * Adds a role or a permission as a child of another role or permission.
      *
-     * @param Item $parent Parent to add child to.
-     * @param Item $child Child to add.
+     * @param string $parentName Name of the parent to add child to.
+     * @param string $childName Name of the child to add.
      */
-    public function addChild(Item $parent, Item $child): void;
+    public function addChild(string $parentName, string $childName): void;
 
     /**
      * Removes a child from its parent.
      * Note, the child role or permission is not deleted. Only the parent-child relationship is removed.
      *
-     * @param Item $parent Parent to remove child from.
-     * @param Item $child Child to remove.
+     * @param string $parentName Name of the parent to remove child from.
+     * @param string $childName Name of the child to remove.
      */
-    public function removeChild(Item $parent, Item $child): void;
+    public function removeChild(string $parentName, string $childName): void;
 
     /**
      * Removed all children form their parent.
      * Note, the children roles or permissions are not deleted. Only the parent-child relationships are removed.
      *
-     * @param Item $parent Parent to remove children from.
+     * @param string $parentName Name of the parent to remove children from.
      */
-    public function removeChildren(Item $parent): void;
+    public function removeChildren(string $parentName): void;
 
     /**
      * Returns all rules available in the system.
@@ -163,7 +163,7 @@ interface RolesStorageInterface
      *
      * @return RuleInterface|null The rule object, or `null` if the specified name does not correspond to a rule.
      */
-    public function getRuleByName(string $name): ?RuleInterface;
+    public function getRule(string $name): ?RuleInterface;
 
     /**
      * Removes the rule of the specified name from RBAC system.

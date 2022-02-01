@@ -28,25 +28,25 @@ interface AssignmentsStorageInterface
      *
      * @psalm-return array<string, Assignment>
      */
-    public function getUserAssignments(string $userId): array;
+    public function getByUserId(string $userId): array;
 
     /**
      * Returns role or permission assignment for the specified item name that belongs to user with the specified ID.
      *
+     * @param string $itemName Item name.
      * @param string $userId The user ID.
-     * @param string $name Role name.
      *
      * @return Assignment|null Assignment or null if there is no role or permission assigned to the user.
      */
-    public function get(string $userId, string $name): ?Assignment;
+    public function get(string $itemName, string $userId): ?Assignment;
 
     /**
      * Adds assignment of the role or permission to the user with ID specified.
      *
-     * @param string $userId The user ID.
      * @param string $itemName Item name to assign.
+     * @param string $userId The user ID.
      */
-    public function add(string $userId, string $itemName): void;
+    public function add(string $itemName, string $userId): void;
 
     /**
      * Returns whether there is assignment for a named role or permission.
@@ -68,24 +68,24 @@ interface AssignmentsStorageInterface
     /**
      * Removes assignment of a role or a permission to the user with ID specified.
      *
-     * @param string $userId The user ID.
      * @param string $itemName Name of a role or permission to remove assignment from.
+     * @param string $userId The user ID.
      */
-    public function remove(string $userId, string $itemName): void;
+    public function remove(string $itemName, string $userId): void;
 
     /**
      * Removes all role or permission assignments for a user with ID specified.
      *
      * @param string $userId The user ID.
      */
-    public function removeUserAssignments(string $userId): void;
+    public function removeByUserId(string $userId): void;
 
     /**
      * Removes all assignments for role or permission.
      *
      * @param string $itemName Name of a role or permission to remove.
      */
-    public function removeItemAssignments(string $itemName): void;
+    public function removeByItemName(string $itemName): void;
 
     /**
      * Removes all role and permission assignments.
