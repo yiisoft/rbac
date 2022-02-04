@@ -54,12 +54,6 @@ interface ItemsStorageInterface
     public function remove(string $name): void;
 
     /**
-     * @return array
-     * @psalm-return array<string,Item[]>
-     */
-    public function getAllChildren(): array;
-
-    /**
      * Returns all roles in the system.
      *
      * @return Role[] All roles in the system.
@@ -103,6 +97,17 @@ interface ItemsStorageInterface
      * All parent child relations will be adjusted accordingly.
      */
     public function clearPermissions(): void;
+
+    /**
+     * Returns the parent permissions and/or roles.
+     *
+     * @param string $name The child name.
+     *
+     * @return Item[] The parent permissions and/or roles.
+     *
+     * @psalm-return array<string,Item>
+     */
+    public function getParents(string $name): array;
 
     /**
      * Returns the child permissions and/or roles.
