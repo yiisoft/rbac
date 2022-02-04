@@ -53,9 +53,24 @@ final class FakeItemsStorage implements ItemsStorageInterface
         return $this->getItemsByType(Item::TYPE_PERMISSION);
     }
 
-    public function getAllChildren(): array
+    public function getParents(string $name): array
     {
-        return $this->children;
+        $result = [];
+        $this->getParentsRecursive($name, $result);
+        return $result;
+    }
+
+    private function getParentsRecursive(string $name, array &$result): void
+    {
+        foreach ($this->children as $parentName => $items) {
+            foreach ($items as $item) {
+                if ($item->getName() === $name) {
+                    $result[$parentName] = $this->get($parentName);
+                    $this->getParentsRecursive($parentName, $result);
+                    break;
+                }
+            }
+        }
     }
 
     public function getChildren(string $name): array

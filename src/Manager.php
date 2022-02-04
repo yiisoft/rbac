@@ -345,8 +345,7 @@ final class Manager implements AccessCheckerInterface
     public function getUserIdsByRoleName(string $roleName): array
     {
         $result = [];
-        $roles = [$roleName];
-        $this->getParentRolesRecursive($roleName, $roles);
+        $roles = [$roleName, ...array_keys($this->itemsStorage->getParents($roleName))];
 
         foreach ($this->assignmentsStorage->getAll() as $userId => $assignments) {
             foreach ($assignments as $userAssignment) {
@@ -537,19 +536,6 @@ final class Manager implements AccessCheckerInterface
         $this->itemsStorage->add($item);
     }
 
-    private function getParentRolesRecursive(string $roleName, array &$result): void
-    {
-        foreach ($this->itemsStorage->getAllChildren() as $parentRole => $items) {
-            foreach ($items as $item) {
-                if ($item->getName() === $roleName) {
-                    $result[] = $parentRole;
-                    $this->getParentRolesRecursive($parentRole, $result);
-                    break;
-                }
-            }
-        }
-    }
-
     private function hasItem(string $name): bool
     {
         return $this->itemsStorage->get($name) !== null;
@@ -651,20 +637,12 @@ final class Manager implements AccessCheckerInterface
             return false;
         }
 
-        if (isset($assignments[$item->getName()])) {
+        if (array_key_exists($item->getName(), $assignments)) {
             return true;
         }
 
-        foreach ($this->itemsStorage->getAllChildren() as $parentName => $children) {
-            if (
-                isset($children[$item->getName()])
-                && $this->userHasItem(
-                    $user,
-                    $this->itemsStorage->get($parentName),
-                    $params,
-                    $assignments
-                )
-            ) {
+        foreach ($this->itemsStorage->getParents($item->getName()) as $parentName => $_parent) {
+            if (array_key_exists($parentName, $assignments)) {
                 return true;
             }
         }
