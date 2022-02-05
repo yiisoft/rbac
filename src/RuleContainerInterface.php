@@ -15,10 +15,10 @@ interface RuleContainerInterface
     /**
      * @param string $name Rule name.
      *
-     * @return RuleInterface Rule created.
-     *
      * @throws RuleNotFoundException
      * @throws RuleInterfaceNotImplementedException
+     *
+     * @return RuleInterface Rule created.
      */
     public function get(string $name): RuleInterface;
 }
