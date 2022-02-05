@@ -10,11 +10,6 @@ namespace Yiisoft\Rbac;
 interface RuleInterface
 {
     /**
-     * @return string The rule name.
-     */
-    public function getName(): string;
-
-    /**
      * Executes the rule.
      *
      * @param string $userId The user ID. This should be a string representing the unique identifier of a user.
