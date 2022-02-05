@@ -26,7 +26,7 @@ final class Manager implements AccessCheckerInterface
 {
     private ItemsStorageInterface $itemsStorage;
     private AssignmentsStorageInterface $assignmentsStorage;
-    private RuleFactoryInterface $ruleFactory;
+    private RuleContainerInterface $ruleContainer;
 
     /**
      * @var string[] A list of role names that are assigned to every user automatically without calling {@see assign()}.
@@ -44,19 +44,19 @@ final class Manager implements AccessCheckerInterface
     /**
      * @param ItemsStorageInterface $itemsStorage Items storage.
      * @param AssignmentsStorageInterface $assignmentsStorage Assignments storage.
-     * @param RuleFactoryInterface $ruleFactory Rule factory.
+     * @param RuleContainerInterface $ruleContainer Rule container.
      * @param bool $enableDirectPermissions Whether to enable assigning permissions directly to user. Prefer assigning
      * roles only.
      */
     public function __construct(
         ItemsStorageInterface $itemsStorage,
         AssignmentsStorageInterface $assignmentsStorage,
-        RuleFactoryInterface $ruleFactory,
+        RuleContainerInterface $ruleContainer,
         bool $enableDirectPermissions = false
     ) {
         $this->itemsStorage = $itemsStorage;
         $this->assignmentsStorage = $assignmentsStorage;
-        $this->ruleFactory = $ruleFactory;
+        $this->ruleContainer = $ruleContainer;
         $this->enableDirectPermissions = $enableDirectPermissions;
     }
 
@@ -360,7 +360,6 @@ final class Manager implements AccessCheckerInterface
 
     public function addRole(Role $role): void
     {
-        $this->createItemRuleIfNotExist($role);
         $this->addItem($role);
     }
 
@@ -372,14 +371,12 @@ final class Manager implements AccessCheckerInterface
     public function updateRole(string $name, Role $role): void
     {
         $this->checkItemNameForUpdate($role, $name);
-        $this->createItemRuleIfNotExist($role);
         $this->itemsStorage->update($name, $role);
         $this->assignmentsStorage->renameItem($name, $role->getName());
     }
 
     public function addPermission(Permission $permission): void
     {
-        $this->createItemRuleIfNotExist($permission);
         $this->addItem($permission);
     }
 
@@ -391,29 +388,8 @@ final class Manager implements AccessCheckerInterface
     public function updatePermission(string $name, Permission $permission): void
     {
         $this->checkItemNameForUpdate($permission, $name);
-        $this->createItemRuleIfNotExist($permission);
         $this->itemsStorage->update($name, $permission);
         $this->assignmentsStorage->renameItem($name, $permission->getName());
-    }
-
-    public function addRule(RuleInterface $rule): void
-    {
-        $this->itemsStorage->addRule($rule);
-    }
-
-    public function removeRule(RuleInterface $rule): void
-    {
-        if ($this->itemsStorage->getRule($rule->getName()) !== null) {
-            $this->itemsStorage->removeRule($rule->getName());
-        }
-    }
-
-    public function updateRule(string $name, RuleInterface $rule): void
-    {
-        if ($rule->getName() !== $name) {
-            $this->itemsStorage->removeRule($name);
-        }
-        $this->itemsStorage->addRule($rule);
     }
 
     /**
@@ -507,20 +483,9 @@ final class Manager implements AccessCheckerInterface
             return true;
         }
 
-        $rule = $this->itemsStorage->getRule($item->getRuleName());
-        if ($rule === null) {
-            throw new RuntimeException(sprintf('Rule "%s" not found.', $item->getRuleName()));
-        }
-
-        return $rule->execute($user, $item, $params);
-    }
-
-    private function createItemRuleIfNotExist(Item $item): void
-    {
-        if ($item->getRuleName() !== null && $this->itemsStorage->getRule($item->getRuleName()) === null) {
-            $rule = $this->ruleFactory->create($item->getRuleName());
-            $this->addRule($rule);
-        }
+        return $this->ruleContainer
+            ->get($item->getRuleName())
+            ->execute($user, $item, $params);
     }
 
     private function addItem(Item $item): void

@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac;
 
 /**
- * A storage for RBAC items used in {@see Manager}.
+ * A storage for RBAC roles and permissions used in {@see Manager}.
  */
 interface ItemsStorageInterface
 {
     /**
-     * Removes all authorization data, including roles, permissions, and rules.
+     * Removes all roles and permissions.
      */
     public function clear(): void;
 
@@ -153,40 +153,4 @@ interface ItemsStorageInterface
      * @param string $parentName Name of the parent to remove children from.
      */
     public function removeChildren(string $parentName): void;
-
-    /**
-     * Returns all rules available in the system.
-     *
-     * @return RuleInterface[] The rules indexed by the rule names.
-     */
-    public function getRules(): array;
-
-    /**
-     * Returns the rule of the specified name.
-     *
-     * @param string $name The rule name.
-     *
-     * @return RuleInterface|null The rule object, or `null` if the specified name does not correspond to a rule.
-     */
-    public function getRule(string $name): ?RuleInterface;
-
-    /**
-     * Removes the rule of the specified name from RBAC system.
-     *
-     * @param string $name The rule name.
-     */
-    public function removeRule(string $name): void;
-
-    /**
-     * Adds the rule to RBAC system.
-     *
-     * @param RuleInterface $rule The rule to add.
-     */
-    public function addRule(RuleInterface $rule): void;
-
-    /**
-     * Removes all rules.
-     * All roles and permissions which have rules will be adjusted accordingly.
-     */
-    public function clearRules(): void;
 }

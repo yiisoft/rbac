@@ -8,15 +8,17 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Yiisoft\Rbac\AssignmentsStorageInterface;
+use Yiisoft\Rbac\Exception\RuleNotFoundException;
 use Yiisoft\Rbac\Manager;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\ItemsStorageInterface;
-use Yiisoft\Rbac\ClassNameRuleFactory;
+use Yiisoft\Rbac\RuleContainer;
 use Yiisoft\Rbac\Tests\Support\AuthorRule;
 use Yiisoft\Rbac\Tests\Support\EasyRule;
 use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
+use Yiisoft\Test\Support\Container\SimpleContainer;
 
 /**
  * @group rbac
@@ -210,7 +212,7 @@ final class ManagerTest extends TestCase
         $this->itemsStorage->add($permission);
         $this->itemsStorage->addChild('test', 'test-permission');
 
-        $this->expectException(RuntimeException::class);
+        $this->expectException(RuleNotFoundException::class);
         $this->expectErrorMessage('Rule "non-exist-rule" not found.');
         $this->manager->userHasPermission('reader A', 'test-permission');
     }
@@ -617,38 +619,6 @@ final class ManagerTest extends TestCase
         $this->manager->updatePermission('updatePost', $permission);
     }
 
-    public function testAddRule(): void
-    {
-        $ruleName = 'isReallyReallyAuthor';
-        $rule = new AuthorRule($ruleName, true);
-
-        $this->manager->addRule($rule);
-
-        $rule = $this->itemsStorage->getRule($ruleName);
-        $this->assertEquals($ruleName, $rule->getName());
-        $this->assertTrue($rule->isReallyReally());
-    }
-
-    public function testRemoveRule(): void
-    {
-        $this->manager->removeRule(
-            $this->itemsStorage->getRule('isAuthor')
-        );
-
-        $this->assertNull($this->itemsStorage->getRule('isAuthor'));
-    }
-
-    public function testUpdateRule(): void
-    {
-        $rule = $this->itemsStorage->getRule('isAuthor')
-            ->withName('newName')
-            ->withReallyReally(false);
-
-        $this->manager->updateRule('isAuthor', $rule);
-        $this->assertNull($this->itemsStorage->getRule('isAuthor'));
-        $this->assertNotNull($this->itemsStorage->getRule('newName'));
-    }
-
     public function testDefaultRolesSetWithClosure(): void
     {
         $this->manager->setDefaultRoleNames(
@@ -690,8 +660,21 @@ final class ManagerTest extends TestCase
         AssignmentsStorageInterface $assignmentsStorage,
         bool $enableDirectPermissions = false
     ): Manager {
-        return (new Manager($itemsStorage, $assignmentsStorage, new ClassNameRuleFactory(), $enableDirectPermissions))
-            ->setDefaultRoleNames(['myDefaultRole']);
+        $manager = new Manager(
+            $itemsStorage,
+            $assignmentsStorage,
+            new RuleContainer(
+                new SimpleContainer(),
+                [
+                    'isAuthor' => AuthorRule::class,
+                ]
+            ),
+            $enableDirectPermissions
+        );
+
+        $manager->setDefaultRoleNames(['myDefaultRole']);
+
+        return $manager;
     }
 
     private function createItemsStorage(): ItemsStorageInterface
@@ -716,8 +699,6 @@ final class ManagerTest extends TestCase
         $storage->addChild('author', 'reader');
         $storage->addChild('admin', 'author');
         $storage->addChild('admin', 'updateAnyPost');
-
-        $storage->addRule(new AuthorRule('isAuthor'));
 
         return $storage;
     }
