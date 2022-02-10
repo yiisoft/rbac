@@ -65,8 +65,16 @@ final class Manager implements AccessCheckerInterface
      *
      * @psalm-suppress DocblockTypeContradiction
      */
-    public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
+    public function userHasPermission($userId, $permissionName, array $parameters = []): bool
     {
+        if (!is_string($permissionName) && !$permissionName instanceof \BackendEnum) {
+            throw new \InvalidArgumentException('Permission name should be specified as either a string or a backed enum.');
+        }
+
+        if ($permissionName instanceof \BackedEnum) {
+            $permissionName = (string)$permissionName->value;
+        }
+
         if ($userId === null) {
             return $this->guestHasPermission($permissionName);
         }
