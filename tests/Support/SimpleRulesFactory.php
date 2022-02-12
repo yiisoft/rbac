@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac\Tests\Support;
 
 use Yiisoft\Rbac\Exception\RuleNotFoundException;
-use Yiisoft\Rbac\RuleContainerInterface;
+use Yiisoft\Rbac\RulesFactoryInterface;
 use Yiisoft\Rbac\RuleInterface;
 
-final class SimpleRuleContainer implements RuleContainerInterface
+use function array_key_exists;
+
+final class SimpleRulesFactory implements RulesFactoryInterface
 {
     /**
      * @psalm-var array<string,RuleInterface>
@@ -23,7 +25,7 @@ final class SimpleRuleContainer implements RuleContainerInterface
         $this->rules = $rules;
     }
 
-    public function get(string $name): RuleInterface
+    public function create(string $name): RuleInterface
     {
         if (!array_key_exists($name, $this->rules)) {
             throw new RuleNotFoundException($name);
