@@ -7,16 +7,12 @@ namespace Yiisoft\Rbac\Tests\Support;
 use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
-use Yiisoft\Rbac\RuleInterface;
 use Yiisoft\Rbac\ItemsStorageInterface;
 
 final class FakeItemsStorage implements ItemsStorageInterface
 {
     private array $items = [];
-
     private array $children = [];
-
-    private array $rules = [];
 
     public function getAll(): array
     {
@@ -78,16 +74,6 @@ final class FakeItemsStorage implements ItemsStorageInterface
         return $this->children[$name] ?? [];
     }
 
-    public function getRules(): array
-    {
-        return $this->rules;
-    }
-
-    public function getRule(string $name): ?RuleInterface
-    {
-        return $this->rules[$name] ?? null;
-    }
-
     public function addChild(string $parentName, string $childName): void
     {
         $this->children[$parentName][$childName] = $this->items[$childName];
@@ -124,31 +110,10 @@ final class FakeItemsStorage implements ItemsStorageInterface
         $this->add($item);
     }
 
-    public function removeRule(string $name): void
-    {
-        unset($this->rules[$name]);
-        foreach ($this->getItemsByRuleName($name) as $item) {
-            $item = $item->withRuleName(null);
-            $this->update($item->getName(), $item);
-        }
-    }
-
-    public function addRule(RuleInterface $rule): void
-    {
-        $this->rules[$rule->getName()] = $rule;
-    }
-
     public function clear(): void
     {
         $this->children = [];
-        $this->rules = [];
         $this->items = [];
-    }
-
-    public function clearRules(): void
-    {
-        $this->clearItemsFromRules();
-        $this->rules = [];
     }
 
     public function clearPermissions(): void
@@ -170,13 +135,6 @@ final class FakeItemsStorage implements ItemsStorageInterface
     {
         return $this->filterItems(
             fn (Item $item) => $item->getType() === $type
-        );
-    }
-
-    private function getItemsByRuleName(string $ruleName): array
-    {
-        return $this->filterItems(
-            fn (Item $item) => $item->getRuleName() === $ruleName
         );
     }
 
@@ -221,12 +179,5 @@ final class FakeItemsStorage implements ItemsStorageInterface
     private function removeItemByName(string $name): void
     {
         unset($this->items[$name]);
-    }
-
-    private function clearItemsFromRules(): void
-    {
-        foreach ($this->items as &$item) {
-            $item = $item->withRuleName(null);
-        }
     }
 }

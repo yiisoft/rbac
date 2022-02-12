@@ -360,7 +360,6 @@ final class Manager implements AccessCheckerInterface
 
     public function addRole(Role $role): void
     {
-        $this->createItemRuleIfNotExist($role);
         $this->addItem($role);
     }
 
@@ -372,14 +371,12 @@ final class Manager implements AccessCheckerInterface
     public function updateRole(string $name, Role $role): void
     {
         $this->checkItemNameForUpdate($role, $name);
-        $this->createItemRuleIfNotExist($role);
         $this->itemsStorage->update($name, $role);
         $this->assignmentsStorage->renameItem($name, $role->getName());
     }
 
     public function addPermission(Permission $permission): void
     {
-        $this->createItemRuleIfNotExist($permission);
         $this->addItem($permission);
     }
 
@@ -391,29 +388,8 @@ final class Manager implements AccessCheckerInterface
     public function updatePermission(string $name, Permission $permission): void
     {
         $this->checkItemNameForUpdate($permission, $name);
-        $this->createItemRuleIfNotExist($permission);
         $this->itemsStorage->update($name, $permission);
         $this->assignmentsStorage->renameItem($name, $permission->getName());
-    }
-
-    public function addRule(RuleInterface $rule): void
-    {
-        $this->itemsStorage->addRule($rule);
-    }
-
-    public function removeRule(RuleInterface $rule): void
-    {
-        if ($this->itemsStorage->getRule($rule->getName()) !== null) {
-            $this->itemsStorage->removeRule($rule->getName());
-        }
-    }
-
-    public function updateRule(string $name, RuleInterface $rule): void
-    {
-        if ($rule->getName() !== $name) {
-            $this->itemsStorage->removeRule($name);
-        }
-        $this->itemsStorage->addRule($rule);
     }
 
     /**
@@ -507,20 +483,9 @@ final class Manager implements AccessCheckerInterface
             return true;
         }
 
-        $rule = $this->itemsStorage->getRule($item->getRuleName());
-        if ($rule === null) {
-            throw new RuntimeException(sprintf('Rule "%s" not found.', $item->getRuleName()));
-        }
-
-        return $rule->execute($user, $item, $params);
-    }
-
-    private function createItemRuleIfNotExist(Item $item): void
-    {
-        if ($item->getRuleName() !== null && $this->itemsStorage->getRule($item->getRuleName()) === null) {
-            $rule = $this->ruleFactory->create($item->getRuleName());
-            $this->addRule($rule);
-        }
+        return $this->ruleFactory
+            ->create($item->getRuleName())
+            ->execute($user, $item, $params);
     }
 
     private function addItem(Item $item): void

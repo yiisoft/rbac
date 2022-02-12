@@ -4,13 +4,19 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac;
 
+use Yiisoft\Rbac\Exception\RuleInterfaceNotImplementedException;
+use Yiisoft\Rbac\Exception\RuleNotFoundException;
+
 /**
  * Having a rule name creates an instance of it.
  */
 interface RuleFactoryInterface
 {
     /**
-     * @param string $name Class name or other rule definition.
+     * @param string $name Rule name.
+     *
+     * @throws RuleNotFoundException
+     * @throws RuleInterfaceNotImplementedException
      *
      * @return RuleInterface Rule created.
      */

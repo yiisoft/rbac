@@ -22,7 +22,7 @@ use function is_object;
  * $compositeRule = new CompositeRule('fresh_and_owned', CompositeRule::OR, [new FreshRule(), new OwnedRule()]);
  * ```
  */
-final class CompositeRule extends Rule
+final class CompositeRule implements RuleInterface
 {
     public const AND = 'and';
     public const OR = 'or';
@@ -35,11 +35,10 @@ final class CompositeRule extends Rule
     private array $rules;
 
     /**
-     * @param string $name Rule name.
      * @param string $operator Operator to be used. Could be `CompositeRule::AND` or `CompositeRule::OR`.
      * @param RuleInterface[] $rules Array of rule instances.
      */
-    public function __construct(string $name, string $operator, array $rules)
+    public function __construct(string $operator, array $rules)
     {
         if (!in_array($operator, [self::AND, self::OR], true)) {
             throw new InvalidArgumentException(
@@ -58,14 +57,13 @@ final class CompositeRule extends Rule
                 throw new InvalidArgumentException(
                     sprintf(
                         'Each rule should be an instance of %s, "%s" given.',
-                        Rule::class,
+                        RuleInterface::class,
                         $type
                     )
                 );
             }
         }
 
-        parent::__construct($name);
         $this->operator = $operator;
         $this->rules = $rules;
     }

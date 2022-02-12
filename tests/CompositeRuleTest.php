@@ -8,7 +8,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Yiisoft\Rbac\CompositeRule;
 use Yiisoft\Rbac\Permission;
-use Yiisoft\Rbac\Rule;
+use Yiisoft\Rbac\RuleInterface;
 use Yiisoft\Rbac\Tests\Support\EasyRule;
 
 final class CompositeRuleTest extends TestCase
@@ -31,7 +31,7 @@ final class CompositeRuleTest extends TestCase
      */
     public function testCompositeRule(string $operator, array $rules, bool $expected): void
     {
-        $rule = new CompositeRule('rule', $operator, $rules);
+        $rule = new CompositeRule($operator, $rules);
         $result = $rule->execute('user', new Permission('permission'), []);
         $this->assertSame($expected, $result);
     }
@@ -46,13 +46,13 @@ final class CompositeRuleTest extends TestCase
             CompositeRule::class .
             '::OR, "no_such_operation" given.'
         );
-        new CompositeRule('rule', 'no_such_operation', []);
+        new CompositeRule('no_such_operation', []);
     }
 
     public function testInvalidRule(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Each rule should be an instance of ' . Rule::class . ', "string" given.');
-        new CompositeRule('rule', CompositeRule::OR, ['invalid_rule']);
+        $this->expectExceptionMessage('Each rule should be an instance of ' . RuleInterface::class . ', "string" given.');
+        new CompositeRule(CompositeRule::OR, ['invalid_rule']);
     }
 }
