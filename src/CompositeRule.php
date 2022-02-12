@@ -36,7 +36,7 @@ final class CompositeRule implements RuleInterface
 
     /**
      * @param string $operator Operator to be used. Could be `CompositeRule::AND` or `CompositeRule::OR`.
-     * @param RuleInterface[]|array $rules Array of rule instances.
+     * @param array|RuleInterface[] $rules Array of rule instances.
      */
     public function __construct(string $operator, array $rules)
     {

@@ -195,7 +195,7 @@ final class Manager implements AccessCheckerInterface
      * Assigns a role or permission to a user.
      *
      * @param string $itemName Name of the role or the permission to be assigned.
-     * @param string|int|object $userId The user ID.
+     * @param int|object|string $userId The user ID.
      *
      * @throws Exception If the role or permission has already been assigned to the user.
      *
@@ -232,7 +232,7 @@ final class Manager implements AccessCheckerInterface
      * Revokes a role or a permission from a user.
      *
      * @param string $itemName The name of the role or permission to be revoked.
-     * @param string|int|object $userId The user ID.
+     * @param int|object|string $userId The user ID.
      */
     public function revoke(string $itemName, $userId): void
     {
@@ -246,7 +246,7 @@ final class Manager implements AccessCheckerInterface
     /**
      * Revokes all roles and permissions from a user.
      *
-     * @param string|int|object $userId The user ID.
+     * @param int|object|string $userId The user ID.
      */
     public function revokeAll($userId): void
     {
@@ -259,7 +259,7 @@ final class Manager implements AccessCheckerInterface
      * Returns the roles that are assigned to the user via {@see assign()}.
      * Note that child roles that are not assigned directly to the user will not be returned.
      *
-     * @param string|int|object $userId The user ID.
+     * @param int|object|string $userId The user ID.
      *
      * @return Role[] All roles directly assigned to the user. The array is indexed by the role names.
      */
@@ -324,7 +324,7 @@ final class Manager implements AccessCheckerInterface
     /**
      * Returns all permissions that the user has.
      *
-     * @param string|int|object $userId The user ID.
+     * @param int|object|string $userId The user ID.
      *
      * @return Permission[] All permissions that the user has. The array is indexed by the permission names.
      */
@@ -340,6 +340,7 @@ final class Manager implements AccessCheckerInterface
 
     /**
      * @param mixed $userId
+     *
      * @return string
      */
     private function ensureStringUserId($userId): string
