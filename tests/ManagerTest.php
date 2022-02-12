@@ -13,12 +13,11 @@ use Yiisoft\Rbac\Manager;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\ItemsStorageInterface;
-use Yiisoft\Rbac\RuleContainer;
 use Yiisoft\Rbac\Tests\Support\AuthorRule;
 use Yiisoft\Rbac\Tests\Support\EasyRule;
 use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
-use Yiisoft\Test\Support\Container\SimpleContainer;
+use Yiisoft\Rbac\Tests\Support\SimpleRuleContainer;
 
 /**
  * @group rbac
@@ -741,12 +740,9 @@ final class ManagerTest extends TestCase
         $manager = new Manager(
             $this->itemsStorage,
             $this->assignmentsStorage,
-            new RuleContainer(
-                new SimpleContainer(),
-                [
-                    'isAuthor' => AuthorRule::class,
-                ]
-            ),
+            new SimpleRuleContainer([
+                'isAuthor' => new AuthorRule(),
+            ]),
             $enableDirectPermissions
         );
 
