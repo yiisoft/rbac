@@ -17,7 +17,7 @@ use Yiisoft\Rbac\Tests\Support\AuthorRule;
 use Yiisoft\Rbac\Tests\Support\EasyRule;
 use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
-use Yiisoft\Rbac\Tests\Support\SimpleRulesFactory;
+use Yiisoft\Rbac\Tests\Support\SimpleRuleFactory;
 
 /**
  * @group rbac
@@ -740,7 +740,7 @@ final class ManagerTest extends TestCase
         $manager = new Manager(
             $this->itemsStorage,
             $this->assignmentsStorage,
-            new SimpleRulesFactory([
+            new SimpleRuleFactory([
                 'isAuthor' => new AuthorRule(),
             ]),
             $enableDirectPermissions

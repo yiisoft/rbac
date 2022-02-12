@@ -26,7 +26,7 @@ final class Manager implements AccessCheckerInterface
 {
     private ItemsStorageInterface $itemsStorage;
     private AssignmentsStorageInterface $assignmentsStorage;
-    private RulesFactoryInterface $rulesFactory;
+    private RuleFactoryInterface $ruleFactory;
 
     /**
      * @var string[] A list of role names that are assigned to every user automatically without calling {@see assign()}.
@@ -44,19 +44,19 @@ final class Manager implements AccessCheckerInterface
     /**
      * @param ItemsStorageInterface $itemsStorage Items storage.
      * @param AssignmentsStorageInterface $assignmentsStorage Assignments storage.
-     * @param RulesFactoryInterface $rulesFactory Rules factory.
+     * @param RuleFactoryInterface $ruleFactory Rule factory.
      * @param bool $enableDirectPermissions Whether to enable assigning permissions directly to user. Prefer assigning
      * roles only.
      */
     public function __construct(
         ItemsStorageInterface $itemsStorage,
         AssignmentsStorageInterface $assignmentsStorage,
-        RulesFactoryInterface $rulesFactory,
+        RuleFactoryInterface $ruleFactory,
         bool $enableDirectPermissions = false
     ) {
         $this->itemsStorage = $itemsStorage;
         $this->assignmentsStorage = $assignmentsStorage;
-        $this->rulesFactory = $rulesFactory;
+        $this->ruleFactory = $ruleFactory;
         $this->enableDirectPermissions = $enableDirectPermissions;
     }
 
@@ -483,7 +483,7 @@ final class Manager implements AccessCheckerInterface
             return true;
         }
 
-        return $this->rulesFactory
+        return $this->ruleFactory
             ->create($item->getRuleName())
             ->execute($user, $item, $params);
     }

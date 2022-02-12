@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac\Tests\Support;
 
 use Yiisoft\Rbac\Exception\RuleNotFoundException;
-use Yiisoft\Rbac\RulesFactoryInterface;
+use Yiisoft\Rbac\RuleFactoryInterface;
 use Yiisoft\Rbac\RuleInterface;
 
 use function array_key_exists;
 
-final class SimpleRulesFactory implements RulesFactoryInterface
+final class SimpleRuleFactory implements RuleFactoryInterface
 {
     /**
      * @psalm-var array<string,RuleInterface>

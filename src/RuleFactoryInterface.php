@@ -10,7 +10,7 @@ use Yiisoft\Rbac\Exception\RuleNotFoundException;
 /**
  * Having a rule name creates an instance of it.
  */
-interface RulesFactoryInterface
+interface RuleFactoryInterface
 {
     /**
      * @param string $name Rule name.
