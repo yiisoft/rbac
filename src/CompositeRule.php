@@ -36,7 +36,7 @@ final class CompositeRule implements RuleInterface
 
     /**
      * @param string $operator Operator to be used. Could be `CompositeRule::AND` or `CompositeRule::OR`.
-     * @param array|RuleInterface[] $rules Array of rule instances.
+     * @param RuleInterface[] $rules Array of rule instances.
      */
     public function __construct(string $operator, array $rules)
     {
@@ -51,6 +51,7 @@ final class CompositeRule implements RuleInterface
         }
 
         foreach ($rules as $rule) {
+            /** @psalm-suppress DocblockTypeContradiction */
             if (!$rule instanceof RuleInterface) {
                 /** @psalm-suppress RedundantConditionGivenDocblockType,DocblockTypeContradiction */
                 $type = is_object($rule) ? get_class($rule) : gettype($rule);
@@ -65,8 +66,6 @@ final class CompositeRule implements RuleInterface
         }
 
         $this->operator = $operator;
-
-        /** @var RuleInterface[] $rules */
         $this->rules = $rules;
     }
 
