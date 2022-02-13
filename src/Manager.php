@@ -71,14 +71,7 @@ final class Manager implements AccessCheckerInterface
             return $this->guestHasPermission($permissionName);
         }
 
-        if (!is_string($userId) && !is_int($userId)) {
-            $type = is_object($userId) ? get_class($userId) : gettype($userId);
-            throw new InvalidArgumentException(
-                sprintf('userId must be a string or an int, %s given.', $type)
-            );
-        }
-
-        $userId = (string) $userId;
+        $userId = $this->ensureStringUserId($userId);
         $assignments = $this->assignmentsStorage->getByUserId($userId);
 
         if (empty($assignments) && empty($this->defaultRoleNames)) {
@@ -202,14 +195,16 @@ final class Manager implements AccessCheckerInterface
      * Assigns a role or permission to a user.
      *
      * @param string $itemName Name of the role or the permission to be assigned.
-     * @param string $userId The user ID.
+     * @param int|object|string $userId The user ID.
      *
-     *@throws Exception If the role or permission has already been assigned to the user.
+     * @throws Exception If the role or permission has already been assigned to the user.
      *
      * @return Assignment|null The role or permission assignment information.
      */
-    public function assign(string $itemName, string $userId): ?Assignment
+    public function assign(string $itemName, $userId): ?Assignment
     {
+        $userId = $this->ensureStringUserId($userId);
+
         $item = $this->itemsStorage->get($itemName);
 
         if ($item === null) {
@@ -237,10 +232,12 @@ final class Manager implements AccessCheckerInterface
      * Revokes a role or a permission from a user.
      *
      * @param string $itemName The name of the role or permission to be revoked.
-     * @param string $userId The user ID.
+     * @param int|object|string $userId The user ID.
      */
-    public function revoke(string $itemName, string $userId): void
+    public function revoke(string $itemName, $userId): void
     {
+        $userId = $this->ensureStringUserId($userId);
+
         if ($this->assignmentsStorage->get($itemName, $userId) !== null) {
             $this->assignmentsStorage->remove($itemName, $userId);
         }
@@ -249,10 +246,12 @@ final class Manager implements AccessCheckerInterface
     /**
      * Revokes all roles and permissions from a user.
      *
-     * @param string $userId The user ID.
+     * @param int|object|string $userId The user ID.
      */
-    public function revokeAll(string $userId): void
+    public function revokeAll($userId): void
     {
+        $userId = $this->ensureStringUserId($userId);
+
         $this->assignmentsStorage->removeByUserId($userId);
     }
 
@@ -260,12 +259,14 @@ final class Manager implements AccessCheckerInterface
      * Returns the roles that are assigned to the user via {@see assign()}.
      * Note that child roles that are not assigned directly to the user will not be returned.
      *
-     * @param string $userId The user ID.
+     * @param int|object|string $userId The user ID.
      *
      * @return Role[] All roles directly assigned to the user. The array is indexed by the role names.
      */
-    public function getRolesByUserId(string $userId): array
+    public function getRolesByUserId($userId): array
     {
+        $userId = $this->ensureStringUserId($userId);
+
         $roles = $this->getDefaultRoles();
         foreach ($this->assignmentsStorage->getByUserId($userId) as $name => $assignment) {
             $role = $this->itemsStorage->getRole($assignment->getItemName());
@@ -323,16 +324,34 @@ final class Manager implements AccessCheckerInterface
     /**
      * Returns all permissions that the user has.
      *
-     * @param string $userId The user ID.
+     * @param int|object|string $userId The user ID.
      *
      * @return Permission[] All permissions that the user has. The array is indexed by the permission names.
      */
-    public function getPermissionsByUserId(string $userId): array
+    public function getPermissionsByUserId($userId): array
     {
+        $userId = $this->ensureStringUserId($userId);
+
         return array_merge(
             $this->getDirectPermissionsByUser($userId),
             $this->getInheritedPermissionsByUser($userId)
         );
+    }
+
+    /**
+     * @param mixed $userId
+     *
+     * @return string
+     */
+    private function ensureStringUserId($userId): string
+    {
+        if (!is_string($userId) && !is_int($userId) && !(is_object($userId) && method_exists($userId, '__toString'))) {
+            $type = is_object($userId) ? get_class($userId) : gettype($userId);
+            throw new InvalidArgumentException(
+                sprintf('User ID must be a string, an integer, or an object with method "__toString()", %s given.', $type)
+            );
+        }
+        return (string)$userId;
     }
 
     /**

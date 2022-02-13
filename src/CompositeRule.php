@@ -51,6 +51,7 @@ final class CompositeRule implements RuleInterface
         }
 
         foreach ($rules as $rule) {
+            /** @psalm-suppress DocblockTypeContradiction */
             if (!$rule instanceof RuleInterface) {
                 /** @psalm-suppress RedundantConditionGivenDocblockType,DocblockTypeContradiction */
                 $type = is_object($rule) ? get_class($rule) : gettype($rule);
