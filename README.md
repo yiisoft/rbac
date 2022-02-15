@@ -98,7 +98,19 @@ Next, we need to attach permissions to roles:
 ```php
 $manager->addChild('reader', 'readPost');
 $manager->addChild('author', 'createPost');
+$manager->addChild('author', 'deletePost');
 $manager->addChild('author', 'reader');
+```
+
+Hierarchy for the example above:
+
+```mermaid
+flowchart LR
+  createPost:::permission ---> author:::role
+  readPost:::permission --> reader:::role --> author:::role
+  deletePost:::permission ---> author:::role
+  classDef permission fill:#fc0,stroke:#000,color:#000
+  classDef role fill:#9c0,stroke:#000,color:#000
 ```
 
 Sometimes, basic permissions are not enough. In this case, rules are helpful. Rules are PHP classes that could be
