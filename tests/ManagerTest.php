@@ -261,6 +261,38 @@ final class ManagerTest extends TestCase
         );
     }
 
+    public function testCanAddChildToNonExistItem(): void
+    {
+        $itemsStorage = new FakeItemsStorage();
+        $itemsStorage->add(new Role('author'));
+
+        $manager = new Manager(
+            $itemsStorage,
+            new FakeAssignmentsStorage(),
+            new SimpleRuleFactory(),
+        );
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('There is no item named "admin".');
+        $manager->canAddChild('admin', 'author');
+    }
+
+    public function testCanAddNonExistChild(): void
+    {
+        $itemsStorage = new FakeItemsStorage();
+        $itemsStorage->add(new Role('author'));
+
+        $manager = new Manager(
+            $itemsStorage,
+            new FakeAssignmentsStorage(),
+            new SimpleRuleFactory(),
+        );
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('There is no item named "reader".');
+        $manager->canAddChild('author', 'reader');
+    }
+
     public function testAddChild(): void
     {
         $manager = $this->createManager();
