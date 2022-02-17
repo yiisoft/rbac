@@ -261,6 +261,38 @@ final class ManagerTest extends TestCase
         );
     }
 
+    public function testCanAddChildToNonExistItem(): void
+    {
+        $itemsStorage = new FakeItemsStorage();
+        $itemsStorage->add(new Role('author'));
+
+        $manager = new Manager(
+            $itemsStorage,
+            new FakeAssignmentsStorage(),
+            new SimpleRuleFactory(),
+        );
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('There is no item named "admin".');
+        $manager->canAddChild('admin', 'author');
+    }
+
+    public function testCanAddNonExistChild(): void
+    {
+        $itemsStorage = new FakeItemsStorage();
+        $itemsStorage->add(new Role('author'));
+
+        $manager = new Manager(
+            $itemsStorage,
+            new FakeAssignmentsStorage(),
+            new SimpleRuleFactory(),
+        );
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('There is no item named "reader".');
+        $manager->canAddChild('author', 'reader');
+    }
+
     public function testAddChild(): void
     {
         $manager = $this->createManager();
@@ -733,6 +765,21 @@ final class ManagerTest extends TestCase
         $manager = $this->createManager();
 
         $this->assertEquals(['myDefaultRole'], $manager->getDefaultRoleNames());
+    }
+
+    public function testGetDefaultNonExistRoles(): void
+    {
+        $manager = new Manager(
+            new FakeItemsStorage(),
+            new FakeAssignmentsStorage(),
+            new SimpleRuleFactory(),
+        );
+
+        $manager->setDefaultRoleNames(['bananaCollector']);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Default role "bananaCollector" not found.');
+        $manager->getDefaultRoles();
     }
 
     private function createManager(bool $enableDirectPermissions = false): Manager

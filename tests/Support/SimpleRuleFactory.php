@@ -20,7 +20,7 @@ final class SimpleRuleFactory implements RuleFactoryInterface
     /**
      * @psalm-param array<string,RuleInterface> $rules
      */
-    public function __construct(array $rules)
+    public function __construct(array $rules = [])
     {
         $this->rules = $rules;
     }
