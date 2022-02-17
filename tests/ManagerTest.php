@@ -735,6 +735,21 @@ final class ManagerTest extends TestCase
         $this->assertEquals(['myDefaultRole'], $manager->getDefaultRoleNames());
     }
 
+    public function testGetDefaultNonExistRoles(): void
+    {
+        $manager = new Manager(
+            new FakeItemsStorage(),
+            new FakeAssignmentsStorage(),
+            new SimpleRuleFactory(),
+        );
+
+        $manager->setDefaultRoleNames(['bananaCollector']);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Default role "bananaCollector" not found.');
+        $manager->getDefaultRoles();
+    }
+
     private function createManager(bool $enableDirectPermissions = false): Manager
     {
         $manager = new Manager(
