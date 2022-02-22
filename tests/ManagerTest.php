@@ -19,9 +19,6 @@ use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
 use Yiisoft\Rbac\Tests\Support\SimpleRuleFactory;
 
-/**
- * @group rbac
- */
 final class ManagerTest extends TestCase
 {
     private const NOW = 1642027031;
@@ -147,6 +144,23 @@ final class ManagerTest extends TestCase
                 sprintf('Checking "%s" can "%s"', $userId, $permission)
             );
         }
+    }
+
+    public function testGuestRoleName(): void
+    {
+        $itemsStorage = new FakeItemsStorage();
+        $itemsStorage->add(new Role('guest'));
+
+        $manager = new Manager(
+            $itemsStorage,
+            new FakeAssignmentsStorage(),
+            new SimpleRuleFactory()
+        );
+
+        $returnedManager = $manager->setGuestRoleName('guest');
+
+        $this->assertFalse($manager->userHasPermission(null, 'guest'));
+        $this->assertSame($manager, $returnedManager);
     }
 
     public function dataProviderUserHasPermissionWithGuest(): array
@@ -297,18 +311,16 @@ final class ManagerTest extends TestCase
     {
         $manager = $this->createManager();
 
-        $manager->addChild(
-            'reader',
-            'createPost'
-        );
+        $returnedManager = $manager->addChild('reader', 'createPost');
 
-        $this->assertEquals(
+        $this->assertSame(
             [
                 'readPost',
                 'createPost',
             ],
             array_keys($this->itemsStorage->getChildren('reader'))
         );
+        $this->assertSame($manager, $returnedManager);
     }
 
     public function testAddChildNotHasItem(): void
@@ -389,26 +401,26 @@ final class ManagerTest extends TestCase
     {
         $manager = $this->createManager();
 
-        $manager->removeChild(
-            'author',
-            'createPost',
-        );
+        $returnedManager = $manager->removeChild('author', 'createPost');
 
-        $this->assertEquals(
+        $this->assertSame(
             [
                 'updatePost',
                 'reader',
             ],
             array_keys($this->itemsStorage->getChildren('author'))
         );
+        $this->assertSame($manager, $returnedManager);
     }
 
     public function testRemoveChildren(): void
     {
         $manager = $this->createManager();
 
-        $manager->removeChildren('author');
+        $returnedManager = $manager->removeChildren('author');
+
         $this->assertFalse($this->itemsStorage->hasChildren('author'));
+        $this->assertSame($manager, $returnedManager);
     }
 
     public function testHasChild(): void
@@ -421,20 +433,31 @@ final class ManagerTest extends TestCase
 
     public function testAssign(): void
     {
-        $manager = $this->createManager();
+        $itemsStorage = new FakeItemsStorage();
+        $itemsStorage->add(new Role('author'));
+        $itemsStorage->add(new Role('reader'));
+        $itemsStorage->add(new Role('writer'));
+        $itemsStorage->add(new Role('default-role'));
 
-        $readerAssignment = $manager->assign(
-            'reader',
-            'readingAuthor'
-        );
-        $authorAssignment = $manager->assign(
-            'author',
-            'readingAuthor'
-        );
+        $now = 1642027031;
+        $assignmentsStorage = new FakeAssignmentsStorage($now);
 
-        $this->assertEquals(
+        $manager = new Manager(
+            $itemsStorage,
+            $assignmentsStorage,
+            new SimpleRuleFactory(),
+        );
+        $manager->setDefaultRoleNames(['default-role']);
+
+        $manager->assign('reader', 'readingAuthor');
+        $readerAssignment = $assignmentsStorage->get('reader', 'readingAuthor');
+
+        $manager->assign('author', 'readingAuthor');
+        $authorAssignment = $assignmentsStorage->get('author', 'readingAuthor');
+
+        $this->assertSame(
             [
-                'myDefaultRole',
+                'default-role',
                 'reader',
                 'author',
             ],
@@ -597,7 +620,7 @@ final class ManagerTest extends TestCase
             ->withCreatedAt(1642026147)
             ->withUpdatedAt(1642026148);
 
-        $manager->addRole($role);
+        $returnedManager = $manager->addRole($role);
 
         $storedRole = $this->itemsStorage->getRole('new role');
 
@@ -616,14 +639,17 @@ final class ManagerTest extends TestCase
             ],
             $storedRole->getAttributes()
         );
+        $this->assertSame($manager, $returnedManager);
     }
 
     public function testRemoveRole(): void
     {
         $manager = $this->createManager();
 
-        $manager->removeRole('reader');
+        $returnedManager = $manager->removeRole('reader');
+
         $this->assertNull($this->itemsStorage->getRole('new role'));
+        $this->assertSame($manager, $returnedManager);
     }
 
     public function testUpdateRoleNameAndRule(): void
@@ -631,10 +657,12 @@ final class ManagerTest extends TestCase
         $manager = $this->createManager();
 
         $role = $this->itemsStorage->getRole('reader')->withName('new reader');
-        $manager->updateRole('reader', $role);
+
+        $returnedManager = $manager->updateRole('reader', $role);
 
         $this->assertNull($this->itemsStorage->getRole('reader'));
         $this->assertNotNull($this->itemsStorage->getRole('new reader'));
+        $this->assertSame($manager, $returnedManager);
     }
 
     public function testAddPermission(): void
@@ -646,7 +674,7 @@ final class ManagerTest extends TestCase
             ->withCreatedAt(1642026147)
             ->withUpdatedAt(1642026148);
 
-        $manager->addPermission($permission);
+        $returnedManager = $manager->addPermission($permission);
 
         $storedPermission = $this->itemsStorage->getPermission('edit post');
 
@@ -665,6 +693,7 @@ final class ManagerTest extends TestCase
             ],
             $storedPermission->getAttributes()
         );
+        $this->assertSame($manager, $returnedManager);
     }
 
     public function testAddPermissionWithoutTime(): void
@@ -685,8 +714,10 @@ final class ManagerTest extends TestCase
     {
         $manager = $this->createManager();
 
-        $manager->removePermission('updatePost');
+        $returnedManager = $manager->removePermission('updatePost');
+
         $this->assertNull($this->itemsStorage->getPermission('updatePost'));
+        $this->assertSame($manager, $returnedManager);
     }
 
     public function testUpdatePermission(): void
@@ -698,13 +729,14 @@ final class ManagerTest extends TestCase
             ->withCreatedAt(1642026149)
             ->withUpdatedAt(1642026150);
 
-        $manager->updatePermission('updatePost', $permission);
+        $returnedManager = $manager->updatePermission('updatePost', $permission);
 
         $this->assertNull($this->itemsStorage->getPermission('updatePost'));
         $newPermission = $this->itemsStorage->getPermission('newUpdatePost');
         $this->assertNotNull($newPermission);
         $this->assertSame(1642026149, $newPermission->getCreatedAt());
         $this->assertSame(1642026150, $newPermission->getUpdatedAt());
+        $this->assertSame($manager, $returnedManager);
     }
 
     public function testUpdatePermissionNameAlreadyUsed(): void
@@ -721,6 +753,20 @@ final class ManagerTest extends TestCase
             ->withName('createPost');
 
         $manager->updatePermission('updatePost', $permission);
+    }
+
+    public function testDefaultRoleNames(): void
+    {
+        $manager = new Manager(
+            new FakeItemsStorage(),
+            new FakeAssignmentsStorage(),
+            new SimpleRuleFactory(),
+        );
+
+        $returnedManager = $manager->setDefaultRoleNames(['a', 'b']);
+
+        $this->assertSame(['a', 'b'], $manager->getDefaultRoleNames());
+        $this->assertSame($manager, $returnedManager);
     }
 
     public function testDefaultRolesSetWithClosure(): void
@@ -841,12 +887,16 @@ final class ManagerTest extends TestCase
     {
         $manager = $this->createManager();
 
-        $manager->revoke(
+        $returnedManager = $manager->revoke(
             'reader',
             'reader A'
         );
 
-        $this->assertEquals(['Fast Metabolism'], array_keys($this->assignmentsStorage->getByUserId('reader A')));
+        $this->assertSame(
+            ['Fast Metabolism'],
+            array_keys($this->assignmentsStorage->getByUserId('reader A'))
+        );
+        $this->assertSame($manager, $returnedManager);
     }
 
     public function testRevokePermission(): void
@@ -858,14 +908,19 @@ final class ManagerTest extends TestCase
             'author B'
         );
 
-        $this->assertEquals(['author'], array_keys($this->assignmentsStorage->getByUserId('author B')));
+        $this->assertSame(
+            ['author'],
+            array_keys($this->assignmentsStorage->getByUserId('author B'))
+        );
     }
 
     public function testRevokeAll(): void
     {
         $manager = $this->createManager();
 
-        $manager->revokeAll('author B');
+        $returnedManager = $manager->revokeAll('author B');
+
         $this->assertEmpty($this->assignmentsStorage->getByUserId('author B'));
+        $this->assertSame($manager, $returnedManager);
     }
 }
