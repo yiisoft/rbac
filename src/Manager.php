@@ -107,8 +107,10 @@ final class Manager implements AccessCheckerInterface
      *
      * @throws RuntimeException
      * @throws InvalidArgumentException
+     *
+     * @return self
      */
-    public function addChild(string $parentName, string $childName): void
+    public function addChild(string $parentName, string $childName): self
     {
         if (!$this->hasItem($parentName)) {
             throw new InvalidArgumentException(
@@ -149,6 +151,8 @@ final class Manager implements AccessCheckerInterface
         }
 
         $this->itemsStorage->addChild($parentName, $childName);
+
+        return $this;
     }
 
     /**
@@ -157,12 +161,16 @@ final class Manager implements AccessCheckerInterface
      *
      * @param string $parentName The name of the parent item.
      * @param string $childName The name of the child item.
+     *
+     * @return self
      */
-    public function removeChild(string $parentName, string $childName): void
+    public function removeChild(string $parentName, string $childName): self
     {
         if ($this->hasChild($parentName, $childName)) {
             $this->itemsStorage->removeChild($parentName, $childName);
         }
+
+        return $this;
     }
 
     /**
@@ -170,12 +178,16 @@ final class Manager implements AccessCheckerInterface
      * Note, the children items are not deleted. Only the parent-child relationships are removed.
      *
      * @param string $parentName The name of the parent item.
+     *
+     * @return self
      */
-    public function removeChildren(string $parentName): void
+    public function removeChildren(string $parentName): self
     {
         if ($this->itemsStorage->hasChildren($parentName)) {
             $this->itemsStorage->removeChildren($parentName);
         }
+
+        return $this;
     }
 
     /**
@@ -199,9 +211,9 @@ final class Manager implements AccessCheckerInterface
      *
      * @throws Exception If the role or permission has already been assigned to the user.
      *
-     * @return Assignment|null The role or permission assignment information.
+     * @return self
      */
-    public function assign(string $itemName, $userId): ?Assignment
+    public function assign(string $itemName, $userId): self
     {
         $userId = $this->ensureStringUserId($userId);
 
@@ -225,7 +237,7 @@ final class Manager implements AccessCheckerInterface
 
         $this->assignmentsStorage->add($itemName, $userId);
 
-        return $this->assignmentsStorage->get($itemName, $userId);
+        return $this;
     }
 
     /**
@@ -233,26 +245,34 @@ final class Manager implements AccessCheckerInterface
      *
      * @param string $itemName The name of the role or permission to be revoked.
      * @param int|object|string $userId The user ID.
+     *
+     * @return self
      */
-    public function revoke(string $itemName, $userId): void
+    public function revoke(string $itemName, $userId): self
     {
         $userId = $this->ensureStringUserId($userId);
 
         if ($this->assignmentsStorage->get($itemName, $userId) !== null) {
             $this->assignmentsStorage->remove($itemName, $userId);
         }
+
+        return $this;
     }
 
     /**
      * Revokes all roles and permissions from a user.
      *
      * @param int|object|string $userId The user ID.
+     *
+     * @return self
      */
-    public function revokeAll($userId): void
+    public function revokeAll($userId): self
     {
         $userId = $this->ensureStringUserId($userId);
 
         $this->assignmentsStorage->removeByUserId($userId);
+
+        return $this;
     }
 
     /**
@@ -377,38 +397,80 @@ final class Manager implements AccessCheckerInterface
         return $result;
     }
 
-    public function addRole(Role $role): void
+    /**
+     * @param Role $role
+     *
+     * @return self
+     */
+    public function addRole(Role $role): self
     {
         $this->addItem($role);
+        return $this;
     }
 
-    public function removeRole(string $name): void
+    /**
+     * @param string $name The role name.
+     *
+     * @return self
+     */
+    public function removeRole(string $name): self
     {
         $this->removeItem($name);
+        return $this;
     }
 
-    public function updateRole(string $name, Role $role): void
+    /**
+     * @param string $name The role name.
+     * @param Role $role
+     *
+     * @return self
+     */
+    public function updateRole(string $name, Role $role): self
     {
         $this->checkItemNameForUpdate($role, $name);
+
         $this->itemsStorage->update($name, $role);
         $this->assignmentsStorage->renameItem($name, $role->getName());
+
+        return $this;
     }
 
-    public function addPermission(Permission $permission): void
+    /**
+     * @param Permission $permission
+     *
+     * @return self
+     */
+    public function addPermission(Permission $permission): self
     {
         $this->addItem($permission);
+        return $this;
     }
 
-    public function removePermission(string $permissionName): void
+    /**
+     * @param string $permissionName The permission name.
+     *
+     * @return self
+     */
+    public function removePermission(string $permissionName): self
     {
         $this->removeItem($permissionName);
+        return $this;
     }
 
-    public function updatePermission(string $name, Permission $permission): void
+    /**
+     * @param string $name The permission name.
+     * @param Permission $permission
+     *
+     * @return self
+     */
+    public function updatePermission(string $name, Permission $permission): self
     {
         $this->checkItemNameForUpdate($permission, $name);
+
         $this->itemsStorage->update($name, $permission);
         $this->assignmentsStorage->renameItem($name, $permission->getName());
+
+        return $this;
     }
 
     /**
