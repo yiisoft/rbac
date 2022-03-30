@@ -743,15 +743,15 @@ final class ManagerTest extends TestCase
     {
         $manager = $this->createManager();
 
+        $permission = $this->itemsStorage
+            ->getPermission('updatePost')
+            ->withName('createPost');
+
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(
             'Unable to change the role or the permission name. ' .
             'The name "createPost" is already used by another role or permission.'
         );
-
-        $permission = $this->itemsStorage->getPermission('updatePost')
-            ->withName('createPost');
-
         $manager->updatePermission('updatePost', $permission);
     }
 
