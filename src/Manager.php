@@ -368,7 +368,10 @@ final class Manager implements AccessCheckerInterface
         if (!is_string($userId) && !is_int($userId) && !(is_object($userId) && method_exists($userId, '__toString'))) {
             $type = is_object($userId) ? get_class($userId) : gettype($userId);
             throw new InvalidArgumentException(
-                sprintf('User ID must be a string, an integer, or an object with method "__toString()", %s given.', $type)
+                sprintf(
+                    'User ID must be a string, an integer, or an object with method "__toString()", %s given.',
+                    $type
+                )
             );
         }
         return (string)$userId;

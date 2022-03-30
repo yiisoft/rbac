@@ -10,14 +10,13 @@ use Yiisoft\Rbac\Exception\RuleNotFoundException;
 
 final class RuleNotFoundExceptionTest extends TestCase
 {
-    public function testMessage(): void
+    public function testBase(): void
     {
         $exception = new RuleNotFoundException('MyRule');
 
-        $this->assertSame(
-            'Rule "MyRule" not found.',
-            $exception->getMessage()
-        );
+        $this->assertSame('Rule "MyRule" not found.', $exception->getMessage());
+        $this->assertSame(0, $exception->getCode());
+        $this->assertNull($exception->getPrevious());
     }
 
     public function testCodeAndPreviousException(): void
