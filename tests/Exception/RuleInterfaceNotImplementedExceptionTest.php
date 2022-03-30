@@ -11,7 +11,7 @@ use Yiisoft\Rbac\RuleInterface;
 
 final class RuleInterfaceNotImplementedExceptionTest extends TestCase
 {
-    public function testMessage(): void
+    public function testBase(): void
     {
         $exception = new RuleInterfaceNotImplementedException('MyRule');
 
@@ -19,6 +19,8 @@ final class RuleInterfaceNotImplementedExceptionTest extends TestCase
             'Rule "MyRule" should implement "' . RuleInterface::class . '".',
             $exception->getMessage()
         );
+        $this->assertSame(0, $exception->getCode());
+        $this->assertNull($exception->getPrevious());
     }
 
     public function testCodeAndPreviousException(): void
