@@ -37,7 +37,8 @@
         "vimeo/psalm": "^4.22"
     },
     "suggest": {
-        "yiisoft/rbac-php": "To store rules in PHP files"
+        "yiisoft/rbac-php": "To store rules in PHP files",
+        "yiisoft/rbac-rules-container": "To create rules via Yii Factory"
     },
     "autoload": {
         "psr-4": {
