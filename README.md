@@ -47,7 +47,7 @@ One of the following storages should be installed as well:
 - [Cycle DB storage](https://github.com/yiisoft/rbac-cycle-db) - database storage based on
   [Cycle DBAL](https://github.com/cycle/database) (in development).
 
-Also should be installed rule factory implementation such as 
+Also a rule factory implementation should be installed such as  
 [Rules Container](https://github.com/yiisoft/rbac-rules-container) (based on 
 [Yii Factory](https://github.com/yiisoft/factory)).
 
