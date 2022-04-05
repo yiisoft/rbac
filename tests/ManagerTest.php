@@ -501,15 +501,17 @@ final class ManagerTest extends TestCase
 
     public function testAssignPermissionDirectlyWhenItIsDisabled(): void
     {
-        $manager = $this->createManager();
+        $manager = new Manager(
+            new FakeItemsStorage(),
+            new FakeAssignmentsStorage(),
+            new SimpleRuleFactory(),
+        );
+        $manager->addPermission(new Permission('readPost'));
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Assigning permissions directly is disabled. Prefer assigning roles only.');
 
-        $manager->assign(
-            'updateAnyPost',
-            'reader'
-        );
+        $manager->assign('readPost', 'id7');
     }
 
     public function testAssignPermissionDirectlyWhenItIsEnabled(): void
