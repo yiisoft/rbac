@@ -571,7 +571,7 @@ final class ManagerTest extends TestCase
         $manager = $this->createManager();
 
         $this->assertSame(
-            ['deletePost', 'createPost', 'updatePost', 'readPost'],
+            ['deletePost', 'publishPost', 'createPost', 'updatePost', 'readPost'],
             array_keys($manager->getPermissionsByUserId('author B'))
         );
     }
@@ -663,6 +663,7 @@ final class ManagerTest extends TestCase
         $this->assertNull($this->itemsStorage->getRole('reader'));
         $this->assertNotNull($this->itemsStorage->getRole('new reader'));
         $this->assertSame($manager, $returnedManager);
+        $this->assertTrue($manager->userHasPermission('reader A', 'readPost'));
     }
 
     public function testAddPermission(): void
@@ -737,6 +738,29 @@ final class ManagerTest extends TestCase
         $this->assertSame(1642026149, $newPermission->getCreatedAt());
         $this->assertSame(1642026150, $newPermission->getUpdatedAt());
         $this->assertSame($manager, $returnedManager);
+        $this->assertFalse($manager->userHasPermission('author B', 'updatePost', ['authorID' => 'author B']));
+        $this->assertTrue($manager->userHasPermission('author B', 'newUpdatePost', ['authorID' => 'author B']));
+    }
+
+    public function testUpdateDirectPermission1(): void
+    {
+        $manager = $this->createManager();
+
+        $permission = $this->itemsStorage->getPermission('deletePost')
+            ->withName('newDeletePost')
+            ->withCreatedAt(1642026149)
+            ->withUpdatedAt(1642026150);
+
+        $manager->updatePermission('deletePost', $permission);
+
+        $newPermission = $this->itemsStorage->getPermission('newDeletePost');
+
+        $this->assertNull($this->itemsStorage->getPermission('deletePost'));
+        $this->assertNotNull($newPermission);
+        $this->assertSame(1642026149, $newPermission->getCreatedAt());
+        $this->assertSame(1642026150, $newPermission->getUpdatedAt());
+        $this->assertFalse($manager->userHasPermission('author B', 'deletePost'));
+        $this->assertTrue($manager->userHasPermission('author B', 'newDeletePost'));
     }
 
     public function testUpdatePermissionNameAlreadyUsed(): void
@@ -753,6 +777,43 @@ final class ManagerTest extends TestCase
             'The name "createPost" is already used by another role or permission.'
         );
         $manager->updatePermission('updatePost', $permission);
+    }
+
+    public function testUpdateRoleNameAlreadyUsed(): void
+    {
+        $manager = $this->createManager();
+
+        $role = $this->itemsStorage
+            ->getRole('reader')
+            ->withName('author');
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage(
+            'Unable to change the role or the permission name. ' .
+            'The name "author" is already used by another role or permission.'
+        );
+        $manager->updateRole('reader', $role);
+    }
+
+    public function testSeveralDefaultRoles(): void
+    {
+        $manager = new Manager(
+            new FakeItemsStorage(),
+            new FakeAssignmentsStorage(),
+            new SimpleRuleFactory(),
+        );
+        $manager
+            ->addRole(new Role('a'))
+            ->addRole(new Role('b'))
+            ->addRole(new Role('c'))
+            ->setDefaultRoleNames(['a', 'b']);
+
+        $roles = $manager->getDefaultRoles();
+
+        $this->assertCount(2, $roles);
+        $this->assertSame(['a', 'b'], array_keys($roles));
+        $this->assertSame('a', $roles['a']->getName());
+        $this->assertSame('b', $roles['b']->getName());
     }
 
     public function testDefaultRoleNames(): void
@@ -850,6 +911,7 @@ final class ManagerTest extends TestCase
 
         $storage->add(new Permission('Fast Metabolism'));
         $storage->add(new Permission('createPost'));
+        $storage->add(new Permission('publishPost'));
         $storage->add(new Permission('readPost'));
         $storage->add(new Permission('deletePost'));
         $storage->add((new Permission('updatePost'))->withRuleName('isAuthor'));
@@ -878,6 +940,7 @@ final class ManagerTest extends TestCase
         $storage->add('reader', 'reader A');
         $storage->add('author', 'author B');
         $storage->add('deletePost', 'author B');
+        $storage->add('publishPost', 'author B');
         $storage->add('admin', 'admin C');
 
         return $storage;
@@ -909,7 +972,7 @@ final class ManagerTest extends TestCase
         );
 
         $this->assertSame(
-            ['author'],
+            ['author', 'publishPost'],
             array_keys($this->assignmentsStorage->getByUserId('author B'))
         );
     }
