@@ -170,7 +170,7 @@ final class FakeItemsStorage implements ItemsStorageInterface
         }
         foreach ($this->children as &$children) {
             if (isset($children[$name])) {
-                $children[$item->getName()] = $children[$name];
+                $children[$item->getName()] = $item;
                 unset($children[$name]);
             }
         }

@@ -32,13 +32,13 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5",
-        "roave/infection-static-analysis-plugin": "^1.16",
+        "roave/infection-static-analysis-plugin": "^1.18",
         "spatie/phpunit-watcher": "^1.23",
-        "vimeo/psalm": "^4.18"
+        "vimeo/psalm": "^4.22"
     },
     "suggest": {
         "yiisoft/rbac-php": "To store rules in PHP files",
-        "yiisoft/rbac-db": "To store rules in database"
+        "yiisoft/rbac-rules-container": "To create rules via Yii Factory"
     },
     "autoload": {
         "psr-4": {
@@ -48,11 +48,6 @@
     "autoload-dev": {
         "psr-4": {
             "Yiisoft\\Rbac\\Tests\\": "tests"
-        }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "3.0.x-dev"
         }
     },
     "config": {

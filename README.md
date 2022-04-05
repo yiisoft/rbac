@@ -41,9 +41,15 @@ composer require yiisoft/rbac --prefer-dist
 
 One of the following storages should be installed as well:
 
-- [PHP storage](https://github.com/yiisoft/rbac-php) - PHP file storage.
+- [PHP storage](https://github.com/yiisoft/rbac-php) - PHP file storage;
 - [DB storage](https://github.com/yiisoft/rbac-db) - database storage based on 
-  [yiisoft/db](https://github.com/yiisoft/db).
+  [Yii DB](https://github.com/yiisoft/db)  (in development);
+- [Cycle DB storage](https://github.com/yiisoft/rbac-cycle-db) - database storage based on
+  [Cycle DBAL](https://github.com/cycle/database) (in development).
+
+Also a rule factory implementation should be installed such as  
+[Rules Container](https://github.com/yiisoft/rbac-rules-container) (based on 
+[Yii Factory](https://github.com/yiisoft/factory)).
 
 ## General usage
 

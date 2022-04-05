@@ -62,8 +62,6 @@ final class Manager implements AccessCheckerInterface
 
     /**
      * @inheritdoc
-     *
-     * @psalm-suppress DocblockTypeContradiction
      */
     public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
     {
@@ -74,7 +72,7 @@ final class Manager implements AccessCheckerInterface
         $userId = $this->ensureStringUserId($userId);
         $assignments = $this->assignmentsStorage->getByUserId($userId);
 
-        if (empty($assignments) && empty($this->defaultRoleNames)) {
+        if (empty($assignments)) {
             return false;
         }
 
@@ -656,6 +654,7 @@ final class Manager implements AccessCheckerInterface
     {
         if ($this->hasItem($name)) {
             $this->itemsStorage->remove($name);
+            $this->assignmentsStorage->removeByItemName($name);
         }
     }
 
