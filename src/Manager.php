@@ -74,7 +74,7 @@ final class Manager implements AccessCheckerInterface
         $userId = $this->ensureStringUserId($userId);
         $assignments = $this->assignmentsStorage->getByUserId($userId);
 
-        if (empty($assignments) && empty($this->defaultRoleNames)) {
+        if (empty($assignments)) {
             return false;
         }
 
