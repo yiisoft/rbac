@@ -648,8 +648,9 @@ final class ManagerTest extends TestCase
 
         $returnedManager = $manager->removeRole('reader');
 
-        $this->assertNull($this->itemsStorage->getRole('new role'));
+        $this->assertNull($this->itemsStorage->getRole('reader'));
         $this->assertSame($manager, $returnedManager);
+        $this->assertFalse($manager->userHasPermission('reader A', 'readPost'));
     }
 
     public function testUpdateRoleNameAndRule(): void
@@ -715,10 +716,11 @@ final class ManagerTest extends TestCase
     {
         $manager = $this->createManager();
 
-        $returnedManager = $manager->removePermission('updatePost');
+        $returnedManager = $manager->removePermission('deletePost');
 
-        $this->assertNull($this->itemsStorage->getPermission('updatePost'));
+        $this->assertNull($this->itemsStorage->getPermission('deletePost'));
         $this->assertSame($manager, $returnedManager);
+        $this->assertFalse($manager->userHasPermission('author B', 'deletePost'));
     }
 
     public function testUpdatePermission(): void

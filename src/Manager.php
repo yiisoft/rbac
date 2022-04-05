@@ -656,6 +656,7 @@ final class Manager implements AccessCheckerInterface
     {
         if ($this->hasItem($name)) {
             $this->itemsStorage->remove($name);
+            $this->assignmentsStorage->removeByItemName($name);
         }
     }
 
