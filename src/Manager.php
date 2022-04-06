@@ -580,7 +580,7 @@ final class Manager implements AccessCheckerInterface
      */
     private function addItem(Item $item): void
     {
-        if ($this->itemsStorage->get($item->getName()) !== null) {
+        if ($this->itemsStorage->exists($item->getName())) {
             throw new ItemAlreadyExistsException($item);
         }
 
