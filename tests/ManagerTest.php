@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Yiisoft\Rbac\AssignmentsStorageInterface;
+use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 use Yiisoft\Rbac\Exception\RuleNotFoundException;
 use Yiisoft\Rbac\Manager;
 use Yiisoft\Rbac\Permission;
@@ -642,6 +643,22 @@ final class ManagerTest extends TestCase
             $storedRole->getAttributes()
         );
         $this->assertSame($manager, $returnedManager);
+    }
+
+    public function testAddAlreadyExistsItem(): void
+    {
+        $manager = new Manager(
+            new FakeItemsStorage(),
+            new FakeAssignmentsStorage(),
+            new SimpleRuleFactory(),
+        );
+        $manager->addRole(new Role('reader'));
+
+        $permission = new Permission('reader');
+
+        $this->expectException(ItemAlreadyExistsException::class);
+        $this->expectExceptionMessage('Role or permission with name "reader" already exists.');
+        $manager->addPermission($permission);
     }
 
     public function testRemoveRole(): void

@@ -9,6 +9,7 @@ use Exception;
 use InvalidArgumentException;
 use RuntimeException;
 use Yiisoft\Access\AccessCheckerInterface;
+use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 
 use function array_key_exists;
 use function get_class;
@@ -372,7 +373,7 @@ final class Manager implements AccessCheckerInterface
                 )
             );
         }
-        return (string)$userId;
+        return (string) $userId;
     }
 
     /**
@@ -402,6 +403,8 @@ final class Manager implements AccessCheckerInterface
      * @param Role $role
      *
      * @return self
+     *
+     * @throws ItemAlreadyExistsException
      */
     public function addRole(Role $role): self
     {
@@ -440,6 +443,8 @@ final class Manager implements AccessCheckerInterface
      * @param Permission $permission
      *
      * @return self
+     *
+     * @throws ItemAlreadyExistsException
      */
     public function addPermission(Permission $permission): self
     {
@@ -570,8 +575,15 @@ final class Manager implements AccessCheckerInterface
             ->execute($user, $item, $params);
     }
 
+    /**
+     * @throws ItemAlreadyExistsException
+     */
     private function addItem(Item $item): void
     {
+        if ($this->itemsStorage->get($item->getName()) !== null) {
+            throw new ItemAlreadyExistsException($item);
+        }
+
         $time = time();
         if (!$item->hasCreatedAt()) {
             $item = $item->withCreatedAt($time);
