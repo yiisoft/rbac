@@ -24,6 +24,11 @@ final class FakeItemsStorage implements ItemsStorageInterface
         return $this->items[$name] ?? null;
     }
 
+    public function exists(string $name): bool
+    {
+        return array_key_exists($name, $this->items);
+    }
+
     public function add(Item $item): void
     {
         $this->items[$item->getName()] = $item;
