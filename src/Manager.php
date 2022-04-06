@@ -402,9 +402,9 @@ final class Manager implements AccessCheckerInterface
     /**
      * @param Role $role
      *
-     * @return self
-     *
      * @throws ItemAlreadyExistsException
+     *
+     * @return self
      */
     public function addRole(Role $role): self
     {
@@ -442,9 +442,9 @@ final class Manager implements AccessCheckerInterface
     /**
      * @param Permission $permission
      *
-     * @return self
-     *
      * @throws ItemAlreadyExistsException
+     *
+     * @return self
      */
     public function addPermission(Permission $permission): self
     {
