@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac\Tests\Support;
 
+use DateTime;
 use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\AssignmentsStorageInterface;
 
 final class FakeAssignmentsStorage implements AssignmentsStorageInterface
 {
     private array $assignments = [];
-    private ?int $now;
+    private ?DateTime $now;
 
-    public function __construct(?int $now = null)
+    public function __construct(?DateTime $now = null)
     {
         $this->now = $now;
     }
@@ -37,7 +38,7 @@ final class FakeAssignmentsStorage implements AssignmentsStorageInterface
         $this->assignments[$userId][$itemName] = new Assignment(
             $userId,
             $itemName,
-            $this->now ?? time()
+            $this->now ?? new DateTime()
         );
     }
 

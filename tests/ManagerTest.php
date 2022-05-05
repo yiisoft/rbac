@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac\Tests;
 
+use DateTime;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -22,7 +23,8 @@ use Yiisoft\Rbac\Tests\Support\SimpleRuleFactory;
 
 final class ManagerTest extends TestCase
 {
-    private const NOW = 1642027031;
+    private DateTime $now;
+    private DateTime $updateNow;
 
     private ItemsStorageInterface $itemsStorage;
 
@@ -31,6 +33,8 @@ final class ManagerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->now = new DateTime("2022-05-05 16:38:45");
+        $this->updateNow = new DateTime("2022-05-05 16:38:46");
         $this->itemsStorage = $this->createItemsStorage();
         $this->assignmentsStorage = $this->createAssignmentsStorage();
     }
@@ -440,7 +444,7 @@ final class ManagerTest extends TestCase
         $itemsStorage->add(new Role('writer'));
         $itemsStorage->add(new Role('default-role'));
 
-        $now = 1642027031;
+        $now = $this->now;
         $assignmentsStorage = new FakeAssignmentsStorage($now);
 
         $manager = new Manager(
@@ -467,11 +471,11 @@ final class ManagerTest extends TestCase
 
         $this->assertSame('readingAuthor', $readerAssignment->getUserId());
         $this->assertSame('reader', $readerAssignment->getItemName());
-        $this->assertSame(self::NOW, $readerAssignment->getCreatedAt());
+        $this->assertSame($this->now->format("Y-m-d H:i:s"), $readerAssignment->getCreatedAt()->format("Y-m-d H:i:s"));
 
         $this->assertSame('readingAuthor', $authorAssignment->getUserId());
         $this->assertSame('author', $authorAssignment->getItemName());
-        $this->assertSame(self::NOW, $authorAssignment->getCreatedAt());
+        $this->assertSame($this->now->format("Y-m-d H:i:s"), $authorAssignment->getCreatedAt()->format("Y-m-d H:i:s"));
     }
 
     public function testAssignUnknownItem(): void
@@ -620,8 +624,8 @@ final class ManagerTest extends TestCase
         $role = (new Role('new role'))
             ->withDescription('new role description')
             ->withRuleName($rule->getName())
-            ->withCreatedAt(1642026147)
-            ->withUpdatedAt(1642026148);
+            ->withCreatedAt($this->now)
+            ->withUpdatedAt($this->updateNow);
 
         $returnedManager = $manager->addRole($role);
 
@@ -629,16 +633,16 @@ final class ManagerTest extends TestCase
 
         $this->assertNotNull($storedRole);
         $this->assertSame('new role description', $storedRole->getDescription());
-        $this->assertSame(1642026147, $storedRole->getCreatedAt());
-        $this->assertSame(1642026148, $storedRole->getUpdatedAt());
+        $this->assertSame($this->now, $storedRole->getCreatedAt());
+        $this->assertSame($this->updateNow, $storedRole->getUpdatedAt());
         $this->assertSame(
             [
                 'name' => 'new role',
                 'description' => 'new role description',
                 'ruleName' => EasyRule::class,
                 'type' => 'role',
-                'updatedAt' => 1642026148,
-                'createdAt' => 1642026147,
+                'updatedAt' => $this->updateNow->format("Y-m-d H:i:s"),
+                'createdAt' => $this->now->format("Y-m-d H:i:s"),
             ],
             $storedRole->getAttributes()
         );
@@ -692,8 +696,8 @@ final class ManagerTest extends TestCase
 
         $permission = (new Permission('edit post'))
             ->withDescription('edit a post')
-            ->withCreatedAt(1642026147)
-            ->withUpdatedAt(1642026148);
+            ->withCreatedAt($this->now)
+            ->withUpdatedAt($this->updateNow);
 
         $returnedManager = $manager->addPermission($permission);
 
@@ -701,16 +705,16 @@ final class ManagerTest extends TestCase
 
         $this->assertNotNull($storedPermission);
         $this->assertSame('edit a post', $storedPermission->getDescription());
-        $this->assertSame(1642026147, $storedPermission->getCreatedAt());
-        $this->assertSame(1642026148, $storedPermission->getUpdatedAt());
+        $this->assertSame($this->now, $storedPermission->getCreatedAt());
+        $this->assertSame($this->updateNow, $storedPermission->getUpdatedAt());
         $this->assertSame(
             [
                 'name' => 'edit post',
                 'description' => 'edit a post',
                 'ruleName' => null,
                 'type' => 'permission',
-                'updatedAt' => 1642026148,
-                'createdAt' => 1642026147,
+                'updatedAt' => $this->updateNow->format("Y-m-d H:i:s"),
+                'createdAt' => $this->now->format("Y-m-d H:i:s"),
             ],
             $storedPermission->getAttributes()
         );
@@ -745,19 +749,20 @@ final class ManagerTest extends TestCase
     public function testUpdatePermission(): void
     {
         $manager = $this->createManager();
-
+        $createdAt = new DateTime('2022-05-05 16:38:49');
+        $updatedAt = new DateTime('2022-05-05 16:38:49');
         $permission = $this->itemsStorage->getPermission('updatePost')
             ->withName('newUpdatePost')
-            ->withCreatedAt(1642026149)
-            ->withUpdatedAt(1642026150);
+            ->withCreatedAt($createdAt)
+            ->withUpdatedAt($updatedAt);
 
         $returnedManager = $manager->updatePermission('updatePost', $permission);
 
         $this->assertNull($this->itemsStorage->getPermission('updatePost'));
         $newPermission = $this->itemsStorage->getPermission('newUpdatePost');
         $this->assertNotNull($newPermission);
-        $this->assertSame(1642026149, $newPermission->getCreatedAt());
-        $this->assertSame(1642026150, $newPermission->getUpdatedAt());
+        $this->assertSame($createdAt, $newPermission->getCreatedAt());
+        $this->assertSame($updatedAt, $newPermission->getUpdatedAt());
         $this->assertSame($manager, $returnedManager);
         $this->assertFalse($manager->userHasPermission('author B', 'updatePost', ['authorID' => 'author B']));
         $this->assertTrue($manager->userHasPermission('author B', 'newUpdatePost', ['authorID' => 'author B']));
@@ -767,10 +772,12 @@ final class ManagerTest extends TestCase
     {
         $manager = $this->createManager();
 
+        $createdAt = new DateTime('2022-05-05 16:38:49');
+        $updatedAt = new DateTime('2022-05-05 16:38:49');
         $permission = $this->itemsStorage->getPermission('deletePost')
             ->withName('newDeletePost')
-            ->withCreatedAt(1642026149)
-            ->withUpdatedAt(1642026150);
+            ->withCreatedAt($createdAt)
+            ->withUpdatedAt($updatedAt);
 
         $manager->updatePermission('deletePost', $permission);
 
@@ -778,8 +785,8 @@ final class ManagerTest extends TestCase
 
         $this->assertNull($this->itemsStorage->getPermission('deletePost'));
         $this->assertNotNull($newPermission);
-        $this->assertSame(1642026149, $newPermission->getCreatedAt());
-        $this->assertSame(1642026150, $newPermission->getUpdatedAt());
+        $this->assertSame($createdAt, $newPermission->getCreatedAt());
+        $this->assertSame($updatedAt, $newPermission->getUpdatedAt());
         $this->assertFalse($manager->userHasPermission('author B', 'deletePost'));
         $this->assertTrue($manager->userHasPermission('author B', 'newDeletePost'));
     }
@@ -955,7 +962,7 @@ final class ManagerTest extends TestCase
 
     private function createAssignmentsStorage(): AssignmentsStorageInterface
     {
-        $storage = new FakeAssignmentsStorage(self::NOW);
+        $storage = new FakeAssignmentsStorage($this->now);
 
         $storage->add('Fast Metabolism', 'reader A');
         $storage->add('reader', 'reader A');

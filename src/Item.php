@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac;
 
+use DateTime;
+
 /**
  * Items are RBAC hierarchy entities that could be assigned to the user.
  * Both roles and permissions are items.
@@ -29,14 +31,14 @@ abstract class Item
     private ?string $ruleName = null;
 
     /**
-     * @var int|null UNIX timestamp representing the item creation time.
+     * @var DateTime|null UNIX timestamp representing the item creation time.
      */
-    private ?int $createdAt = null;
+    private ?DateTime $createdAt = null;
 
     /**
-     * @var int|null UNIX timestamp representing the item updating time.
+     * @var DateTime|null UNIX timestamp representing the item updating time.
      */
-    private ?int $updatedAt = null;
+    private ?DateTime $updatedAt = null;
 
     /**
      * @param string $name The name of the item. This must be globally unique.
@@ -102,14 +104,14 @@ abstract class Item
     /**
      * @return static
      */
-    final public function withCreatedAt(int $createdAt): self
+    final public function withCreatedAt(DateTime $createdAt): self
     {
         $new = clone $this;
         $new->createdAt = $createdAt;
         return $new;
     }
 
-    final public function getCreatedAt(): ?int
+    final public function getCreatedAt(): ?DateTime
     {
         return $this->createdAt;
     }
@@ -117,14 +119,14 @@ abstract class Item
     /**
      * @return static
      */
-    final public function withUpdatedAt(int $updatedAt): self
+    final public function withUpdatedAt(DateTime $updatedAt): self
     {
         $new = clone $this;
         $new->updatedAt = $updatedAt;
         return $new;
     }
 
-    final public function getUpdatedAt(): ?int
+    final public function getUpdatedAt(): ?DateTime
     {
         return $this->updatedAt;
     }
@@ -147,19 +149,27 @@ abstract class Item
      *     description:string,
      *     ruleName:string|null,
      *     type:string,
-     *     updatedAt:int|null,
-     *     createdAt:int|null,
+     *     updatedAt:DateTime|null,
+     *     createdAt:DateTime|null,
      * }
      */
     final public function getAttributes(): array
     {
+        $createdAt = $this->getUpdatedAt();
+        if ($createdAt instanceof DateTime) {
+            $createdAt = $createdAt->format("Y-m-d H:i:s");
+        }
+        $updatedAt = $this->getCreatedAt();
+        if ($updatedAt instanceof DateTime) {
+            $updatedAt = $updatedAt->format("Y-m-d H:i:s");
+        }
         return [
             'name' => $this->getName(),
             'description' => $this->getDescription(),
             'ruleName' => $this->getRuleName(),
             'type' => $this->getType(),
-            'updatedAt' => $this->getUpdatedAt(),
-            'createdAt' => $this->getCreatedAt(),
+            'updatedAt' => $createdAt,
+            'createdAt' => $updatedAt,
         ];
     }
 }

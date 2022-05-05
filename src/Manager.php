@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac;
 
 use Closure;
+use DateTime;
 use Exception;
 use InvalidArgumentException;
 use RuntimeException;
@@ -584,7 +585,7 @@ final class Manager implements AccessCheckerInterface
             throw new ItemAlreadyExistsException($item);
         }
 
-        $time = time();
+        $time = new DateTime();
         if (!$item->hasCreatedAt()) {
             $item = $item->withCreatedAt($time);
         }
