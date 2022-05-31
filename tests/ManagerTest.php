@@ -676,7 +676,9 @@ final class ManagerTest extends TestCase
     {
         $manager = $this->createManager();
 
-        $role = $this->itemsStorage->getRole('reader')->withName('new reader');
+        $role = $this->itemsStorage
+            ->getRole('reader')
+            ->withName('new reader');
 
         $returnedManager = $manager->updateRole('reader', $role);
 
@@ -746,7 +748,8 @@ final class ManagerTest extends TestCase
     {
         $manager = $this->createManager();
 
-        $permission = $this->itemsStorage->getPermission('updatePost')
+        $permission = $this->itemsStorage
+            ->getPermission('updatePost')
             ->withName('newUpdatePost')
             ->withCreatedAt(1642026149)
             ->withUpdatedAt(1642026150);
@@ -767,7 +770,8 @@ final class ManagerTest extends TestCase
     {
         $manager = $this->createManager();
 
-        $permission = $this->itemsStorage->getPermission('deletePost')
+        $permission = $this->itemsStorage
+            ->getPermission('deletePost')
             ->withName('newDeletePost')
             ->withCreatedAt(1642026149)
             ->withUpdatedAt(1642026150);
