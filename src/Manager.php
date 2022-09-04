@@ -673,7 +673,7 @@ final class Manager implements AccessCheckerInterface
     /**
      * Performs access check for the specified user.
      *
-     * @param string $user The user ID. This should br a string representing the unique identifier of a user.
+     * @param string $user The user ID. This should be a string representing the unique identifier of a user.
      * @param Item|null $item The permission or the role that need access check.
      * @param array $params Name-value pairs that would be passed to rules associated with the permissions and roles
      * assigned to the user. A param with name 'user' is added to this array, which holds the value of `$userId`.
