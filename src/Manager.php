@@ -9,6 +9,7 @@ use Exception;
 use InvalidArgumentException;
 use RuntimeException;
 use Yiisoft\Access\AccessCheckerInterface;
+use Yiisoft\Rbac\Exception\DefaultRoleNotFoundException;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 
 use function array_key_exists;
@@ -529,7 +530,7 @@ final class Manager implements AccessCheckerInterface
         foreach ($this->defaultRoleNames as $roleName) {
             $role = $this->itemsStorage->getRole($roleName);
             if ($role === null) {
-                throw new RuntimeException("Default role \"$roleName\" not found.");
+                throw new DefaultRoleNotFoundException("Default role \"$roleName\" not found.");
             }
             $roles[$roleName] = $role;
         }
