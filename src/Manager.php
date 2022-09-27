@@ -13,8 +13,6 @@ use Yiisoft\Rbac\Exception\DefaultRoleNotFoundException;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 
 use function array_key_exists;
-use function get_class;
-use function gettype;
 use function in_array;
 use function is_array;
 use function is_int;
@@ -26,20 +24,11 @@ use function is_string;
  */
 final class Manager implements AccessCheckerInterface
 {
-    private ItemsStorageInterface $itemsStorage;
-    private AssignmentsStorageInterface $assignmentsStorage;
-    private RuleFactoryInterface $ruleFactory;
-
     /**
      * @var string[] A list of role names that are assigned to every user automatically without calling {@see assign()}.
      * Note that these roles are applied to users, regardless of their state of authentication.
      */
     private array $defaultRoleNames = [];
-
-    /**
-     * @var bool Whether to enable assigning permissions directly to user. Prefer assigning roles only.
-     */
-    private bool $enableDirectPermissions;
 
     private ?string $guestRoleName = null;
 
@@ -50,16 +39,8 @@ final class Manager implements AccessCheckerInterface
      * @param bool $enableDirectPermissions Whether to enable assigning permissions directly to user. Prefer assigning
      * roles only.
      */
-    public function __construct(
-        ItemsStorageInterface $itemsStorage,
-        AssignmentsStorageInterface $assignmentsStorage,
-        RuleFactoryInterface $ruleFactory,
-        bool $enableDirectPermissions = false
-    ) {
-        $this->itemsStorage = $itemsStorage;
-        $this->assignmentsStorage = $assignmentsStorage;
-        $this->ruleFactory = $ruleFactory;
-        $this->enableDirectPermissions = $enableDirectPermissions;
+    public function __construct(private ItemsStorageInterface $itemsStorage, private AssignmentsStorageInterface $assignmentsStorage, private RuleFactoryInterface $ruleFactory, private bool $enableDirectPermissions = false)
+    {
     }
 
     /**
@@ -107,8 +88,6 @@ final class Manager implements AccessCheckerInterface
      *
      * @throws RuntimeException
      * @throws InvalidArgumentException
-     *
-     * @return self
      */
     public function addChild(string $parentName, string $childName): self
     {
@@ -161,8 +140,6 @@ final class Manager implements AccessCheckerInterface
      *
      * @param string $parentName The name of the parent item.
      * @param string $childName The name of the child item.
-     *
-     * @return self
      */
     public function removeChild(string $parentName, string $childName): self
     {
@@ -178,8 +155,6 @@ final class Manager implements AccessCheckerInterface
      * Note, the children items are not deleted. Only the parent-child relationships are removed.
      *
      * @param string $parentName The name of the parent item.
-     *
-     * @return self
      */
     public function removeChildren(string $parentName): self
     {
@@ -210,8 +185,6 @@ final class Manager implements AccessCheckerInterface
      * @param int|object|string $userId The user ID.
      *
      * @throws Exception If the role or permission has already been assigned to the user.
-     *
-     * @return self
      */
     public function assign(string $itemName, $userId): self
     {
@@ -245,8 +218,6 @@ final class Manager implements AccessCheckerInterface
      *
      * @param string $itemName The name of the role or permission to be revoked.
      * @param int|object|string $userId The user ID.
-     *
-     * @return self
      */
     public function revoke(string $itemName, $userId): self
     {
@@ -263,8 +234,6 @@ final class Manager implements AccessCheckerInterface
      * Revokes all roles and permissions from a user.
      *
      * @param int|object|string $userId The user ID.
-     *
-     * @return self
      */
     public function revokeAll($userId): self
     {
@@ -358,15 +327,10 @@ final class Manager implements AccessCheckerInterface
         );
     }
 
-    /**
-     * @param mixed $userId
-     *
-     * @return string
-     */
-    private function ensureStringUserId($userId): string
+    private function ensureStringUserId(mixed $userId): string
     {
         if (!is_string($userId) && !is_int($userId) && !(is_object($userId) && method_exists($userId, '__toString'))) {
-            $type = is_object($userId) ? get_class($userId) : gettype($userId);
+            $type = get_debug_type($userId);
             throw new InvalidArgumentException(
                 sprintf(
                     'User ID must be a string, an integer, or an object with method "__toString()", %s given.',
@@ -401,11 +365,7 @@ final class Manager implements AccessCheckerInterface
     }
 
     /**
-     * @param Role $role
-     *
      * @throws ItemAlreadyExistsException
-     *
-     * @return self
      */
     public function addRole(Role $role): self
     {
@@ -415,8 +375,6 @@ final class Manager implements AccessCheckerInterface
 
     /**
      * @param string $name The role name.
-     *
-     * @return self
      */
     public function removeRole(string $name): self
     {
@@ -426,9 +384,6 @@ final class Manager implements AccessCheckerInterface
 
     /**
      * @param string $name The role name.
-     * @param Role $role
-     *
-     * @return self
      */
     public function updateRole(string $name, Role $role): self
     {
@@ -441,11 +396,7 @@ final class Manager implements AccessCheckerInterface
     }
 
     /**
-     * @param Permission $permission
-     *
      * @throws ItemAlreadyExistsException
-     *
-     * @return self
      */
     public function addPermission(Permission $permission): self
     {
@@ -455,8 +406,6 @@ final class Manager implements AccessCheckerInterface
 
     /**
      * @param string $permissionName The permission name.
-     *
-     * @return self
      */
     public function removePermission(string $permissionName): self
     {
@@ -466,9 +415,6 @@ final class Manager implements AccessCheckerInterface
 
     /**
      * @param string $name The permission name.
-     * @param Permission $permission
-     *
-     * @return self
      */
     public function updatePermission(string $name, Permission $permission): self
     {
@@ -488,7 +434,7 @@ final class Manager implements AccessCheckerInterface
      * @throws InvalidArgumentException When `$roles` is neither array nor closure.
      * @throws RuntimeException When callable returns not array.
      */
-    public function setDefaultRoleNames($roleNames): self
+    public function setDefaultRoleNames(Closure|array $roleNames): self
     {
         if (is_array($roleNames)) {
             $this->defaultRoleNames = $roleNames;
@@ -788,9 +734,7 @@ final class Manager implements AccessCheckerInterface
     {
         return array_filter(
             $this->itemsStorage->getRoles(),
-            static function (Role $roleItem) use ($array) {
-                return array_key_exists($roleItem->getName(), $array);
-            }
+            static fn (Role $roleItem) => array_key_exists($roleItem->getName(), $array)
         );
     }
 

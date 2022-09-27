@@ -22,7 +22,7 @@ use Yiisoft\Rbac\Tests\Support\SimpleRuleFactory;
 
 final class ManagerTest extends TestCase
 {
-    private const NOW = 1642027031;
+    private const NOW = 1_642_027_031;
 
     private ItemsStorageInterface $itemsStorage;
 
@@ -440,7 +440,7 @@ final class ManagerTest extends TestCase
         $itemsStorage->add(new Role('writer'));
         $itemsStorage->add(new Role('default-role'));
 
-        $now = 1642027031;
+        $now = 1_642_027_031;
         $assignmentsStorage = new FakeAssignmentsStorage($now);
 
         $manager = new Manager(
@@ -620,8 +620,8 @@ final class ManagerTest extends TestCase
         $role = (new Role('new role'))
             ->withDescription('new role description')
             ->withRuleName($rule->getName())
-            ->withCreatedAt(1642026147)
-            ->withUpdatedAt(1642026148);
+            ->withCreatedAt(1_642_026_147)
+            ->withUpdatedAt(1_642_026_148);
 
         $returnedManager = $manager->addRole($role);
 
@@ -629,16 +629,16 @@ final class ManagerTest extends TestCase
 
         $this->assertNotNull($storedRole);
         $this->assertSame('new role description', $storedRole->getDescription());
-        $this->assertSame(1642026147, $storedRole->getCreatedAt());
-        $this->assertSame(1642026148, $storedRole->getUpdatedAt());
+        $this->assertSame(1_642_026_147, $storedRole->getCreatedAt());
+        $this->assertSame(1_642_026_148, $storedRole->getUpdatedAt());
         $this->assertSame(
             [
                 'name' => 'new role',
                 'description' => 'new role description',
                 'ruleName' => EasyRule::class,
                 'type' => 'role',
-                'updatedAt' => 1642026148,
-                'createdAt' => 1642026147,
+                'updatedAt' => 1_642_026_148,
+                'createdAt' => 1_642_026_147,
             ],
             $storedRole->getAttributes()
         );
@@ -694,8 +694,8 @@ final class ManagerTest extends TestCase
 
         $permission = (new Permission('edit post'))
             ->withDescription('edit a post')
-            ->withCreatedAt(1642026147)
-            ->withUpdatedAt(1642026148);
+            ->withCreatedAt(1_642_026_147)
+            ->withUpdatedAt(1_642_026_148);
 
         $returnedManager = $manager->addPermission($permission);
 
@@ -703,16 +703,16 @@ final class ManagerTest extends TestCase
 
         $this->assertNotNull($storedPermission);
         $this->assertSame('edit a post', $storedPermission->getDescription());
-        $this->assertSame(1642026147, $storedPermission->getCreatedAt());
-        $this->assertSame(1642026148, $storedPermission->getUpdatedAt());
+        $this->assertSame(1_642_026_147, $storedPermission->getCreatedAt());
+        $this->assertSame(1_642_026_148, $storedPermission->getUpdatedAt());
         $this->assertSame(
             [
                 'name' => 'edit post',
                 'description' => 'edit a post',
                 'ruleName' => null,
                 'type' => 'permission',
-                'updatedAt' => 1642026148,
-                'createdAt' => 1642026147,
+                'updatedAt' => 1_642_026_148,
+                'createdAt' => 1_642_026_147,
             ],
             $storedPermission->getAttributes()
         );
@@ -751,16 +751,16 @@ final class ManagerTest extends TestCase
         $permission = $this->itemsStorage
             ->getPermission('updatePost')
             ->withName('newUpdatePost')
-            ->withCreatedAt(1642026149)
-            ->withUpdatedAt(1642026150);
+            ->withCreatedAt(1_642_026_149)
+            ->withUpdatedAt(1_642_026_150);
 
         $returnedManager = $manager->updatePermission('updatePost', $permission);
 
         $this->assertNull($this->itemsStorage->getPermission('updatePost'));
         $newPermission = $this->itemsStorage->getPermission('newUpdatePost');
         $this->assertNotNull($newPermission);
-        $this->assertSame(1642026149, $newPermission->getCreatedAt());
-        $this->assertSame(1642026150, $newPermission->getUpdatedAt());
+        $this->assertSame(1_642_026_149, $newPermission->getCreatedAt());
+        $this->assertSame(1_642_026_150, $newPermission->getUpdatedAt());
         $this->assertSame($manager, $returnedManager);
         $this->assertFalse($manager->userHasPermission('author B', 'updatePost', ['authorID' => 'author B']));
         $this->assertTrue($manager->userHasPermission('author B', 'newUpdatePost', ['authorID' => 'author B']));
@@ -773,8 +773,8 @@ final class ManagerTest extends TestCase
         $permission = $this->itemsStorage
             ->getPermission('deletePost')
             ->withName('newDeletePost')
-            ->withCreatedAt(1642026149)
-            ->withUpdatedAt(1642026150);
+            ->withCreatedAt(1_642_026_149)
+            ->withUpdatedAt(1_642_026_150);
 
         $manager->updatePermission('deletePost', $permission);
 
@@ -782,8 +782,8 @@ final class ManagerTest extends TestCase
 
         $this->assertNull($this->itemsStorage->getPermission('deletePost'));
         $this->assertNotNull($newPermission);
-        $this->assertSame(1642026149, $newPermission->getCreatedAt());
-        $this->assertSame(1642026150, $newPermission->getUpdatedAt());
+        $this->assertSame(1_642_026_149, $newPermission->getCreatedAt());
+        $this->assertSame(1_642_026_150, $newPermission->getUpdatedAt());
         $this->assertFalse($manager->userHasPermission('author B', 'deletePost'));
         $this->assertTrue($manager->userHasPermission('author B', 'newDeletePost'));
     }
@@ -860,9 +860,7 @@ final class ManagerTest extends TestCase
         $manager = $this->createManager();
 
         $manager->setDefaultRoleNames(
-            static function () {
-                return ['newDefaultRole'];
-            }
+            static fn () => ['newDefaultRole']
         );
 
         $this->assertEquals(['newDefaultRole'], $manager->getDefaultRoleNames());
@@ -876,9 +874,7 @@ final class ManagerTest extends TestCase
         $this->expectExceptionMessage('Default role names closure must return an array');
 
         $manager->setDefaultRoleNames(
-            static function () {
-                return 'test';
-            }
+            static fn () => 'test'
         );
     }
 

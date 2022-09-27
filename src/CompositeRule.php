@@ -6,10 +6,7 @@ namespace Yiisoft\Rbac;
 
 use InvalidArgumentException;
 
-use function get_class;
-use function gettype;
 use function in_array;
-use function is_object;
 
 /**
  * Composite rule allows combining multiple rules.
@@ -53,7 +50,7 @@ final class CompositeRule implements RuleInterface
         foreach ($rules as $rule) {
             if (!$rule instanceof RuleInterface) {
                 /** @psalm-suppress RedundantConditionGivenDocblockType,DocblockTypeContradiction */
-                $type = is_object($rule) ? get_class($rule) : gettype($rule);
+                $type = get_debug_type($rule);
                 throw new InvalidArgumentException(
                     sprintf(
                         'Each rule should be an instance of %s, "%s" given.',
