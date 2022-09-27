@@ -13,16 +13,15 @@ use function array_key_exists;
 final class SimpleRuleFactory implements RuleFactoryInterface
 {
     /**
-     * @psalm-var array<string,RuleInterface>
-     */
-    private array $rules;
-
-    /**
      * @psalm-param array<string,RuleInterface> $rules
      */
-    public function __construct(array $rules = [])
+    public function __construct(
+        /**
+         * @psalm-var array<string,RuleInterface>
+         */
+        private array $rules = []
+    )
     {
-        $this->rules = $rules;
     }
 
     public function create(string $name): RuleInterface

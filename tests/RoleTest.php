@@ -15,8 +15,8 @@ final class RoleTest extends TestCase
         $original = new Role('test');
         $new1 = $original->withName('test2');
         $new2 = $original->withDescription('new description');
-        $new3 = $original->withUpdatedAt(1642029084);
-        $new4 = $original->withCreatedAt(1642029084);
+        $new3 = $original->withUpdatedAt(1_642_029_084);
+        $new4 = $original->withCreatedAt(1_642_029_084);
         $new5 = $original->withRuleName('test');
 
 

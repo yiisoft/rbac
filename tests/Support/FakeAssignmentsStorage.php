@@ -10,11 +10,9 @@ use Yiisoft\Rbac\AssignmentsStorageInterface;
 final class FakeAssignmentsStorage implements AssignmentsStorageInterface
 {
     private array $assignments = [];
-    private ?int $now;
 
-    public function __construct(?int $now = null)
+    public function __construct(private ?int $now = null)
     {
-        $this->now = $now;
     }
 
     public function getAll(): array

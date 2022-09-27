@@ -9,11 +9,8 @@ use Yiisoft\Rbac\RuleInterface;
 
 final class EasyRule implements RuleInterface
 {
-    private bool $expected;
-
-    public function __construct(bool $expected = true)
+    public function __construct(private bool $expected = true)
     {
-        $this->expected = $expected;
     }
 
     public function execute(string $userId, Item $item, array $parameters = []): bool
