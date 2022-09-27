@@ -13,8 +13,6 @@ use Yiisoft\Rbac\Exception\DefaultRoleNotFoundException;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 
 use function array_key_exists;
-use function get_class;
-use function gettype;
 use function in_array;
 use function is_array;
 use function is_int;
@@ -367,9 +365,7 @@ final class Manager implements AccessCheckerInterface
     }
 
     /**
-     *
      * @throws ItemAlreadyExistsException
-     *
      */
     public function addRole(Role $role): self
     {
@@ -388,7 +384,6 @@ final class Manager implements AccessCheckerInterface
 
     /**
      * @param string $name The role name.
-     *
      */
     public function updateRole(string $name, Role $role): self
     {
@@ -401,9 +396,7 @@ final class Manager implements AccessCheckerInterface
     }
 
     /**
-     *
      * @throws ItemAlreadyExistsException
-     *
      */
     public function addPermission(Permission $permission): self
     {
@@ -422,7 +415,6 @@ final class Manager implements AccessCheckerInterface
 
     /**
      * @param string $name The permission name.
-     *
      */
     public function updatePermission(string $name, Permission $permission): self
     {
@@ -442,7 +434,7 @@ final class Manager implements AccessCheckerInterface
      * @throws InvalidArgumentException When `$roles` is neither array nor closure.
      * @throws RuntimeException When callable returns not array.
      */
-    public function setDefaultRoleNames(\Closure|array $roleNames): self
+    public function setDefaultRoleNames(Closure|array $roleNames): self
     {
         if (is_array($roleNames)) {
             $this->defaultRoleNames = $roleNames;
@@ -742,7 +734,7 @@ final class Manager implements AccessCheckerInterface
     {
         return array_filter(
             $this->itemsStorage->getRoles(),
-            static fn(Role $roleItem) => array_key_exists($roleItem->getName(), $array)
+            static fn (Role $roleItem) => array_key_exists($roleItem->getName(), $array)
         );
     }
 
