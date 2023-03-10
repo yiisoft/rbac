@@ -36,7 +36,7 @@ library. It is used in [Yii Framework](https://yiiframework.com) but is usable s
 The package could be installed with composer:
 
 ```shell
-composer require yiisoft/rbac --prefer-dist
+composer require yiisoft/rbac
 ```
 
 One of the following storages should be installed as well:
@@ -45,7 +45,7 @@ One of the following storages should be installed as well:
 - [DB storage](https://github.com/yiisoft/rbac-db) - database storage based on 
   [Yii DB](https://github.com/yiisoft/db)  (in development);
 - [Cycle DB storage](https://github.com/yiisoft/rbac-cycle-db) - database storage based on
-  [Cycle DBAL](https://github.com/cycle/database) (in development).
+  [Cycle DBAL](https://github.com/cycle/database).
 
 Also a rule factory implementation should be installed such as  
 [Rules Container](https://github.com/yiisoft/rbac-rules-container) (based on 
