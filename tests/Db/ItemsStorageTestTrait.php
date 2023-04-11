@@ -8,7 +8,7 @@ use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 
-trait ItemsStorageTestTest
+trait ItemsStorageTestTrait
 {
     private int $initialRolesCount = 0;
     private int $initialPermissionsCount = 0;
