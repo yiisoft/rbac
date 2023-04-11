@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Rbac\Cycle\Tests\Base;
+namespace Yiisoft\Rbac\Tests\Db;
 
 use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\Permission;
