@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <phpunit
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    bootstrap="vendor/autoload.php" colors="true"
+    bootstrap="vendor/autoload.php"
+    colors="true"
+    verbose="true"
     failOnRisky="true"
     failOnWarning="true"
+    convertErrorsToExceptions="true"
+    convertNoticesToExceptions="true"
+    convertWarningsToExceptions="true"
     stopOnFailure="false"
     executionOrder="random"
     resolveDependencies="true"
-    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.1/phpunit.xsd"
-    cacheDirectory=".phpunit.cache"
 >
-
     <php>
         <ini name="error_reporting" value="-1"/>
     </php>
@@ -21,11 +23,9 @@
         </testsuite>
     </testsuites>
 
-    <coverage/>
-
-    <source>
+    <coverage>
         <include>
             <directory>./src</directory>
         </include>
-    </source>
+    </coverage>
 </phpunit>

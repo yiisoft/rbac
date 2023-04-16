@@ -53,7 +53,7 @@ final class ManagerTest extends TestCase
         }
     }
 
-    public static function dataProviderUserHasPermission(): array
+    public function dataProviderUserHasPermission(): array
     {
         return [
             [
@@ -164,7 +164,7 @@ final class ManagerTest extends TestCase
         $this->assertSame($manager, $returnedManager);
     }
 
-    public static function dataProviderUserHasPermissionWithGuest(): array
+    public function dataProviderUserHasPermissionWithGuest(): array
     {
         return [
             [
@@ -208,7 +208,7 @@ final class ManagerTest extends TestCase
         $manager->userHasPermission($userId, $permission, $params);
     }
 
-    public static function dataProviderUserHasPermissionWithFailUserId(): array
+    public function dataProviderUserHasPermissionWithFailUserId(): array
     {
         return [
             [true],

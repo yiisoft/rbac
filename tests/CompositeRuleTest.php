@@ -13,7 +13,7 @@ use Yiisoft\Rbac\Tests\Support\EasyRule;
 
 final class CompositeRuleTest extends TestCase
 {
-    public static function compositeRuleDataProvider(): array
+    public function compositeRuleDataProvider(): array
     {
         return [
             'AND empty' => [CompositeRule::AND, [], true],
