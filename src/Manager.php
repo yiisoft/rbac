@@ -626,7 +626,6 @@ final class Manager implements AccessCheckerInterface
      * @param string $userId The user ID.
      *
      * @return Permission[] All direct permissions that the user has. The array is indexed by the permission names.
-     *
      * @psalm-return array<string,Permission>
      */
     private function getDirectPermissionsByUser(string $userId): array
