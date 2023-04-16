@@ -327,7 +327,6 @@ final class Manager implements AccessCheckerInterface
      * @param string $roleName The role name.
      *
      * @return Permission[] All permissions that the role represents. The array is indexed by the permission names.
-     *
      * @psalm-return array<string,Permission>
      */
     public function getPermissionsByRoleName(string $roleName): array
