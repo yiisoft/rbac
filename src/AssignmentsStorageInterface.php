@@ -14,6 +14,7 @@ interface AssignmentsStorageInterface
      * Returns all role and permission assignment information.
      *
      * @return array
+     *
      * @psalm-return array<string,array<string, Assignment>>
      */
     public function getAll(): array;
