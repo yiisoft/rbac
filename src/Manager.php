@@ -605,7 +605,6 @@ final class Manager implements AccessCheckerInterface
      * @param array<string,mixed> $permissionNames
      *
      * @return Permission[]
-     *
      * @psalm-return array<string,Permission>
      */
     private function normalizePermissions(array $permissionNames): array
