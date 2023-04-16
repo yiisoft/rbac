@@ -53,7 +53,7 @@ final class ManagerTest extends TestCase
         }
     }
 
-    public function dataProviderUserHasPermission(): array
+    public static function dataProviderUserHasPermission(): array
     {
         return [
             [
@@ -164,7 +164,7 @@ final class ManagerTest extends TestCase
         $this->assertSame($manager, $returnedManager);
     }
 
-    public function dataProviderUserHasPermissionWithGuest(): array
+    public static function dataProviderUserHasPermissionWithGuest(): array
     {
         return [
             [
@@ -208,7 +208,7 @@ final class ManagerTest extends TestCase
         $manager->userHasPermission($userId, $permission, $params);
     }
 
-    public function dataProviderUserHasPermissionWithFailUserId(): array
+    public static function dataProviderUserHasPermissionWithFailUserId(): array
     {
         return [
             [true],
@@ -225,7 +225,7 @@ final class ManagerTest extends TestCase
         $this->assertFalse($manager->userHasPermission('unknown user', 'createPost'));
     }
 
-    public function testUserHasPermissionWithNonExistsRule(): void
+    public function testUserHasPermissionWithNonExistingRule(): void
     {
         $manager = $this->createManager();
 
@@ -236,7 +236,7 @@ final class ManagerTest extends TestCase
         $this->itemsStorage->addChild('test', 'test-permission');
 
         $this->expectException(RuleNotFoundException::class);
-        $this->expectErrorMessage('Rule "non-exist-rule" not found.');
+        $this->expectExceptionMessage('Rule "non-exist-rule" not found.');
         $manager->userHasPermission('reader A', 'test-permission');
     }
 
@@ -247,8 +247,8 @@ final class ManagerTest extends TestCase
         $this->assertTrue(
             $manager->canAddChild(
                 'author',
-                'reader'
-            )
+                'reader',
+            ),
         );
     }
 
@@ -259,8 +259,8 @@ final class ManagerTest extends TestCase
         $this->assertFalse(
             $manager->canAddChild(
                 'reader',
-                'author'
-            )
+                'author',
+            ),
         );
     }
 
@@ -271,8 +271,8 @@ final class ManagerTest extends TestCase
         $this->assertFalse(
             $manager->canAddChild(
                 'readPost',
-                'reader'
-            )
+                'reader',
+            ),
         );
     }
 
