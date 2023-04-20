@@ -2,7 +2,7 @@
 
 ## 1.0.2 under development
 
-- no changes in this release.
+- Technical release, no code changes.
 
 ## 1.0.1 April 20, 2023
 
