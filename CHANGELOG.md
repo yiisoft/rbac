@@ -1,5 +1,9 @@
 # Yii Role-Based Access Control Change Log
 
+## 1.0.2 under development
+
+- no changes in this release.
+
 ## 1.0.1 April 20, 2023
 
 - Enh #121: Throw friendly exception when getting non-existing default roles (@DplusG)
