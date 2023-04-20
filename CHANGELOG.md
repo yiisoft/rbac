@@ -1,6 +1,6 @@
 # Yii Role-Based Access Control Change Log
 
-## 1.0.2 under development
+## 1.0.2 April 20, 2023
 
 - Technical release, no code changes.
 
