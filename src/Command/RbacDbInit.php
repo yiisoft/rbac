@@ -8,7 +8,6 @@ use InvalidArgumentException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Rbac\Db\SchemaManager;
 
 /**
@@ -55,8 +54,6 @@ final class RbacDbInit extends Command
 
         return Command::SUCCESS;
     }
-
-
 
     /**
      * Basic method for creating RBAC related table. When a table already exists, creation is skipped. Operations are
