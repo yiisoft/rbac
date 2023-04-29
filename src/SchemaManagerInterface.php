@@ -12,7 +12,7 @@ interface SchemaManagerInterface
 
     public function createAssignmentsTable(): void;
 
-    public function tableExists(string $tableName): bool;
+    public function hasTable(string $tableName): bool;
 
     public function dropTable(string $tableName): void;
 
