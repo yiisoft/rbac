@@ -15,8 +15,6 @@ use Yiisoft\Rbac\SchemaManagerInterface;
  */
 class RbacDbInit extends Command
 {
-    protected static $defaultName = 'rbac/db/init';
-
     /**
      * @throws InvalidArgumentException When a table name is set to the empty string.
      */
