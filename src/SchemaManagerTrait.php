@@ -57,7 +57,7 @@ trait SchemaManagerTrait
         return $this->itemsChildrenTable;
     }
 
-    private function initTables(string $itemsTable, string $assignmentsTable, string $itemsChildrenTable): void
+    private function initTables(string $itemsTable, string $assignmentsTable, $itemsChildrenTable): void
     {
         if ($itemsTable === '') {
             throw new InvalidArgumentException('Items table name can\'t be empty.');
