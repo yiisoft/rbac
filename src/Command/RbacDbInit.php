@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Rbac\Db\Command;
+namespace Yiisoft\Rbac\Command;
 
 use InvalidArgumentException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Yiisoft\Rbac\Db\SchemaManager;
+use Yiisoft\Rbac\SchemaManagerInterface;
 
 /**
  * Command for creating RBAC related database tables.
@@ -21,7 +21,7 @@ final class RbacDbInit extends Command
      * @throws InvalidArgumentException When a table name is set to the empty string.
      */
     public function __construct(
-        private SchemaManager $schemaManager,
+        private SchemaManagerInterface $schemaManager,
     ) {
         $this->schemaManager = $this->schemaManager;
 
