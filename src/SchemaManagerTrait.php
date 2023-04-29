@@ -42,6 +42,21 @@ trait SchemaManagerTrait
         $this->dropTable($this->itemsTable);
     }
 
+    public function getItemsTable(): string
+    {
+        return $this->itemsTable;
+    }
+
+    public function getAssignmentsTable(): string
+    {
+        return $this->assignmentsTable;
+    }
+
+    public function getItemsChildrenTable(): string
+    {
+        return $this->itemsChildrenTable;
+    }
+
     private function initTables(string $itemsTable, string $assignmentsTable, string $itemsChildrenTable): void
     {
         if ($itemsTable === '') {
