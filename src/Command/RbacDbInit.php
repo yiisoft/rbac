@@ -12,7 +12,7 @@ use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Rbac\Db\SchemaManager;
 
 /**
- * Command for creating RBAC related database tables using Yii Database.
+ * Command for creating RBAC related database tables.
  */
 final class RbacDbInit extends Command
 {
@@ -33,7 +33,7 @@ final class RbacDbInit extends Command
     {
         $this
             ->setDescription('Create RBAC schemas')
-            ->setHelp('This command creates schemas for RBAC using Yii Database')
+            ->setHelp('This command creates schemas for RBAC')
             ->addOption(name: 'force', shortcut: 'f', description: 'Force recreation of schemas if they exist');
     }
 
