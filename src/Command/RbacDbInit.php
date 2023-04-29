@@ -67,7 +67,7 @@ class RbacDbInit extends Command
     {
         $output->writeln("<fg=blue>Checking existence of `$tableName` table...</>");
 
-        if ($this->schemaManager->tableExists($tableName)) {
+        if ($this->schemaManager->hasTable($tableName)) {
             $output->writeln("<bg=yellow>`$tableName` table already exists. Skipped creating.</>");
 
             return;
@@ -97,7 +97,7 @@ class RbacDbInit extends Command
     {
         $output->writeln("<fg=blue>Checking existence of `$tableName` table...</>");
 
-        if (!$this->schemaManager->tableExists($tableName)) {
+        if (!$this->schemaManager->hasTable($tableName)) {
             $output->writeln("<bg=yellow>`$tableName` table doesn't exist. Skipped dropping.</>");
 
             return;
