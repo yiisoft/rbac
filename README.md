@@ -43,7 +43,7 @@ One of the following storages should be installed as well:
 
 - [PHP storage](https://github.com/yiisoft/rbac-php) - PHP file storage;
 - [DB storage](https://github.com/yiisoft/rbac-db) - database storage based on 
-  [Yii DB](https://github.com/yiisoft/db)  (in development);
+  [Yii DB](https://github.com/yiisoft/db);
 - [Cycle DB storage](https://github.com/yiisoft/rbac-cycle-db) - database storage based on
   [Cycle DBAL](https://github.com/cycle/database).
 
