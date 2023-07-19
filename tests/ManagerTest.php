@@ -30,8 +30,8 @@ final class ManagerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->itemsStorage = $this->createItemsStorage();
-        $this->assignmentsStorage = $this->createAssignmentsStorage();
+        $this->itemsStorage = $this->createFilledItemsStorage();
+        $this->assignmentsStorage = $this->createFilledAssignmentsStorage();
     }
 
     /**
@@ -148,13 +148,13 @@ final class ManagerTest extends TestCase
 
     public function testGuestRoleName(): void
     {
-        $itemsStorage = new FakeItemsStorage();
+        $itemsStorage = $this->createItemsStorage();
         $itemsStorage->add(new Role('guest'));
 
         $manager = new Manager(
             $itemsStorage,
-            new FakeAssignmentsStorage(),
-            new SimpleRuleFactory()
+            $this->createAssignmentsStorage(),
+            new SimpleRuleFactory(),
         );
 
         $returnedManager = $manager->setGuestRoleName('guest');
@@ -277,12 +277,12 @@ final class ManagerTest extends TestCase
 
     public function testCanAddChildToNonExistItem(): void
     {
-        $itemsStorage = new FakeItemsStorage();
+        $itemsStorage = $this->createItemsStorage();
         $itemsStorage->add(new Role('author'));
 
         $manager = new Manager(
             $itemsStorage,
-            new FakeAssignmentsStorage(),
+            $this->createAssignmentsStorage(),
             new SimpleRuleFactory(),
         );
 
@@ -293,12 +293,12 @@ final class ManagerTest extends TestCase
 
     public function testCanAddNonExistChild(): void
     {
-        $itemsStorage = new FakeItemsStorage();
+        $itemsStorage = $this->createItemsStorage();
         $itemsStorage->add(new Role('author'));
 
         $manager = new Manager(
             $itemsStorage,
-            new FakeAssignmentsStorage(),
+            $this->createAssignmentsStorage(),
             new SimpleRuleFactory(),
         );
 
@@ -433,14 +433,14 @@ final class ManagerTest extends TestCase
 
     public function testAssign(): void
     {
-        $itemsStorage = new FakeItemsStorage();
+        $itemsStorage = $this->createItemsStorage();
         $itemsStorage->add(new Role('author'));
         $itemsStorage->add(new Role('reader'));
         $itemsStorage->add(new Role('writer'));
         $itemsStorage->add(new Role('default-role'));
 
         $now = 1642027031;
-        $assignmentsStorage = new FakeAssignmentsStorage($now);
+        $assignmentsStorage = $this->createAssignmentsStorage($now);
 
         $manager = new Manager(
             $itemsStorage,
@@ -502,8 +502,8 @@ final class ManagerTest extends TestCase
     public function testAssignPermissionDirectlyWhenItIsDisabled(): void
     {
         $manager = new Manager(
-            new FakeItemsStorage(),
-            new FakeAssignmentsStorage(),
+            $this->createItemsStorage(),
+            $this->createAssignmentsStorage(),
             new SimpleRuleFactory(),
         );
         $manager->addPermission(new Permission('readPost'));
@@ -647,8 +647,8 @@ final class ManagerTest extends TestCase
     public function testAddAlreadyExistsItem(): void
     {
         $manager = new Manager(
-            new FakeItemsStorage(),
-            new FakeAssignmentsStorage(),
+            $this->createItemsStorage(),
+            $this->createAssignmentsStorage(),
             new SimpleRuleFactory(),
         );
         $manager->addRole(new Role('reader'));
@@ -822,8 +822,8 @@ final class ManagerTest extends TestCase
     public function testSeveralDefaultRoles(): void
     {
         $manager = new Manager(
-            new FakeItemsStorage(),
-            new FakeAssignmentsStorage(),
+            $this->createItemsStorage(),
+            $this->createAssignmentsStorage(),
             new SimpleRuleFactory(),
         );
         $manager
@@ -843,8 +843,8 @@ final class ManagerTest extends TestCase
     public function testDefaultRoleNames(): void
     {
         $manager = new Manager(
-            new FakeItemsStorage(),
-            new FakeAssignmentsStorage(),
+            $this->createItemsStorage(),
+            $this->createAssignmentsStorage(),
             new SimpleRuleFactory(),
         );
 
@@ -901,8 +901,8 @@ final class ManagerTest extends TestCase
     public function testGetDefaultNonExistRoles(): void
     {
         $manager = new Manager(
-            new FakeItemsStorage(),
-            new FakeAssignmentsStorage(),
+            $this->createItemsStorage(),
+            $this->createAssignmentsStorage(),
             new SimpleRuleFactory(),
         );
 
@@ -954,6 +954,16 @@ final class ManagerTest extends TestCase
         $this->assertSame($manager, $returnedManager);
     }
 
+    protected function createItemsStorage(): ItemsStorageInterface
+    {
+        return new FakeItemsStorage();
+    }
+
+    protected function createAssignmentsStorage(int $now = self::NOW): AssignmentsStorageInterface
+    {
+        return new FakeAssignmentsStorage($now);
+    }
+
     private function createManager(bool $enableDirectPermissions = false): Manager
     {
         $manager = new Manager(
@@ -962,7 +972,7 @@ final class ManagerTest extends TestCase
             new SimpleRuleFactory([
                 'isAuthor' => new AuthorRule(),
             ]),
-            $enableDirectPermissions
+            $enableDirectPermissions,
         );
 
         $manager->setDefaultRoleNames(['myDefaultRole']);
@@ -970,9 +980,9 @@ final class ManagerTest extends TestCase
         return $manager;
     }
 
-    private function createItemsStorage(): ItemsStorageInterface
+    private function createFilledItemsStorage(): ItemsStorageInterface
     {
-        $storage = new FakeItemsStorage();
+        $storage = $this->createItemsStorage();
 
         $storage->add(new Permission('Fast Metabolism'));
         $storage->add(new Permission('createPost'));
@@ -997,9 +1007,9 @@ final class ManagerTest extends TestCase
         return $storage;
     }
 
-    private function createAssignmentsStorage(): AssignmentsStorageInterface
+    private function createFilledAssignmentsStorage(): AssignmentsStorageInterface
     {
-        $storage = new FakeAssignmentsStorage(self::NOW);
+        $storage = $this->createAssignmentsStorage();
 
         $storage->add('Fast Metabolism', 'reader A');
         $storage->add('reader', 'reader A');
