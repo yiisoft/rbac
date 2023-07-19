@@ -913,22 +913,6 @@ final class ManagerTest extends TestCase
         $manager->getDefaultRoles();
     }
 
-    private function createManager(bool $enableDirectPermissions = false): Manager
-    {
-        $manager = new Manager(
-            $this->itemsStorage,
-            $this->assignmentsStorage,
-            new SimpleRuleFactory([
-                'isAuthor' => new AuthorRule(),
-            ]),
-            $enableDirectPermissions
-        );
-
-        $manager->setDefaultRoleNames(['myDefaultRole']);
-
-        return $manager;
-    }
-
     public function testRevokeRole(): void
     {
         $manager = $this->createManager();
@@ -968,6 +952,22 @@ final class ManagerTest extends TestCase
 
         $this->assertEmpty($this->assignmentsStorage->getByUserId('author B'));
         $this->assertSame($manager, $returnedManager);
+    }
+
+    private function createManager(bool $enableDirectPermissions = false): Manager
+    {
+        $manager = new Manager(
+            $this->itemsStorage,
+            $this->assignmentsStorage,
+            new SimpleRuleFactory([
+                'isAuthor' => new AuthorRule(),
+            ]),
+            $enableDirectPermissions
+        );
+
+        $manager->setDefaultRoleNames(['myDefaultRole']);
+
+        return $manager;
     }
 
     private function createItemsStorage(): ItemsStorageInterface
