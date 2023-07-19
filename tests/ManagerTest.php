@@ -30,7 +30,6 @@ final class ManagerTest extends TestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
         $this->itemsStorage = $this->createItemsStorage();
         $this->assignmentsStorage = $this->createAssignmentsStorage();
     }
@@ -930,47 +929,6 @@ final class ManagerTest extends TestCase
         return $manager;
     }
 
-    private function createItemsStorage(): ItemsStorageInterface
-    {
-        $storage = new FakeItemsStorage();
-
-        $storage->add(new Permission('Fast Metabolism'));
-        $storage->add(new Permission('createPost'));
-        $storage->add(new Permission('publishPost'));
-        $storage->add(new Permission('readPost'));
-        $storage->add(new Permission('deletePost'));
-        $storage->add((new Permission('updatePost'))->withRuleName('isAuthor'));
-        $storage->add(new Permission('updateAnyPost'));
-        $storage->add(new Role('withoutChildren'));
-        $storage->add(new Role('reader'));
-        $storage->add(new Role('author'));
-        $storage->add(new Role('admin'));
-        $storage->add(new Role('myDefaultRole'));
-
-        $storage->addChild('reader', 'readPost');
-        $storage->addChild('author', 'createPost');
-        $storage->addChild('author', 'updatePost');
-        $storage->addChild('author', 'reader');
-        $storage->addChild('admin', 'author');
-        $storage->addChild('admin', 'updateAnyPost');
-
-        return $storage;
-    }
-
-    private function createAssignmentsStorage(): AssignmentsStorageInterface
-    {
-        $storage = new FakeAssignmentsStorage(self::NOW);
-
-        $storage->add('Fast Metabolism', 'reader A');
-        $storage->add('reader', 'reader A');
-        $storage->add('author', 'author B');
-        $storage->add('deletePost', 'author B');
-        $storage->add('publishPost', 'author B');
-        $storage->add('admin', 'admin C');
-
-        return $storage;
-    }
-
     public function testRevokeRole(): void
     {
         $manager = $this->createManager();
@@ -1010,5 +968,46 @@ final class ManagerTest extends TestCase
 
         $this->assertEmpty($this->assignmentsStorage->getByUserId('author B'));
         $this->assertSame($manager, $returnedManager);
+    }
+
+    private function createItemsStorage(): ItemsStorageInterface
+    {
+        $storage = new FakeItemsStorage();
+
+        $storage->add(new Permission('Fast Metabolism'));
+        $storage->add(new Permission('createPost'));
+        $storage->add(new Permission('publishPost'));
+        $storage->add(new Permission('readPost'));
+        $storage->add(new Permission('deletePost'));
+        $storage->add((new Permission('updatePost'))->withRuleName('isAuthor'));
+        $storage->add(new Permission('updateAnyPost'));
+        $storage->add(new Role('withoutChildren'));
+        $storage->add(new Role('reader'));
+        $storage->add(new Role('author'));
+        $storage->add(new Role('admin'));
+        $storage->add(new Role('myDefaultRole'));
+
+        $storage->addChild('reader', 'readPost');
+        $storage->addChild('author', 'createPost');
+        $storage->addChild('author', 'updatePost');
+        $storage->addChild('author', 'reader');
+        $storage->addChild('admin', 'author');
+        $storage->addChild('admin', 'updateAnyPost');
+
+        return $storage;
+    }
+
+    private function createAssignmentsStorage(): AssignmentsStorageInterface
+    {
+        $storage = new FakeAssignmentsStorage(self::NOW);
+
+        $storage->add('Fast Metabolism', 'reader A');
+        $storage->add('reader', 'reader A');
+        $storage->add('author', 'author B');
+        $storage->add('deletePost', 'author B');
+        $storage->add('publishPost', 'author B');
+        $storage->add('admin', 'admin C');
+
+        return $storage;
     }
 }
