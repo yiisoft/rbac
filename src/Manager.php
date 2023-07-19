@@ -24,7 +24,7 @@ use function is_string;
 /**
  * An authorization manager that helps with building RBAC hierarchy and check for permissions.
  */
-final class Manager implements AccessCheckerInterface
+class Manager implements AccessCheckerInterface
 {
     private ItemsStorageInterface $itemsStorage;
     private AssignmentsStorageInterface $assignmentsStorage;
@@ -359,25 +359,6 @@ final class Manager implements AccessCheckerInterface
     }
 
     /**
-     * @param mixed $userId
-     *
-     * @return string
-     */
-    private function ensureStringUserId($userId): string
-    {
-        if (!is_string($userId) && !is_int($userId) && !(is_object($userId) && method_exists($userId, '__toString'))) {
-            $type = is_object($userId) ? get_class($userId) : gettype($userId);
-            throw new InvalidArgumentException(
-                sprintf(
-                    'User ID must be a string, an integer, or an object with method "__toString()", %s given.',
-                    $type
-                )
-            );
-        }
-        return (string) $userId;
-    }
-
-    /**
      * Returns all user IDs assigned to the role specified.
      *
      * @param string $roleName The role name.
@@ -547,6 +528,25 @@ final class Manager implements AccessCheckerInterface
     {
         $this->guestRoleName = $name;
         return $this;
+    }
+
+    /**
+     * @param mixed $userId
+     *
+     * @return string
+     */
+    private function ensureStringUserId($userId): string
+    {
+        if (!is_string($userId) && !is_int($userId) && !(is_object($userId) && method_exists($userId, '__toString'))) {
+            $type = is_object($userId) ? get_class($userId) : gettype($userId);
+            throw new InvalidArgumentException(
+                sprintf(
+                    'User ID must be a string, an integer, or an object with method "__toString()", %s given.',
+                    $type
+                )
+            );
+        }
+        return (string) $userId;
     }
 
     /**
