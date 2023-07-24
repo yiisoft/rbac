@@ -532,7 +532,7 @@ trait ManagerTestTrait
     {
         $manager = $this->createFilledManager();
 
-        $this->assertEquals(
+        $this->assertEqualsCanonicalizing(
             ['createPost', 'updatePost', 'readPost', 'updateAnyPost'],
             array_keys($manager->getPermissionsByRoleName('admin'))
         );
