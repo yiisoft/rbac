@@ -7,7 +7,7 @@ namespace Yiisoft\Rbac\Tests\Support;
 use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\AssignmentsStorageInterface;
 
-final class FakeAssignmentsStorage implements AssignmentsStorageInterface
+class FakeAssignmentsStorage implements AssignmentsStorageInterface
 {
     private array $assignments = [];
 
