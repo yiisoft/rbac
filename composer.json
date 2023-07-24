@@ -32,8 +32,10 @@
         "yiisoft/friendly-exception": "^1.1"
     },
     "require-dev": {
+        "ext-uopz": "*",
         "phpunit/phpunit": "^9.5",
         "roave/infection-static-analysis-plugin": "^1.18",
+        "slope-it/clock-mock": "^0.3.8",
         "spatie/phpunit-watcher": "^1.23",
         "vimeo/psalm": "^4.30|^5.3"
     },

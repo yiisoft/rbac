@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac\Tests\Common;
 
+use DateTime;
 use InvalidArgumentException;
 use RuntimeException;
+use SlopeIt\ClockMock\ClockMock;
 use Yiisoft\Rbac\AssignmentsStorageInterface;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 use Yiisoft\Rbac\Exception\RuleNotFoundException;
@@ -22,10 +24,22 @@ use Yiisoft\Rbac\Tests\Support\SimpleRuleFactory;
 
 trait ManagerTestTrait
 {
-    private static int $NOW = 1642027031;
-
     private ItemsStorageInterface $itemsStorage;
     private AssignmentsStorageInterface $assignmentsStorage;
+
+    protected function setUp(): void
+    {
+        if ($this->getName() === 'testAssign') {
+            ClockMock::freeze(new DateTime('2023-05-10 08:24:39'));
+        }
+    }
+
+    protected function tearDown(): void
+    {
+        if ( $this->getName() === 'testAssign') {
+            ClockMock::reset();
+        }
+    }
 
     /**
      * @dataProvider dataProviderUserHasPermission
@@ -415,8 +429,7 @@ trait ManagerTestTrait
         $itemsStorage->add(new Role('writer'));
         $itemsStorage->add(new Role('default-role'));
 
-        $now = 1642027031;
-        $assignmentsStorage = $this->createAssignmentsStorage($now);
+        $assignmentsStorage = $this->createAssignmentsStorage();
 
         $manager = $this->createManager($itemsStorage, $assignmentsStorage);
         $manager->setDefaultRoleNames(['default-role']);
@@ -436,13 +449,15 @@ trait ManagerTestTrait
             array_keys($manager->getRolesByUserId('readingAuthor'))
         );
 
+        $createdAt = 1683707079;
+
         $this->assertSame('readingAuthor', $readerAssignment->getUserId());
         $this->assertSame('reader', $readerAssignment->getItemName());
-        $this->assertSame(self::$NOW, $readerAssignment->getCreatedAt());
+        $this->assertSame($createdAt, $readerAssignment->getCreatedAt());
 
         $this->assertSame('readingAuthor', $authorAssignment->getUserId());
         $this->assertSame('author', $authorAssignment->getItemName());
-        $this->assertSame(self::$NOW, $authorAssignment->getCreatedAt());
+        $this->assertSame($createdAt, $authorAssignment->getCreatedAt());
     }
 
     public function testAssignUnknownItem(): void
@@ -902,9 +917,9 @@ trait ManagerTestTrait
         return new FakeItemsStorage();
     }
 
-    protected function createAssignmentsStorage(?int $now = null): AssignmentsStorageInterface
+    protected function createAssignmentsStorage(): AssignmentsStorageInterface
     {
-        return new FakeAssignmentsStorage($now ?? self::$NOW);
+        return new FakeAssignmentsStorage();
     }
 
     private function createFilledManager(bool $enableDirectPermissions = false): Manager

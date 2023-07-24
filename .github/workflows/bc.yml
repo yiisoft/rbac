@@ -8,6 +8,7 @@ jobs:
   roave_bc_check:
     uses: yiisoft/actions/.github/workflows/bc.yml@master
     with:
+      extensions: uopz
       os: >-
         ['ubuntu-latest']
       php: >-
