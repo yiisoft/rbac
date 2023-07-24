@@ -381,6 +381,7 @@ trait ManagerTestTrait
 
         $this->assertEqualsCanonicalizing(
             [
+                'readPost',
                 'updatePost',
                 'reader',
             ],
