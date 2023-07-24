@@ -36,7 +36,7 @@ trait ManagerTestTrait
 
     protected function tearDown(): void
     {
-        if ( $this->getName() === 'testAssign') {
+        if ($this->getName() === 'testAssign') {
             ClockMock::reset();
         }
     }
