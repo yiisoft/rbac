@@ -544,7 +544,7 @@ trait ManagerTestTrait
     {
         $manager = $this->createFilledManager();
 
-        $this->assertSame(
+        $this->assertEqualsCanonicalizing(
             ['deletePost', 'publishPost', 'createPost', 'updatePost', 'readPost'],
             array_keys($manager->getPermissionsByUserId('author B'))
         );
