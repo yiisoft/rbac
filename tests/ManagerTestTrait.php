@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Rbac\Tests\Common;
+namespace Yiisoft\Rbac\Tests;
 
 use InvalidArgumentException;
 use RuntimeException;
