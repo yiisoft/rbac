@@ -61,33 +61,11 @@ final class FakeItemsStorage implements ItemsStorageInterface
         return $result;
     }
 
-    private function fillParentsRecursive(string $name, array &$result): void
-    {
-        foreach ($this->children as $parentName => $childItems) {
-            foreach ($childItems as $childItem) {
-                if ($childItem->getName() === $name) {
-                    $result[$parentName] = $this->get($parentName);
-                    $this->fillParentsRecursive($parentName, $result);
-                    break;
-                }
-            }
-        }
-    }
-
     public function getChildren(string $name): array
     {
         $result = [];
         $this->fillChildrenRecursive($name, $result);
         return $result;
-    }
-
-    private function fillChildrenRecursive(string $name, array &$result): void
-    {
-        $children = $this->children[$name] ?? [];
-        foreach ($children as $childName => $childItem) {
-            $result[$childName] = $this->get($childName);
-            $this->fillChildrenRecursive($childName, $result);
-        }
     }
 
     public function addChild(string $parentName, string $childName): void
@@ -195,5 +173,27 @@ final class FakeItemsStorage implements ItemsStorageInterface
     private function removeItemByName(string $name): void
     {
         unset($this->items[$name]);
+    }
+
+    private function fillParentsRecursive(string $name, array &$result): void
+    {
+        foreach ($this->children as $parentName => $childItems) {
+            foreach ($childItems as $childItem) {
+                if ($childItem->getName() === $name) {
+                    $result[$parentName] = $this->get($parentName);
+                    $this->fillParentsRecursive($parentName, $result);
+                    break;
+                }
+            }
+        }
+    }
+
+    private function fillChildrenRecursive(string $name, array &$result): void
+    {
+        $children = $this->children[$name] ?? [];
+        foreach ($children as $childName => $childItem) {
+            $result[$childName] = $this->get($childName);
+            $this->fillChildrenRecursive($childName, $result);
+        }
     }
 }
