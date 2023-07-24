@@ -57,17 +57,17 @@ final class FakeItemsStorage implements ItemsStorageInterface
     public function getParents(string $name): array
     {
         $result = [];
-        $this->getParentsRecursive($name, $result);
+        $this->fillParentsRecursive($name, $result);
         return $result;
     }
 
-    private function getParentsRecursive(string $name, array &$result): void
+    private function fillParentsRecursive(string $name, array &$result): void
     {
-        foreach ($this->children as $parentName => $items) {
-            foreach ($items as $item) {
-                if ($item->getName() === $name) {
+        foreach ($this->children as $parentName => $childItems) {
+            foreach ($childItems as $childItem) {
+                if ($childItem->getName() === $name) {
                     $result[$parentName] = $this->get($parentName);
-                    $this->getParentsRecursive($parentName, $result);
+                    $this->fillParentsRecursive($parentName, $result);
                     break;
                 }
             }
@@ -76,7 +76,18 @@ final class FakeItemsStorage implements ItemsStorageInterface
 
     public function getChildren(string $name): array
     {
-        return $this->children[$name] ?? [];
+        $result = [];
+        $this->fillChildrenRecursive($name, $result);
+        return $result;
+    }
+
+    private function fillChildrenRecursive(string $name, array &$result): void
+    {
+        $children = $this->children[$name] ?? [];
+        foreach ($children as $childName => $childItem) {
+            $result[$childName] = $this->get($childName);
+            $this->fillChildrenRecursive($childName, $result);
+        }
     }
 
     public function addChild(string $parentName, string $childName): void
