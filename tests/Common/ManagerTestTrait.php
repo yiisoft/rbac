@@ -27,12 +27,6 @@ trait ManagerTestTrait
     private ItemsStorageInterface $itemsStorage;
     private AssignmentsStorageInterface $assignmentsStorage;
 
-    protected function setUp(): void
-    {
-        $this->itemsStorage = $this->createFilledItemsStorage();
-        $this->assignmentsStorage = $this->createFilledAssignmentsStorage();
-    }
-
     /**
      * @dataProvider dataProviderUserHasPermission
      */
@@ -914,6 +908,9 @@ trait ManagerTestTrait
 
     private function createFilledManager(bool $enableDirectPermissions = false): Manager
     {
+        $this->itemsStorage = $this->createFilledItemsStorage();
+        $this->assignmentsStorage = $this->createFilledAssignmentsStorage();
+
         $manager = $this->createManager(
             $this->itemsStorage,
             $this->assignmentsStorage,
