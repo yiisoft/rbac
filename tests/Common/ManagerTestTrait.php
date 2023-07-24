@@ -290,7 +290,7 @@ trait ManagerTestTrait
         $manager = $this->createFilledManager();
         $returnedManager = $manager->addChild('reader', 'createPost');
 
-        $this->assertSame(
+        $this->assertEqualsCanonicalizing(
             [
                 'readPost',
                 'createPost',
