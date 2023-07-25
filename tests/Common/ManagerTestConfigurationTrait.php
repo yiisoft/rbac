@@ -48,7 +48,7 @@ trait ManagerTestConfigurationTrait
         return new FakeAssignmentsStorage();
     }
 
-    private function createFilledManager(bool $enableDirectPermissions = false): Manager
+    protected function createFilledManager(bool $enableDirectPermissions = false): Manager
     {
         $this->itemsStorage = $this->createFilledItemsStorage();
         $this->assignmentsStorage = $this->createFilledAssignmentsStorage();
