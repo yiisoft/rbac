@@ -429,7 +429,7 @@ trait ManagerTestLogicTrait
         $manager->assign('author', 'readingAuthor');
         $authorAssignment = $assignmentsStorage->get('author', 'readingAuthor');
 
-        $this->assertSame(
+        $this->assertEqualsCanonicalizing(
             [
                 'default-role',
                 'reader',
@@ -511,7 +511,7 @@ trait ManagerTestLogicTrait
     {
         $manager = $this->createFilledManager();
 
-        $this->assertEquals(
+        $this->assertEqualsCanonicalizing(
             ['admin', 'reader', 'author'],
             array_keys($manager->getChildRoles('admin'))
         );
