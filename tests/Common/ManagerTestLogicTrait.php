@@ -10,9 +10,11 @@ use RuntimeException;
 use SlopeIt\ClockMock\ClockMock;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 use Yiisoft\Rbac\Exception\RuleNotFoundException;
+use Yiisoft\Rbac\Manager;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\Tests\Support\EasyRule;
+use Yiisoft\Rbac\Tests\Support\SimpleRuleFactory;
 
 trait ManagerTestLogicTrait
 {
@@ -477,9 +479,9 @@ trait ManagerTestLogicTrait
 
     public function testAssignPermissionDirectlyWhenItIsDisabled(): void
     {
-        $manager = $this->createManager();
-        $manager->addPermission(new Permission('readPost'));
+        $manager = new Manager($this->createItemsStorage(), $this->createAssignmentsStorage(), new SimpleRuleFactory());
 
+        $manager->addPermission(new Permission('readPost'));
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Assigning permissions directly is disabled. Prefer assigning roles only.');
 

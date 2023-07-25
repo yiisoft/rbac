@@ -29,18 +29,16 @@ class Manager implements AccessCheckerInterface
     private ItemsStorageInterface $itemsStorage;
     private AssignmentsStorageInterface $assignmentsStorage;
     private RuleFactoryInterface $ruleFactory;
+    /**
+     * @var bool Whether to enable assigning permissions directly to user. Prefer assigning roles only.
+     */
+    private bool $enableDirectPermissions;
 
     /**
      * @var string[] A list of role names that are assigned to every user automatically without calling {@see assign()}.
      * Note that these roles are applied to users, regardless of their state of authentication.
      */
     private array $defaultRoleNames = [];
-
-    /**
-     * @var bool Whether to enable assigning permissions directly to user. Prefer assigning roles only.
-     */
-    private bool $enableDirectPermissions;
-
     private ?string $guestRoleName = null;
 
     /**
