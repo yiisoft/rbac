@@ -17,8 +17,8 @@ use Yiisoft\Rbac\Tests\Support\SimpleRuleFactory;
 
 trait ManagerTestConfigurationTrait
 {
-    private ItemsStorageInterface $itemsStorage;
-    private AssignmentsStorageInterface $assignmentsStorage;
+    protected ItemsStorageInterface $itemsStorage;
+    protected AssignmentsStorageInterface $assignmentsStorage;
 
     protected function createManager(
         ?ItemsStorageInterface $itemsStorage = null,
