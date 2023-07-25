@@ -563,7 +563,7 @@ trait ManagerTestLogicTrait
     {
         $manager = $this->createFilledManager();
 
-        $this->assertEquals(
+        $this->assertEqualsCanonicalizing(
             [
                 'reader A',
                 'author B',
@@ -571,7 +571,7 @@ trait ManagerTestLogicTrait
             ],
             $manager->getUserIdsByRoleName('reader')
         );
-        $this->assertEquals(
+        $this->assertEqualsCanonicalizing(
             [
                 'author B',
                 'admin C',
