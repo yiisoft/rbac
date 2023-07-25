@@ -24,14 +24,14 @@ trait ManagerTestConfigurationTrait
         ?ItemsStorageInterface $itemsStorage = null,
         ?AssignmentsStorageInterface $assignmentsStorage = null,
         ?RuleFactoryInterface $ruleFactory = null,
-        bool $enableDirectPermissions = false
+        ?bool $enableDirectPermissions = false
     ): Manager {
-        return new Manager(
-            $itemsStorage ?? $this->createItemsStorage(),
-            $assignmentsStorage ?? $this->createAssignmentsStorage(),
-            $ruleFactory ?? new SimpleRuleFactory(),
+        return new Manager(...$this->getManagerArguments(
+            $itemsStorage,
+            $assignmentsStorage,
+            $ruleFactory,
             $enableDirectPermissions,
-        );
+        ));
     }
 
     protected function createItemsStorage(): ItemsStorageInterface
@@ -42,6 +42,24 @@ trait ManagerTestConfigurationTrait
     protected function createAssignmentsStorage(): AssignmentsStorageInterface
     {
         return new FakeAssignmentsStorage();
+    }
+
+    private function getManagerArguments(
+        ?ItemsStorageInterface $itemsStorage = null,
+        ?AssignmentsStorageInterface $assignmentsStorage = null,
+        ?RuleFactoryInterface $ruleFactory = null,
+        ?bool $enableDirectPermissions = false
+    ): array {
+        $arguments = [
+            $itemsStorage ?? $this->createItemsStorage(),
+            $assignmentsStorage ?? $this->createAssignmentsStorage(),
+            $ruleFactory ?? new SimpleRuleFactory(),
+        ];
+        if ($enableDirectPermissions !== null) {
+            $arguments[] = $enableDirectPermissions;
+        }
+
+        return $arguments;
     }
 
     private function createFilledManager(bool $enableDirectPermissions = false): Manager

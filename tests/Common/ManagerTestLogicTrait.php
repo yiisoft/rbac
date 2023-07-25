@@ -479,12 +479,11 @@ trait ManagerTestLogicTrait
 
     public function testAssignPermissionDirectlyWhenItIsDisabled(): void
     {
-        $manager = new Manager($this->createItemsStorage(), $this->createAssignmentsStorage(), new SimpleRuleFactory());
-
+        $manager = $this->createManager();
         $manager->addPermission(new Permission('readPost'));
+
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Assigning permissions directly is disabled. Prefer assigning roles only.');
-
         $manager->assign('readPost', 'id7');
     }
 
