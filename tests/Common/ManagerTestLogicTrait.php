@@ -479,7 +479,7 @@ trait ManagerTestLogicTrait
 
     public function testAssignPermissionDirectlyWhenItIsDisabled(): void
     {
-        $manager = $this->createManager();
+        $manager = $this->createManager(null, null, null, null);
         $manager->addPermission(new Permission('readPost'));
 
         $this->expectException(InvalidArgumentException::class);
