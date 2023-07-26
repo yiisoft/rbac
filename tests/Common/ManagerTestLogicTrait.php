@@ -10,11 +10,9 @@ use RuntimeException;
 use SlopeIt\ClockMock\ClockMock;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 use Yiisoft\Rbac\Exception\RuleNotFoundException;
-use Yiisoft\Rbac\Manager;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\Tests\Support\EasyRule;
-use Yiisoft\Rbac\Tests\Support\SimpleRuleFactory;
 
 trait ManagerTestLogicTrait
 {
