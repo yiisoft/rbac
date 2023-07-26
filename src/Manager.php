@@ -24,7 +24,7 @@ use function is_string;
 /**
  * An authorization manager that helps with building RBAC hierarchy and check for permissions.
  */
-class Manager implements AccessCheckerInterface
+final class Manager implements AccessCheckerInterface, ManagerInterface
 {
     private ItemsStorageInterface $itemsStorage;
     private AssignmentsStorageInterface $assignmentsStorage;
