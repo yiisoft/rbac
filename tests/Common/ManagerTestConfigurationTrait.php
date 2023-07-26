@@ -7,6 +7,7 @@ namespace Yiisoft\Rbac\Tests\Common;
 use Yiisoft\Rbac\AssignmentsStorageInterface;
 use Yiisoft\Rbac\ItemsStorageInterface;
 use Yiisoft\Rbac\Manager;
+use Yiisoft\Rbac\ManagerInterface;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\RuleFactoryInterface;
@@ -25,7 +26,7 @@ trait ManagerTestConfigurationTrait
         ?AssignmentsStorageInterface $assignmentsStorage = null,
         ?RuleFactoryInterface $ruleFactory = null,
         ?bool $enableDirectPermissions = false
-    ): Manager {
+    ): ManagerInterface {
         $arguments = [
             $itemsStorage ?? $this->createItemsStorage(),
             $assignmentsStorage ?? $this->createAssignmentsStorage(),
@@ -48,7 +49,7 @@ trait ManagerTestConfigurationTrait
         return new FakeAssignmentsStorage();
     }
 
-    protected function createFilledManager(bool $enableDirectPermissions = false): Manager
+    protected function createFilledManager(bool $enableDirectPermissions = false): ManagerInterface
     {
         $this->itemsStorage = $this->createFilledItemsStorage();
         $this->assignmentsStorage = $this->createFilledAssignmentsStorage();
