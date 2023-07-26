@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac;
 
-interface ManagerInterface
+use Yiisoft\Access\AccessCheckerInterface;
+
+interface ManagerInterface extends AccessCheckerInterface
 {
     public function canAddChild(string $parentName, string $childName): bool;
 
