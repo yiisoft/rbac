@@ -37,7 +37,12 @@ final class Manager implements ManagerInterface
      * @param bool $enableDirectPermissions Whether to enable assigning permissions directly to user. Prefer assigning
      * roles only.
      */
-    public function __construct(private ItemsStorageInterface $itemsStorage, private AssignmentsStorageInterface $assignmentsStorage, private RuleFactoryInterface $ruleFactory, private bool $enableDirectPermissions = false)
+    public function __construct(
+        private ItemsStorageInterface $itemsStorage,
+        private AssignmentsStorageInterface $assignmentsStorage,
+        private RuleFactoryInterface $ruleFactory,
+        private bool $enableDirectPermissions = false,
+    )
     {
     }
 
@@ -592,7 +597,9 @@ final class Manager implements ManagerInterface
     {
         return array_filter(
             $this->itemsStorage->getRoles(),
-            static fn(Role $roleItem) => array_key_exists($roleItem->getName(), $array)
+            static function (Role $roleItem) use ($array) {
+                return array_key_exists($roleItem->getName(), $array);
+            }
         );
     }
 
