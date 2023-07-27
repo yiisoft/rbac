@@ -799,7 +799,9 @@ trait ManagerTestLogicTrait
     {
         $manager = $this->createFilledManager();
         $manager->setDefaultRoleNames(
-            static fn() => ['newDefaultRole']
+            static function () {
+                return ['newDefaultRole'];
+            }
         );
 
         $this->assertEquals(['newDefaultRole'], $manager->getDefaultRoleNames());
@@ -813,7 +815,9 @@ trait ManagerTestLogicTrait
         $this->expectExceptionMessage('Default role names closure must return an array');
 
         $manager->setDefaultRoleNames(
-            static fn() => 'test'
+            static function () {
+                return 'test';
+            }
         );
     }
 
