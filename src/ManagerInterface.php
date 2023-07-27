@@ -77,7 +77,7 @@ interface ManagerInterface extends AccessCheckerInterface
      *
      * @return self
      */
-    public function assign(string $itemName, $userId): self;
+    public function assign(string $itemName, int|object|string $userId): self;
 
     /**
      * Revokes a role or a permission from a user.
@@ -87,7 +87,7 @@ interface ManagerInterface extends AccessCheckerInterface
      *
      * @return self
      */
-    public function revoke(string $itemName, $userId): self;
+    public function revoke(string $itemName, int|object|string $userId): self;
 
     /**
      * Revokes all roles and permissions from a user.
@@ -96,7 +96,7 @@ interface ManagerInterface extends AccessCheckerInterface
      *
      * @return self
      */
-    public function revokeAll($userId): self;
+    public function revokeAll(int|object|string $userId): self;
 
     /**
      * Returns the roles that are assigned to the user via {@see assign()}.
@@ -106,7 +106,7 @@ interface ManagerInterface extends AccessCheckerInterface
      *
      * @return Role[] All roles directly assigned to the user. The array is indexed by the role names.
      */
-    public function getRolesByUserId($userId): array;
+    public function getRolesByUserId(int|object|string $userId): array;
 
     /**
      * Returns child roles of the role specified. Depth isn't limited.
@@ -137,7 +137,7 @@ interface ManagerInterface extends AccessCheckerInterface
      *
      * @return Permission[] All permissions that the user has. The array is indexed by the permission names.
      */
-    public function getPermissionsByUserId($userId): array;
+    public function getPermissionsByUserId(int|object|string $userId): array;
 
     /**
      * Returns all user IDs assigned to the role specified.
@@ -204,7 +204,7 @@ interface ManagerInterface extends AccessCheckerInterface
      * @throws InvalidArgumentException When `$roles` is neither array nor closure.
      * @throws RuntimeException When callable returns not array.
      */
-    public function setDefaultRoleNames($roleNames): self;
+    public function setDefaultRoleNames(Closure|array $roleNames): self;
 
     /**
      * Returns default role names.

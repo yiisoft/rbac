@@ -821,16 +821,6 @@ trait ManagerTestLogicTrait
         );
     }
 
-    public function testDefaultRolesWithNonArrayValue(): void
-    {
-        $manager = $this->createFilledManager();
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Default role names must be either an array or a closure');
-
-        $manager->setDefaultRoleNames('test');
-    }
-
     public function testGetDefaultRoles(): void
     {
         $manager = $this->createFilledManager();

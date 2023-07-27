@@ -27,7 +27,7 @@
         }
     ],
     "require": {
-        "php": "^7.4|^8.0",
+        "php": "^8.0",
         "yiisoft/access": "^1.0",
         "yiisoft/friendly-exception": "^1.1"
     },

@@ -1,6 +1,6 @@
 # Yii Role-Based Access Control Change Log
 
-## 1.0.3 under development
+## 2.0.0 under development
 
 - no changes in this release.
 

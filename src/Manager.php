@@ -153,7 +153,7 @@ final class Manager implements ManagerInterface
         return array_key_exists($childName, $this->itemsStorage->getChildren($parentName));
     }
 
-    public function assign(string $itemName, $userId): self
+    public function assign(string $itemName, int|object|string $userId): self
     {
         $userId = $this->ensureStringUserId($userId);
 
@@ -180,7 +180,7 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
-    public function revoke(string $itemName, $userId): self
+    public function revoke(string $itemName, int|object|string $userId): self
     {
         $userId = $this->ensureStringUserId($userId);
 
@@ -191,7 +191,7 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
-    public function revokeAll($userId): self
+    public function revokeAll(int|object|string $userId): self
     {
         $userId = $this->ensureStringUserId($userId);
 
@@ -200,7 +200,7 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
-    public function getRolesByUserId($userId): array
+    public function getRolesByUserId(int|object|string $userId): array
     {
         $userId = $this->ensureStringUserId($userId);
 
@@ -240,7 +240,7 @@ final class Manager implements ManagerInterface
         return $this->normalizePermissions($result);
     }
 
-    public function getPermissionsByUserId($userId): array
+    public function getPermissionsByUserId(int|object|string $userId): array
     {
         $userId = $this->ensureStringUserId($userId);
 
@@ -310,25 +310,23 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
-    public function setDefaultRoleNames($roleNames): self
+    public function setDefaultRoleNames(Closure|array $roleNames): self
     {
         if (is_array($roleNames)) {
             $this->defaultRoleNames = $roleNames;
+
             return $this;
         }
 
-        /** @psalm-suppress RedundantConditionGivenDocblockType */
-        if ($roleNames instanceof Closure) {
-            $defaultRoleNames = $roleNames();
-            if (!is_array($defaultRoleNames)) {
-                throw new RuntimeException('Default role names closure must return an array.');
-            }
-            /** @var string[] $defaultRoleNames */
-            $this->defaultRoleNames = $defaultRoleNames;
-            return $this;
+        $defaultRoleNames = $roleNames();
+        if (!is_array($defaultRoleNames)) {
+            throw new RuntimeException('Default role names closure must return an array.');
         }
 
-        throw new InvalidArgumentException('Default role names must be either an array or a closure.');
+        /** @var string[] $defaultRoleNames */
+        $this->defaultRoleNames = $defaultRoleNames;
+
+        return $this;
     }
 
     public function getDefaultRoleNames(): array
