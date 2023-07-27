@@ -15,7 +15,8 @@ final class SimpleRuleFactory implements RuleFactoryInterface
     /**
      * @psalm-param array<string,RuleInterface> $rules
      */
-    public function __construct(private array $rules = []) {
+    public function __construct(private array $rules = [])
+    {
     }
 
     public function create(string $name): RuleInterface
