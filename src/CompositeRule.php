@@ -6,10 +6,7 @@ namespace Yiisoft\Rbac;
 
 use InvalidArgumentException;
 
-use function get_class;
-use function gettype;
 use function in_array;
-use function is_object;
 
 /**
  * Composite rule allows combining multiple rules.

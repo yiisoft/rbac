@@ -12,8 +12,6 @@ use Yiisoft\Rbac\Exception\DefaultRoleNotFoundException;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 
 use function array_key_exists;
-use function get_class;
-use function gettype;
 use function in_array;
 use function is_array;
 use function is_int;

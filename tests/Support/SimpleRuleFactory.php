@@ -20,8 +20,7 @@ final class SimpleRuleFactory implements RuleFactoryInterface
          * @psalm-var array<string,RuleInterface>
          */
         private array $rules = []
-    )
-    {
+    ) {
     }
 
     public function create(string $name): RuleInterface
