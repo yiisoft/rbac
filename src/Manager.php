@@ -42,8 +42,7 @@ final class Manager implements ManagerInterface
         private AssignmentsStorageInterface $assignmentsStorage,
         private RuleFactoryInterface $ruleFactory,
         private bool $enableDirectPermissions = false,
-    )
-    {
+    ) {
     }
 
     public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
