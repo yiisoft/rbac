@@ -60,9 +60,6 @@ final class Manager implements ManagerInterface
         $this->enableDirectPermissions = $enableDirectPermissions;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
     {
         if ($userId === null) {
@@ -84,30 +81,11 @@ final class Manager implements ManagerInterface
         );
     }
 
-    /**
-     * Checks the possibility of adding a child to parent.
-     *
-     * @param string $parentName The name of the parent item.
-     * @param string $childName The name of the child item to be added to the hierarchy.
-     *
-     * @return bool Whether it is possible to add the child to the parent.
-     */
     public function canAddChild(string $parentName, string $childName): bool
     {
         return $this->canBeParent($parentName, $childName) && !$this->hasLoop($parentName, $childName);
     }
 
-    /**
-     * Adds an item as a child of another item.
-     *
-     * @param string $parentName The name of the parent item.
-     * @param string $childName The name of the child item.
-     *
-     * @throws RuntimeException
-     * @throws InvalidArgumentException
-     *
-     * @return self
-     */
     public function addChild(string $parentName, string $childName): self
     {
         if (!$this->hasItem($parentName)) {
@@ -153,15 +131,6 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
-    /**
-     * Removes a child from its parent.
-     * Note, the child item is not deleted. Only the parent-child relationship is removed.
-     *
-     * @param string $parentName The name of the parent item.
-     * @param string $childName The name of the child item.
-     *
-     * @return self
-     */
     public function removeChild(string $parentName, string $childName): self
     {
         if ($this->hasChild($parentName, $childName)) {
@@ -171,14 +140,6 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
-    /**
-     * Removes all children form their parent.
-     * Note, the children items are not deleted. Only the parent-child relationships are removed.
-     *
-     * @param string $parentName The name of the parent item.
-     *
-     * @return self
-     */
     public function removeChildren(string $parentName): self
     {
         if ($this->itemsStorage->hasChildren($parentName)) {
@@ -188,29 +149,11 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
-    /**
-     * Returns a value indicating whether the child already exists for the parent.
-     *
-     * @param string $parentName The name of the parent item.
-     * @param string $childName The name of the child item.
-     *
-     * @return bool Whether `$child` is already a child of `$parent`
-     */
     public function hasChild(string $parentName, string $childName): bool
     {
         return array_key_exists($childName, $this->itemsStorage->getChildren($parentName));
     }
 
-    /**
-     * Assigns a role or permission to a user.
-     *
-     * @param string $itemName Name of the role or the permission to be assigned.
-     * @param int|object|string $userId The user ID.
-     *
-     * @throws Exception If the role or permission has already been assigned to the user.
-     *
-     * @return self
-     */
     public function assign(string $itemName, $userId): self
     {
         $userId = $this->ensureStringUserId($userId);
@@ -238,14 +181,6 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
-    /**
-     * Revokes a role or a permission from a user.
-     *
-     * @param string $itemName The name of the role or permission to be revoked.
-     * @param int|object|string $userId The user ID.
-     *
-     * @return self
-     */
     public function revoke(string $itemName, $userId): self
     {
         $userId = $this->ensureStringUserId($userId);
@@ -257,13 +192,6 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
-    /**
-     * Revokes all roles and permissions from a user.
-     *
-     * @param int|object|string $userId The user ID.
-     *
-     * @return self
-     */
     public function revokeAll($userId): self
     {
         $userId = $this->ensureStringUserId($userId);
@@ -273,14 +201,6 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
-    /**
-     * Returns the roles that are assigned to the user via {@see assign()}.
-     * Note that child roles that are not assigned directly to the user will not be returned.
-     *
-     * @param int|object|string $userId The user ID.
-     *
-     * @return Role[] All roles directly assigned to the user. The array is indexed by the role names.
-     */
     public function getRolesByUserId($userId): array
     {
         $userId = $this->ensureStringUserId($userId);
@@ -296,16 +216,6 @@ final class Manager implements ManagerInterface
         return $roles;
     }
 
-    /**
-     * Returns child roles of the role specified. Depth isn't limited.
-     *
-     * @param string $roleName Name of the role to get child roles for.
-     *
-     * @throws InvalidArgumentException If role was not found by `$roleName`.
-     *
-     * @return Role[] Child roles. The array is indexed by the role names. First element is an instance of the parent
-     * role itself.
-     */
     public function getChildRoles(string $roleName): array
     {
         $role = $this->itemsStorage->getRole($roleName);
@@ -319,14 +229,6 @@ final class Manager implements ManagerInterface
         return array_merge([$roleName => $role], $this->getRolesPresentInArray($result));
     }
 
-    /**
-     * Returns all permissions that the specified role represents.
-     *
-     * @param string $roleName The role name.
-     *
-     * @return Permission[] All permissions that the role represents. The array is indexed by the permission names.
-     * @psalm-return array<string,Permission>
-     */
     public function getPermissionsByRoleName(string $roleName): array
     {
         $result = [];
@@ -339,13 +241,6 @@ final class Manager implements ManagerInterface
         return $this->normalizePermissions($result);
     }
 
-    /**
-     * Returns all permissions that the user has.
-     *
-     * @param int|object|string $userId The user ID.
-     *
-     * @return Permission[] All permissions that the user has. The array is indexed by the permission names.
-     */
     public function getPermissionsByUserId($userId): array
     {
         $userId = $this->ensureStringUserId($userId);
@@ -356,13 +251,6 @@ final class Manager implements ManagerInterface
         );
     }
 
-    /**
-     * Returns all user IDs assigned to the role specified.
-     *
-     * @param string $roleName The role name.
-     *
-     * @return array Array of user ID strings.
-     */
     public function getUserIdsByRoleName(string $roleName): array
     {
         $result = [];
@@ -379,36 +267,18 @@ final class Manager implements ManagerInterface
         return $result;
     }
 
-    /**
-     * @param Role $role
-     *
-     * @throws ItemAlreadyExistsException
-     *
-     * @return self
-     */
     public function addRole(Role $role): self
     {
         $this->addItem($role);
         return $this;
     }
 
-    /**
-     * @param string $name The role name.
-     *
-     * @return self
-     */
     public function removeRole(string $name): self
     {
         $this->removeItem($name);
         return $this;
     }
 
-    /**
-     * @param string $name The role name.
-     * @param Role $role
-     *
-     * @return self
-     */
     public function updateRole(string $name, Role $role): self
     {
         $this->checkItemNameForUpdate($role, $name);
@@ -419,36 +289,18 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
-    /**
-     * @param Permission $permission
-     *
-     * @throws ItemAlreadyExistsException
-     *
-     * @return self
-     */
     public function addPermission(Permission $permission): self
     {
         $this->addItem($permission);
         return $this;
     }
 
-    /**
-     * @param string $permissionName The permission name.
-     *
-     * @return self
-     */
     public function removePermission(string $permissionName): self
     {
         $this->removeItem($permissionName);
         return $this;
     }
 
-    /**
-     * @param string $name The permission name.
-     * @param Permission $permission
-     *
-     * @return self
-     */
     public function updatePermission(string $name, Permission $permission): self
     {
         $this->checkItemNameForUpdate($permission, $name);
@@ -459,14 +311,6 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
-    /**
-     * Set default role names.
-     *
-     * @param Closure|string[] $roleNames Either array of role names or a closure returning it.
-     *
-     * @throws InvalidArgumentException When `$roles` is neither array nor closure.
-     * @throws RuntimeException When callable returns not array.
-     */
     public function setDefaultRoleNames($roleNames): self
     {
         if (is_array($roleNames)) {
@@ -488,21 +332,11 @@ final class Manager implements ManagerInterface
         throw new InvalidArgumentException('Default role names must be either an array or a closure.');
     }
 
-    /**
-     * Returns default role names.
-     *
-     * @return string[] Default role names.
-     */
     public function getDefaultRoleNames(): array
     {
         return $this->defaultRoleNames;
     }
 
-    /**
-     * Returns default roles.
-     *
-     * @return Role[] Default roles. The array is indexed by the role names.
-     */
     public function getDefaultRoles(): array
     {
         $roles = [];
@@ -517,11 +351,6 @@ final class Manager implements ManagerInterface
         return $roles;
     }
 
-    /**
-     * Set guest role name.
-     *
-     * @param string|null $name The guest role name.
-     */
     public function setGuestRoleName(?string $name): self
     {
         $this->guestRoleName = $name;
