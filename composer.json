@@ -33,6 +33,7 @@
     },
     "require-dev": {
         "ext-uopz": "*",
+        "maglnet/composer-require-checker": "^4.3",
         "phpunit/phpunit": "^9.5",
         "roave/infection-static-analysis-plugin": "^1.18",
         "slope-it/clock-mock": "^0.3.8",
