@@ -11,6 +11,9 @@ use RuntimeException;
 use Yiisoft\Access\AccessCheckerInterface;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 
+/**
+ * An interface for managing RBAC entities (items, assignments, rules) with possibility to check user permissions.
+ */
 interface ManagerInterface extends AccessCheckerInterface
 {
     /**
