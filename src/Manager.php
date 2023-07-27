@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac;
 
 use Closure;
-use Exception;
 use InvalidArgumentException;
 use RuntimeException;
 use Yiisoft\Access\AccessCheckerInterface;
