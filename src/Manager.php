@@ -25,14 +25,6 @@ use function is_string;
  */
 final class Manager implements ManagerInterface
 {
-    private ItemsStorageInterface $itemsStorage;
-    private AssignmentsStorageInterface $assignmentsStorage;
-    private RuleFactoryInterface $ruleFactory;
-    /**
-     * @var bool Whether to enable assigning permissions directly to user. Prefer assigning roles only.
-     */
-    private bool $enableDirectPermissions;
-
     /**
      * @var string[] A list of role names that are assigned to every user automatically without calling {@see assign()}.
      * Note that these roles are applied to users, regardless of their state of authentication.
@@ -47,16 +39,8 @@ final class Manager implements ManagerInterface
      * @param bool $enableDirectPermissions Whether to enable assigning permissions directly to user. Prefer assigning
      * roles only.
      */
-    public function __construct(
-        ItemsStorageInterface $itemsStorage,
-        AssignmentsStorageInterface $assignmentsStorage,
-        RuleFactoryInterface $ruleFactory,
-        bool $enableDirectPermissions = false
-    ) {
-        $this->itemsStorage = $itemsStorage;
-        $this->assignmentsStorage = $assignmentsStorage;
-        $this->ruleFactory = $ruleFactory;
-        $this->enableDirectPermissions = $enableDirectPermissions;
+    public function __construct(private ItemsStorageInterface $itemsStorage, private AssignmentsStorageInterface $assignmentsStorage, private RuleFactoryInterface $ruleFactory, private bool $enableDirectPermissions = false)
+    {
     }
 
     public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
@@ -355,14 +339,12 @@ final class Manager implements ManagerInterface
     }
 
     /**
-     * @param mixed $userId
-     *
      * @return string
      */
-    private function ensureStringUserId($userId): string
+    private function ensureStringUserId(mixed $userId): string
     {
         if (!is_string($userId) && !is_int($userId) && !(is_object($userId) && method_exists($userId, '__toString'))) {
-            $type = is_object($userId) ? get_class($userId) : gettype($userId);
+            $type = get_debug_type($userId);
             throw new InvalidArgumentException(
                 sprintf(
                     'User ID must be a string, an integer, or an object with method "__toString()", %s given.',
@@ -612,9 +594,7 @@ final class Manager implements ManagerInterface
     {
         return array_filter(
             $this->itemsStorage->getRoles(),
-            static function (Role $roleItem) use ($array) {
-                return array_key_exists($roleItem->getName(), $array);
-            }
+            static fn(Role $roleItem) => array_key_exists($roleItem->getName(), $array)
         );
     }
 

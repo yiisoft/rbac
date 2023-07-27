@@ -53,7 +53,7 @@ final class CompositeRule implements RuleInterface
         foreach ($rules as $rule) {
             if (!$rule instanceof RuleInterface) {
                 /** @psalm-suppress RedundantConditionGivenDocblockType,DocblockTypeContradiction */
-                $type = is_object($rule) ? get_class($rule) : gettype($rule);
+                $type = get_debug_type($rule);
                 throw new InvalidArgumentException(
                     sprintf(
                         'Each rule should be an instance of %s, "%s" given.',

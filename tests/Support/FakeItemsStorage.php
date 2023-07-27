@@ -133,8 +133,6 @@ final class FakeItemsStorage implements ItemsStorageInterface
     }
 
     /**
-     * @param callable $callback
-     *
      * @return array|Item[]
      */
     private function filterItems(callable $callback): array
