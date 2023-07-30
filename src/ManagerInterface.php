@@ -90,7 +90,7 @@ interface ManagerInterface extends AccessCheckerInterface
      *
      * @return self
      */
-    public function revoke(string $itemName, int|object|string $userId): self;
+    public function revoke(string $itemName, int|Stringable|string $userId): self;
 
     /**
      * Revokes all roles and permissions from a user.
