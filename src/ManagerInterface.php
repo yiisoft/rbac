@@ -109,7 +109,7 @@ interface ManagerInterface extends AccessCheckerInterface
      *
      * @return Role[] All roles directly assigned to the user. The array is indexed by the role names.
      */
-    public function getRolesByUserId(int|object|string $userId): array;
+    public function getRolesByUserId(int|Stringable|string $userId): array;
 
     /**
      * Returns child roles of the role specified. Depth isn't limited.
