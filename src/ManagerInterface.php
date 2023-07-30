@@ -140,7 +140,7 @@ interface ManagerInterface extends AccessCheckerInterface
      *
      * @return Permission[] All permissions that the user has. The array is indexed by the permission names.
      */
-    public function getPermissionsByUserId(int|object|string $userId): array;
+    public function getPermissionsByUserId(int|Stringable|string $userId): array;
 
     /**
      * Returns all user IDs assigned to the role specified.
