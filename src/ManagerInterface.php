@@ -80,7 +80,7 @@ interface ManagerInterface extends AccessCheckerInterface
      *
      * @return self
      */
-    public function assign(string $itemName, int|object|string $userId): self;
+    public function assign(string $itemName, int|Stringable|string $userId): self;
 
     /**
      * Revokes a role or a permission from a user.
