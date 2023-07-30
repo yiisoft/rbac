@@ -99,7 +99,7 @@ interface ManagerInterface extends AccessCheckerInterface
      *
      * @return self
      */
-    public function revokeAll(int|object|string $userId): self;
+    public function revokeAll(int|Stringable|string $userId): self;
 
     /**
      * Returns the roles that are assigned to the user via {@see assign()}.
