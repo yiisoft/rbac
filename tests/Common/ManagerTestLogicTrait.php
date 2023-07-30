@@ -410,6 +410,10 @@ trait ManagerTestLogicTrait
         $this->assertFalse($manager->hasChild('reader', 'createPost'));
     }
 
+    /**
+     * Relies on {@see ClockMock} for testing timestamp. When using with other PHPUnit classes / traits, make sure to
+     * call {@see setUp} and {@see tearDown} methods explicitly.
+     */
     public function testAssign(): void
     {
         $itemsStorage = $this->createItemsStorage();
