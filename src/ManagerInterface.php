@@ -8,6 +8,7 @@ use Closure;
 use Exception;
 use InvalidArgumentException;
 use RuntimeException;
+use Stringable;
 use Yiisoft\Access\AccessCheckerInterface;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 

@@ -7,6 +7,7 @@ namespace Yiisoft\Rbac;
 use Closure;
 use InvalidArgumentException;
 use RuntimeException;
+use Stringable;
 use Yiisoft\Access\AccessCheckerInterface;
 use Yiisoft\Rbac\Exception\DefaultRoleNotFoundException;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
@@ -45,7 +46,7 @@ final class Manager implements ManagerInterface
     ) {
     }
 
-    public function userHasPermission($userId, string $permissionName, array $parameters = []): bool
+    public function userHasPermission(mixed $userId, string $permissionName, array $parameters = []): bool
     {
         if ($userId === null) {
             return $this->guestHasPermission($permissionName);
@@ -139,7 +140,7 @@ final class Manager implements ManagerInterface
         return array_key_exists($childName, $this->itemsStorage->getChildren($parentName));
     }
 
-    public function assign(string $itemName, int|object|string $userId): self
+    public function assign(string $itemName, int|Stringable|string $userId): self
     {
         $userId = $this->ensureStringUserId($userId);
 
@@ -166,7 +167,7 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
-    public function revoke(string $itemName, int|object|string $userId): self
+    public function revoke(string $itemName, int|Stringable|string $userId): self
     {
         $userId = $this->ensureStringUserId($userId);
 
@@ -177,7 +178,7 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
-    public function revokeAll(int|object|string $userId): self
+    public function revokeAll(int|Stringable|string $userId): self
     {
         $userId = $this->ensureStringUserId($userId);
 
@@ -186,7 +187,7 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
-    public function getRolesByUserId(int|object|string $userId): array
+    public function getRolesByUserId(int|Stringable|string $userId): array
     {
         $userId = $this->ensureStringUserId($userId);
 
@@ -226,7 +227,7 @@ final class Manager implements ManagerInterface
         return $this->normalizePermissions($result);
     }
 
-    public function getPermissionsByUserId(int|object|string $userId): array
+    public function getPermissionsByUserId(int|Stringable|string $userId): array
     {
         $userId = $this->ensureStringUserId($userId);
 
@@ -340,9 +341,6 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
-    /**
-     * @return string
-     */
     private function ensureStringUserId(mixed $userId): string
     {
         if (!is_string($userId) && !is_int($userId) && !(is_object($userId) && method_exists($userId, '__toString'))) {
