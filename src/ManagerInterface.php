@@ -75,7 +75,7 @@ interface ManagerInterface extends AccessCheckerInterface
      * Assigns a role or permission to a user.
      *
      * @param string $itemName Name of the role or the permission to be assigned.
-     * @param int|Stringable|string $userId The user ID.
+     * @param int|string|Stringable $userId The user ID.
      *
      * @throws Exception If the role or permission has already been assigned to the user.
      *
@@ -87,7 +87,7 @@ interface ManagerInterface extends AccessCheckerInterface
      * Revokes a role or a permission from a user.
      *
      * @param string $itemName The name of the role or permission to be revoked.
-     * @param int|Stringable|string $userId The user ID.
+     * @param int|string|Stringable $userId The user ID.
      *
      * @return self
      */
@@ -96,7 +96,7 @@ interface ManagerInterface extends AccessCheckerInterface
     /**
      * Revokes all roles and permissions from a user.
      *
-     * @param int|Stringable|string $userId The user ID.
+     * @param int|string|Stringable $userId The user ID.
      *
      * @return self
      */
@@ -106,7 +106,7 @@ interface ManagerInterface extends AccessCheckerInterface
      * Returns the roles that are assigned to the user via {@see assign()}.
      * Note that child roles that are not assigned directly to the user will not be returned.
      *
-     * @param int|Stringable|string $userId The user ID.
+     * @param int|string|Stringable $userId The user ID.
      *
      * @return Role[] All roles directly assigned to the user. The array is indexed by the role names.
      */
@@ -137,7 +137,7 @@ interface ManagerInterface extends AccessCheckerInterface
     /**
      * Returns all permissions that the user has.
      *
-     * @param int|Stringable|string $userId The user ID.
+     * @param int|string|Stringable $userId The user ID.
      *
      * @return Permission[] All permissions that the user has. The array is indexed by the permission names.
      */
