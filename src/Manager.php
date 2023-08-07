@@ -55,7 +55,7 @@ final class Manager implements ManagerInterface
             return $this->guestHasPermission($permissionName);
         }
 
-        $userId = $this->ensureStringUserId($userId);
+        $userId = (string) $userId;
         $assignments = $this->assignmentsStorage->getByUserId($userId);
 
         if (empty($assignments)) {
@@ -145,7 +145,7 @@ final class Manager implements ManagerInterface
 
     public function assign(string $itemName, int|Stringable|string $userId): self
     {
-        $userId = $this->ensureStringUserId($userId);
+        $userId = (string) $userId;
 
         $item = $this->itemsStorage->get($itemName);
 
@@ -172,7 +172,7 @@ final class Manager implements ManagerInterface
 
     public function revoke(string $itemName, int|Stringable|string $userId): self
     {
-        $userId = $this->ensureStringUserId($userId);
+        $userId = (string) $userId;
 
         if ($this->assignmentsStorage->get($itemName, $userId) !== null) {
             $this->assignmentsStorage->remove($itemName, $userId);
@@ -183,7 +183,7 @@ final class Manager implements ManagerInterface
 
     public function revokeAll(int|Stringable|string $userId): self
     {
-        $userId = $this->ensureStringUserId($userId);
+        $userId = (string) $userId;
 
         $this->assignmentsStorage->removeByUserId($userId);
 
@@ -192,7 +192,7 @@ final class Manager implements ManagerInterface
 
     public function getRolesByUserId(int|Stringable|string $userId): array
     {
-        $userId = $this->ensureStringUserId($userId);
+        $userId = (string) $userId;
 
         $roles = $this->getDefaultRoles();
         foreach ($this->assignmentsStorage->getByUserId($userId) as $name => $assignment) {
@@ -232,7 +232,7 @@ final class Manager implements ManagerInterface
 
     public function getPermissionsByUserId(int|Stringable|string $userId): array
     {
-        $userId = $this->ensureStringUserId($userId);
+        $userId = (string) $userId;
 
         return array_merge(
             $this->getDirectPermissionsByUser($userId),
@@ -342,20 +342,6 @@ final class Manager implements ManagerInterface
     {
         $this->guestRoleName = $name;
         return $this;
-    }
-
-    private function ensureStringUserId(int|string|Stringable|null $userId): string
-    {
-        if (!is_string($userId) && !is_int($userId) && !(is_object($userId) && method_exists($userId, '__toString'))) {
-            $type = get_debug_type($userId);
-            throw new InvalidArgumentException(
-                sprintf(
-                    'User ID must be a string, an integer, or an object with method "__toString()", %s given.',
-                    $type
-                )
-            );
-        }
-        return (string) $userId;
     }
 
     /**
