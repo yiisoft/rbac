@@ -26,10 +26,9 @@
             "url": "https://github.com/sponsors/yiisoft"
         }
     ],
-    "minimum-stability": "dev",
     "require": {
         "php": "^8.0",
-        "yiisoft/access": "dev-master",
+        "yiisoft/access": "2.0",
         "yiisoft/friendly-exception": "^1.1"
     },
     "require-dev": {
