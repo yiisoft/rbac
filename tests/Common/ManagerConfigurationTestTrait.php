@@ -16,7 +16,7 @@ use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
 use Yiisoft\Rbac\Tests\Support\SimpleRuleFactory;
 
-trait ManagerTestConfigurationTrait
+trait ManagerConfigurationTestTrait
 {
     protected ItemsStorageInterface $itemsStorage;
     protected AssignmentsStorageInterface $assignmentsStorage;

@@ -14,7 +14,7 @@ use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\Tests\Support\EasyRule;
 
-trait ManagerTestLogicTrait
+trait ManagerLogicTestTrait
 {
     protected function setUp(): void
     {
