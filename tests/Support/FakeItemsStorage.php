@@ -63,9 +63,7 @@ final class FakeItemsStorage implements ItemsStorageInterface
 
     public function getChildren(string $name): array
     {
-        $result = [];
-        $this->fillChildrenRecursive($name, $result);
-        return $result;
+        return $this->children[$name] ?? [];
     }
 
     public function addChild(string $parentName, string $childName): void
@@ -183,15 +181,6 @@ final class FakeItemsStorage implements ItemsStorageInterface
                     break;
                 }
             }
-        }
-    }
-
-    private function fillChildrenRecursive(string $name, array &$result): void
-    {
-        $children = $this->children[$name] ?? [];
-        foreach ($children as $childName => $childItem) {
-            $result[$childName] = $this->get($childName);
-            $this->fillChildrenRecursive($childName, $result);
         }
     }
 }

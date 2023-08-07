@@ -181,30 +181,6 @@ trait ManagerTestLogicTrait
         );
     }
 
-    /**
-     * @dataProvider dataProviderUserHasPermissionWithFailUserId
-     */
-    public function testUserHasPermissionWithFailUserId($userId): void
-    {
-        $manager = $this->createFilledManager();
-
-        $this->expectException(InvalidArgumentException::class);
-
-        $permission = 'createPost';
-        $params = ['authorID' => 'author B'];
-
-        $manager->userHasPermission($userId, $permission, $params);
-    }
-
-    public function dataProviderUserHasPermissionWithFailUserId(): array
-    {
-        return [
-            [true],
-            [(object) []],
-            [['test' => 1]],
-        ];
-    }
-
     public function testUserHasPermissionReturnFalseForNonExistingUserAndNoDefaultRoles(): void
     {
         $manager = $this->createFilledManager();
@@ -384,7 +360,6 @@ trait ManagerTestLogicTrait
 
         $this->assertEqualsCanonicalizing(
             [
-                'readPost',
                 'updatePost',
                 'reader',
             ],
