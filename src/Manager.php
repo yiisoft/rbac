@@ -50,8 +50,7 @@ final class Manager implements ManagerInterface
         int|string|Stringable|null $userId,
         string $permissionName,
         array $parameters = [],
-    ): bool
-    {
+    ): bool {
         if ($userId === null) {
             return $this->guestHasPermission($permissionName);
         }
