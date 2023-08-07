@@ -15,9 +15,6 @@ use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 use function array_key_exists;
 use function in_array;
 use function is_array;
-use function is_int;
-use function is_object;
-use function is_string;
 
 /**
  * An authorization manager that helps with building RBAC hierarchy and check for permissions.
