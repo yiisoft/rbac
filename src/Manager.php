@@ -46,7 +46,11 @@ final class Manager implements ManagerInterface
     ) {
     }
 
-    public function userHasPermission(mixed $userId, string $permissionName, array $parameters = []): bool
+    public function userHasPermission(
+        int|string|Stringable|null $userId,
+        string $permissionName,
+        array $parameters = [],
+    ): bool
     {
         if ($userId === null) {
             return $this->guestHasPermission($permissionName);
@@ -341,7 +345,7 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
-    private function ensureStringUserId(mixed $userId): string
+    private function ensureStringUserId(int|string|Stringable|null $userId): string
     {
         if (!is_string($userId) && !is_int($userId) && !(is_object($userId) && method_exists($userId, '__toString'))) {
             $type = get_debug_type($userId);
