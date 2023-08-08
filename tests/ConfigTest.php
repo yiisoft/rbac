@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use Yiisoft\Di\Container;
 use Yiisoft\Di\ContainerConfig;
 use Yiisoft\Rbac\AssignmentsStorageInterface;
@@ -20,15 +21,15 @@ final class ConfigTest extends TestCase
 {
     public function testBase(): void
     {
-        $container = $this->createTestContainer();
+        $container = $this->createContainer();
 
         $manager = $container->get(ManagerInterface::class);
         $this->assertInstanceOf(Manager::class, $manager);
     }
 
-    private function createTestContainer(array|null $params = null): Container
+    private function createContainer(): ContainerInterface
     {
-        $definitions = $this->getContainerDefinitions($params);
+        $definitions = $this->getContainerDefinitions();
         $definitions = array_merge($definitions, [
             ItemsStorageInterface::class => FakeItemsStorage::class,
             AssignmentsStorageInterface::class => FakeAssignmentsStorage::class,
@@ -39,17 +40,8 @@ final class ConfigTest extends TestCase
         return new Container($config);
     }
 
-    private function getContainerDefinitions(array|null $params): array
+    private function getContainerDefinitions(): array
     {
-        if ($params === null) {
-            $params = $this->getParams();
-        }
-
         return require dirname(__DIR__) . '/config/di.php';
-    }
-
-    private function getParams(): array
-    {
-        return require dirname(__DIR__) . '/config/params.php';
     }
 }
