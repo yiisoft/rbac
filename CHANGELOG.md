@@ -1,8 +1,10 @@
 # Yii Role-Based Access Control Change Log
 
-## 1.0.3 under development
+## 2.0.0 under development
 
-- no changes in this release.
+- Chg #161: Allow to reuse manager test code in related packages (@arogachev)
+- New #161: Add `ManagerInterface` (@arogachev)
+- Chg #161: Raise PHP version to 8.0 (@arogachev)
 
 ## 1.0.2 April 20, 2023
 

@@ -14,11 +14,6 @@ abstract class Item
     public const TYPE_PERMISSION = 'permission';
 
     /**
-     * @var string The name of the item. This must be globally unique.
-     */
-    private string $name;
-
-    /**
      * @var string The item description.
      */
     private string $description = '';
@@ -41,9 +36,8 @@ abstract class Item
     /**
      * @param string $name The name of the item. This must be globally unique.
      */
-    final public function __construct(string $name)
+    final public function __construct(private string $name)
     {
-        $this->name = $name;
     }
 
     /**

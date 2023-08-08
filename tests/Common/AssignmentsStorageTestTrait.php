@@ -21,8 +21,8 @@ trait AssignmentsStorageTestTrait
         $storage = $this->getStorage();
         $storage->renameItem('Accountant', 'Senior accountant');
 
-        $this->assertTrue($storage->hasItem('Accountant'));
-        $this->assertFalse($storage->hasItem('Senior accountant'));
+        $this->assertFalse($storage->hasItem('Accountant'));
+        $this->assertTrue($storage->hasItem('Senior accountant'));
     }
 
     public function testGetAll(): void

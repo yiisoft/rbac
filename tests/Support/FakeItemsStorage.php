@@ -57,21 +57,8 @@ final class FakeItemsStorage implements ItemsStorageInterface
     public function getParents(string $name): array
     {
         $result = [];
-        $this->getParentsRecursive($name, $result);
+        $this->fillParentsRecursive($name, $result);
         return $result;
-    }
-
-    private function getParentsRecursive(string $name, array &$result): void
-    {
-        foreach ($this->children as $parentName => $items) {
-            foreach ($items as $item) {
-                if ($item->getName() === $name) {
-                    $result[$parentName] = $this->get($parentName);
-                    $this->getParentsRecursive($parentName, $result);
-                    break;
-                }
-            }
-        }
     }
 
     public function getChildren(string $name): array
@@ -144,8 +131,6 @@ final class FakeItemsStorage implements ItemsStorageInterface
     }
 
     /**
-     * @param callable $callback
-     *
      * @return array|Item[]
      */
     private function filterItems(callable $callback): array
@@ -184,5 +169,18 @@ final class FakeItemsStorage implements ItemsStorageInterface
     private function removeItemByName(string $name): void
     {
         unset($this->items[$name]);
+    }
+
+    private function fillParentsRecursive(string $name, array &$result): void
+    {
+        foreach ($this->children as $parentName => $childItems) {
+            foreach ($childItems as $childItem) {
+                if ($childItem->getName() === $name) {
+                    $result[$parentName] = $this->get($parentName);
+                    $this->fillParentsRecursive($parentName, $result);
+                    break;
+                }
+            }
+        }
     }
 }

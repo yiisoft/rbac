@@ -27,15 +27,20 @@
         }
     ],
     "require": {
-        "php": "^7.4|^8.0",
-        "yiisoft/access": "^1.0",
+        "php": "^8.0",
+        "yiisoft/access": "2.0",
         "yiisoft/friendly-exception": "^1.1"
     },
     "require-dev": {
+        "ext-uopz": "*",
+        "maglnet/composer-require-checker": "^4.3",
         "phpunit/phpunit": "^9.5",
+        "rector/rector": "^0.17.0",
         "roave/infection-static-analysis-plugin": "^1.18",
+        "slope-it/clock-mock": "^0.3.8",
         "spatie/phpunit-watcher": "^1.23",
-        "vimeo/psalm": "^4.30|^5.3"
+        "vimeo/psalm": "^4.30|^5.3",
+        "yiisoft/di": "^1.2"
     },
     "suggest": {
         "yiisoft/rbac-cycle-db": "For using Cycle as a storage",
