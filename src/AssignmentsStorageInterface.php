@@ -7,6 +7,12 @@ namespace Yiisoft\Rbac;
 /**
  * `AssignmentsStorageInterface` represents a storage for assignment of RBAC items (a role or a permission) to a user
  * used in {@see Manager}.
+ *
+ * @psalm-type RawAssignment = array{
+ *     itemName: string,
+ *     userId: string,
+ *     createdAt: int|string,
+ * }
  */
 interface AssignmentsStorageInterface
 {
