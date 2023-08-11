@@ -7,14 +7,6 @@ namespace Yiisoft\Rbac;
 /**
  * A storage for RBAC roles and permissions used in {@see Manager}.
  *
- * @psalm-type RawItem = array{
- *     type: Item::TYPE_*,
- *     name: string,
- *     description: string|null,
- *     ruleName: string|null,
- *     createdAt: int|string,
- *     updatedAt: int|string
- * }
  * @psalm-type ItemsIndexedByName = array<string, Permission|Role>
  */
 interface ItemsStorageInterface
