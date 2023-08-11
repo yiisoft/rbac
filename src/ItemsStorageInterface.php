@@ -124,7 +124,7 @@ interface ItemsStorageInterface
      *
      * @return Item[] The parent permissions and/or roles.
      *
-     * @psalm-return array<string,Item>
+     * @psalm-return ItemsIndexedByName
      */
     public function getParents(string $name): array;
 
@@ -135,7 +135,7 @@ interface ItemsStorageInterface
      *
      * @return Item[] The child permissions and/or roles.
      *
-     * @psalm-return array<string,Item>
+     * @psalm-return ItemsIndexedByName
      */
     public function getChildren(string $name): array;
 
