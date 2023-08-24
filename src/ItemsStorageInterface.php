@@ -121,7 +121,7 @@ interface ItemsStorageInterface
     public function getParents(string $name): array;
 
     /**
-     * Returns the child permissions and/or roles.
+     * Returns direct child permissions and/or roles.
      *
      * @param string $name The parent name.
      *
@@ -129,7 +129,22 @@ interface ItemsStorageInterface
      *
      * @psalm-return ItemsIndexedByName
      */
-    public function getChildren(string $name): array;
+    public function getDirectChildren(string $name): array;
+
+    /**
+     * Returns all child permissions and/or roles.
+     *
+     * @param string $name The parent name.
+     *
+     * @return Item[] The child permissions and/or roles.
+     *
+     * @psalm-return array<string,Item>
+     */
+    public function getAllChildren(string $name): array;
+
+    public function getAllChildRoles(string $name): array;
+
+    public function getAllChildPermissions(string $name): array;
 
     /**
      * Returns whether named parent has children.
@@ -139,6 +154,26 @@ interface ItemsStorageInterface
      * @return bool Whether named parent has children.
      */
     public function hasChildren(string $name): bool;
+
+    /**
+     * Returns whether selected parent has a child with a given name.
+     *
+     * @param string $parentName The parent name.
+     * @param string $childName The child name.
+     *
+     * @return bool Whether selected parent has a child with a given name.
+     */
+    public function hasChild(string $parentName, string $childName): bool;
+
+    /**
+     * Returns whether selected parent has a direct child with a given name.
+     *
+     * @param string $parentName The parent name.
+     * @param string $childName The child name.
+     *
+     * @return bool Whether selected parent has a direct child with a given name.
+     */
+    public function hasDirectChild(string $parentName, string $childName): bool;
 
     /**
      * Adds a role or a permission as a child of another role or permission.

@@ -208,6 +208,8 @@ trait ManagerLogicTestTrait
     {
         $manager = $this->createFilledManager();
 
+        // TODO: Duplicate
+
         $this->assertTrue(
             $manager->canAddChild(
                 'author',
@@ -363,7 +365,7 @@ trait ManagerLogicTestTrait
                 'updatePost',
                 'reader',
             ],
-            array_keys($this->itemsStorage->getChildren('author'))
+            array_keys($this->itemsStorage->getDirectChildren('author'))
         );
         $this->assertSame($manager, $returnedManager);
     }

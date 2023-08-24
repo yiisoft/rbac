@@ -61,9 +61,30 @@ final class FakeItemsStorage implements ItemsStorageInterface
         return $result;
     }
 
-    public function getChildren(string $name): array
+    public function getDirectChildren(string $name): array
     {
         return $this->children[$name] ?? [];
+    }
+
+    public function getAllChildren(string $name): array
+    {
+        $result = [];
+        $this->fillChildrenRecursive($name, $result);
+        return $result;
+    }
+
+    public function getAllChildRoles(string $name): array
+    {
+        $result = [];
+        $this->fillChildrenRecursive($name, $result);
+        return $this->getRolesPresentInArray($result);
+    }
+
+    public function getAllChildPermissions(string $name): array
+    {
+        $result = [];
+        $this->fillChildrenRecursive($name, $result);
+        return $this->normalizePermissions($result);
     }
 
     public function addChild(string $parentName, string $childName): void
@@ -74,6 +95,16 @@ final class FakeItemsStorage implements ItemsStorageInterface
     public function hasChildren(string $name): bool
     {
         return isset($this->children[$name]);
+    }
+
+    public function hasChild(string $parentName, string $childName): bool
+    {
+        return true;
+    }
+
+    public function hasDirectChild(string $parentName, string $childName): bool
+    {
+        return true;
     }
 
     public function removeChild(string $parentName, string $childName): void
@@ -182,5 +213,78 @@ final class FakeItemsStorage implements ItemsStorageInterface
                 }
             }
         }
+    }
+
+    private function fillChildrenRecursive(string $name, array &$result): void
+    {
+        $children = $this->children[$name] ?? [];
+        foreach ($children as $childName => $childItem) {
+            $result[$childName] = $this->get($childName);
+            $this->fillChildrenRecursive($childName, $result);
+        }
+    }
+
+    /**
+     * @param true[] $array
+     *
+     * @psalm-param array<string,true> $array
+     *
+     * @return Role[]
+     */
+    private function getRolesPresentInArray(array $array): array
+    {
+        return array_filter(
+            $this->getRoles(),
+            static function (Role $roleItem) use ($array) {
+                return array_key_exists($roleItem->getName(), $array);
+            }
+        );
+    }
+
+    /**
+     * @param array<string,mixed> $permissionNames
+     *
+     * @return Permission[]
+     * @psalm-return array<string,Permission>
+     */
+    private function normalizePermissions(array $permissionNames): array
+    {
+        $normalizedPermissions = [];
+        foreach (array_keys($permissionNames) as $permissionName) {
+            $permission = $this->getPermission($permissionName);
+            if ($permission !== null) {
+                $normalizedPermissions[$permissionName] = $permission;
+            }
+        }
+
+        return $normalizedPermissions;
+    }
+
+    /**
+     * Checks whether there is a loop in the authorization item hierarchy.
+     *
+     * @param string $parentName Name of the parent item.
+     * @param string $childName Name of the child item that is to be added to the hierarchy.
+     *
+     * @return bool Whether a loop exists.
+     */
+    private function hasLoop(string $parentName, string $childName): bool
+    {
+        if ($childName === $parentName) {
+            return true;
+        }
+
+        $children = $this->getDirectChildren($childName);
+        if (empty($children)) {
+            return false;
+        }
+
+        foreach ($children as $groupChild) {
+            if ($this->hasLoop($parentName, $groupChild->getName())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
