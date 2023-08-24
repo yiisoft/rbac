@@ -137,13 +137,28 @@ interface ItemsStorageInterface
      * @param string $name The parent name.
      *
      * @return Item[] The child permissions and/or roles.
-     *
-     * @psalm-return array<string,Item>
+     * @psalm-return array<string, Item>
      */
     public function getAllChildren(string $name): array;
 
+    /**
+     * Returns all child roles.
+     *
+     * @param string $name The parent name.
+     *
+     * @return Role[] The child roles.
+     * @psalm-return array<string, Role>
+     */
     public function getAllChildRoles(string $name): array;
 
+    /**
+     * Returns all child permissions.
+     *
+     * @param string $name The parent name.
+     *
+     * @return Permission[] The child permissions.
+     * @psalm-return array<string, Permission>
+     */
     public function getAllChildPermissions(string $name): array;
 
     /**
