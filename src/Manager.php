@@ -69,7 +69,7 @@ final class Manager implements ManagerInterface
 
     public function canAddChild(string $parentName, string $childName): bool
     {
-        return $this->canBeParent($parentName, $childName) && !$this->itemsStorage->hasChild($parentName, $childName);
+        return $this->canBeParent($parentName, $childName) && !$this->itemsStorage->hasChild($childName, $parentName);
     }
 
     public function addChild(string $parentName, string $childName): self
@@ -96,7 +96,7 @@ final class Manager implements ManagerInterface
             );
         }
 
-        if ($this->itemsStorage->hasChild($parentName, $childName)) {
+        if ($this->itemsStorage->hasChild($childName, $parentName)) {
             throw new RuntimeException(
                 sprintf(
                     'Cannot add "%s" as a child of "%s". A loop has been detected.',

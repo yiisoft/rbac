@@ -77,14 +77,14 @@ final class FakeItemsStorage implements ItemsStorageInterface
     {
         $result = [];
         $this->fillChildrenRecursive($name, $result);
-        return $this->getRolesPresentInArray($result);
+        return $this->filterRoles($result);
     }
 
     public function getAllChildPermissions(string $name): array
     {
         $result = [];
         $this->fillChildrenRecursive($name, $result);
-        return $this->normalizePermissions($result);
+        return $this->filterPermissions($result);
     }
 
     public function addChild(string $parentName, string $childName): void
@@ -99,12 +99,12 @@ final class FakeItemsStorage implements ItemsStorageInterface
 
     public function hasChild(string $parentName, string $childName): bool
     {
-        return true;
+        return $this->hasLoop($childName, $parentName);
     }
 
     public function hasDirectChild(string $parentName, string $childName): bool
     {
-        return true;
+        return isset($this->children[$parentName][$childName]);
     }
 
     public function removeChild(string $parentName, string $childName): void
@@ -225,39 +225,38 @@ final class FakeItemsStorage implements ItemsStorageInterface
     }
 
     /**
-     * @param true[] $array
-     *
-     * @psalm-param array<string,true> $array
+     * @param Item[] $array
+     * @psalm-param array<string, Item> $array
      *
      * @return Role[]
+     * @psalm-return array<string, Role>
      */
-    private function getRolesPresentInArray(array $array): array
+    private function filterRoles(array $array): array
     {
         return array_filter(
             $this->getRoles(),
-            static function (Role $roleItem) use ($array) {
-                return array_key_exists($roleItem->getName(), $array);
-            }
+            static fn (Role $roleItem): bool => array_key_exists($roleItem->getName(), $array),
         );
     }
 
     /**
-     * @param array<string,mixed> $permissionNames
+     * @param Item[] $items
+     * @psalm-param array<string, Item> $items
      *
      * @return Permission[]
-     * @psalm-return array<string,Permission>
+     * @psalm-return array<string, Permission>
      */
-    private function normalizePermissions(array $permissionNames): array
+    private function filterPermissions(array $items): array
     {
-        $normalizedPermissions = [];
-        foreach (array_keys($permissionNames) as $permissionName) {
+        $permissions = [];
+        foreach (array_keys($items) as $permissionName) {
             $permission = $this->getPermission($permissionName);
             if ($permission !== null) {
-                $normalizedPermissions[$permissionName] = $permission;
+                $permissions[$permissionName] = $permission;
             }
         }
 
-        return $normalizedPermissions;
+        return $permissions;
     }
 
     /**

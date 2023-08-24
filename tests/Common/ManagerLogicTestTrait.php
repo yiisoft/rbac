@@ -276,7 +276,7 @@ trait ManagerLogicTestTrait
                 'readPost',
                 'createPost',
             ],
-            array_keys($this->itemsStorage->getChildren('reader'))
+            array_keys($this->itemsStorage->getDirectChildren('reader'))
         );
         $this->assertSame($manager, $returnedManager);
     }
