@@ -69,7 +69,9 @@ final class Manager implements ManagerInterface
 
     public function canAddChild(string $parentName, string $childName): bool
     {
-        return $this->canBeParent($parentName, $childName) && !$this->itemsStorage->hasChild($childName, $parentName);
+        return $this->canBeParent($parentName, $childName) &&
+            !$this->itemsStorage->hasDirectChild($parentName, $childName) &&
+            !$this->itemsStorage->hasChild($childName, $parentName);
     }
 
     public function addChild(string $parentName, string $childName): self
@@ -96,6 +98,12 @@ final class Manager implements ManagerInterface
             );
         }
 
+        if ($this->itemsStorage->hasDirectChild($parentName, $childName)) {
+            throw new RuntimeException(
+                sprintf('The item "%s" already has a child "%s".', $parentName, $childName)
+            );
+        }
+
         if ($this->itemsStorage->hasChild($childName, $parentName)) {
             throw new RuntimeException(
                 sprintf(
@@ -103,12 +111,6 @@ final class Manager implements ManagerInterface
                     $childName,
                     $parentName
                 )
-            );
-        }
-
-        if ($this->itemsStorage->hasDirectChild($parentName, $childName)) {
-            throw new RuntimeException(
-                sprintf('The item "%s" already has a child "%s".', $parentName, $childName)
             );
         }
 

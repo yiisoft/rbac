@@ -204,13 +204,11 @@ trait ManagerLogicTestTrait
         $manager->userHasPermission('reader A', 'test-permission');
     }
 
-    public function testCanAddChildReturnTrue(): void
+    public function testCanAddExistingChild(): void
     {
         $manager = $this->createFilledManager();
 
-        // TODO: Duplicate
-
-        $this->assertTrue(
+        $this->assertFalse(
             $manager->canAddChild(
                 'author',
                 'reader',
