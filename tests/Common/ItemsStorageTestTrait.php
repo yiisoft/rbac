@@ -103,7 +103,7 @@ trait ItemsStorageTestTrait
         $storage = $this->getStorage();
         $storage->addChild('Parent 2', 'Child 1');
 
-        $children = $storage->getChildren('Parent 2');
+        $children = $storage->getAllChildren('Parent 2');
         $this->assertCount(3, $children);
 
         foreach ($children as $name => $item) {
@@ -143,7 +143,7 @@ trait ItemsStorageTestTrait
     public function testGetChildren(string $parentName, array $expectedChildren): void
     {
         $storage = $this->getStorage();
-        $children = $storage->getChildren($parentName);
+        $children = $storage->getAllChildren($parentName);
 
         $this->assertCount(count($expectedChildren), $children);
         foreach ($children as $childName => $child) {
@@ -244,11 +244,11 @@ trait ItemsStorageTestTrait
         $storage->addChild('Parent 2', 'Child 1');
         $storage->removeChild('Parent 2', 'Child 1');
 
-        $children = $storage->getChildren('Parent 2');
+        $children = $storage->getAllChildren('Parent 2');
         $this->assertNotEmpty($children);
         $this->assertArrayNotHasKey('Child 1', $children);
 
-        $this->assertArrayHasKey('Child 1', $storage->getChildren('Parent 1'));
+        $this->assertArrayHasKey('Child 1', $storage->getAllChildren('Parent 1'));
     }
 
     public function testGetAll(): void
