@@ -240,28 +240,24 @@ trait ManagerLogicTestTrait
         );
     }
 
-    public function testCanAddChildToNonExistItem(): void
+    public function testCanAddChildToNonExistingItem(): void
     {
         $itemsStorage = $this->createItemsStorage();
         $itemsStorage->add(new Role('author'));
 
         $manager = $this->createManager($itemsStorage);
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('There is no item named "admin".');
-        $manager->canAddChild('admin', 'author');
+        $this->assertFalse($manager->canAddChild('admin', 'author'));
     }
 
-    public function testCanAddNonExistChild(): void
+    public function testCanAddNonExistingChild(): void
     {
         $itemsStorage = $this->createItemsStorage();
         $itemsStorage->add(new Role('author'));
 
         $manager = $this->createManager($itemsStorage);
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('There is no item named "reader".');
-        $manager->canAddChild('author', 'reader');
+        $this->assertFalse($manager->canAddChild('author', 'reader'));
     }
 
     public function testAddChild(): void
@@ -283,8 +279,8 @@ trait ManagerLogicTestTrait
     {
         $manager = $this->createFilledManager();
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Either "new reader" does not exist.');
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Parent "new reader" does not exist.');
 
         $manager->addChild(
             'new reader',
@@ -296,7 +292,7 @@ trait ManagerLogicTestTrait
     {
         $manager = $this->createFilledManager();
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Cannot add "createPost" as a child of itself.');
 
         $manager->addChild(
@@ -309,7 +305,7 @@ trait ManagerLogicTestTrait
     {
         $manager = $this->createFilledManager();
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Can not add "reader" role as a child of "createPost" permission.');
 
         $manager->addChild(
@@ -344,12 +340,12 @@ trait ManagerLogicTestTrait
         );
     }
 
-    public function testAddChildWithNonExistChild(): void
+    public function testAddChildWithNonExistingChild(): void
     {
         $manager = $this->createFilledManager();
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Either "new reader" does not exist.');
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Child "new reader" does not exist.');
         $manager->addChild('reader', 'new reader');
     }
 

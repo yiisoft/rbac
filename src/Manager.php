@@ -69,51 +69,18 @@ final class Manager implements ManagerInterface
 
     public function canAddChild(string $parentName, string $childName): bool
     {
-        return $this->canBeParent($parentName, $childName) &&
-            !$this->itemsStorage->hasDirectChild($parentName, $childName) &&
-            !$this->itemsStorage->hasChild($childName, $parentName);
+        try {
+            $this->assertFutureChild($parentName, $childName);
+        } catch (RuntimeException) {
+            return false;
+        }
+
+        return true;
     }
 
     public function addChild(string $parentName, string $childName): self
     {
-        if (!$this->hasItem($parentName)) {
-            throw new InvalidArgumentException(
-                sprintf('Either "%s" does not exist.', $parentName)
-            );
-        }
-
-        if (!$this->hasItem($childName)) {
-            throw new InvalidArgumentException(
-                sprintf('Either "%s" does not exist.', $childName)
-            );
-        }
-
-        if ($parentName === $childName) {
-            throw new InvalidArgumentException(sprintf('Cannot add "%s" as a child of itself.', $parentName));
-        }
-
-        if (!$this->canBeParent($parentName, $childName)) {
-            throw new InvalidArgumentException(
-                sprintf('Can not add "%s" role as a child of "%s" permission.', $childName, $parentName)
-            );
-        }
-
-        if ($this->itemsStorage->hasDirectChild($parentName, $childName)) {
-            throw new RuntimeException(
-                sprintf('The item "%s" already has a child "%s".', $parentName, $childName)
-            );
-        }
-
-        if ($this->itemsStorage->hasChild($childName, $parentName)) {
-            throw new RuntimeException(
-                sprintf(
-                    'Cannot add "%s" as a child of "%s". A loop has been detected.',
-                    $childName,
-                    $parentName
-                )
-            );
-        }
-
+        $this->assertFutureChild($parentName, $childName);
         $this->itemsStorage->addChild($parentName, $childName);
 
         return $this;
@@ -474,19 +441,40 @@ final class Manager implements ManagerInterface
         return $this->itemsStorage->hasDirectChild($this->guestRoleName, $permissionName);
     }
 
-    private function canBeParent(string $parentName, string $childName): bool
+    /**
+     * @throws RuntimeException
+     */
+    private function assertFutureChild(string $parentName, string $childName): void
     {
         $parent = $this->itemsStorage->get($parentName);
         if ($parent === null) {
-            throw new InvalidArgumentException("There is no item named \"$parentName\".");
+            throw new RuntimeException("Parent \"$parentName\" does not exist.");
         }
 
         $child = $this->itemsStorage->get($childName);
         if ($child === null) {
-            throw new InvalidArgumentException("There is no item named \"$childName\".");
+            throw new RuntimeException("Child \"$childName\" does not exist.");
         }
 
-        return $parent->getType() !== Item::TYPE_PERMISSION || $child->getType() !== Item::TYPE_ROLE;
+        if ($parentName === $childName) {
+            throw new RuntimeException("Cannot add \"$parentName\" as a child of itself.");
+        }
+
+        if ($parent->getType() === Item::TYPE_PERMISSION && $child->getType() === Item::TYPE_ROLE) {
+            throw new RuntimeException(
+                "Can not add \"$childName\" role as a child of \"$parentName\" permission.",
+            );
+        }
+
+        if ($this->itemsStorage->hasDirectChild($parentName, $childName)) {
+            throw new RuntimeException("The item \"$parentName\" already has a child \"$childName\".");
+        }
+
+        if ($this->itemsStorage->hasChild($childName, $parentName)) {
+            throw new RuntimeException(
+                "Cannot add \"$childName\" as a child of \"$parentName\". A loop has been detected.",
+            );
+        }
     }
 
     private function checkItemNameForUpdate(Item $item, string $name): void
