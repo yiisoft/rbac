@@ -260,7 +260,7 @@ use Yiisoft\Rbac\ManagerInterface;
 /** @var ManagerInterface $manager */
 $anotherUserId = 103;
 if (!$manager->userHasPermission($anotherUserId, 'viewList', ['action' => 'home'])) {
-    echo 'reader hasn\'t  permission index';
+    echo 'reader hasn\'t "index" permission';
 }
 ```
 
