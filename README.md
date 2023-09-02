@@ -47,7 +47,7 @@ One of the following storages should be installed as well:
 - [Cycle DB storage](https://github.com/yiisoft/rbac-cycle-db) - database storage based on
   [Cycle DBAL](https://github.com/cycle/database).
 
-Also a rule factory implementation should be installed such as  
+Also, a rule factory implementation should be installed such as  
 [Rules Container](https://github.com/yiisoft/rbac-rules-container) (based on 
 [Yii Factory](https://github.com/yiisoft/factory)).
 
@@ -66,7 +66,7 @@ $manager = new Manager($itemsStorage, $assignmentsStorage, new ClassNameRuleFact
 ```
 
 It requires specifying items storage (hierarchy itself) and assignment storage where user IDs are mapped to roles. Also,
-rule factory is requires. Given a rule name stored in items storage it can create an instance of `Rule`.
+rule factory is required. Given a rule name stored in items storage it can create an instance of `Rule`.
 
 - Roles and permissions could usually be considered "semi-static", as they only change when you update your application
   code, so it may make sense to use PHP storage for it. 
@@ -202,7 +202,16 @@ Sometimes you need to add guest-only permission, which is not assigned to any us
 a role which is assigned to guest user:
 
 ```php
-$manager->setGuestRole('guest');
+use Yiisoft\Access\AccessCheckerInterface;
+use Yiisoft\Rbac\Permission;
+use Yiisoft\Rbac\Role;
+
+/** 
+ * @var ManagerInterface $manager
+ * @var AccessCheckerInterface $accessChecker 
+ */
+ 
+$manager->setGuestRoleName('guest');
 $manager->addPermission(new Permission('signup'));
 $manager->addRole(new Role('guest'));
 $manager->addChild('guest', 'signup');
