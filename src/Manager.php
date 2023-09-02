@@ -365,7 +365,7 @@ final class Manager implements ManagerInterface
 
         return $this->ruleFactory
             ->create($item->getRuleName())
-            ->execute($user, $item, $params);
+            ->execute($user, $item, $this->ruleFactory, $params);
     }
 
     /**

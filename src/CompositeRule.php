@@ -13,10 +13,10 @@ use function in_array;
  *
  * ```php
  * // Fresh and owned
- * $compositeRule = new CompositeRule(CompositeRule::AND, [new FreshRule(), new OwnedRule()]);
+ * $compositeRule = new CompositeRule(CompositeRule::AND, ['fresh-rule', 'owned-rule']);
  *
  * // Fresh or owned
- * $compositeRule = new CompositeRule(CompositeRule::OR, [new FreshRule(), new OwnedRule()]);
+ * $compositeRule = new CompositeRule(CompositeRule::OR, ['fresh-rule', 'owned-rule']);
  * ```
  */
 final class CompositeRule implements RuleInterface
@@ -24,18 +24,11 @@ final class CompositeRule implements RuleInterface
     public const AND = 'and';
     public const OR = 'or';
 
-    private string $operator;
-
-    /**
-     * @var RuleInterface[]
-     */
-    private array $rules;
-
     /**
      * @param string $operator Operator to be used. Could be `CompositeRule::AND` or `CompositeRule::OR`.
-     * @param RuleInterface[] $rules Array of rule instances.
+     * @param string[] $ruleNames Array of rule names.
      */
-    public function __construct(string $operator, array $rules)
+    public function __construct(private string $operator, private array $ruleNames)
     {
         if (!in_array($operator, [self::AND, self::OR], true)) {
             throw new InvalidArgumentException(
@@ -47,32 +40,22 @@ final class CompositeRule implements RuleInterface
             );
         }
 
-        foreach ($rules as $rule) {
-            if (!$rule instanceof RuleInterface) {
+        foreach ($ruleNames as $ruleName) {
+            if ($ruleName === '') {
                 /** @psalm-suppress RedundantConditionGivenDocblockType,DocblockTypeContradiction */
-                $type = get_debug_type($rule);
-                throw new InvalidArgumentException(
-                    sprintf(
-                        'Each rule should be an instance of %s, "%s" given.',
-                        RuleInterface::class,
-                        $type
-                    )
-                );
+                throw new InvalidArgumentException('Rule name can\'t be empty.');
             }
         }
-
-        $this->operator = $operator;
-        $this->rules = $rules;
     }
 
-    public function execute(string $userId, Item $item, array $parameters = []): bool
+    public function execute(string $userId, Item $item, RuleFactoryInterface $ruleFactory, array $parameters = []): bool
     {
-        if (empty($this->rules)) {
+        if (empty($this->ruleNames)) {
             return true;
         }
 
-        foreach ($this->rules as $rule) {
-            $result = $rule->execute($userId, $item, $parameters);
+        foreach ($this->ruleNames as $ruleName) {
+            $result = $ruleFactory->create($ruleName)->execute($userId, $item, $parameters);
 
             if ($this->operator === self::AND && $result === false) {
                 return false;
