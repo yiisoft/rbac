@@ -119,7 +119,7 @@ trait ItemsStorageTestTrait
         $this->assertEmpty($storage->getAll());
     }
 
-    public function dataGetChildren(): array
+    public function dataGetAllChildren(): array
     {
         return [
             ['Parent 1', ['Child 1']],
@@ -138,9 +138,9 @@ trait ItemsStorageTestTrait
     }
 
     /**
-     * @dataProvider dataGetChildren
+     * @dataProvider dataGetAllChildren
      */
-    public function testGetChildren(string $parentName, array $expectedChildren): void
+    public function testGetAllChildren(string $parentName, array $expectedChildren): void
     {
         $storage = $this->getStorage();
         $children = $storage->getAllChildren($parentName);

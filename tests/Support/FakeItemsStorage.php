@@ -269,7 +269,7 @@ final class FakeItemsStorage implements ItemsStorageInterface
      */
     private function hasLoop(string $parentName, string $childName): bool
     {
-        if ($childName === $parentName) {
+        if ($parentName === $childName) {
             return true;
         }
 
