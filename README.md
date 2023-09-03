@@ -190,10 +190,10 @@ If you need to aggregate multiple rules at once, use composite rule:
 use Yiisoft\Rbac\CompositeRule;
 
 // Fresh and owned
-$compositeRule = new CompositeRule(CompositeRule::AND, [new FreshRule(), new OwnedRule()]);
+$compositeRule = new CompositeRule(CompositeRule::AND, ['fresh_rule', 'owned_rule']);
 
 // Fresh or owned
-$compositeRule = new CompositeRule(CompositeRule::OR, [new FreshRule(), new OwnedRule()]);
+$compositeRule = new CompositeRule(CompositeRule::OR, ['fresh_rule', 'owned_rule']);
 ```
 
 ### Assigning roles to users

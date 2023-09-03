@@ -39,13 +39,6 @@ final class CompositeRule implements RuleInterface
                 )
             );
         }
-
-        foreach ($ruleNames as $ruleName) {
-            if ($ruleName === '') {
-                /** @psalm-suppress RedundantConditionGivenDocblockType,DocblockTypeContradiction */
-                throw new InvalidArgumentException('Rule name can\'t be empty.');
-            }
-        }
     }
 
     public function execute(string $userId, Item $item, RuleFactoryInterface $ruleFactory, array $parameters = []): bool
@@ -55,7 +48,7 @@ final class CompositeRule implements RuleInterface
         }
 
         foreach ($this->ruleNames as $ruleName) {
-            $result = $ruleFactory->create($ruleName)->execute($userId, $item, $parameters);
+            $result = $ruleFactory->create($ruleName)->execute($userId, $item, $ruleFactory, $parameters);
 
             if ($this->operator === self::AND && $result === false) {
                 return false;
