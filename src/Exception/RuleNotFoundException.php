@@ -11,6 +11,6 @@ final class RuleNotFoundException extends Exception
 {
     public function __construct(string $name, int $code = 0, ?Throwable $previous = null)
     {
-        parent::__construct(sprintf('Rule "%s" not found.', $name), $code, $previous);
+        parent::__construct("Rule \"$name\" not found.", $code, $previous);
     }
 }

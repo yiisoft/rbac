@@ -9,7 +9,7 @@ use InvalidArgumentException;
 use RuntimeException;
 use Stringable;
 use Yiisoft\Access\AccessCheckerInterface;
-use Yiisoft\Rbac\Exception\DefaultRoleNotFoundException;
+use Yiisoft\Rbac\Exception\DefaultRolesNotFoundException;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 
 use function array_key_exists;
@@ -160,8 +160,7 @@ final class Manager implements ManagerInterface
     {
         $role = $this->itemsStorage->getRole($roleName);
         if ($role === null) {
-            // TODO: Use "role not found" exception
-            throw new InvalidArgumentException(sprintf('Role "%s" not found.', $roleName));
+            throw new InvalidArgumentException("Role \"$roleName\" not found.");
         }
 
         return array_merge([$roleName => $role], $this->itemsStorage->getAllChildRoles($roleName));
@@ -277,7 +276,7 @@ final class Manager implements ManagerInterface
         if (!empty($missingRoles)) {
             $missingRolesStr = '"' . implode('", "', $missingRoles) . '"';
 
-            throw new DefaultRoleNotFoundException("The following default roles were not found: $missingRolesStr.");
+            throw new DefaultRolesNotFoundException("The following default roles were not found: $missingRolesStr.");
         }
 
         return $roles;
