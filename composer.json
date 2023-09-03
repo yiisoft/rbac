@@ -37,7 +37,7 @@
         "phpunit/phpunit": "^9.5",
         "rector/rector": "^0.18.1",
         "roave/infection-static-analysis-plugin": "^1.18",
-        "slope-it/clock-mock": "^0.3.8",
+        "slope-it/clock-mock": "^0.4.0",
         "spatie/phpunit-watcher": "^1.23",
         "vimeo/psalm": "^4.30|^5.3",
         "yiisoft/di": "^1.2"
