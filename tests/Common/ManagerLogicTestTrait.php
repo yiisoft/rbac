@@ -260,6 +260,18 @@ trait ManagerLogicTestTrait
         $this->assertFalse($manager->canAddChild('author', 'reader'));
     }
 
+    public function testCanAddChild(): void
+    {
+        $manager = $this->createFilledManager();
+
+        $this->assertTrue(
+            $manager->canAddChild(
+                'reader',
+                'createPost',
+            ),
+        );
+    }
+
     public function testAddChild(): void
     {
         $manager = $this->createFilledManager();
