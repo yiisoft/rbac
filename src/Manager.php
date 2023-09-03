@@ -256,8 +256,6 @@ final class Manager implements ManagerInterface
             throw new RuntimeException('Default role names closure must return an array.');
         }
 
-        // TODO: Check that each array item is a string
-
         /** @var string[] $defaultRoleNames */
         $this->defaultRoleNames = $defaultRoleNames;
 
