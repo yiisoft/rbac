@@ -803,13 +803,27 @@ trait ManagerLogicTestTrait
         $this->assertEquals(['myDefaultRole'], $manager->getDefaultRoleNames());
     }
 
-    public function testGetDefaultNonExistRoles(): void
+    public function dataGetDefaultNonExistingRoles()
+    {
+        return [
+            [['bananaCollector'], 'The following default roles were not found: "bananaCollector".'],
+            [
+                ['bananaCollector1', 'bananaCollector2'],
+                'The following default roles were not found: "bananaCollector1", "bananaCollector2"',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetDefaultNonExistingRoles
+     */
+    public function testGetDefaultNonExistingRoles(array $defaultRoleNames, string $expectedExceptionMessage): void
     {
         $manager = $this->createManager();
-        $manager->setDefaultRoleNames(['bananaCollector']);
+        $manager->setDefaultRoleNames($defaultRoleNames);
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Default role "bananaCollector" not found.');
+        $this->expectExceptionMessage($expectedExceptionMessage);
         $manager->getDefaultRoles();
     }
 

@@ -152,6 +152,8 @@ trait ItemsStorageTestTrait
         }
     }
 
+    // TODO: Add tests for new methods
+
     public function testGetRoles(): void
     {
         $storage = $this->getStorage();

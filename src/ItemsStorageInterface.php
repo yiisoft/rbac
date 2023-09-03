@@ -67,9 +67,20 @@ interface ItemsStorageInterface
     /**
      * Returns all roles in the system.
      *
-     * @return Role[] All roles in the system.
+     * @return Role[] Array of role instances indexed by role names.
+     * @psalm-return array<string, Role>
      */
     public function getRoles(): array;
+
+    /**
+     * Returns roles by the given names' list.
+     *
+     * @param string[] $names List of role names.
+     *
+     * @return Role[] Array of role instances indexed by role names.
+     * @psalm-return array<string, Role>
+     */
+    public function getRolesByNames(array $names): array;
 
     /**
      * Returns the named role.
@@ -89,17 +100,28 @@ interface ItemsStorageInterface
     /**
      * Returns all permissions in the system.
      *
-     * @return Permission[] All permissions in the system.
+     * @return Permission[] Array of permission instances indexed by permission names.
+     * @psalm-return array<string, Permission>
      */
     public function getPermissions(): array;
+
+    /**
+     * Returns permissions by the given names' list.
+     *
+     * @param string[] $names List of permission names.
+     *
+     * @return Permission[] Array of permission instances indexed by permission names.
+     * @psalm-return array<string, Permission>
+     */
+    public function getPermissionsByNames(array $names): array;
 
     /**
      * Returns the named permission.
      *
      * @param string $name The permission name.
      *
-     * @return Permission|null The permission corresponding to the specified name. `null` is returned if no such
-     * permission.
+     * @return Permission|null The permission corresponding to the specified name. `null` is returned if there is no
+     * such permission.
      */
     public function getPermission(string $name): ?Permission;
 

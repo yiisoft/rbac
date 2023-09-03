@@ -44,6 +44,14 @@ final class FakeItemsStorage implements ItemsStorageInterface
         return $this->getItemsByType(Item::TYPE_ROLE);
     }
 
+    public function getRolesByNames(array $names): array
+    {
+        return array_filter(
+            $this->getAll(),
+            static fn (Item $item): bool => $item->getType() === Item::TYPE_ROLE && in_array($item->getName(), $names),
+        );
+    }
+
     public function getPermission(string $name): ?Permission
     {
         return $this->getItemsByType(Item::TYPE_PERMISSION)[$name] ?? null;
@@ -52,6 +60,16 @@ final class FakeItemsStorage implements ItemsStorageInterface
     public function getPermissions(): array
     {
         return $this->getItemsByType(Item::TYPE_PERMISSION);
+    }
+
+    public function getPermissionsByNames(array $names): array
+    {
+        $permissionType = Item::TYPE_PERMISSION;
+
+        return array_filter(
+            $this->getAll(),
+            static fn (Item $item): bool => $item->getType() === $permissionType && in_array($item->getName(), $names),
+        );
     }
 
     public function getParents(string $name): array
@@ -141,12 +159,12 @@ final class FakeItemsStorage implements ItemsStorageInterface
 
     public function clearPermissions(): void
     {
-        $this->removeAllItems(Item::TYPE_PERMISSION);
+        $this->removeItemsByType(Item::TYPE_PERMISSION);
     }
 
     public function clearRoles(): void
     {
-        $this->removeAllItems(Item::TYPE_ROLE);
+        $this->removeItemsByType(Item::TYPE_ROLE);
     }
 
     private function updateItemName(string $name, Item $item): void
@@ -156,20 +174,13 @@ final class FakeItemsStorage implements ItemsStorageInterface
 
     private function getItemsByType(string $type): array
     {
-        return $this->filterItems(
-            fn (Item $item) => $item->getType() === $type
+        return array_filter(
+            $this->getAll(),
+            static fn (Item $item): bool => $item->getType() === $type,
         );
     }
 
-    /**
-     * @return array|Item[]
-     */
-    private function filterItems(callable $callback): array
-    {
-        return array_filter($this->getAll(), $callback);
-    }
-
-    private function removeAllItems(string $type): void
+    private function removeItemsByType(string $type): void
     {
         foreach ($this->getItemsByType($type) as $item) {
             $this->remove($item->getName());
