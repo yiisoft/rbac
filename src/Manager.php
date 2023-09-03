@@ -185,12 +185,12 @@ final class Manager implements ManagerInterface
     public function getUserIdsByRoleName(string $roleName): array
     {
         $result = [];
-        $roles = [$roleName, ...array_keys($this->itemsStorage->getParents($roleName))];
+        $roleNames = [$roleName, ...array_keys($this->itemsStorage->getParents($roleName))];
 
         foreach ($this->assignmentsStorage->getAll() as $userId => $assignments) {
             foreach ($assignments as $userAssignment) {
                 // TODO: Optimize
-                if (in_array($userAssignment->getItemName(), $roles, true)) {
+                if (in_array($userAssignment->getItemName(), $roleNames, true)) {
                     $result[] = $userId;
                 }
             }
