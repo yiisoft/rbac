@@ -372,7 +372,7 @@ final class Manager implements ManagerInterface
             return false;
         }
 
-        if ($this->itemsStorage->roleExists($this->guestRoleName) === null) {
+        if ($this->itemsStorage->roleExists($this->guestRoleName)) {
             return false;
         }
 
