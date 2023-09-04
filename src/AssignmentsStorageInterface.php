@@ -31,6 +31,15 @@ interface AssignmentsStorageInterface
     public function getByUserId(string $userId): array;
 
     /**
+     * Returns user ids by given item names.
+     *
+     * @param string[] $itemNames List of item names.
+     *
+     * @return string[] List of user ids.
+     */
+    public function getUserIdsByItemNames(array $itemNames): array;
+
+    /**
      * Returns role or permission assignment for the specified item name that belongs to user with the specified ID.
      *
      * @param string $itemName Item name.
