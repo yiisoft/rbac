@@ -25,19 +25,20 @@ interface AssignmentsStorageInterface
      *
      * @return Assignment[] The assignments. The array is indexed by the role or the permission names. An empty array
      * will be returned if there is no role or permission assigned to the user.
-     *
      * @psalm-return array<string, Assignment>
      */
     public function getByUserId(string $userId): array;
 
     /**
-     * Returns user ids by given item names.
+     * Returns all role or permission assignment information by the specified item names' list.
      *
      * @param string[] $itemNames List of item names.
      *
-     * @return string[] List of user ids.
+     * @return Assignment[] The assignments. An empty array will be returned if there are no users assigned to these
+     * item names.
+     * @psalm-return list<Assignment>
      */
-    public function getUserIdsByItemNames(array $itemNames): array;
+    public function getByItemNames(array $itemNames): array;
 
     /**
      * Returns role or permission assignment for the specified item name that belongs to user with the specified ID.
@@ -48,6 +49,16 @@ interface AssignmentsStorageInterface
      * @return Assignment|null Assignment or null if there is no role or permission assigned to the user.
      */
     public function get(string $itemName, string $userId): ?Assignment;
+
+    /**
+     * Whether a user has at least one permission from the given list.
+     *
+     * @param string $userId User id.
+     * @param array $permissionNames List of permission names.
+     *
+     * @return bool Whether a user has at least one permission.
+     */
+    public function userHasPermission(string $userId, array $permissionNames): bool;
 
     /**
      * Adds assignment of the role or permission to the user with ID specified.

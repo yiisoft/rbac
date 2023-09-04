@@ -12,7 +12,6 @@ use Yiisoft\Access\AccessCheckerInterface;
 use Yiisoft\Rbac\Exception\DefaultRolesNotFoundException;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 
-use function array_key_exists;
 use function is_array;
 
 /**
@@ -51,19 +50,20 @@ final class Manager implements ManagerInterface
             return $this->guestHasPermission($permissionName);
         }
 
-        $userId = (string) $userId;
-        $assignments = $this->assignmentsStorage->getByUserId($userId);
-
-        if (empty($assignments)) {
+        $permission = $this->itemsStorage->getPermission($permissionName);
+        if ($permission === null) {
             return false;
         }
 
-        return $this->userHasItem(
-            $userId,
-            $this->itemsStorage->getPermission($permissionName),
-            $parameters,
-            $assignments,
-        );
+        $userId = (string) $userId;
+        if (!$this->executeRule($userId, $permission, $parameters)) {
+            return false;
+        }
+
+        $parentPermissions = $this->itemsStorage->getParents($permission->getName());
+        $permissionNames = [$permission->getName(), ...array_keys($parentPermissions)];
+
+        return $this->assignmentsStorage->userHasPermission($userId, $permissionNames);
     }
 
     public function canAddChild(string $parentName, string $childName): bool
@@ -185,7 +185,10 @@ final class Manager implements ManagerInterface
     {
         $roleNames = [$roleName, ...array_keys($this->itemsStorage->getParents($roleName))];
 
-        return $this->assignmentsStorage->getUserIdsByItemNames($roleNames);
+        return array_map(
+            static fn(Assignment $assignment): string => $assignment->getUserId(),
+            $this->assignmentsStorage->getByItemNames($roleNames),
+        );
     }
 
     public function addRole(Role $role): self
@@ -271,6 +274,7 @@ final class Manager implements ManagerInterface
 
     public function setGuestRoleName(?string $name): self
     {
+        // TODO: Check that this role exists
         $this->guestRoleName = $name;
         return $this;
     }
@@ -367,48 +371,6 @@ final class Manager implements ManagerInterface
             $this->itemsStorage->remove($name);
             $this->assignmentsStorage->removeByItemName($name);
         }
-    }
-
-    /**
-     * Performs access check for the specified user.
-     *
-     * @param string $user The user ID. This should be a string representing the unique identifier of a user.
-     * @param Item|null $item The permission or the role that need access check.
-     * @param array $params Name-value pairs that would be passed to rules associated with the permissions and roles
-     * assigned to the user. A param with name 'user' is added to this array, which holds the value of `$userId`.
-     * @param Assignment[] $assignments The assignments to the specified user.
-     *
-     * @throws RuntimeException
-     *
-     * @return bool Whether the operations can be performed by the user.
-     */
-    private function userHasItem(
-        string $user,
-        ?Item $item,
-        array $params,
-        array $assignments
-    ): bool {
-        if ($item === null) {
-            return false;
-        }
-
-        if (!$this->executeRule($user, $item, $params)) {
-            return false;
-        }
-
-        // TODO: Optimize
-        if (array_key_exists($item->getName(), $assignments)) {
-            return true;
-        }
-
-        foreach ($this->itemsStorage->getParents($item->getName()) as $parentName => $_parent) {
-            // TODO: Optimize
-            if (array_key_exists($parentName, $assignments)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private function guestHasPermission(string $permissionName): bool

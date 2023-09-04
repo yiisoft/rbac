@@ -21,14 +21,14 @@ class FakeAssignmentsStorage implements AssignmentsStorageInterface
         return $this->assignments[$userId] ?? [];
     }
 
-    public function getUserIdsByItemNames(array $itemNames): array
+    public function getByItemNames(array $itemNames): array
     {
         $result = [];
 
-        foreach ($this->assignments as $userId => $assignments) {
+        foreach ($this->assignments as $assignments) {
             foreach ($assignments as $userAssignment) {
                 if (in_array($userAssignment->getItemName(), $itemNames, true)) {
-                    $result[] = $userId;
+                    $result[] = $userAssignment;
                 }
             }
         }
@@ -39,6 +39,22 @@ class FakeAssignmentsStorage implements AssignmentsStorageInterface
     public function get(string $itemName, string $userId): ?Assignment
     {
         return $this->getByUserId($userId)[$itemName] ?? null;
+    }
+
+    public function userHasPermission(string $userId, array $permissionNames): bool
+    {
+        $assignments = $this->getByUserId($userId);
+        if (empty($assignments)) {
+            return false;
+        }
+
+        foreach ($permissionNames as $permissionName) {
+            if (array_key_exists($permissionName, $assignments)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function add(string $itemName, string $userId): void
