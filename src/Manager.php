@@ -15,7 +15,7 @@ use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 use function is_array;
 
 /**
- * An authorization manager that helps with building RBAC hierarchy and check for permissions.
+ * Helps to manage RBAC hierarchy and check for permissions.
  */
 final class Manager implements ManagerInterface
 {
@@ -119,7 +119,7 @@ final class Manager implements ManagerInterface
             );
         }
 
-        if ($this->assignmentsStorage->get($itemName, $userId) !== null) {
+        if ($this->assignmentsStorage->exists($itemName, $userId)) {
             throw new InvalidArgumentException(
                 "\"$itemName\" {$item->getType()} has already been assigned to user $userId.",
             );
@@ -274,7 +274,6 @@ final class Manager implements ManagerInterface
 
     public function setGuestRoleName(?string $name): self
     {
-        // TODO: Check that this role exists
         $this->guestRoleName = $name;
         return $this;
     }
@@ -326,11 +325,6 @@ final class Manager implements ManagerInterface
         $this->itemsStorage->add($item);
     }
 
-    private function hasItem(string $name): bool
-    {
-        return $this->itemsStorage->exists($name);
-    }
-
     /**
      * Returns all permissions that are directly assigned to user.
      *
@@ -358,7 +352,6 @@ final class Manager implements ManagerInterface
     {
         $result = [];
         foreach (array_keys($userAssignments) as $roleName) {
-            // TODO: Optimize
             $result = array_merge($result, $this->itemsStorage->getAllChildPermissions($roleName));
         }
 
@@ -367,7 +360,7 @@ final class Manager implements ManagerInterface
 
     private function removeItem(string $name): void
     {
-        if ($this->hasItem($name)) {
+        if ($this->itemsStorage->exists($name)) {
             $this->itemsStorage->remove($name);
             $this->assignmentsStorage->removeByItemName($name);
         }
@@ -379,7 +372,7 @@ final class Manager implements ManagerInterface
             return false;
         }
 
-        if ($this->itemsStorage->getRole($this->guestRoleName) === null) {
+        if ($this->itemsStorage->roleExists($this->guestRoleName) === null) {
             return false;
         }
 
@@ -391,6 +384,10 @@ final class Manager implements ManagerInterface
      */
     private function assertFutureChild(string $parentName, string $childName): void
     {
+        if ($parentName === $childName) {
+            throw new RuntimeException("Cannot add \"$parentName\" as a child of itself.");
+        }
+
         $parent = $this->itemsStorage->get($parentName);
         if ($parent === null) {
             throw new RuntimeException("Parent \"$parentName\" does not exist.");
@@ -399,10 +396,6 @@ final class Manager implements ManagerInterface
         $child = $this->itemsStorage->get($childName);
         if ($child === null) {
             throw new RuntimeException("Child \"$childName\" does not exist.");
-        }
-
-        if ($parentName === $childName) {
-            throw new RuntimeException("Cannot add \"$parentName\" as a child of itself.");
         }
 
         if ($parent->getType() === Item::TYPE_PERMISSION && $child->getType() === Item::TYPE_ROLE) {
@@ -424,7 +417,7 @@ final class Manager implements ManagerInterface
 
     private function checkItemNameForUpdate(Item $item, string $name): void
     {
-        if ($item->getName() === $name || !$this->hasItem($item->getName())) {
+        if ($item->getName() === $name || !$this->itemsStorage->exists($item->getName())) {
             return;
         }
 

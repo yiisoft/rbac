@@ -51,6 +51,16 @@ interface AssignmentsStorageInterface
     public function get(string $itemName, string $userId): ?Assignment;
 
     /**
+     * Whether assignment with a given item name and user id pair exists.
+     *
+     * @param string $itemName Item name.
+     * @param string $userId User id.
+     *
+     * @return bool Whether assignment exists.
+     */
+    public function exists(string $itemName, string $userId): bool;
+
+    /**
      * Whether a user has at least one permission from the given list.
      *
      * @param string $userId User id.

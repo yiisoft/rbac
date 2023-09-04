@@ -34,13 +34,22 @@ interface ItemsStorageInterface
     public function get(string $name): ?Item;
 
     /**
-     * Returns whether named role or permission exists.
+     * Whether named role or permission exists.
      *
      * @param string $name The role or the permission name.
      *
      * @return bool Whether named role or permission exists.
      */
     public function exists(string $name): bool;
+
+    /**
+     * Whether named role exists.
+     *
+     * @param string $name The role name.
+     *
+     * @return bool Whether named role exists.
+     */
+    public function roleExists(string $name): bool;
 
     /**
      * Adds the role or the permission to RBAC system.

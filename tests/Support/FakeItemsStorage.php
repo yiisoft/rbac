@@ -29,6 +29,11 @@ final class FakeItemsStorage implements ItemsStorageInterface
         return array_key_exists($name, $this->items);
     }
 
+    public function roleExists(string $name): bool
+    {
+        return isset($this->getItemsByType(Item::TYPE_ROLE)[$name]);
+    }
+
     public function add(Item $item): void
     {
         $this->items[$item->getName()] = $item;
