@@ -130,10 +130,7 @@ trait ItemsStorageTestTrait
             ['posts.delete', []],
             ['posts.viewer', ['posts.view']],
             ['posts.redactor', ['posts.viewer', 'posts.create', 'posts.update']],
-            [
-                'posts.admin',
-                ['posts.redactor', 'posts.delete'],
-            ],
+            ['posts.admin', ['posts.redactor', 'posts.delete']],
         ];
     }
 
@@ -170,6 +167,54 @@ trait ItemsStorageTestTrait
     public function testGetAllChildren(string $parentName, array $expectedChildren): void
     {
         $children = $this->getStorage()->getAllChildren($parentName);
+        $this->assertChildren($children, $expectedChildren);
+    }
+
+    public function dataGetAllChildPermissions(): array
+    {
+        return [
+            ['Parent 1', ['Child 1']],
+            ['Parent 2', []],
+            ['posts.view', []],
+            ['posts.create', []],
+            ['posts.update', []],
+            ['posts.delete', []],
+            ['posts.viewer', ['posts.view']],
+            ['posts.redactor', ['posts.view', 'posts.create', 'posts.update']],
+            ['posts.admin', ['posts.view', 'posts.create', 'posts.update', 'posts.delete']],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetAllChildPermissions
+     */
+    public function testGetAllChildPermissions(string $parentName, array $expectedChildren): void
+    {
+        $children = $this->getStorage()->getAllChildPermissions($parentName);
+        $this->assertChildren($children, $expectedChildren);
+    }
+
+    public function dataGetAllChildRoles(): array
+    {
+        return [
+            ['Parent 1', []],
+            ['Parent 2', ['Child 2', 'Child 3']],
+            ['posts.view', []],
+            ['posts.create', []],
+            ['posts.update', []],
+            ['posts.delete', []],
+            ['posts.viewer', []],
+            ['posts.redactor', ['posts.viewer']],
+            ['posts.admin', ['posts.redactor', 'posts.viewer']],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetAllChildRoles
+     */
+    public function testGetAllChildRoles(string $parentName, array $expectedChildren): void
+    {
+        $children = $this->getStorage()->getAllChildRoles($parentName);
         $this->assertChildren($children, $expectedChildren);
     }
 
