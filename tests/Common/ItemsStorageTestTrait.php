@@ -83,10 +83,27 @@ trait ItemsStorageTestTrait
     /**
      * @dataProvider existsProvider
      */
-    public function testExists(string $name, bool $exists): void
+    public function testExists(string $name, bool $expectedExists): void
     {
         $storage = $this->getStorage();
-        $this->assertSame($storage->exists($name), $exists);
+        $this->assertSame($expectedExists, $storage->exists($name));
+    }
+
+    public function dataRoleExists(): array
+    {
+        return [
+            ['posts.viewer', true],
+            ['posts.view', false],
+            ['non-existing', false],
+        ];
+    }
+
+    /**
+     * @dataProvider dataRoleExists
+     */
+    public function testRoleExists(string $name, bool $expectedRoleExists): void
+    {
+        $this->assertSame($expectedRoleExists, $this->getStorage()->roleExists($name));
     }
 
     public function testGetPermission(): void
@@ -131,6 +148,7 @@ trait ItemsStorageTestTrait
             ['posts.viewer', ['posts.view']],
             ['posts.redactor', ['posts.viewer', 'posts.create', 'posts.update']],
             ['posts.admin', ['posts.redactor', 'posts.delete']],
+            ['non-existing', []],
         ];
     }
 
@@ -158,6 +176,7 @@ trait ItemsStorageTestTrait
                 'posts.admin',
                 ['posts.redactor', 'posts.viewer', 'posts.view', 'posts.create', 'posts.update', 'posts.delete'],
             ],
+            ['non-existing', []],
         ];
     }
 
@@ -182,6 +201,7 @@ trait ItemsStorageTestTrait
             ['posts.viewer', ['posts.view']],
             ['posts.redactor', ['posts.view', 'posts.create', 'posts.update']],
             ['posts.admin', ['posts.view', 'posts.create', 'posts.update', 'posts.delete']],
+            ['non-existing', []],
         ];
     }
 
@@ -206,6 +226,7 @@ trait ItemsStorageTestTrait
             ['posts.viewer', []],
             ['posts.redactor', ['posts.viewer']],
             ['posts.admin', ['posts.redactor', 'posts.viewer']],
+            ['non-existing', []],
         ];
     }
 
@@ -258,6 +279,7 @@ trait ItemsStorageTestTrait
             ['posts.viewer', ['posts.admin', 'posts.redactor']],
             ['posts.redactor', ['posts.admin']],
             ['posts.admin', []],
+            ['non-existing', []],
         ];
     }
 
@@ -352,6 +374,9 @@ trait ItemsStorageTestTrait
             ['posts.viewer', 'posts.redactor', false],
             ['posts.viewer', 'posts.admin', false],
             ['posts.redactor', 'posts.admin', false],
+            ['posts.viewer', 'non-existing', false],
+            ['non-existing', 'posts.viewer', false],
+            ['non-existing1', 'non-existing2', false],
         ];
     }
 
@@ -384,6 +409,9 @@ trait ItemsStorageTestTrait
             ['posts.viewer', 'posts.redactor', false],
             ['posts.viewer', 'posts.admin', false],
             ['posts.redactor', 'posts.admin', false],
+            ['posts.viewer', 'non-existing', false],
+            ['non-existing', 'posts.viewer', false],
+            ['non-existing1', 'non-existing2', false],
         ];
     }
 
