@@ -331,6 +331,70 @@ trait ItemsStorageTestTrait
         $this->assertFalse($storage->hasChildren('Parent 3'));
     }
 
+    public function dataHasChild(): array
+    {
+        return [
+            ['posts.viewer', 'posts.view', true],
+            ['posts.viewer', 'posts.create', false],
+            ['posts.viewer', 'posts.delete', false],
+
+            ['posts.redactor', 'posts.create', true],
+            ['posts.redactor', 'posts.view', true],
+            ['posts.redactor', 'posts.viewer', true],
+            ['posts.redactor', 'posts.delete', false],
+
+            ['posts.admin', 'posts.delete', true],
+            ['posts.admin', 'posts.create', true],
+            ['posts.admin', 'posts.redactor', true],
+            ['posts.admin', 'posts.view', true],
+            ['posts.admin', 'posts.viewer', true],
+
+            ['posts.viewer', 'posts.redactor', false],
+            ['posts.viewer', 'posts.admin', false],
+            ['posts.redactor', 'posts.admin', false],
+        ];
+    }
+
+    /**
+     * @dataProvider dataHasChild
+     */
+    public function testHasChild(string $parentName, string $childName, bool $expectedHasChild): void
+    {
+        $this->assertSame($expectedHasChild, $this->getStorage()->hasChild($parentName, $childName));
+    }
+
+    public function dataHasDirectChild(): array
+    {
+        return [
+            ['posts.viewer', 'posts.view', true],
+            ['posts.viewer', 'posts.create', false],
+            ['posts.viewer', 'posts.delete', false],
+
+            ['posts.redactor', 'posts.create', true],
+            ['posts.redactor', 'posts.view', false],
+            ['posts.redactor', 'posts.viewer', true],
+            ['posts.redactor', 'posts.delete', false],
+
+            ['posts.admin', 'posts.delete', true],
+            ['posts.admin', 'posts.create', false],
+            ['posts.admin', 'posts.redactor', true],
+            ['posts.admin', 'posts.view', false],
+            ['posts.admin', 'posts.viewer', false],
+
+            ['posts.viewer', 'posts.redactor', false],
+            ['posts.viewer', 'posts.admin', false],
+            ['posts.redactor', 'posts.admin', false],
+        ];
+    }
+
+    /**
+     * @dataProvider dataHasDirectChild
+     */
+    public function testHasDirectChild(string $parentName, string $childName, bool $expectedHasDirectChild): void
+    {
+        $this->assertSame($expectedHasDirectChild, $this->getStorage()->hasDirectChild($parentName, $childName));
+    }
+
     public function testClearPermissions(): void
     {
         $storage = $this->getStorage();
