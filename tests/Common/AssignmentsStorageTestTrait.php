@@ -134,6 +134,11 @@ trait AssignmentsStorageTestTrait
         $this->assertIsInt($assignment->getCreatedAt());
     }
 
+    public function testGetNonExisting(): void
+    {
+        $this->assertNull($this->getStorage()->get('Researcher', 'jeff'));
+    }
+
     public function dataExists(): array
     {
         return [
@@ -151,6 +156,26 @@ trait AssignmentsStorageTestTrait
     public function testExists(string $itemName, string $userId, bool $expectedExists): void
     {
         $this->assertSame($expectedExists, $this->getStorage()->exists($itemName, $userId));
+    }
+
+    public function dataUserHasItem(): array
+    {
+        return [
+            ['john', ['Researcher', 'Accountant'], true],
+            ['jeff', ['Researcher', 'Operator'], true],
+            ['jeff', ['Researcher', 'non-existing'], false],
+            ['jeff', ['non-existing', 'Operator'], true],
+            ['jeff', ['non-existing1', 'non-existing2'], false],
+            ['jeff', ['Researcher', 'Accountant'], false],
+        ];
+    }
+
+    /**
+     * @dataProvider dataUserHasItem
+     */
+    public function testUserHasItem(string $userId, array $itemNames, bool $expectedUserHasItem): void
+    {
+        $this->assertSame($expectedUserHasItem, $this->getStorage()->userHasItem($userId, $itemNames));
     }
 
     public function testAdd(): void
