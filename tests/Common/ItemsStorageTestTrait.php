@@ -248,6 +248,32 @@ trait ItemsStorageTestTrait
         $this->assertContainsOnlyInstancesOf(Role::class, $roles);
     }
 
+    public function dataGetRolesByNames(): array
+    {
+        return [
+            [[], []],
+            [['posts.viewer'], ['posts.viewer']],
+            [['posts.viewer', 'posts.redactor'], ['posts.viewer', 'posts.redactor']],
+            [['posts.viewer', 'posts.view'], ['posts.viewer']],
+            [['posts.viewer', 'non-existing'], ['posts.viewer']],
+            [['non-existing1', 'non-existing2'], []],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetRolesByNames
+     */
+    public function testGetRolesByNames(array $names, array $expectedRoleNames): void
+    {
+        $roles = $this->getStorage()->getRolesByNames($names);
+
+        $this->assertCount(count($expectedRoleNames), $roles);
+        foreach ($roles as $roleName => $role) {
+            $this->assertContains($roleName, $expectedRoleNames);
+            $this->assertSame($roleName, $role->getName());
+        }
+    }
+
     public function testGetPermissions(): void
     {
         $storage = $this->getStorage();
@@ -255,6 +281,32 @@ trait ItemsStorageTestTrait
 
         $this->assertCount($this->initialPermissionsCount, $permissions);
         $this->assertContainsOnlyInstancesOf(Permission::class, $permissions);
+    }
+
+    public function dataGetPermissionsByNames(): array
+    {
+        return [
+            [[], []],
+            [['posts.view'], ['posts.view']],
+            [['posts.create', 'posts.update'], ['posts.create', 'posts.update']],
+            [['posts.create', 'posts.redactor'], ['posts.create']],
+            [['posts.create', 'non-existing'], ['posts.create']],
+            [['non-existing1', 'non-existing2'], []],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetPermissionsByNames
+     */
+    public function testGetPermissionsByNames(array $names, array $expectedPermissionNames): void
+    {
+        $permissions = $this->getStorage()->getPermissionsByNames($names);
+
+        $this->assertCount(count($expectedPermissionNames), $permissions);
+        foreach ($permissions as $permissionName => $permission) {
+            $this->assertContains($permissionName, $expectedPermissionNames);
+            $this->assertSame($permissionName, $permission->getName());
+        }
     }
 
     public function testRemove(): void
