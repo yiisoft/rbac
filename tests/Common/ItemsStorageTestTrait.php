@@ -169,7 +169,7 @@ trait ItemsStorageTestTrait
      */
     public function testGetAllChildren(string $parentName, array $expectedChildren): void
     {
-        $children = $this->getStorage()->getDirectChildren($parentName);
+        $children = $this->getStorage()->getAllChildren($parentName);
         $this->assertChildren($children, $expectedChildren);
     }
 
