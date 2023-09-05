@@ -61,14 +61,14 @@ interface AssignmentsStorageInterface
     public function exists(string $itemName, string $userId): bool;
 
     /**
-     * Whether a user has at least one permission from the given list.
+     * Whether at least one item from the given list is assigned to the user.
      *
      * @param string $userId User id.
-     * @param array $permissionNames List of permission names.
+     * @param array $itemNames List of item names.
      *
-     * @return bool Whether a user has at least one permission.
+     * @return bool Whether at least one item from the given list is assigned to the user.
      */
-    public function userHasPermission(string $userId, array $permissionNames): bool;
+    public function userHasItem(string $userId, array $itemNames): bool;
 
     /**
      * Adds assignment of the role or permission to the user with ID specified.

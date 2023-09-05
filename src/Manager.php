@@ -63,7 +63,7 @@ final class Manager implements ManagerInterface
         $parentPermissions = $this->itemsStorage->getParents($permission->getName());
         $permissionNames = [$permission->getName(), ...array_keys($parentPermissions)];
 
-        return $this->assignmentsStorage->userHasPermission($userId, $permissionNames);
+        return $this->assignmentsStorage->userHasItem($userId, $permissionNames);
     }
 
     public function canAddChild(string $parentName, string $childName): bool
@@ -372,7 +372,7 @@ final class Manager implements ManagerInterface
             return false;
         }
 
-        if ($this->itemsStorage->roleExists($this->guestRoleName)) {
+        if (!$this->itemsStorage->roleExists($this->guestRoleName)) {
             return false;
         }
 

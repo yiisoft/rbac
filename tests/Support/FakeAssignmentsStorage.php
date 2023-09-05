@@ -46,14 +46,14 @@ class FakeAssignmentsStorage implements AssignmentsStorageInterface
         return isset($this->getByUserId($userId)[$itemName]);
     }
 
-    public function userHasPermission(string $userId, array $permissionNames): bool
+    public function userHasItem(string $userId, array $itemNames): bool
     {
         $assignments = $this->getByUserId($userId);
         if (empty($assignments)) {
             return false;
         }
 
-        foreach ($permissionNames as $permissionName) {
+        foreach ($itemNames as $permissionName) {
             if (array_key_exists($permissionName, $assignments)) {
                 return true;
             }
