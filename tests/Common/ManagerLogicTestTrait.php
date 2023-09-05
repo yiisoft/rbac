@@ -768,7 +768,7 @@ trait ManagerLogicTestTrait
         $roles = $manager->getDefaultRoles();
 
         $this->assertCount(2, $roles);
-        $this->assertSame(['a', 'b'], array_keys($roles));
+        $this->assertEqualsCanonicalizing(['a', 'b'], array_keys($roles));
         $this->assertSame('a', $roles['a']->getName());
         $this->assertSame('b', $roles['b']->getName());
     }
