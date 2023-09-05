@@ -119,6 +119,33 @@ trait ItemsStorageTestTrait
         $this->assertEmpty($storage->getAll());
     }
 
+    public function dataGetDirectChildren(): array
+    {
+        return [
+            ['Parent 1', ['Child 1']],
+            ['Parent 2', ['Child 2', 'Child 3']],
+            ['posts.view', []],
+            ['posts.create', []],
+            ['posts.update', []],
+            ['posts.delete', []],
+            ['posts.viewer', ['posts.view']],
+            ['posts.redactor', ['posts.viewer', 'posts.create', 'posts.update']],
+            [
+                'posts.admin',
+                ['posts.redactor', 'posts.delete'],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetDirectChildren
+     */
+    public function testGetDirectChildren(string $parentName, array $expectedChildren): void
+    {
+        $children = $this->getStorage()->getDirectChildren($parentName);
+        $this->assertChildren($children, $expectedChildren);
+    }
+
     public function dataGetAllChildren(): array
     {
         return [
@@ -142,17 +169,9 @@ trait ItemsStorageTestTrait
      */
     public function testGetAllChildren(string $parentName, array $expectedChildren): void
     {
-        $storage = $this->getStorage();
-        $children = $storage->getAllChildren($parentName);
-
-        $this->assertCount(count($expectedChildren), $children);
-        foreach ($children as $childName => $child) {
-            $this->assertContains($childName, $expectedChildren);
-            $this->assertSame($childName, $child->getName());
-        }
+        $children = $this->getStorage()->getDirectChildren($parentName);
+        $this->assertChildren($children, $expectedChildren);
     }
-
-    // TODO: Add tests for new methods
 
     public function testGetRoles(): void
     {
@@ -371,5 +390,14 @@ trait ItemsStorageTestTrait
     private function getItemsCount(): int
     {
         return $this->initialRolesCount + $this->initialPermissionsCount;
+    }
+
+    private function assertChildren(array $children, array $expectedChildren): void
+    {
+        $this->assertCount(count($expectedChildren), $children);
+        foreach ($children as $childName => $child) {
+            $this->assertContains($childName, $expectedChildren);
+            $this->assertSame($childName, $child->getName());
+        }
     }
 }
