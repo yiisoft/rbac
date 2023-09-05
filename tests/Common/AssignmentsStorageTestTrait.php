@@ -134,6 +134,25 @@ trait AssignmentsStorageTestTrait
         $this->assertIsInt($assignment->getCreatedAt());
     }
 
+    public function dataExists(): array
+    {
+        return [
+            ['Manager', 'jack', true],
+            ['jack', 'Manager', false],
+            ['Manager', 'non-existing', false],
+            ['non-existing', 'jack', false],
+            ['non-existing1', 'non-existing2', false],
+        ];
+    }
+
+    /**
+     * @dataProvider dataExists
+     */
+    public function testExists(string $itemName, string $userId, bool $expectedExists): void
+    {
+        $this->assertSame($expectedExists, $this->getStorage()->exists($itemName, $userId));
+    }
+
     public function testAdd(): void
     {
         $storage = $this->getStorage();
