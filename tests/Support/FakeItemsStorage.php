@@ -93,6 +93,7 @@ final class FakeItemsStorage implements ItemsStorageInterface
     {
         $result = [];
         $this->fillChildrenRecursive($name, $result);
+
         return $result;
     }
 
@@ -100,6 +101,7 @@ final class FakeItemsStorage implements ItemsStorageInterface
     {
         $result = [];
         $this->fillChildrenRecursive($name, $result);
+
         return $this->filterRoles($result);
     }
 
@@ -107,6 +109,7 @@ final class FakeItemsStorage implements ItemsStorageInterface
     {
         $result = [];
         $this->fillChildrenRecursive($name, $result);
+
         return $this->filterPermissions($result);
     }
 
@@ -276,7 +279,7 @@ final class FakeItemsStorage implements ItemsStorageInterface
     }
 
     /**
-     * Checks whether there is a loop in the authorization item hierarchy.
+     * Checks whether there is a loop in the item hierarchy.
      *
      * @param string $parentName Name of the parent item.
      * @param string $childName Name of the child item that is to be added to the hierarchy.

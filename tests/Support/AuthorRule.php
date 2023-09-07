@@ -8,12 +8,12 @@ use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\RuleInterface;
 
 /**
- * Checks if authorID matches userID passed via params.
+ * Checks if user ID matches `authorID` passed via parameters.
  */
-class AuthorRule implements RuleInterface
+final class AuthorRule implements RuleInterface
 {
     public function execute(string $userId, Item $item, array $parameters = []): bool
     {
-        return $parameters['authorID'] == $userId;
+        return $parameters['authorID'] === $userId;
     }
 }
