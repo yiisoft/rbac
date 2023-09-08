@@ -12,6 +12,7 @@ use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\RuleFactoryInterface;
 use Yiisoft\Rbac\Tests\Support\AuthorRule;
+use Yiisoft\Rbac\Tests\Support\EasyRule;
 use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
 use Yiisoft\Rbac\Tests\Support\SimpleRuleFactory;
@@ -59,6 +60,8 @@ trait ManagerConfigurationTestTrait
             $this->assignmentsStorage,
             new SimpleRuleFactory([
                 'isAuthor' => new AuthorRule(),
+                'easyTrue' => new EasyRule(false),
+                'easyFalse' => new EasyRule(false),
             ]),
             $enableDirectPermissions,
         );

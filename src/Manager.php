@@ -46,13 +46,13 @@ final class Manager implements ManagerInterface
         string $permissionName,
         array $parameters = [],
     ): bool {
-        if ($userId === null) {
-            return $this->guestHasPermission($permissionName);
-        }
-
         $permission = $this->itemsStorage->getPermission($permissionName);
         if ($permission === null) {
             return false;
+        }
+
+        if ($userId === null) {
+            return $this->guestHasPermission($permission, $parameters);
         }
 
         $userId = (string) $userId;
@@ -284,17 +284,18 @@ final class Manager implements ManagerInterface
      * If the item does not specify a rule, this method will return `true`. Otherwise, it will
      * return the value of {@see RuleInterface::execute()}.
      *
-     * @param string $user The user ID. This should be a string representing the unique identifier of a user.
+     * @param string $userId The user ID. This should be a string representing the unique identifier of a user. For
+     * guests the value is `null`.
      * @param Item $item The role or the permission that needs to execute its rule.
      * @param array $params Parameters passed to {@see AccessCheckerInterface::userHasPermission()} and will be passed
      * to the rule.
      *
-     * @throws RuntimeException If the role or the permission has an invalid rule.
-     *
      * @return bool The return value of {@see RuleInterface::execute()}. If the role or the permission does not specify
      * a rule, `true` will be returned.
+     * @throws RuntimeException If the role or the permission has an invalid rule.
+     *
      */
-    private function executeRule(string $user, Item $item, array $params): bool
+    private function executeRule(?string $userId, Item $item, array $params): bool
     {
         if ($item->getRuleName() === null) {
             return true;
@@ -302,7 +303,7 @@ final class Manager implements ManagerInterface
 
         return $this->ruleFactory
             ->create($item->getRuleName())
-            ->execute($user, $item, $params);
+            ->execute($userId, $item, $params);
     }
 
     /**
@@ -366,7 +367,7 @@ final class Manager implements ManagerInterface
         }
     }
 
-    private function guestHasPermission(string $permissionName): bool
+    private function guestHasPermission(Permission $permission, array $parameters): bool
     {
         if ($this->guestRoleName === null) {
             return false;
@@ -376,7 +377,11 @@ final class Manager implements ManagerInterface
             return false;
         }
 
-        return $this->itemsStorage->hasDirectChild($this->guestRoleName, $permissionName);
+        if (!$this->executeRule(null, $permission, $parameters)) {
+            return false;
+        }
+
+        return $this->itemsStorage->hasDirectChild($this->guestRoleName, $permission->getName());
     }
 
     /**

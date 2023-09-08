@@ -65,7 +65,7 @@ final class CompositeRule implements RuleInterface
         $this->rules = $rules;
     }
 
-    public function execute(string $userId, Item $item, array $parameters = []): bool
+    public function execute(?string $userId, Item $item, array $parameters = []): bool
     {
         if (empty($this->rules)) {
             return true;

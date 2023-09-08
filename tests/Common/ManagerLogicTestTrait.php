@@ -141,6 +141,22 @@ trait ManagerLogicTestTrait
         }
     }
 
+    public function testUserHasPermissionWithGuestAndCustomRule(): void
+    {
+        $userId = 1;
+        $manager = $this->createFilledManager()
+            ->setGuestRoleName('guest')
+            ->addPermission(
+                (new Permission('viewIssue'))->withRuleName('easyTrue'),
+            )
+            ->addRole(new Role('guest'))
+            ->addChild('guest', 'viewIssue')
+            ->assign('guest', $userId);
+
+        $this->assertFalse($manager->userHasPermission(null, 'viewIssue'));
+        $this->assertFalse($manager->userHasPermission($userId, 'viewIssue'));
+    }
+
     public function testGuestRoleName(): void
     {
         $itemsStorage = $this->createItemsStorage();
