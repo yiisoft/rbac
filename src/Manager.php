@@ -290,10 +290,9 @@ final class Manager implements ManagerInterface
      * @param array $params Parameters passed to {@see AccessCheckerInterface::userHasPermission()} and will be passed
      * to the rule.
      *
+     * @throws RuntimeException If the role or the permission has an invalid rule.
      * @return bool The return value of {@see RuleInterface::execute()}. If the role or the permission does not specify
      * a rule, `true` will be returned.
-     * @throws RuntimeException If the role or the permission has an invalid rule.
-     *
      */
     private function executeRule(?string $userId, Item $item, array $params): bool
     {
