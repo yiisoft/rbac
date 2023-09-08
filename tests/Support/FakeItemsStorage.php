@@ -225,11 +225,18 @@ final class FakeItemsStorage implements ItemsStorageInterface
     {
         foreach ($this->children as $parentName => $childItems) {
             foreach ($childItems as $childItem) {
-                if ($childItem->getName() === $name) {
-                    $result[$parentName] = $this->get($parentName);
-                    $this->fillParentsRecursive($parentName, $result);
-                    break;
+                if ($childItem->getName() !== $name) {
+                    continue;
                 }
+
+                $parent = $this->get($parentName);
+                if ($parent !== null) {
+                    $result[$parentName] = $parent;
+                }
+
+                $this->fillParentsRecursive($parentName, $result);
+
+                break;
             }
         }
     }
@@ -238,7 +245,11 @@ final class FakeItemsStorage implements ItemsStorageInterface
     {
         $children = $this->children[$name] ?? [];
         foreach ($children as $childName => $_childItem) {
-            $result[$childName] = $this->get($childName);
+            $child = $this->get($childName);
+            if ($child !== null) {
+                $result[$childName] = $child;
+            }
+
             $this->fillChildrenRecursive($childName, $result);
         }
     }
