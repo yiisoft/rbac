@@ -64,7 +64,7 @@ interface AssignmentsStorageInterface
      * Whether at least one item from the given list is assigned to the user.
      *
      * @param string $userId User id.
-     * @param array $itemNames List of item names.
+     * @param string[] $itemNames List of item names.
      *
      * @return bool Whether at least one item from the given list is assigned to the user.
      */
