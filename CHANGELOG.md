@@ -6,6 +6,7 @@
 - New #161: Add `ManagerInterface` (@arogachev)
 - Chg #161: Raise PHP version to 8.0 (@arogachev)
 - Enh #165: Improve perfomance (@arogachev)
+- Bug #172: Execute rule when checking permissions for guests (@arogachev)
 
 ## 1.0.2 April 20, 2023
 
