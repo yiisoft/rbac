@@ -16,20 +16,6 @@ use Yiisoft\Rbac\Tests\Support\EasyRule;
 
 trait ManagerLogicTestTrait
 {
-    protected function setUp(): void
-    {
-        if ($this->getName() === 'testAssign') {
-            ClockMock::freeze(new DateTime('2023-05-10 08:24:39'));
-        }
-    }
-
-    protected function tearDown(): void
-    {
-        if ($this->getName() === 'testAssign') {
-            ClockMock::reset();
-        }
-    }
-
     /**
      * @dataProvider dataProviderUserHasPermission
      */
@@ -393,10 +379,6 @@ trait ManagerLogicTestTrait
         $this->assertFalse($manager->hasChild('reader', 'createPost'));
     }
 
-    /**
-     * Relies on {@see ClockMock} for testing timestamp. When using with other PHPUnit classes / traits, make sure to
-     * call {@see setUp} and {@see tearDown} methods explicitly.
-     */
     public function testAssign(): void
     {
         $itemsStorage = $this->createItemsStorage();

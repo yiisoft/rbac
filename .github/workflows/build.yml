@@ -50,7 +50,6 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           coverage: pcov
-          extensions: uopz
           ini-values: date.timezone='UTC'
           php-version: ${{ matrix.php }}
           tools: composer:v2

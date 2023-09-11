@@ -27,6 +27,5 @@ jobs:
         ['ubuntu-latest']
       php: >-
         ['8.1']
-      extensions: uopz
     secrets:
       STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
