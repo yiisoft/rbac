@@ -24,16 +24,6 @@ abstract class Item
     private ?string $ruleName = null;
 
     /**
-     * @var int|null UNIX timestamp representing the item creation time.
-     */
-    private ?int $createdAt = null;
-
-    /**
-     * @var int|null UNIX timestamp representing the item updating time.
-     */
-    private ?int $updatedAt = null;
-
-    /**
      * @param string $name The name of the item. This must be globally unique.
      */
     final public function __construct(private string $name)
@@ -94,46 +84,6 @@ abstract class Item
     }
 
     /**
-     * @return static
-     */
-    final public function withCreatedAt(int $createdAt): self
-    {
-        $new = clone $this;
-        $new->createdAt = $createdAt;
-        return $new;
-    }
-
-    final public function getCreatedAt(): ?int
-    {
-        return $this->createdAt;
-    }
-
-    /**
-     * @return static
-     */
-    final public function withUpdatedAt(int $updatedAt): self
-    {
-        $new = clone $this;
-        $new->updatedAt = $updatedAt;
-        return $new;
-    }
-
-    final public function getUpdatedAt(): ?int
-    {
-        return $this->updatedAt;
-    }
-
-    final public function hasCreatedAt(): bool
-    {
-        return $this->createdAt !== null;
-    }
-
-    final public function hasUpdatedAt(): bool
-    {
-        return $this->updatedAt !== null;
-    }
-
-    /**
      * @return array Authorization item attribute values indexed by attribute names.
      *
      * @psalm-return array{
@@ -141,8 +91,6 @@ abstract class Item
      *     description:string,
      *     ruleName:string|null,
      *     type:string,
-     *     updatedAt:int|null,
-     *     createdAt:int|null,
      * }
      */
     final public function getAttributes(): array
@@ -152,8 +100,6 @@ abstract class Item
             'description' => $this->getDescription(),
             'ruleName' => $this->getRuleName(),
             'type' => $this->getType(),
-            'updatedAt' => $this->getUpdatedAt(),
-            'createdAt' => $this->getCreatedAt(),
         ];
     }
 }

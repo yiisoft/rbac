@@ -425,15 +425,11 @@ trait ManagerLogicTestTrait
             array_keys($manager->getRolesByUserId('readingAuthor'))
         );
 
-        $createdAt = 1_683_707_079;
-
         $this->assertSame('readingAuthor', $readerAssignment->getUserId());
         $this->assertSame('reader', $readerAssignment->getItemName());
-        $this->assertSame($createdAt, $readerAssignment->getCreatedAt());
 
         $this->assertSame('readingAuthor', $authorAssignment->getUserId());
         $this->assertSame('author', $authorAssignment->getItemName());
-        $this->assertSame($createdAt, $authorAssignment->getCreatedAt());
     }
 
     public function testAssignUnknownItem(): void
@@ -575,9 +571,7 @@ trait ManagerLogicTestTrait
 
         $role = (new Role('new role'))
             ->withDescription('new role description')
-            ->withRuleName($rule->getName())
-            ->withCreatedAt(1_642_026_147)
-            ->withUpdatedAt(1_642_026_148);
+            ->withRuleName($rule->getName());
 
         $returnedManager = $manager->addRole($role);
 
@@ -585,16 +579,12 @@ trait ManagerLogicTestTrait
 
         $this->assertNotNull($storedRole);
         $this->assertSame('new role description', $storedRole->getDescription());
-        $this->assertSame(1_642_026_147, $storedRole->getCreatedAt());
-        $this->assertSame(1_642_026_148, $storedRole->getUpdatedAt());
         $this->assertSame(
             [
                 'name' => 'new role',
                 'description' => 'new role description',
                 'ruleName' => EasyRule::class,
                 'type' => 'role',
-                'updatedAt' => 1_642_026_148,
-                'createdAt' => 1_642_026_147,
             ],
             $storedRole->getAttributes()
         );
@@ -641,24 +631,18 @@ trait ManagerLogicTestTrait
     {
         $manager = $this->createFilledManager();
         $permission = (new Permission('edit post'))
-            ->withDescription('edit a post')
-            ->withCreatedAt(1_642_026_147)
-            ->withUpdatedAt(1_642_026_148);
+            ->withDescription('edit a post');
         $returnedManager = $manager->addPermission($permission);
         $storedPermission = $this->itemsStorage->getPermission('edit post');
 
         $this->assertNotNull($storedPermission);
         $this->assertSame('edit a post', $storedPermission->getDescription());
-        $this->assertSame(1_642_026_147, $storedPermission->getCreatedAt());
-        $this->assertSame(1_642_026_148, $storedPermission->getUpdatedAt());
         $this->assertSame(
             [
                 'name' => 'edit post',
                 'description' => 'edit a post',
                 'ruleName' => null,
                 'type' => 'permission',
-                'updatedAt' => 1_642_026_148,
-                'createdAt' => 1_642_026_147,
             ],
             $storedPermission->getAttributes()
         );
@@ -673,8 +657,6 @@ trait ManagerLogicTestTrait
         $storedPermission = $this->itemsStorage->getPermission('test');
 
         $this->assertNotNull($storedPermission);
-        $this->assertNotNull($storedPermission->getCreatedAt());
-        $this->assertNotNull($storedPermission->getUpdatedAt());
     }
 
     public function testRemovePermission(): void
@@ -692,16 +674,12 @@ trait ManagerLogicTestTrait
         $manager = $this->createFilledManager();
         $permission = $this->itemsStorage
             ->getPermission('updatePost')
-            ->withName('newUpdatePost')
-            ->withCreatedAt(1_642_026_149)
-            ->withUpdatedAt(1_642_026_150);
+            ->withName('newUpdatePost');
         $returnedManager = $manager->updatePermission('updatePost', $permission);
 
         $this->assertNull($this->itemsStorage->getPermission('updatePost'));
         $newPermission = $this->itemsStorage->getPermission('newUpdatePost');
         $this->assertNotNull($newPermission);
-        $this->assertSame(1_642_026_149, $newPermission->getCreatedAt());
-        $this->assertSame(1_642_026_150, $newPermission->getUpdatedAt());
         $this->assertSame($manager, $returnedManager);
         $this->assertFalse($manager->userHasPermission('author B', 'updatePost', ['authorID' => 'author B']));
         $this->assertTrue($manager->userHasPermission('author B', 'newUpdatePost', ['authorID' => 'author B']));
@@ -712,16 +690,12 @@ trait ManagerLogicTestTrait
         $manager = $this->createFilledManager();
         $permission = $this->itemsStorage
             ->getPermission('deletePost')
-            ->withName('newDeletePost')
-            ->withCreatedAt(1_642_026_149)
-            ->withUpdatedAt(1_642_026_150);
+            ->withName('newDeletePost');
         $manager->updatePermission('deletePost', $permission);
         $newPermission = $this->itemsStorage->getPermission('newDeletePost');
 
         $this->assertNull($this->itemsStorage->getPermission('deletePost'));
         $this->assertNotNull($newPermission);
-        $this->assertSame(1_642_026_149, $newPermission->getCreatedAt());
-        $this->assertSame(1_642_026_150, $newPermission->getUpdatedAt());
         $this->assertFalse($manager->userHasPermission('author B', 'deletePost'));
         $this->assertTrue($manager->userHasPermission('author B', 'newDeletePost'));
     }
@@ -875,5 +849,24 @@ trait ManagerLogicTestTrait
 
         $this->assertEmpty($this->assignmentsStorage->getByUserId('author B'));
         $this->assertSame($manager, $returnedManager);
+    }
+
+    public function testDataPersistency(): void
+    {
+        $manager = $this->createManager();
+        $manager
+            ->addRole(new Role('role1'))
+            ->addRole(new Role('role2'))
+            ->addChild('role1', 'role2');
+        $manager->assign('role1', 1);
+        $manager->assign('role2', 2);
+
+        $this->assertEquals(['role1' => new Role('role1')], $manager->getRolesByUserId(1));
+        $this->assertEquals(['role2' => new Role('role2')], $manager->getRolesByUserId(2));
+
+        $this->assertEquals(
+            ['role1' => new Role('role1'), 'role2' => new Role('role2')],
+            $manager->getChildRoles('role1'),
+        );
     }
 }

@@ -15,15 +15,11 @@ final class PermissionTest extends TestCase
         $original = new Permission('test');
         $new1 = $original->withName('test2');
         $new2 = $original->withDescription('new description');
-        $new3 = $original->withUpdatedAt(1_642_029_084);
-        $new4 = $original->withCreatedAt(1_642_029_084);
-        $new5 = $original->withRuleName('test');
+        $new3 = $original->withRuleName('test');
 
         $this->assertNotSame($original, $new1);
         $this->assertNotSame($original, $new2);
         $this->assertNotSame($original, $new3);
-        $this->assertNotSame($original, $new4);
-        $this->assertNotSame($original, $new5);
     }
 
     public function testDefaultAttributes(): void
@@ -34,8 +30,6 @@ final class PermissionTest extends TestCase
             'description' => '',
             'ruleName' => null,
             'type' => Item::TYPE_PERMISSION,
-            'updatedAt' => null,
-            'createdAt' => null,
         ], $permission->getAttributes());
     }
 }

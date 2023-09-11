@@ -12,9 +12,8 @@ final class Assignment
     /**
      * @param string $userId The user ID. This should be a string representing the unique identifier of a user.
      * @param string $itemName The role or permission name.
-     * @param int $createdAt UNIX timestamp representing the assignment creation time.
      */
-    public function __construct(private string $userId, private string $itemName, private int $createdAt)
+    public function __construct(private string $userId, private string $itemName)
     {
     }
 
@@ -33,10 +32,5 @@ final class Assignment
         $new = clone $this;
         $new->itemName = $roleName;
         return $new;
-    }
-
-    public function getCreatedAt(): int
-    {
-        return $this->createdAt;
     }
 }

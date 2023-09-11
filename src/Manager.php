@@ -314,14 +314,6 @@ final class Manager implements ManagerInterface
             throw new ItemAlreadyExistsException($item);
         }
 
-        $time = time();
-        if (!$item->hasCreatedAt()) {
-            $item = $item->withCreatedAt($time);
-        }
-        if (!$item->hasUpdatedAt()) {
-            $item = $item->withUpdatedAt($time);
-        }
-
         $this->itemsStorage->add($item);
     }
 

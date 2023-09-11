@@ -131,7 +131,6 @@ trait AssignmentsStorageTestTrait
 
         $this->assertSame('Manager', $assignment->getItemName());
         $this->assertSame('jack', $assignment->getUserId());
-        $this->assertIsInt($assignment->getCreatedAt());
     }
 
     public function testGetNonExisting(): void
@@ -198,15 +197,6 @@ trait AssignmentsStorageTestTrait
             ['name' => 'Support specialist', 'type' => Item::TYPE_ROLE],
             ['name' => 'Delete user', 'type' => Item::TYPE_PERMISSION],
         ];
-        $items = array_map(
-            static function (array $item) use ($time): array {
-                $item['createdAt'] = $time;
-                $item['updatedAt'] = $time;
-
-                return $item;
-            },
-            $items,
-        );
         $assignments = [
             ['itemName' => 'Researcher', 'userId' => 'john'],
             ['itemName' => 'Accountant', 'userId' => 'john'],
@@ -216,14 +206,6 @@ trait AssignmentsStorageTestTrait
             ['itemName' => 'Support specialist', 'userId' => 'jack'],
             ['itemName' => 'Operator', 'userId' => 'jeff'],
         ];
-        $assignments = array_map(
-            static function (array $item) use ($time): array {
-                $item['createdAt'] = $time;
-
-                return $item;
-            },
-            $assignments,
-        );
 
         return ['items' => $items, 'assignments' => $assignments];
     }

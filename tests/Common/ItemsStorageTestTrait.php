@@ -533,8 +533,6 @@ trait ItemsStorageTestTrait
             $items[] = [
                 'name' => $name,
                 'type' => $type,
-                'createdAt' => $time,
-                'updatedAt' => $time,
             ];
             $type === Item::TYPE_ROLE ? $this->initialRolesCount++ : $this->initialPermissionsCount++;
         }
