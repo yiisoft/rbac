@@ -76,12 +76,13 @@ interface ManagerInterface extends AccessCheckerInterface
      *
      * @param string $itemName Name of the role or the permission to be assigned.
      * @param int|string|Stringable $userId The user ID.
+     * @param int|null UNIX timestamp representing assignment creation time. When `null`, current time is used.
      *
      * @throws Exception If the role or permission has already been assigned to the user.
      *
      * @return self
      */
-    public function assign(string $itemName, int|Stringable|string $userId): self;
+    public function assign(string $itemName, int|Stringable|string $userId, ?int $createdAt = null): self;
 
     /**
      * Revokes a role or a permission from a user.

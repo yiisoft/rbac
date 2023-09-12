@@ -4,11 +4,26 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac\Tests\Common;
 
+use SlopeIt\ClockMock\ClockMock;
 use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\Item;
 
 trait AssignmentsStorageTestTrait
 {
+    protected function setUp(): void
+    {
+        if ($this->getName() === 'testAdd') {
+            ClockMock::freeze(new DateTime('2023-05-10 08:24:39'));
+        }
+    }
+
+    protected function tearDown(): void
+    {
+        if ($this->getName() === 'testAdd') {
+            ClockMock::reset();
+        }
+    }
+
     public function testHasItem(): void
     {
         $storage = $this->getStorage();
@@ -181,9 +196,23 @@ trait AssignmentsStorageTestTrait
     public function testAdd(): void
     {
         $storage = $this->getStorage();
-        $storage->add('Operator', 'john');
+        $storage->add(userId: 'john', itemName: 'Operator');
 
-        $this->assertInstanceOf(Assignment::class, $storage->get('Operator', 'john'));
+        $this->assertEquals(
+            new Assignment(userId: 'john', itemName: 'Operator', createdAt: 1_683_707_079),
+            $storage->get(itemName: 'Operator', userId: 'john'),
+        );
+    }
+
+    public function testAddWithCreatedAt(): void
+    {
+        $storage = $this->getStorage();
+        $storage->add(userId: 'john', itemName: 'Operator', createdAt: 1694508008);
+
+        $this->assertEquals(
+            new Assignment(userId: 'john', itemName: 'Operator', createdAt: 1694508008),
+            $storage->get(itemName: 'Operator', userId: 'john'),
+        );
     }
 
     protected function getFixtures(): array
