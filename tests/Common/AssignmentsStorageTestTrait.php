@@ -207,10 +207,10 @@ trait AssignmentsStorageTestTrait
     public function testAddWithCreatedAt(): void
     {
         $storage = $this->getStorage();
-        $storage->add(userId: 'john', itemName: 'Operator', createdAt: 1694508008);
+        $storage->add(userId: 'john', itemName: 'Operator', createdAt: 1_694_508_008);
 
         $this->assertEquals(
-            new Assignment(userId: 'john', itemName: 'Operator', createdAt: 1694508008),
+            new Assignment(userId: 'john', itemName: 'Operator', createdAt: 1_694_508_008),
             $storage->get(itemName: 'Operator', userId: 'john'),
         );
     }
