@@ -30,7 +30,7 @@ trait AssignmentsStorageTestTrait
         $storage = $this->getStorage();
         $all = $storage->getAll();
 
-        $this->assertCount(2, $all);
+        $this->assertCount(3, $all);
         foreach ($all as $userId => $assignments) {
             foreach ($assignments as $name => $assignment) {
                 $this->assertSame($userId, $assignment->getUserId());
@@ -58,6 +58,43 @@ trait AssignmentsStorageTestTrait
 
         foreach ($assignments as $name => $assignment) {
             $this->assertSame($name, $assignment->getItemName());
+        }
+    }
+
+    public function dataGetByItemNames(): array
+    {
+        return [
+            [[], []],
+            [['Researcher'], [['Researcher', 'john']]],
+            [['Researcher', 'Operator'], [['Researcher', 'john'], ['Operator', 'jack'], ['Operator', 'jeff']]],
+            [['Researcher', 'jack'], [['Researcher', 'john']]],
+            [['Researcher', 'non-existing'], [['Researcher', 'john']]],
+            [['non-existing1', 'non-existing2'], []],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetByItemNames
+     */
+    public function testGetByItemNames(array $itemNames, array $expectedAssignments): void
+    {
+        $assignments = $this->getStorage()->getByItemNames($itemNames);
+        $this->assertCount(count($expectedAssignments), $assignments);
+
+        $assignmentFound = false;
+        foreach ($assignments as $assignment) {
+            foreach ($expectedAssignments as $expectedAssignment) {
+                if (
+                    $assignment->getItemName() === $expectedAssignment[0] &&
+                    $assignment->getUserId() === $expectedAssignment[1]
+                ) {
+                    $assignmentFound = true;
+                }
+            }
+        }
+
+        if (!empty($expectedAssignments) && !$assignmentFound) {
+            $this->fail('Assignment not found.');
         }
     }
 
@@ -97,6 +134,50 @@ trait AssignmentsStorageTestTrait
         $this->assertIsInt($assignment->getCreatedAt());
     }
 
+    public function testGetNonExisting(): void
+    {
+        $this->assertNull($this->getStorage()->get('Researcher', 'jeff'));
+    }
+
+    public function dataExists(): array
+    {
+        return [
+            ['Manager', 'jack', true],
+            ['jack', 'Manager', false],
+            ['Manager', 'non-existing', false],
+            ['non-existing', 'jack', false],
+            ['non-existing1', 'non-existing2', false],
+        ];
+    }
+
+    /**
+     * @dataProvider dataExists
+     */
+    public function testExists(string $itemName, string $userId, bool $expectedExists): void
+    {
+        $this->assertSame($expectedExists, $this->getStorage()->exists($itemName, $userId));
+    }
+
+    public function dataUserHasItem(): array
+    {
+        return [
+            ['john', ['Researcher', 'Accountant'], true],
+            ['jeff', ['Researcher', 'Operator'], true],
+            ['jeff', ['Researcher', 'non-existing'], false],
+            ['jeff', ['non-existing', 'Operator'], true],
+            ['jeff', ['non-existing1', 'non-existing2'], false],
+            ['jeff', ['Researcher', 'Accountant'], false],
+        ];
+    }
+
+    /**
+     * @dataProvider dataUserHasItem
+     */
+    public function testUserHasItem(string $userId, array $itemNames, bool $expectedUserHasItem): void
+    {
+        $this->assertSame($expectedUserHasItem, $this->getStorage()->userHasItem($userId, $itemNames));
+    }
+
     public function testAdd(): void
     {
         $storage = $this->getStorage();
@@ -133,6 +214,7 @@ trait AssignmentsStorageTestTrait
             ['itemName' => 'Operator', 'userId' => 'jack'],
             ['itemName' => 'Manager', 'userId' => 'jack'],
             ['itemName' => 'Support specialist', 'userId' => 'jack'],
+            ['itemName' => 'Operator', 'userId' => 'jeff'],
         ];
         $assignments = array_map(
             static function (array $item) use ($time): array {

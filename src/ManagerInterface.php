@@ -119,8 +119,8 @@ interface ManagerInterface extends AccessCheckerInterface
      *
      * @throws InvalidArgumentException If role was not found by `$roleName`.
      *
-     * @return Role[] Child roles. The array is indexed by the role names. First element is an instance of the parent
-     * role itself.
+     * @return Role[] Child roles. The array is indexed by the role names.
+     * @psalm-return array<string, Role>
      */
     public function getChildRoles(string $roleName): array;
 
@@ -130,7 +130,7 @@ interface ManagerInterface extends AccessCheckerInterface
      * @param string $roleName The role name.
      *
      * @return Permission[] All permissions that the role represents. The array is indexed by the permission names.
-     * @psalm-return array<string,Permission>
+     * @psalm-return array<string, Permission>
      */
     public function getPermissionsByRoleName(string $roleName): array;
 

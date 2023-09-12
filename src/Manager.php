@@ -9,15 +9,13 @@ use InvalidArgumentException;
 use RuntimeException;
 use Stringable;
 use Yiisoft\Access\AccessCheckerInterface;
-use Yiisoft\Rbac\Exception\DefaultRoleNotFoundException;
+use Yiisoft\Rbac\Exception\DefaultRolesNotFoundException;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 
-use function array_key_exists;
-use function in_array;
 use function is_array;
 
 /**
- * An authorization manager that helps with building RBAC hierarchy and check for permissions.
+ * Helps to manage RBAC hierarchy and check for permissions.
  */
 final class Manager implements ManagerInterface
 {
@@ -52,66 +50,36 @@ final class Manager implements ManagerInterface
             return $this->guestHasPermission($permissionName);
         }
 
-        $userId = (string) $userId;
-        $assignments = $this->assignmentsStorage->getByUserId($userId);
-
-        if (empty($assignments)) {
+        $permission = $this->itemsStorage->getPermission($permissionName);
+        if ($permission === null) {
             return false;
         }
 
-        return $this->userHasItem(
-            $userId,
-            $this->itemsStorage->getPermission($permissionName),
-            $parameters,
-            $assignments
-        );
+        $userId = (string) $userId;
+        if (!$this->executeRule($userId, $permission, $parameters)) {
+            return false;
+        }
+
+        $parentPermissions = $this->itemsStorage->getParents($permission->getName());
+        $permissionNames = [$permission->getName(), ...array_keys($parentPermissions)];
+
+        return $this->assignmentsStorage->userHasItem($userId, $permissionNames);
     }
 
     public function canAddChild(string $parentName, string $childName): bool
     {
-        return $this->canBeParent($parentName, $childName) && !$this->hasLoop($parentName, $childName);
+        try {
+            $this->assertFutureChild($parentName, $childName);
+        } catch (RuntimeException) {
+            return false;
+        }
+
+        return true;
     }
 
     public function addChild(string $parentName, string $childName): self
     {
-        if (!$this->hasItem($parentName)) {
-            throw new InvalidArgumentException(
-                sprintf('Either "%s" does not exist.', $parentName)
-            );
-        }
-
-        if (!$this->hasItem($childName)) {
-            throw new InvalidArgumentException(
-                sprintf('Either "%s" does not exist.', $childName)
-            );
-        }
-
-        if ($parentName === $childName) {
-            throw new InvalidArgumentException(sprintf('Cannot add "%s" as a child of itself.', $parentName));
-        }
-
-        if (!$this->canBeParent($parentName, $childName)) {
-            throw new InvalidArgumentException(
-                sprintf('Can not add "%s" role as a child of "%s" permission.', $childName, $parentName)
-            );
-        }
-
-        if ($this->hasLoop($parentName, $childName)) {
-            throw new RuntimeException(
-                sprintf(
-                    'Cannot add "%s" as a child of "%s". A loop has been detected.',
-                    $childName,
-                    $parentName
-                )
-            );
-        }
-
-        if (isset($this->itemsStorage->getChildren($parentName)[$childName])) {
-            throw new RuntimeException(
-                sprintf('The item "%s" already has a child "%s".', $parentName, $childName)
-            );
-        }
-
+        $this->assertFutureChild($parentName, $childName);
         $this->itemsStorage->addChild($parentName, $childName);
 
         return $this;
@@ -119,25 +87,21 @@ final class Manager implements ManagerInterface
 
     public function removeChild(string $parentName, string $childName): self
     {
-        if ($this->hasChild($parentName, $childName)) {
-            $this->itemsStorage->removeChild($parentName, $childName);
-        }
+        $this->itemsStorage->removeChild($parentName, $childName);
 
         return $this;
     }
 
     public function removeChildren(string $parentName): self
     {
-        if ($this->itemsStorage->hasChildren($parentName)) {
-            $this->itemsStorage->removeChildren($parentName);
-        }
+        $this->itemsStorage->removeChildren($parentName);
 
         return $this;
     }
 
     public function hasChild(string $parentName, string $childName): bool
     {
-        return array_key_exists($childName, $this->itemsStorage->getChildren($parentName));
+        return $this->itemsStorage->hasDirectChild($parentName, $childName);
     }
 
     public function assign(string $itemName, int|Stringable|string $userId): self
@@ -145,7 +109,6 @@ final class Manager implements ManagerInterface
         $userId = (string) $userId;
 
         $item = $this->itemsStorage->get($itemName);
-
         if ($item === null) {
             throw new InvalidArgumentException("There is no item named \"$itemName\".");
         }
@@ -156,9 +119,9 @@ final class Manager implements ManagerInterface
             );
         }
 
-        if ($this->assignmentsStorage->get($itemName, $userId) !== null) {
+        if ($this->assignmentsStorage->exists($itemName, $userId)) {
             throw new InvalidArgumentException(
-                sprintf('"%s" %s has already been assigned to user %s.', $itemName, $item->getType(), $userId)
+                "\"$itemName\" {$item->getType()} has already been assigned to user $userId.",
             );
         }
 
@@ -169,20 +132,14 @@ final class Manager implements ManagerInterface
 
     public function revoke(string $itemName, int|Stringable|string $userId): self
     {
-        $userId = (string) $userId;
-
-        if ($this->assignmentsStorage->get($itemName, $userId) !== null) {
-            $this->assignmentsStorage->remove($itemName, $userId);
-        }
+        $this->assignmentsStorage->remove($itemName, (string) $userId);
 
         return $this;
     }
 
     public function revokeAll(int|Stringable|string $userId): self
     {
-        $userId = (string) $userId;
-
-        $this->assignmentsStorage->removeByUserId($userId);
+        $this->assignmentsStorage->removeByUserId((string) $userId);
 
         return $this;
     }
@@ -191,66 +148,46 @@ final class Manager implements ManagerInterface
     {
         $userId = (string) $userId;
 
-        $roles = $this->getDefaultRoles();
-        foreach ($this->assignmentsStorage->getByUserId($userId) as $name => $assignment) {
-            $role = $this->itemsStorage->getRole($assignment->getItemName());
-            if ($role !== null) {
-                $roles[$name] = $role;
-            }
-        }
+        $defaultRoles = $this->getDefaultRoles();
+        $assignments = $this->assignmentsStorage->getByUserId($userId);
+        $roles = $this->itemsStorage->getRolesByNames(array_keys($assignments));
 
-        return $roles;
+        return array_merge($defaultRoles, $roles);
     }
 
     public function getChildRoles(string $roleName): array
     {
-        $role = $this->itemsStorage->getRole($roleName);
-        if ($role === null) {
-            throw new InvalidArgumentException(sprintf('Role "%s" not found.', $roleName));
+        if (!$this->itemsStorage->roleExists($roleName)) {
+            throw new InvalidArgumentException("Role \"$roleName\" not found.");
         }
 
-        $result = [];
-        $this->getChildrenRecursive($roleName, $result);
-
-        return array_merge([$roleName => $role], $this->getRolesPresentInArray($result));
+        return $this->itemsStorage->getAllChildRoles($roleName);
     }
 
     public function getPermissionsByRoleName(string $roleName): array
     {
-        $result = [];
-        $this->getChildrenRecursive($roleName, $result);
-
-        if (empty($result)) {
-            return [];
-        }
-
-        return $this->normalizePermissions($result);
+        return $this->itemsStorage->getAllChildPermissions($roleName);
     }
 
     public function getPermissionsByUserId(int|Stringable|string $userId): array
     {
         $userId = (string) $userId;
+        $userAssignments = $this->assignmentsStorage->getByUserId($userId);
 
         return array_merge(
-            $this->getDirectPermissionsByUser($userId),
-            $this->getInheritedPermissionsByUser($userId)
+            $this->getDirectPermissionsByUser($userAssignments),
+            $this->getInheritedPermissionsByUser($userAssignments),
         );
     }
 
     public function getUserIdsByRoleName(string $roleName): array
     {
-        $result = [];
-        $roles = [$roleName, ...array_keys($this->itemsStorage->getParents($roleName))];
+        $roleNames = [$roleName, ...array_keys($this->itemsStorage->getParents($roleName))];
 
-        foreach ($this->assignmentsStorage->getAll() as $userId => $assignments) {
-            foreach ($assignments as $userAssignment) {
-                if (in_array($userAssignment->getItemName(), $roles, true)) {
-                    $result[] = $userId;
-                }
-            }
-        }
-
-        return $result;
+        return array_map(
+            static fn(Assignment $assignment): string => $assignment->getUserId(),
+            $this->assignmentsStorage->getByItemNames($roleNames),
+        );
     }
 
     public function addRole(Role $role): self
@@ -323,13 +260,12 @@ final class Manager implements ManagerInterface
 
     public function getDefaultRoles(): array
     {
-        $roles = [];
-        foreach ($this->defaultRoleNames as $roleName) {
-            $role = $this->itemsStorage->getRole($roleName);
-            if ($role === null) {
-                throw new DefaultRoleNotFoundException("Default role \"$roleName\" not found.");
-            }
-            $roles[$roleName] = $role;
+        $roles = $this->itemsStorage->getRolesByNames($this->defaultRoleNames);
+        $missingRoles = array_diff($this->defaultRoleNames, array_keys($roles));
+        if (!empty($missingRoles)) {
+            $missingRolesStr = '"' . implode('", "', $missingRoles) . '"';
+
+            throw new DefaultRolesNotFoundException("The following default roles were not found: $missingRolesStr.");
         }
 
         return $roles;
@@ -388,119 +324,45 @@ final class Manager implements ManagerInterface
         $this->itemsStorage->add($item);
     }
 
-    private function hasItem(string $name): bool
-    {
-        return $this->itemsStorage->get($name) !== null;
-    }
-
-    /**
-     * @param array<string,mixed> $permissionNames
-     *
-     * @return Permission[]
-     * @psalm-return array<string,Permission>
-     */
-    private function normalizePermissions(array $permissionNames): array
-    {
-        $normalizePermissions = [];
-        foreach (array_keys($permissionNames) as $permissionName) {
-            $permission = $this->itemsStorage->getPermission($permissionName);
-            if ($permission !== null) {
-                $normalizePermissions[$permissionName] = $permission;
-            }
-        }
-
-        return $normalizePermissions;
-    }
-
     /**
      * Returns all permissions that are directly assigned to user.
      *
-     * @param string $userId The user ID.
+     * @param array $userAssignments The user assignments.
+     * @psalm-param array<string, Assignment> $userAssignments
      *
      * @return Permission[] All direct permissions that the user has. The array is indexed by the permission names.
-     * @psalm-return array<string,Permission>
+     * @psalm-return array<string, Permission>
      */
-    private function getDirectPermissionsByUser(string $userId): array
+    private function getDirectPermissionsByUser(array $userAssignments): array
     {
-        $permissions = [];
-        foreach ($this->assignmentsStorage->getByUserId($userId) as $name => $assignment) {
-            $permission = $this->itemsStorage->getPermission($assignment->getItemName());
-            if ($permission !== null) {
-                $permissions[$name] = $permission;
-            }
-        }
-
-        return $permissions;
+        return $this->itemsStorage->getPermissionsByNames(array_keys($userAssignments));
     }
 
     /**
      * Returns all permissions that the user inherits from the roles assigned to him.
      *
-     * @param string $userId The user ID.
+     * @param array $userAssignments The user assignments.
+     * @psalm-param array<string, Assignment> $userAssignments
      *
      * @return Permission[] All inherited permissions that the user has. The array is indexed by the permission names.
+     * @psalm-return array<string, Permission>
      */
-    private function getInheritedPermissionsByUser(string $userId): array
+    private function getInheritedPermissionsByUser(array $userAssignments): array
     {
-        $assignments = $this->assignmentsStorage->getByUserId($userId);
         $result = [];
-        foreach (array_keys($assignments) as $roleName) {
-            $this->getChildrenRecursive($roleName, $result);
+        foreach (array_keys($userAssignments) as $roleName) {
+            $result = array_merge($result, $this->itemsStorage->getAllChildPermissions($roleName));
         }
 
-        if (empty($result)) {
-            return [];
-        }
-
-        return $this->normalizePermissions($result);
+        return $result;
     }
 
     private function removeItem(string $name): void
     {
-        if ($this->hasItem($name)) {
+        if ($this->itemsStorage->exists($name)) {
             $this->itemsStorage->remove($name);
             $this->assignmentsStorage->removeByItemName($name);
         }
-    }
-
-    /**
-     * Performs access check for the specified user.
-     *
-     * @param string $user The user ID. This should be a string representing the unique identifier of a user.
-     * @param Item|null $item The permission or the role that need access check.
-     * @param array $params Name-value pairs that would be passed to rules associated with the permissions and roles
-     * assigned to the user. A param with name 'user' is added to this array, which holds the value of `$userId`.
-     * @param Assignment[] $assignments The assignments to the specified user.
-     *
-     * @throws RuntimeException
-     *
-     * @return bool Whether the operations can be performed by the user.
-     */
-    private function userHasItem(
-        string $user,
-        ?Item $item,
-        array $params,
-        array $assignments
-    ): bool {
-        if ($item === null) {
-            return false;
-        }
-
-        if (!$this->executeRule($user, $item, $params)) {
-            return false;
-        }
-
-        if (array_key_exists($item->getName(), $assignments)) {
-            return true;
-        }
-
-        foreach ($this->itemsStorage->getParents($item->getName()) as $parentName => $_parent) {
-            if (array_key_exists($parentName, $assignments)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private function guestHasPermission(string $permissionName): bool
@@ -509,110 +371,58 @@ final class Manager implements ManagerInterface
             return false;
         }
 
-        if (
-            $this->itemsStorage->getRole($this->guestRoleName) === null
-            || !$this->itemsStorage->hasChildren($this->guestRoleName)
-        ) {
-            return false;
-        }
-        $permissions = $this->itemsStorage->getChildren($this->guestRoleName);
-
-        return isset($permissions[$permissionName]);
-    }
-
-    /**
-     * Checks whether there is a loop in the authorization item hierarchy.
-     *
-     * @param string $parentName Name of the parent item.
-     * @param string $childName Name of the child item that is to be added to the hierarchy.
-     *
-     * @return bool Whether a loop exists.
-     */
-    private function hasLoop(string $parentName, string $childName): bool
-    {
-        if ($childName === $parentName) {
-            return true;
-        }
-
-        $children = $this->itemsStorage->getChildren($childName);
-        if (empty($children)) {
+        if (!$this->itemsStorage->roleExists($this->guestRoleName)) {
             return false;
         }
 
-        foreach ($children as $groupChild) {
-            if ($this->hasLoop($parentName, $groupChild->getName())) {
-                return true;
-            }
-        }
-
-        return false;
+        return $this->itemsStorage->hasDirectChild($this->guestRoleName, $permissionName);
     }
 
     /**
-     * Recursively finds all children and grand children of the specified item.
-     *
-     * @param string $name The name of the item whose children are to be looked for.
-     * @param true[] $result The children and grand children (in array keys).
-     *
-     * @psalm-param array<string,true> $result
+     * @throws RuntimeException
      */
-    private function getChildrenRecursive(string $name, array &$result): void
+    private function assertFutureChild(string $parentName, string $childName): void
     {
-        $children = $this->itemsStorage->getChildren($name);
-        if (empty($children)) {
-            return;
+        if ($parentName === $childName) {
+            throw new RuntimeException("Cannot add \"$parentName\" as a child of itself.");
         }
 
-        foreach ($children as $childName => $_child) {
-            $result[$childName] = true;
-            $this->getChildrenRecursive($childName, $result);
-        }
-    }
-
-    /**
-     * @param true[] $array
-     *
-     * @psalm-param array<string,true> $array
-     *
-     * @return Role[]
-     */
-    private function getRolesPresentInArray(array $array): array
-    {
-        return array_filter(
-            $this->itemsStorage->getRoles(),
-            static function (Role $roleItem) use ($array) {
-                return array_key_exists($roleItem->getName(), $array);
-            }
-        );
-    }
-
-    private function canBeParent(string $parentName, string $childName): bool
-    {
         $parent = $this->itemsStorage->get($parentName);
         if ($parent === null) {
-            throw new InvalidArgumentException("There is no item named \"$parentName\".");
+            throw new RuntimeException("Parent \"$parentName\" does not exist.");
         }
 
         $child = $this->itemsStorage->get($childName);
         if ($child === null) {
-            throw new InvalidArgumentException("There is no item named \"$childName\".");
+            throw new RuntimeException("Child \"$childName\" does not exist.");
         }
 
-        return $parent->getType() !== Item::TYPE_PERMISSION || $child->getType() !== Item::TYPE_ROLE;
+        if ($parent->getType() === Item::TYPE_PERMISSION && $child->getType() === Item::TYPE_ROLE) {
+            throw new RuntimeException(
+                "Can not add \"$childName\" role as a child of \"$parentName\" permission.",
+            );
+        }
+
+        if ($this->itemsStorage->hasDirectChild($parentName, $childName)) {
+            throw new RuntimeException("The item \"$parentName\" already has a child \"$childName\".");
+        }
+
+        if ($this->itemsStorage->hasChild($childName, $parentName)) {
+            throw new RuntimeException(
+                "Cannot add \"$childName\" as a child of \"$parentName\". A loop has been detected.",
+            );
+        }
     }
 
     private function checkItemNameForUpdate(Item $item, string $name): void
     {
-        if ($item->getName() === $name || !$this->hasItem($item->getName())) {
+        if ($item->getName() === $name || !$this->itemsStorage->exists($item->getName())) {
             return;
         }
 
         throw new InvalidArgumentException(
-            sprintf(
-                'Unable to change the role or the permission name. ' .
-                'The name "%s" is already used by another role or permission.',
-                $item->getName()
-            )
+            'Unable to change the role or the permission name. ' .
+            "The name \"{$item->getName()}\" is already used by another role or permission.",
         );
     }
 }

@@ -12,12 +12,10 @@ final class RuleInterfaceNotImplementedException extends Exception
 {
     public function __construct(string $name, int $code = 0, ?Throwable $previous = null)
     {
+        $interfaceName = RuleInterface::class;
+
         parent::__construct(
-            sprintf(
-                'Rule "%s" should implement "%s".',
-                $name,
-                RuleInterface::class,
-            ),
+            "Rule \"$name\" must implement \"$interfaceName\".",
             $code,
             $previous
         );

@@ -83,10 +83,27 @@ trait ItemsStorageTestTrait
     /**
      * @dataProvider existsProvider
      */
-    public function testExists(string $name, bool $exists): void
+    public function testExists(string $name, bool $expectedExists): void
     {
         $storage = $this->getStorage();
-        $this->assertSame($storage->exists($name), $exists);
+        $this->assertSame($expectedExists, $storage->exists($name));
+    }
+
+    public function dataRoleExists(): array
+    {
+        return [
+            ['posts.viewer', true],
+            ['posts.view', false],
+            ['non-existing', false],
+        ];
+    }
+
+    /**
+     * @dataProvider dataRoleExists
+     */
+    public function testRoleExists(string $name, bool $expectedRoleExists): void
+    {
+        $this->assertSame($expectedRoleExists, $this->getStorage()->roleExists($name));
     }
 
     public function testGetPermission(): void
@@ -103,7 +120,7 @@ trait ItemsStorageTestTrait
         $storage = $this->getStorage();
         $storage->addChild('Parent 2', 'Child 1');
 
-        $children = $storage->getChildren('Parent 2');
+        $children = $storage->getAllChildren('Parent 2');
         $this->assertCount(3, $children);
 
         foreach ($children as $name => $item) {
@@ -119,7 +136,32 @@ trait ItemsStorageTestTrait
         $this->assertEmpty($storage->getAll());
     }
 
-    public function dataGetChildren(): array
+    public function dataGetDirectChildren(): array
+    {
+        return [
+            ['Parent 1', ['Child 1']],
+            ['Parent 2', ['Child 2', 'Child 3']],
+            ['posts.view', []],
+            ['posts.create', []],
+            ['posts.update', []],
+            ['posts.delete', []],
+            ['posts.viewer', ['posts.view']],
+            ['posts.redactor', ['posts.viewer', 'posts.create', 'posts.update']],
+            ['posts.admin', ['posts.redactor', 'posts.delete']],
+            ['non-existing', []],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetDirectChildren
+     */
+    public function testGetDirectChildren(string $parentName, array $expectedChildren): void
+    {
+        $children = $this->getStorage()->getDirectChildren($parentName);
+        $this->assertChildren($children, $expectedChildren);
+    }
+
+    public function dataGetAllChildren(): array
     {
         return [
             ['Parent 1', ['Child 1']],
@@ -134,22 +176,67 @@ trait ItemsStorageTestTrait
                 'posts.admin',
                 ['posts.redactor', 'posts.viewer', 'posts.view', 'posts.create', 'posts.update', 'posts.delete'],
             ],
+            ['non-existing', []],
         ];
     }
 
     /**
-     * @dataProvider dataGetChildren
+     * @dataProvider dataGetAllChildren
      */
-    public function testGetChildren(string $parentName, array $expectedChildren): void
+    public function testGetAllChildren(string $parentName, array $expectedChildren): void
     {
-        $storage = $this->getStorage();
-        $children = $storage->getChildren($parentName);
+        $children = $this->getStorage()->getAllChildren($parentName);
+        $this->assertChildren($children, $expectedChildren);
+    }
 
-        $this->assertCount(count($expectedChildren), $children);
-        foreach ($children as $childName => $child) {
-            $this->assertContains($childName, $expectedChildren);
-            $this->assertSame($childName, $child->getName());
-        }
+    public function dataGetAllChildPermissions(): array
+    {
+        return [
+            ['Parent 1', ['Child 1']],
+            ['Parent 2', []],
+            ['posts.view', []],
+            ['posts.create', []],
+            ['posts.update', []],
+            ['posts.delete', []],
+            ['posts.viewer', ['posts.view']],
+            ['posts.redactor', ['posts.view', 'posts.create', 'posts.update']],
+            ['posts.admin', ['posts.view', 'posts.create', 'posts.update', 'posts.delete']],
+            ['non-existing', []],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetAllChildPermissions
+     */
+    public function testGetAllChildPermissions(string $parentName, array $expectedChildren): void
+    {
+        $children = $this->getStorage()->getAllChildPermissions($parentName);
+        $this->assertChildren($children, $expectedChildren);
+    }
+
+    public function dataGetAllChildRoles(): array
+    {
+        return [
+            ['Parent 1', []],
+            ['Parent 2', ['Child 2', 'Child 3']],
+            ['posts.view', []],
+            ['posts.create', []],
+            ['posts.update', []],
+            ['posts.delete', []],
+            ['posts.viewer', []],
+            ['posts.redactor', ['posts.viewer']],
+            ['posts.admin', ['posts.redactor', 'posts.viewer']],
+            ['non-existing', []],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetAllChildRoles
+     */
+    public function testGetAllChildRoles(string $parentName, array $expectedChildren): void
+    {
+        $children = $this->getStorage()->getAllChildRoles($parentName);
+        $this->assertChildren($children, $expectedChildren);
     }
 
     public function testGetRoles(): void
@@ -161,6 +248,32 @@ trait ItemsStorageTestTrait
         $this->assertContainsOnlyInstancesOf(Role::class, $roles);
     }
 
+    public function dataGetRolesByNames(): array
+    {
+        return [
+            [[], []],
+            [['posts.viewer'], ['posts.viewer']],
+            [['posts.viewer', 'posts.redactor'], ['posts.viewer', 'posts.redactor']],
+            [['posts.viewer', 'posts.view'], ['posts.viewer']],
+            [['posts.viewer', 'non-existing'], ['posts.viewer']],
+            [['non-existing1', 'non-existing2'], []],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetRolesByNames
+     */
+    public function testGetRolesByNames(array $names, array $expectedRoleNames): void
+    {
+        $roles = $this->getStorage()->getRolesByNames($names);
+
+        $this->assertCount(count($expectedRoleNames), $roles);
+        foreach ($roles as $roleName => $role) {
+            $this->assertContains($roleName, $expectedRoleNames);
+            $this->assertSame($roleName, $role->getName());
+        }
+    }
+
     public function testGetPermissions(): void
     {
         $storage = $this->getStorage();
@@ -168,6 +281,32 @@ trait ItemsStorageTestTrait
 
         $this->assertCount($this->initialPermissionsCount, $permissions);
         $this->assertContainsOnlyInstancesOf(Permission::class, $permissions);
+    }
+
+    public function dataGetPermissionsByNames(): array
+    {
+        return [
+            [[], []],
+            [['posts.view'], ['posts.view']],
+            [['posts.create', 'posts.update'], ['posts.create', 'posts.update']],
+            [['posts.create', 'posts.redactor'], ['posts.create']],
+            [['posts.create', 'non-existing'], ['posts.create']],
+            [['non-existing1', 'non-existing2'], []],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetPermissionsByNames
+     */
+    public function testGetPermissionsByNames(array $names, array $expectedPermissionNames): void
+    {
+        $permissions = $this->getStorage()->getPermissionsByNames($names);
+
+        $this->assertCount(count($expectedPermissionNames), $permissions);
+        foreach ($permissions as $permissionName => $permission) {
+            $this->assertContains($permissionName, $expectedPermissionNames);
+            $this->assertSame($permissionName, $permission->getName());
+        }
     }
 
     public function testRemove(): void
@@ -192,6 +331,7 @@ trait ItemsStorageTestTrait
             ['posts.viewer', ['posts.admin', 'posts.redactor']],
             ['posts.redactor', ['posts.admin']],
             ['posts.admin', []],
+            ['non-existing', []],
         ];
     }
 
@@ -244,11 +384,11 @@ trait ItemsStorageTestTrait
         $storage->addChild('Parent 2', 'Child 1');
         $storage->removeChild('Parent 2', 'Child 1');
 
-        $children = $storage->getChildren('Parent 2');
+        $children = $storage->getAllChildren('Parent 2');
         $this->assertNotEmpty($children);
         $this->assertArrayNotHasKey('Child 1', $children);
 
-        $this->assertArrayHasKey('Child 1', $storage->getChildren('Parent 1'));
+        $this->assertArrayHasKey('Child 1', $storage->getAllChildren('Parent 1'));
     }
 
     public function testGetAll(): void
@@ -263,6 +403,76 @@ trait ItemsStorageTestTrait
 
         $this->assertTrue($storage->hasChildren('Parent 1'));
         $this->assertFalse($storage->hasChildren('Parent 3'));
+    }
+
+    public function dataHasChild(): array
+    {
+        return [
+            ['posts.viewer', 'posts.view', true],
+            ['posts.viewer', 'posts.create', false],
+            ['posts.viewer', 'posts.delete', false],
+
+            ['posts.redactor', 'posts.create', true],
+            ['posts.redactor', 'posts.view', true],
+            ['posts.redactor', 'posts.viewer', true],
+            ['posts.redactor', 'posts.delete', false],
+
+            ['posts.admin', 'posts.delete', true],
+            ['posts.admin', 'posts.create', true],
+            ['posts.admin', 'posts.redactor', true],
+            ['posts.admin', 'posts.view', true],
+            ['posts.admin', 'posts.viewer', true],
+
+            ['posts.viewer', 'posts.redactor', false],
+            ['posts.viewer', 'posts.admin', false],
+            ['posts.redactor', 'posts.admin', false],
+            ['posts.viewer', 'non-existing', false],
+            ['non-existing', 'posts.viewer', false],
+            ['non-existing1', 'non-existing2', false],
+        ];
+    }
+
+    /**
+     * @dataProvider dataHasChild
+     */
+    public function testHasChild(string $parentName, string $childName, bool $expectedHasChild): void
+    {
+        $this->assertSame($expectedHasChild, $this->getStorage()->hasChild($parentName, $childName));
+    }
+
+    public function dataHasDirectChild(): array
+    {
+        return [
+            ['posts.viewer', 'posts.view', true],
+            ['posts.viewer', 'posts.create', false],
+            ['posts.viewer', 'posts.delete', false],
+
+            ['posts.redactor', 'posts.create', true],
+            ['posts.redactor', 'posts.view', false],
+            ['posts.redactor', 'posts.viewer', true],
+            ['posts.redactor', 'posts.delete', false],
+
+            ['posts.admin', 'posts.delete', true],
+            ['posts.admin', 'posts.create', false],
+            ['posts.admin', 'posts.redactor', true],
+            ['posts.admin', 'posts.view', false],
+            ['posts.admin', 'posts.viewer', false],
+
+            ['posts.viewer', 'posts.redactor', false],
+            ['posts.viewer', 'posts.admin', false],
+            ['posts.redactor', 'posts.admin', false],
+            ['posts.viewer', 'non-existing', false],
+            ['non-existing', 'posts.viewer', false],
+            ['non-existing1', 'non-existing2', false],
+        ];
+    }
+
+    /**
+     * @dataProvider dataHasDirectChild
+     */
+    public function testHasDirectChild(string $parentName, string $childName, bool $expectedHasDirectChild): void
+    {
+        $this->assertSame($expectedHasDirectChild, $this->getStorage()->hasDirectChild($parentName, $childName));
     }
 
     public function testClearPermissions(): void
@@ -369,5 +579,14 @@ trait ItemsStorageTestTrait
     private function getItemsCount(): int
     {
         return $this->initialRolesCount + $this->initialPermissionsCount;
+    }
+
+    private function assertChildren(array $children, array $expectedChildren): void
+    {
+        $this->assertCount(count($expectedChildren), $children);
+        foreach ($children as $childName => $child) {
+            $this->assertContains($childName, $expectedChildren);
+            $this->assertSame($childName, $child->getName());
+        }
     }
 }
