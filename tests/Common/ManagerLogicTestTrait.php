@@ -866,30 +866,30 @@ trait ManagerLogicTestTrait
         $assignmentsStorage = new FakeAssignmentsStorage();
         $manager = $this->createManager($itemsStorage, $assignmentsStorage);
         $manager
-            ->addRole((new Role('role1'))->withCreatedAt(1694502936)->withUpdatedAt(1694502936))
-            ->addRole((new Role('role2'))->withCreatedAt(1694502976)->withUpdatedAt(1694502976))
+            ->addRole((new Role('role1'))->withCreatedAt(1_694_502_936)->withUpdatedAt(1_694_502_936))
+            ->addRole((new Role('role2'))->withCreatedAt(1_694_502_976)->withUpdatedAt(1_694_502_976))
             ->addChild('role1', 'role2');
         $manager->assign('role1', 1);
         $manager->assign('role2', 2);
 
         $this->assertEquals(
             [
-                'role1' => (new Role('role1'))->withCreatedAt(1694502936)->withUpdatedAt(1694502936),
-                'role2' => (new Role('role2'))->withCreatedAt(1694502976)->withUpdatedAt(1694502976),
+                'role1' => (new Role('role1'))->withCreatedAt(1_694_502_936)->withUpdatedAt(1_694_502_936),
+                'role2' => (new Role('role2'))->withCreatedAt(1_694_502_976)->withUpdatedAt(1_694_502_976),
             ],
             $itemsStorage->getAll(),
         );
         $this->assertEquals(
             [
-                'role1' => (new Role('role1'))->withCreatedAt(1694502936)->withUpdatedAt(1694502936),
-                'role2' => (new Role('role2'))->withCreatedAt(1694502976)->withUpdatedAt(1694502976),
+                'role1' => (new Role('role1'))->withCreatedAt(1_694_502_936)->withUpdatedAt(1_694_502_936),
+                'role2' => (new Role('role2'))->withCreatedAt(1_694_502_976)->withUpdatedAt(1_694_502_976),
             ],
             $manager->getChildRoles('role1'),
         );
         $this->assertEquals(
             [
-                '1' => ['role1' => new Assignment(userId: '1', itemName: 'role1', createdAt: 1683707079)],
-                '2' => ['role2' => new Assignment(userId: '2', itemName: 'role2', createdAt: 1683707079)],
+                '1' => ['role1' => new Assignment(userId: '1', itemName: 'role1', createdAt: 1_683_707_079)],
+                '2' => ['role2' => new Assignment(userId: '2', itemName: 'role2', createdAt: 1_683_707_079)],
             ],
             $assignmentsStorage->getAll(),
         );
