@@ -902,10 +902,7 @@ trait ManagerLogicTestTrait
             $itemsStorage->getAll(),
         );
         $this->assertEquals(
-            [
-                'role1' => (new Role('role1'))->withCreatedAt(1694502936)->withUpdatedAt(1694502936),
-                'role2' => (new Role('role2'))->withCreatedAt(1694502976)->withUpdatedAt(1694502976),
-            ],
+            ['role2' => (new Role('role2'))->withCreatedAt(1694502976)->withUpdatedAt(1694502976)],
             $manager->getChildRoles('role1'),
         );
         $this->assertEquals(
