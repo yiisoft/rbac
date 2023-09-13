@@ -5,10 +5,31 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac\Tests\Common;
 
 use Yiisoft\Rbac\Assignment;
+use Yiisoft\Rbac\AssignmentsStorageInterface;
 use Yiisoft\Rbac\Item;
+use Yiisoft\Rbac\ItemsStorageInterface;
+use Yiisoft\Rbac\Permission;
+use Yiisoft\Rbac\Role;
+use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
+use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
 
 trait AssignmentsStorageTestTrait
 {
+    private ?ItemsStorageInterface $itemsStorage = null;
+    private ?AssignmentsStorageInterface $storage = null;
+
+    protected function setUp(): void
+    {
+        $this->populateItemsStorage();
+        $this->populateStorage();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->getItemsStorage()->clear();
+        $this->getStorage()->clear();
+    }
+
     public function testHasItem(): void
     {
         $storage = $this->getStorage();
@@ -226,5 +247,52 @@ trait AssignmentsStorageTestTrait
         );
 
         return ['items' => $items, 'assignments' => $assignments];
+    }
+
+    protected function populateItemsStorage(): void
+    {
+        foreach ($this->getFixtures()['items'] as $itemData) {
+            $name = $itemData['name'];
+            $item = $itemData['type'] === Item::TYPE_PERMISSION ? new Permission($name) : new Role($name);
+            $item = $item
+                ->withCreatedAt($itemData['createdAt'])
+                ->withUpdatedAt($itemData['updatedAt']);
+            $this->getItemsStorage()->add($item);
+        }
+    }
+
+    protected function populateStorage(): void
+    {
+        foreach ($this->getFixtures()['assignments'] as $assignmentData) {
+            $this->getStorage()->add($assignmentData['itemName'], $assignmentData['userId']);
+        }
+    }
+
+    protected function getItemsStorage(): ItemsStorageInterface
+    {
+        if ($this->itemsStorage === null) {
+            $this->itemsStorage = $this->createItemsStorage();
+        }
+
+        return $this->itemsStorage;
+    }
+
+    protected function getStorage(): AssignmentsStorageInterface
+    {
+        if ($this->storage === null) {
+            $this->storage = $this->createStorage();
+        }
+
+        return $this->storage;
+    }
+
+    protected function createItemsStorage(): ItemsStorageInterface
+    {
+        return new FakeItemsStorage();
+    }
+
+    protected function createStorage(): AssignmentsStorageInterface
+    {
+        return new FakeAssignmentsStorage();
     }
 }

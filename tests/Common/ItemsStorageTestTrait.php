@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac\Tests\Common;
 
 use Yiisoft\Rbac\Item;
+use Yiisoft\Rbac\ItemsStorageInterface;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
+use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
 
 trait ItemsStorageTestTrait
 {
@@ -15,6 +17,18 @@ trait ItemsStorageTestTrait
     private int $initialBothRolesChildrenCount = 0;
     private int $initialBothPermissionsChildrenCount = 0;
     private int $initialItemsChildrenCount = 0;
+
+    private ?ItemsStorageInterface $storage = null;
+
+    protected function setUp(): void
+    {
+        $this->populateStorage();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->getStorage()->clear();
+    }
 
     public function dataUpdate(): array
     {
@@ -497,6 +511,20 @@ trait ItemsStorageTestTrait
         $this->assertTrue($storage->hasChildren('Parent 5'));
     }
 
+    protected function getStorage(): ItemsStorageInterface
+    {
+        if ($this->storage === null) {
+            $this->storage = $this->createStorage();
+        }
+
+        return $this->storage;
+    }
+
+    protected function createStorage(): ItemsStorageInterface
+    {
+        return new FakeItemsStorage();
+    }
+
     protected function getFixtures(): array
     {
         $time = time();
@@ -574,6 +602,24 @@ trait ItemsStorageTestTrait
         }
 
         return ['items' => $items, 'itemsChildren' => $itemsChildren];
+    }
+
+    protected function populateStorage(): void
+    {
+        $storage = $this->getStorage();
+        $fixtures = $this->getFixtures();
+        foreach ($fixtures['items'] as $itemData) {
+            $name = $itemData['name'];
+            $item = $itemData['type'] === Item::TYPE_PERMISSION ? new Permission($name) : new Role($name);
+            $item = $item
+                ->withCreatedAt($itemData['createdAt'])
+                ->withUpdatedAt($itemData['updatedAt']);
+            $storage->add($item);
+        }
+
+        foreach ($fixtures['itemsChildren'] as $itemChildData) {
+            $storage->addChild($itemChildData['parent'], $itemChildData['child']);
+        }
     }
 
     private function getItemsCount(): int
