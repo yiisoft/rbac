@@ -16,7 +16,7 @@ use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
 trait AssignmentsStorageTestTrait
 {
     private ?ItemsStorageInterface $itemsStorage = null;
-    private ?AssignmentsStorageInterface $storage = null;
+    private ?AssignmentsStorageInterface $assignmentsStorage = null;
 
     protected function setUp(): void
     {
@@ -279,11 +279,11 @@ trait AssignmentsStorageTestTrait
 
     protected function getAssignmentsStorage(): AssignmentsStorageInterface
     {
-        if ($this->storage === null) {
-            $this->storage = $this->createAssignmentsStorage();
+        if ($this->assignmentsStorage === null) {
+            $this->assignmentsStorage = $this->createAssignmentsStorage();
         }
 
-        return $this->storage;
+        return $this->assignmentsStorage;
     }
 
     protected function createItemsStorage(): ItemsStorageInterface

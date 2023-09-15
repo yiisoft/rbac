@@ -18,7 +18,7 @@ trait ItemsStorageTestTrait
     private int $initialBothPermissionsChildrenCount = 0;
     private int $initialItemsChildrenCount = 0;
 
-    private ?ItemsStorageInterface $storage = null;
+    private ?ItemsStorageInterface $itemsStorage = null;
 
     protected function setUp(): void
     {
@@ -513,11 +513,11 @@ trait ItemsStorageTestTrait
 
     protected function getItemsStorage(): ItemsStorageInterface
     {
-        if ($this->storage === null) {
-            $this->storage = $this->createItemsStorage();
+        if ($this->itemsStorage === null) {
+            $this->itemsStorage = $this->createItemsStorage();
         }
 
-        return $this->storage;
+        return $this->itemsStorage;
     }
 
     protected function createItemsStorage(): ItemsStorageInterface
