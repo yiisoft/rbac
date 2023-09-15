@@ -76,7 +76,8 @@ interface ManagerInterface extends AccessCheckerInterface
      *
      * @param string $itemName Name of the role or the permission to be assigned.
      * @param int|string|Stringable $userId The user ID.
-     * @param int|null UNIX timestamp representing assignment creation time. When `null`, current time is used.
+     * @param int|null $createdAt UNIX timestamp representing assignment creation time. When `null`, current time is
+     * used.
      *
      * @throws Exception If the role or permission has already been assigned to the user.
      *
