@@ -21,25 +21,25 @@ trait AssignmentsStorageTestTrait
     protected function setUp(): void
     {
         $this->populateItemsStorage();
-        $this->populateStorage();
+        $this->populateAssignmentsStorage();
     }
 
     protected function tearDown(): void
     {
         $this->getItemsStorage()->clear();
-        $this->getStorage()->clear();
+        $this->getAssignmentsStorage()->clear();
     }
 
     public function testHasItem(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getAssignmentsStorage();
 
         $this->assertTrue($storage->hasItem('Accountant'));
     }
 
     public function testRenameItem(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getAssignmentsStorage();
         $storage->renameItem('Accountant', 'Senior accountant');
 
         $this->assertFalse($storage->hasItem('Accountant'));
@@ -48,7 +48,7 @@ trait AssignmentsStorageTestTrait
 
     public function testGetAll(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getAssignmentsStorage();
         $all = $storage->getAll();
 
         $this->assertCount(3, $all);
@@ -62,7 +62,7 @@ trait AssignmentsStorageTestTrait
 
     public function testRemoveByItemName(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getAssignmentsStorage();
         $storage->removeByItemName('Manager');
 
         $this->assertFalse($storage->hasItem('Manager'));
@@ -72,7 +72,7 @@ trait AssignmentsStorageTestTrait
 
     public function testGetByUserId(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getAssignmentsStorage();
         $assignments = $storage->getByUserId('john');
 
         $this->assertCount(3, $assignments);
@@ -99,7 +99,7 @@ trait AssignmentsStorageTestTrait
      */
     public function testGetByItemNames(array $itemNames, array $expectedAssignments): void
     {
-        $assignments = $this->getStorage()->getByItemNames($itemNames);
+        $assignments = $this->getAssignmentsStorage()->getByItemNames($itemNames);
         $this->assertCount(count($expectedAssignments), $assignments);
 
         $assignmentFound = false;
@@ -121,7 +121,7 @@ trait AssignmentsStorageTestTrait
 
     public function testRemoveByUserId(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getAssignmentsStorage();
         $storage->removeByUserId('jack');
 
         $this->assertEmpty($storage->getByUserId('jack'));
@@ -130,7 +130,7 @@ trait AssignmentsStorageTestTrait
 
     public function testRemove(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getAssignmentsStorage();
         $storage->remove('Accountant', 'john');
 
         $this->assertEmpty($storage->get('Accountant', 'john'));
@@ -139,7 +139,7 @@ trait AssignmentsStorageTestTrait
 
     public function testClear(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getAssignmentsStorage();
         $storage->clear();
 
         $this->assertEmpty($storage->getAll());
@@ -147,7 +147,7 @@ trait AssignmentsStorageTestTrait
 
     public function testGet(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getAssignmentsStorage();
         $assignment = $storage->get('Manager', 'jack');
 
         $this->assertSame('Manager', $assignment->getItemName());
@@ -157,7 +157,7 @@ trait AssignmentsStorageTestTrait
 
     public function testGetNonExisting(): void
     {
-        $this->assertNull($this->getStorage()->get('Researcher', 'jeff'));
+        $this->assertNull($this->getAssignmentsStorage()->get('Researcher', 'jeff'));
     }
 
     public function dataExists(): array
@@ -176,7 +176,7 @@ trait AssignmentsStorageTestTrait
      */
     public function testExists(string $itemName, string $userId, bool $expectedExists): void
     {
-        $this->assertSame($expectedExists, $this->getStorage()->exists($itemName, $userId));
+        $this->assertSame($expectedExists, $this->getAssignmentsStorage()->exists($itemName, $userId));
     }
 
     public function dataUserHasItem(): array
@@ -196,12 +196,12 @@ trait AssignmentsStorageTestTrait
      */
     public function testUserHasItem(string $userId, array $itemNames, bool $expectedUserHasItem): void
     {
-        $this->assertSame($expectedUserHasItem, $this->getStorage()->userHasItem($userId, $itemNames));
+        $this->assertSame($expectedUserHasItem, $this->getAssignmentsStorage()->userHasItem($userId, $itemNames));
     }
 
     public function testAdd(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getAssignmentsStorage();
         $storage->add('Operator', 'john');
 
         $this->assertInstanceOf(Assignment::class, $storage->get('Operator', 'john'));
@@ -261,10 +261,10 @@ trait AssignmentsStorageTestTrait
         }
     }
 
-    protected function populateStorage(): void
+    protected function populateAssignmentsStorage(): void
     {
         foreach ($this->getFixtures()['assignments'] as $assignmentData) {
-            $this->getStorage()->add($assignmentData['itemName'], $assignmentData['userId']);
+            $this->getAssignmentsStorage()->add($assignmentData['itemName'], $assignmentData['userId']);
         }
     }
 
@@ -277,10 +277,10 @@ trait AssignmentsStorageTestTrait
         return $this->itemsStorage;
     }
 
-    protected function getStorage(): AssignmentsStorageInterface
+    protected function getAssignmentsStorage(): AssignmentsStorageInterface
     {
         if ($this->storage === null) {
-            $this->storage = $this->createStorage();
+            $this->storage = $this->createAssignmentsStorage();
         }
 
         return $this->storage;
@@ -291,7 +291,7 @@ trait AssignmentsStorageTestTrait
         return new FakeItemsStorage();
     }
 
-    protected function createStorage(): AssignmentsStorageInterface
+    protected function createAssignmentsStorage(): AssignmentsStorageInterface
     {
         return new FakeAssignmentsStorage();
     }
