@@ -181,7 +181,7 @@ trait AssignmentsStorageTestTrait
     public function testAdd(): void
     {
         $storage = $this->getStorage();
-        $storage->add(userId: 'john', itemName: 'Operator');
+        $storage->add('Operator', 'john');
 
         $this->assertInstanceOf(Assignment::class, $storage->get('Operator', 'john'));
     }

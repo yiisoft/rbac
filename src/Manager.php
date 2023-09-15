@@ -104,7 +104,7 @@ final class Manager implements ManagerInterface
         return $this->itemsStorage->hasDirectChild($parentName, $childName);
     }
 
-    public function assign(string $itemName, int|Stringable|string $userId, ?int $createdAt = null): self
+    public function assign(string $itemName, int|Stringable|string $userId): self
     {
         $userId = (string) $userId;
 
@@ -125,8 +125,7 @@ final class Manager implements ManagerInterface
             );
         }
 
-        $assignment = new Assignment($userId, $itemName, $createdAt ?? time());
-        $this->assignmentsStorage->add($assignment);
+        $this->assignmentsStorage->add($itemName, $userId);
 
         return $this;
     }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac\Tests\Common;
 
-use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\AssignmentsStorageInterface;
 use Yiisoft\Rbac\ItemsStorageInterface;
 use Yiisoft\Rbac\Manager;
@@ -99,12 +98,12 @@ trait ManagerConfigurationTestTrait
     {
         $storage = $this->createAssignmentsStorage();
 
-        $storage->add(new Assignment(userId: 'reader A', itemName: 'Fast Metabolism', createdAt: time()));
-        $storage->add(new Assignment(userId: 'reader A', itemName: 'reader', createdAt: time()));
-        $storage->add(new Assignment(userId: 'author B', itemName: 'author', createdAt: time()));
-        $storage->add(new Assignment(userId: 'author B', itemName: 'deletePost', createdAt: time()));
-        $storage->add(new Assignment(userId: 'author B', itemName: 'publishPost', createdAt: time()));
-        $storage->add(new Assignment(userId: 'admin C', itemName: 'admin', createdAt: time()));
+        $storage->add('Fast Metabolism', 'reader A');
+        $storage->add('reader', 'reader A');
+        $storage->add('author', 'author B');
+        $storage->add('deletePost', 'author B');
+        $storage->add('publishPost', 'author B');
+        $storage->add('admin', 'admin C');
 
         return $storage;
     }
