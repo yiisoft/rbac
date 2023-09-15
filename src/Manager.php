@@ -158,12 +158,11 @@ final class Manager implements ManagerInterface
 
     public function getChildRoles(string $roleName): array
     {
-        $role = $this->itemsStorage->getRole($roleName);
-        if ($role === null) {
+        if (!$this->itemsStorage->roleExists($roleName)) {
             throw new InvalidArgumentException("Role \"$roleName\" not found.");
         }
 
-        return array_merge([$roleName => $role], $this->itemsStorage->getAllChildRoles($roleName));
+        return $this->itemsStorage->getAllChildRoles($roleName);
     }
 
     public function getPermissionsByRoleName(string $roleName): array
