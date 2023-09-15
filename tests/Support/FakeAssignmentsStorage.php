@@ -62,9 +62,9 @@ class FakeAssignmentsStorage implements AssignmentsStorageInterface
         return false;
     }
 
-    public function add(string $itemName, string $userId): void
+    public function add(Assignment $assignment): void
     {
-        $this->assignments[$userId][$itemName] = new Assignment($userId, $itemName, time());
+        $this->assignments[$assignment->getUserId()][$assignment->getItemName()] = $assignment;
     }
 
     public function hasItem(string $name): bool

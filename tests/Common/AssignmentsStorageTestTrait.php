@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac\Tests\Common;
 
+use DateTime;
+use SlopeIt\ClockMock\ClockMock;
 use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\AssignmentsStorageInterface;
 use Yiisoft\Rbac\Item;
@@ -20,12 +22,20 @@ trait AssignmentsStorageTestTrait
 
     protected function setUp(): void
     {
+        if ($this->getName() === 'testAdd') {
+            ClockMock::freeze(new DateTime('2023-05-10 08:24:39'));
+        }
+
         $this->populateItemsStorage();
         $this->populateAssignmentsStorage();
     }
 
     protected function tearDown(): void
     {
+        if ($this->getName() === 'testAdd') {
+            ClockMock::reset();
+        }
+
         $this->getItemsStorage()->clear();
         $this->getAssignmentsStorage()->clear();
     }
@@ -202,9 +212,23 @@ trait AssignmentsStorageTestTrait
     public function testAdd(): void
     {
         $storage = $this->getAssignmentsStorage();
-        $storage->add('Operator', 'john');
+        $storage->add(new Assignment(userId: 'john', itemName: 'Operator', createdAt: time()));
 
-        $this->assertInstanceOf(Assignment::class, $storage->get('Operator', 'john'));
+        $this->assertEquals(
+            new Assignment(userId: 'john', itemName: 'Operator', createdAt: 1_683_707_079),
+            $storage->get(itemName: 'Operator', userId: 'john'),
+        );
+    }
+
+    public function testAddWithCreatedAt(): void
+    {
+        $storage = $this->getAssignmentsStorage();
+        $storage->add(new Assignment(userId: 'john', itemName: 'Operator', createdAt: 1_694_508_008));
+
+        $this->assertEquals(
+            new Assignment(userId: 'john', itemName: 'Operator', createdAt: 1_694_508_008),
+            $storage->get(itemName: 'Operator', userId: 'john'),
+        );
     }
 
     protected function getFixtures(): array
@@ -264,7 +288,13 @@ trait AssignmentsStorageTestTrait
     protected function populateAssignmentsStorage(): void
     {
         foreach ($this->getFixtures()['assignments'] as $assignmentData) {
-            $this->getAssignmentsStorage()->add($assignmentData['itemName'], $assignmentData['userId']);
+            $this->getAssignmentsStorage()->add(
+                new Assignment(
+                    userId: $assignmentData['userId'],
+                    itemName: $assignmentData['itemName'],
+                    createdAt: time(),
+                ),
+            );
         }
     }
 

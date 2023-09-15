@@ -71,12 +71,11 @@ interface AssignmentsStorageInterface
     public function userHasItem(string $userId, array $itemNames): bool;
 
     /**
-     * Adds assignment of the role or permission to the user with ID specified.
+     * Adds assignment to the storage.
      *
-     * @param string $itemName Item name to assign.
-     * @param string $userId The user ID.
+     * @param Assignment $assignment Assignment instance.
      */
-    public function add(string $itemName, string $userId): void;
+    public function add(Assignment $assignment): void;
 
     /**
      * Returns whether there is assignment for a named role or permission.
