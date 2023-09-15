@@ -6,6 +6,7 @@
 - New #161: Add `ManagerInterface` (@arogachev)
 - Chg #161: Raise PHP version to 8.0 (@arogachev)
 - Enh #165: Improve perfomance (@arogachev)
+- Bug #178: Exclude parent role from `Manager::getAllChildRoles()` (@arogachev)
 
 ## 1.0.2 April 20, 2023
 
