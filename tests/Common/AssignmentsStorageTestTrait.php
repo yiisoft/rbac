@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac\Tests\Common;
 
+use DateTime;
 use SlopeIt\ClockMock\ClockMock;
 use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\AssignmentsStorageInterface;
@@ -211,7 +212,7 @@ trait AssignmentsStorageTestTrait
     public function testAdd(): void
     {
         $storage = $this->getAssignmentsStorage();
-        $storage->add(userId: 'john', itemName: 'Operator');
+        $storage->add(new Assignment(userId: 'john', itemName: 'Operator', createdAt: time()));
 
         $this->assertEquals(
             new Assignment(userId: 'john', itemName: 'Operator', createdAt: 1_683_707_079),
@@ -222,7 +223,7 @@ trait AssignmentsStorageTestTrait
     public function testAddWithCreatedAt(): void
     {
         $storage = $this->getAssignmentsStorage();
-        $storage->add(userId: 'john', itemName: 'Operator', createdAt: 1_694_508_008);
+        $storage->add(new Assignment(userId: 'john', itemName: 'Operator', createdAt: 1_694_508_008));
 
         $this->assertEquals(
             new Assignment(userId: 'john', itemName: 'Operator', createdAt: 1_694_508_008),
@@ -287,7 +288,13 @@ trait AssignmentsStorageTestTrait
     protected function populateAssignmentsStorage(): void
     {
         foreach ($this->getFixtures()['assignments'] as $assignmentData) {
-            $this->getAssignmentsStorage()->add($assignmentData['itemName'], $assignmentData['userId']);
+            $this->getAssignmentsStorage()->add(
+                new Assignment(
+                    userId: $assignmentData['userId'],
+                    itemName: $assignmentData['itemName'],
+                    createdAt: time(),
+                ),
+            );
         }
     }
 
