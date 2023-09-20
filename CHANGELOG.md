@@ -26,6 +26,7 @@
   - `exists()`;
   - `userHasItem()`.
     (@arogachev)
+- Enh #165: Rename `DefaultRoleNotFoundException` to `DefaultRolesNotFoundException` and finalize it (@arogachev)
 
 ## 1.0.2 April 20, 2023
 
