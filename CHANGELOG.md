@@ -9,7 +9,7 @@
 - Bug #178: Exclude parent role from `Manager::getAllChildRoles()` (@arogachev)
 - Enh #134: Improve handling and control of `Assignment::$createdAt` (@arogachev)
 - Chg #134: Add `$createdAt` parameter to `ManagerInterface::assign()` (@arogachev)
-- Chg #134: Replace parameters with `$assignment` pararemeter in `AssignmentsStorageInterface::add()` (@arogachev)
+- Chg #134: Replace parameters with `$assignment` parameter in `AssignmentsStorageInterface::add()` (@arogachev)
 
 ## 1.0.2 April 20, 2023
 
