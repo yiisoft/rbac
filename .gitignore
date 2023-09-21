@@ -28,3 +28,4 @@ phpunit.phar
 /phpunit.xml
 # phpunit cache
 .phpunit.result.cache
+/.phpunit.cache
