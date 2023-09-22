@@ -197,9 +197,7 @@ final class FakeItemsStorage implements ItemsStorageInterface
 
     private function clearChildrenFromItem(string $itemName): void
     {
-        foreach ($this->children as &$children) {
-            unset($children[$itemName]);
-        }
+        unset($this->children[$itemName]);
     }
 
     private function updateChildrenForItemName(string $name, Item $item): void

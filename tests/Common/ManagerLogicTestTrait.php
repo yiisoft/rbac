@@ -514,12 +514,12 @@ trait ManagerLogicTestTrait
         $manager = $this->createFilledManager();
 
         $this->assertEqualsCanonicalizing(
-            ['admin', 'reader', 'author'],
+            ['reader', 'author'],
             array_keys($manager->getChildRoles('admin'))
         );
     }
 
-    public function testGetChildRolesUnknownRole(): void
+    public function testGetChildRolesWithNonExistingRole(): void
     {
         $manager = $this->createFilledManager();
 
@@ -529,7 +529,7 @@ trait ManagerLogicTestTrait
         $manager->getChildRoles('unknown');
     }
 
-    public function testGetPermissionsByRole(): void
+    public function testGetPermissionsByRoleName(): void
     {
         $manager = $this->createFilledManager();
 

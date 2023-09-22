@@ -55,6 +55,11 @@ final class Manager implements ManagerInterface
             return $this->guestHasPermission($permission, $parameters);
         }
 
+        $permission = $this->itemsStorage->getPermission($permissionName);
+        if ($permission === null) {
+            return false;
+        }
+
         $userId = (string) $userId;
         if (!$this->executeRule($userId, $permission, $parameters)) {
             return false;
@@ -104,7 +109,7 @@ final class Manager implements ManagerInterface
         return $this->itemsStorage->hasDirectChild($parentName, $childName);
     }
 
-    public function assign(string $itemName, int|Stringable|string $userId): self
+    public function assign(string $itemName, int|Stringable|string $userId, ?int $createdAt = null): self
     {
         $userId = (string) $userId;
 
@@ -125,7 +130,8 @@ final class Manager implements ManagerInterface
             );
         }
 
-        $this->assignmentsStorage->add($itemName, $userId);
+        $assignment = new Assignment($userId, $itemName, $createdAt ?? time());
+        $this->assignmentsStorage->add($assignment);
 
         return $this;
     }
@@ -157,12 +163,11 @@ final class Manager implements ManagerInterface
 
     public function getChildRoles(string $roleName): array
     {
-        $role = $this->itemsStorage->getRole($roleName);
-        if ($role === null) {
+        if (!$this->itemsStorage->roleExists($roleName)) {
             throw new InvalidArgumentException("Role \"$roleName\" not found.");
         }
 
-        return array_merge([$roleName => $role], $this->itemsStorage->getAllChildRoles($roleName));
+        return $this->itemsStorage->getAllChildRoles($roleName);
     }
 
     public function getPermissionsByRoleName(string $roleName): array

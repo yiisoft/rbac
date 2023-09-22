@@ -76,12 +76,14 @@ interface ManagerInterface extends AccessCheckerInterface
      *
      * @param string $itemName Name of the role or the permission to be assigned.
      * @param int|string|Stringable $userId The user ID.
+     * @param int|null $createdAt UNIX timestamp representing assignment creation time. When `null`, current time is
+     * used.
      *
      * @throws Exception If the role or permission has already been assigned to the user.
      *
      * @return self
      */
-    public function assign(string $itemName, int|Stringable|string $userId): self;
+    public function assign(string $itemName, int|Stringable|string $userId, ?int $createdAt = null): self;
 
     /**
      * Revokes a role or a permission from a user.
@@ -119,8 +121,7 @@ interface ManagerInterface extends AccessCheckerInterface
      *
      * @throws InvalidArgumentException If role was not found by `$roleName`.
      *
-     * @return Role[] Child roles. The array is indexed by the role names. First element is an instance of the parent
-     * role itself.
+     * @return Role[] Child roles. The array is indexed by the role names.
      * @psalm-return array<string, Role>
      */
     public function getChildRoles(string $roleName): array;
