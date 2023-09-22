@@ -5,8 +5,6 @@
 - Chg #161: Allow to reuse manager test code in related packages (@arogachev)
 - New #161: Add `ManagerInterface` (@arogachev)
 - Chg #161: Raise PHP version to 8.0 (@arogachev)
-- Enh #165: Improve perfomance (@arogachev)
-- Bug #172: Execute rule when checking permissions for guests (@arogachev)
 - Bug #178: Exclude parent role from `Manager::getAllChildRoles()` (@arogachev)
 - Enh #134: Improve handling and control of `Assignment::$createdAt` (@arogachev)
 - Chg #134: Add `$createdAt` parameter to `ManagerInterface::assign()` (@arogachev)
@@ -29,6 +27,7 @@
   - `userHasItem()`.
     (@arogachev)
 - Enh #165: Rename `DefaultRoleNotFoundException` to `DefaultRolesNotFoundException` and finalize it (@arogachev)
+- Bug #172: Execute rule when checking permissions for guests (@arogachev)
 
 ## 1.0.2 April 20, 2023
 
