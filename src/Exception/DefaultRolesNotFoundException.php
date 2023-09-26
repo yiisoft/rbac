@@ -7,7 +7,7 @@ namespace Yiisoft\Rbac\Exception;
 use RuntimeException;
 use Yiisoft\FriendlyException\FriendlyExceptionInterface;
 
-class DefaultRolesNotFoundException extends RuntimeException implements FriendlyExceptionInterface
+final class DefaultRolesNotFoundException extends RuntimeException implements FriendlyExceptionInterface
 {
     public function getName(): string
     {

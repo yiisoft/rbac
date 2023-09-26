@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac\Tests\Common;
 
 use Yiisoft\Rbac\Item;
+use Yiisoft\Rbac\ItemsStorageInterface;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
+use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
 
 trait ItemsStorageTestTrait
 {
@@ -15,6 +17,18 @@ trait ItemsStorageTestTrait
     private int $initialBothRolesChildrenCount = 0;
     private int $initialBothPermissionsChildrenCount = 0;
     private int $initialItemsChildrenCount = 0;
+
+    private ?ItemsStorageInterface $itemsStorage = null;
+
+    protected function setUp(): void
+    {
+        $this->populateItemsStorage();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->getItemsStorage()->clear();
+    }
 
     public function dataUpdate(): array
     {
@@ -30,7 +44,7 @@ trait ItemsStorageTestTrait
      */
     public function testUpdate(string $itemName, string $parentNameForChildrenCheck, bool $expectedHasChildren): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getItemsStorage();
 
         $item = $storage->get($itemName);
         $this->assertNull($item->getRuleName());
@@ -53,7 +67,7 @@ trait ItemsStorageTestTrait
 
     public function testGet(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getItemsStorage();
         $item = $storage->get('Parent 3');
 
         $this->assertInstanceOf(Permission::class, $item);
@@ -63,7 +77,7 @@ trait ItemsStorageTestTrait
 
     public function testGetWithNonExistingName(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getItemsStorage();
         $this->assertNull($storage->get('Non-existing name'));
     }
 
@@ -85,7 +99,7 @@ trait ItemsStorageTestTrait
      */
     public function testExists(string $name, bool $expectedExists): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getItemsStorage();
         $this->assertSame($expectedExists, $storage->exists($name));
     }
 
@@ -103,12 +117,12 @@ trait ItemsStorageTestTrait
      */
     public function testRoleExists(string $name, bool $expectedRoleExists): void
     {
-        $this->assertSame($expectedRoleExists, $this->getStorage()->roleExists($name));
+        $this->assertSame($expectedRoleExists, $this->getItemsStorage()->roleExists($name));
     }
 
     public function testGetPermission(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getItemsStorage();
         $permission = $storage->getPermission('Child 1');
 
         $this->assertInstanceOf(Permission::class, $permission);
@@ -117,7 +131,7 @@ trait ItemsStorageTestTrait
 
     public function testAddChild(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getItemsStorage();
         $storage->addChild('Parent 2', 'Child 1');
 
         $children = $storage->getAllChildren('Parent 2');
@@ -130,7 +144,7 @@ trait ItemsStorageTestTrait
 
     public function testClear(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getItemsStorage();
         $storage->clear();
 
         $this->assertEmpty($storage->getAll());
@@ -157,7 +171,7 @@ trait ItemsStorageTestTrait
      */
     public function testGetDirectChildren(string $parentName, array $expectedChildren): void
     {
-        $children = $this->getStorage()->getDirectChildren($parentName);
+        $children = $this->getItemsStorage()->getDirectChildren($parentName);
         $this->assertChildren($children, $expectedChildren);
     }
 
@@ -185,7 +199,7 @@ trait ItemsStorageTestTrait
      */
     public function testGetAllChildren(string $parentName, array $expectedChildren): void
     {
-        $children = $this->getStorage()->getAllChildren($parentName);
+        $children = $this->getItemsStorage()->getAllChildren($parentName);
         $this->assertChildren($children, $expectedChildren);
     }
 
@@ -210,7 +224,7 @@ trait ItemsStorageTestTrait
      */
     public function testGetAllChildPermissions(string $parentName, array $expectedChildren): void
     {
-        $children = $this->getStorage()->getAllChildPermissions($parentName);
+        $children = $this->getItemsStorage()->getAllChildPermissions($parentName);
         $this->assertChildren($children, $expectedChildren);
     }
 
@@ -235,13 +249,13 @@ trait ItemsStorageTestTrait
      */
     public function testGetAllChildRoles(string $parentName, array $expectedChildren): void
     {
-        $children = $this->getStorage()->getAllChildRoles($parentName);
+        $children = $this->getItemsStorage()->getAllChildRoles($parentName);
         $this->assertChildren($children, $expectedChildren);
     }
 
     public function testGetRoles(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getItemsStorage();
         $roles = $storage->getRoles();
 
         $this->assertCount($this->initialRolesCount, $roles);
@@ -265,7 +279,7 @@ trait ItemsStorageTestTrait
      */
     public function testGetRolesByNames(array $names, array $expectedRoleNames): void
     {
-        $roles = $this->getStorage()->getRolesByNames($names);
+        $roles = $this->getItemsStorage()->getRolesByNames($names);
 
         $this->assertCount(count($expectedRoleNames), $roles);
         foreach ($roles as $roleName => $role) {
@@ -276,7 +290,7 @@ trait ItemsStorageTestTrait
 
     public function testGetPermissions(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getItemsStorage();
         $permissions = $storage->getPermissions();
 
         $this->assertCount($this->initialPermissionsCount, $permissions);
@@ -300,7 +314,7 @@ trait ItemsStorageTestTrait
      */
     public function testGetPermissionsByNames(array $names, array $expectedPermissionNames): void
     {
-        $permissions = $this->getStorage()->getPermissionsByNames($names);
+        $permissions = $this->getItemsStorage()->getPermissionsByNames($names);
 
         $this->assertCount(count($expectedPermissionNames), $permissions);
         foreach ($permissions as $permissionName => $permission) {
@@ -311,7 +325,7 @@ trait ItemsStorageTestTrait
 
     public function testRemove(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getItemsStorage();
         $storage->remove('Parent 2');
 
         $this->assertNull($storage->get('Parent 2'));
@@ -340,7 +354,7 @@ trait ItemsStorageTestTrait
      */
     public function testGetParents(string $childName, array $expectedParents): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getItemsStorage();
         $parents = $storage->getParents($childName);
 
         $this->assertCount(count($expectedParents), $parents);
@@ -352,7 +366,7 @@ trait ItemsStorageTestTrait
 
     public function testRemoveChildren(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getItemsStorage();
         $storage->removeChildren('Parent 2');
 
         $this->assertFalse($storage->hasChildren('Parent 2'));
@@ -361,7 +375,7 @@ trait ItemsStorageTestTrait
 
     public function testGetRole(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getItemsStorage();
         $role = $storage->getRole('Parent 1');
 
         $this->assertNotEmpty($role);
@@ -371,7 +385,7 @@ trait ItemsStorageTestTrait
 
     public function testAdd(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getItemsStorage();
         $newItem = new Permission('Delete post');
         $storage->add($newItem);
 
@@ -380,7 +394,7 @@ trait ItemsStorageTestTrait
 
     public function testRemoveChild(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getItemsStorage();
         $storage->addChild('Parent 2', 'Child 1');
         $storage->removeChild('Parent 2', 'Child 1');
 
@@ -393,13 +407,13 @@ trait ItemsStorageTestTrait
 
     public function testGetAll(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getItemsStorage();
         $this->assertCount($this->getItemsCount(), $storage->getAll());
     }
 
     public function testHasChildren(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getItemsStorage();
 
         $this->assertTrue($storage->hasChildren('Parent 1'));
         $this->assertFalse($storage->hasChildren('Parent 3'));
@@ -437,7 +451,7 @@ trait ItemsStorageTestTrait
      */
     public function testHasChild(string $parentName, string $childName, bool $expectedHasChild): void
     {
-        $this->assertSame($expectedHasChild, $this->getStorage()->hasChild($parentName, $childName));
+        $this->assertSame($expectedHasChild, $this->getItemsStorage()->hasChild($parentName, $childName));
     }
 
     public function dataHasDirectChild(): array
@@ -472,12 +486,12 @@ trait ItemsStorageTestTrait
      */
     public function testHasDirectChild(string $parentName, string $childName, bool $expectedHasDirectChild): void
     {
-        $this->assertSame($expectedHasDirectChild, $this->getStorage()->hasDirectChild($parentName, $childName));
+        $this->assertSame($expectedHasDirectChild, $this->getItemsStorage()->hasDirectChild($parentName, $childName));
     }
 
     public function testClearPermissions(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getItemsStorage();
         $storage->clearPermissions();
 
         $all = $storage->getAll();
@@ -487,7 +501,7 @@ trait ItemsStorageTestTrait
 
     public function testClearRoles(): void
     {
-        $storage = $this->getStorage();
+        $storage = $this->getItemsStorage();
         $storage->clearRoles();
 
         $all = $storage->getAll();
@@ -495,6 +509,20 @@ trait ItemsStorageTestTrait
         $this->assertContainsOnlyInstancesOf(Permission::class, $storage->getAll());
 
         $this->assertTrue($storage->hasChildren('Parent 5'));
+    }
+
+    protected function getItemsStorage(): ItemsStorageInterface
+    {
+        if ($this->itemsStorage === null) {
+            $this->itemsStorage = $this->createItemsStorage();
+        }
+
+        return $this->itemsStorage;
+    }
+
+    protected function createItemsStorage(): ItemsStorageInterface
+    {
+        return new FakeItemsStorage();
     }
 
     protected function getFixtures(): array
@@ -574,6 +602,24 @@ trait ItemsStorageTestTrait
         }
 
         return ['items' => $items, 'itemsChildren' => $itemsChildren];
+    }
+
+    protected function populateItemsStorage(): void
+    {
+        $storage = $this->getItemsStorage();
+        $fixtures = $this->getFixtures();
+        foreach ($fixtures['items'] as $itemData) {
+            $name = $itemData['name'];
+            $item = $itemData['type'] === Item::TYPE_PERMISSION ? new Permission($name) : new Role($name);
+            $item = $item
+                ->withCreatedAt($itemData['createdAt'])
+                ->withUpdatedAt($itemData['updatedAt']);
+            $storage->add($item);
+        }
+
+        foreach ($fixtures['itemsChildren'] as $itemChildData) {
+            $storage->addChild($itemChildData['parent'], $itemChildData['child']);
+        }
     }
 
     private function getItemsCount(): int

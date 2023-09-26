@@ -7,6 +7,28 @@
 - Chg #161: Raise PHP version to 8.0 (@arogachev)
 - Enh #165: Improve perfomance (@arogachev)
 - Bug #178: Exclude parent role from `Manager::getAllChildRoles()` (@arogachev)
+- Bug #178: Exclude parent role from `Manager::getAllChildRoles()` (@arogachev)
+- Enh #134: Improve handling and control of `Assignment::$createdAt` (@arogachev)
+- Chg #134: Add `$createdAt` parameter to `ManagerInterface::assign()` (@arogachev)
+- Chg #134: Replace parameters with `$assignment` parameter in `AssignmentsStorageInterface::add()` (@arogachev)
+- Enh #165: Improve perfomance (@arogachev)
+- Enh #165: Rename `getChildren` method to `getDirectAchildren()` in `ItemsStorage` (@arogachev)
+- Enh #165: Add methods to `ItemsStorage`:
+    - `roleExists()`;
+    - `getRolesByNames()`;
+    - `getPermissionsByNames()`;
+    - `getAllChildren()`;
+    - `getAllChildRoles()`;
+    - `getAllChildPermissions()`;
+    - `hasChild()`;
+    - `hasDirectChild()`.
+      (@arogachev)
+- Enh #165: Add methods to `AssignmentsStorageInterface`:
+  - `getByItemNames()`;
+  - `exists()`;
+  - `userHasItem()`.
+    (@arogachev)
+- Enh #165: Rename `DefaultRoleNotFoundException` to `DefaultRolesNotFoundException` and finalize it (@arogachev)
 
 ## 1.0.2 April 20, 2023
 
