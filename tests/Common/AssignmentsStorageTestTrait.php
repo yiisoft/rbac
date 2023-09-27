@@ -160,6 +160,7 @@ trait AssignmentsStorageTestTrait
         $storage = $this->getAssignmentsStorage();
         $assignment = $storage->get('Manager', 'jack');
 
+        $this->assertNotNull($assignment);
         $this->assertSame('Manager', $assignment->getItemName());
         $this->assertSame('jack', $assignment->getUserId());
         $this->assertIsInt($assignment->getCreatedAt());
