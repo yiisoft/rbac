@@ -19,7 +19,7 @@ final class FakeItemsStorage implements ItemsStorageInterface
         return $this->items;
     }
 
-    public function get(string $name): ?Item
+    public function get(string $name): Permission|Role|null
     {
         return $this->items[$name] ?? null;
     }
@@ -34,7 +34,7 @@ final class FakeItemsStorage implements ItemsStorageInterface
         return isset($this->getItemsByType(Item::TYPE_ROLE)[$name]);
     }
 
-    public function add(Item $item): void
+    public function add(Permission|Role $item): void
     {
         $this->items[$item->getName()] = $item;
     }
@@ -164,7 +164,7 @@ final class FakeItemsStorage implements ItemsStorageInterface
         $this->removeItemByName($name);
     }
 
-    public function update(string $name, Item $item): void
+    public function update(string $name, Permission|Role $item): void
     {
         if ($item->getName() !== $name) {
             $this->updateItemName($name, $item);
