@@ -201,8 +201,7 @@ trait ManagerLogicTestTrait
         mixed $userId,
         array $parameters,
         bool $expectedUserHasPermission,
-    ): void
-    {
+    ): void {
         $manager = $this->createFilledManager()
             ->setGuestRoleName('guest')
             ->addPermission(
