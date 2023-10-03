@@ -28,6 +28,7 @@
     (@arogachev)
 - Enh #165: Rename `DefaultRoleNotFoundException` to `DefaultRolesNotFoundException` and finalize it (@arogachev)
 - Bug #172: Execute rule when checking permissions for guests (@arogachev)
+- Bug #172: Make `$userId` parameter `nullable` in `RuleInterface::execute()` (@arogachev) 
 
 ## 1.0.2 April 20, 2023
 
