@@ -7,7 +7,7 @@ namespace Yiisoft\Rbac;
 /**
  * A storage for RBAC roles and permissions used in {@see Manager}.
  *
- * @psalm-type ItemsIndexedByName = array<string, Item>
+ * @psalm-type ItemsIndexedByName = array<string, Permission|Role>
  */
 interface ItemsStorageInterface
 {
