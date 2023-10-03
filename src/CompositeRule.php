@@ -41,14 +41,14 @@ final class CompositeRule implements RuleInterface
         }
     }
 
-    public function execute(string $userId, Item $item, RuleFactoryInterface $ruleFactory, array $parameters = []): bool
+    public function execute(string $userId, Item $item, RuleContext $ruleContext): bool
     {
         if (empty($this->ruleNames)) {
             return true;
         }
 
         foreach ($this->ruleNames as $ruleName) {
-            $result = $ruleFactory->create($ruleName)->execute($userId, $item, $ruleFactory, $parameters);
+            $result = $ruleContext->createRule($ruleName)->execute($userId, $item, $ruleContext);
 
             if ($this->operator === self::AND && $result === false) {
                 return false;

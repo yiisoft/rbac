@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Yiisoft\Rbac\CompositeRule;
 use Yiisoft\Rbac\Permission;
+use Yiisoft\Rbac\RuleContext;
 use Yiisoft\Rbac\Tests\Support\EasyRule;
 use Yiisoft\Rbac\Tests\Support\SimpleRuleFactory;
 
@@ -36,7 +37,7 @@ final class CompositeRuleTest extends TestCase
             'easy_rule_false' => new EasyRule(false),
             'easy_rule_true' => new EasyRule(true),
         ]);
-        $result = $rule->execute('user', new Permission('permission'), $ruleFactory);
+        $result = $rule->execute('user', new Permission('permission'), new RuleContext($ruleFactory));
         $this->assertSame($expected, $result);
     }
 
