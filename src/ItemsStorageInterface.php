@@ -28,10 +28,10 @@ interface ItemsStorageInterface
      *
      * @param string $name The role or the permission name.
      *
-     * @return Item|null The role or the permission corresponding to the specified name. `null` is returned if no such
+     * @return Permission|Role|null The role or the permission corresponding to the specified name. `null` is returned if no such
      * item.
      */
-    public function get(string $name): ?Item;
+    public function get(string $name): Permission|Role|null;
 
     /**
      * Whether named role or permission exists.
@@ -54,17 +54,17 @@ interface ItemsStorageInterface
     /**
      * Adds the role or the permission to RBAC system.
      *
-     * @param Item $item The role or the permission to add.
+     * @param Permission|Role $item The role or the permission to add.
      */
-    public function add(Item $item): void;
+    public function add(Permission|Role $item): void;
 
     /**
      * Updates the specified role or permission in the system.
      *
      * @param string $name The old name of the role or permission.
-     * @param Item $item Modified role or permission.
+     * @param Permission|Role $item Modified role or permission.
      */
-    public function update(string $name, Item $item): void;
+    public function update(string $name, Permission|Role $item): void;
 
     /**
      * Removes a role or permission from the RBAC system.
