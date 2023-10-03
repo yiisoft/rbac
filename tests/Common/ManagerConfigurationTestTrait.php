@@ -61,7 +61,7 @@ trait ManagerConfigurationTestTrait
             $this->assignmentsStorage,
             new SimpleRuleFactory([
                 'isAuthor' => new AuthorRule(),
-                'easyTrue' => new EasyRule(false),
+                'easyTrue' => new EasyRule(true),
                 'easyFalse' => new EasyRule(false),
             ]),
             $enableDirectPermissions,
