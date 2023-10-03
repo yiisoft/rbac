@@ -9,9 +9,9 @@
 - Enh #134: Improve handling and control of `Assignment::$createdAt` (@arogachev)
 - Chg #134: Add `$createdAt` parameter to `ManagerInterface::assign()` (@arogachev)
 - Chg #134: Replace parameters with `$assignment` parameter in `AssignmentsStorageInterface::add()` (@arogachev)
-- Enh #165: Improve perfomance (@arogachev)
-- Enh #165: Rename `getChildren` method to `getDirectAchildren()` in `ItemsStorage` (@arogachev)
-- Enh #165: Add methods to `ItemsStorage`:
+- Enh #165: Improve performance (@arogachev)
+- Enh #165: Rename `getChildren` method to `getDirectAchildren()` in `ItemsStorageInterface` (@arogachev)
+- Enh #165: Add methods to `ItemsStorageInterface`:
     - `roleExists()`;
     - `getRolesByNames()`;
     - `getPermissionsByNames()`;

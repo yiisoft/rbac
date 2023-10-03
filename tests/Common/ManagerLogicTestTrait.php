@@ -8,24 +8,29 @@ use DateTime;
 use InvalidArgumentException;
 use RuntimeException;
 use SlopeIt\ClockMock\ClockMock;
+use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 use Yiisoft\Rbac\Exception\RuleNotFoundException;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\Tests\Support\EasyRule;
+use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
+use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
 
 trait ManagerLogicTestTrait
 {
+    private static array $frozenTimeTests = ['testAssign', 'testDataPersistency'];
+
     protected function setUp(): void
     {
-        if ($this->getName() === 'testAssign') {
+        if (in_array($this->getName(), self::$frozenTimeTests, strict: true)) {
             ClockMock::freeze(new DateTime('2023-05-10 08:24:39'));
         }
     }
 
     protected function tearDown(): void
     {
-        if ($this->getName() === 'testAssign') {
+        if (in_array($this->getName(), self::$frozenTimeTests, strict: true)) {
             ClockMock::reset();
         }
     }
@@ -891,5 +896,37 @@ trait ManagerLogicTestTrait
 
         $this->assertEmpty($this->assignmentsStorage->getByUserId('author B'));
         $this->assertSame($manager, $returnedManager);
+    }
+
+    public function testDataPersistency(): void
+    {
+        $itemsStorage = new FakeItemsStorage();
+        $assignmentsStorage = new FakeAssignmentsStorage();
+        $manager = $this->createManager($itemsStorage, $assignmentsStorage);
+        $manager
+            ->addRole((new Role('role1'))->withCreatedAt(1_694_502_936)->withUpdatedAt(1_694_502_936))
+            ->addRole((new Role('role2'))->withCreatedAt(1_694_502_976)->withUpdatedAt(1_694_502_976))
+            ->addChild('role1', 'role2');
+        $manager->assign('role1', 1);
+        $manager->assign('role2', 2);
+
+        $this->assertEquals(
+            [
+                'role1' => (new Role('role1'))->withCreatedAt(1_694_502_936)->withUpdatedAt(1_694_502_936),
+                'role2' => (new Role('role2'))->withCreatedAt(1_694_502_976)->withUpdatedAt(1_694_502_976),
+            ],
+            $itemsStorage->getAll(),
+        );
+        $this->assertEquals(
+            ['role2' => (new Role('role2'))->withCreatedAt(1_694_502_976)->withUpdatedAt(1_694_502_976)],
+            $manager->getChildRoles('role1'),
+        );
+        $this->assertEquals(
+            [
+                '1' => ['role1' => new Assignment(userId: '1', itemName: 'role1', createdAt: 1_683_707_079)],
+                '2' => ['role2' => new Assignment(userId: '2', itemName: 'role2', createdAt: 1_683_707_079)],
+            ],
+            $assignmentsStorage->getAll(),
+        );
     }
 }

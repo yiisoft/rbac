@@ -313,7 +313,7 @@ final class Manager implements ManagerInterface
     /**
      * @throws ItemAlreadyExistsException
      */
-    private function addItem(Item $item): void
+    private function addItem(Permission|Role $item): void
     {
         if ($this->itemsStorage->exists($item->getName())) {
             throw new ItemAlreadyExistsException($item);
