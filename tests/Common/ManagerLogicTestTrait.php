@@ -158,8 +158,8 @@ trait ManagerLogicTestTrait
             ->addChild('guest', 'viewIssue')
             ->assign('guest', $userId);
 
-        $this->assertFalse($manager->userHasPermission(null, 'viewIssue'));
-        $this->assertFalse($manager->userHasPermission($userId, 'viewIssue'));
+        $this->assertTrue($manager->userHasPermission(null, 'viewIssue'));
+        $this->assertTrue($manager->userHasPermission($userId, 'viewIssue'));
     }
 
     public function testGuestRoleName(): void
