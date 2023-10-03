@@ -146,34 +146,6 @@ trait ManagerLogicTestTrait
         }
     }
 
-    public function testUserHasPermissionWithGuestAndCustomRule(): void
-    {
-        $userId = 1;
-        $manager = $this->createFilledManager()
-            ->setGuestRoleName('guest')
-            ->addPermission(
-                (new Permission('viewIssue'))->withRuleName('easyTrue'),
-            )
-            ->addRole(new Role('guest'))
-            ->addChild('guest', 'viewIssue')
-            ->assign('guest', $userId);
-
-        $this->assertTrue($manager->userHasPermission(null, 'viewIssue'));
-        $this->assertTrue($manager->userHasPermission($userId, 'viewIssue'));
-    }
-
-    public function testGuestRoleName(): void
-    {
-        $itemsStorage = $this->createItemsStorage();
-        $itemsStorage->add(new Role('guest'));
-
-        $manager = $this->createManager($itemsStorage);
-        $returnedManager = $manager->setGuestRoleName('guest');
-
-        $this->assertFalse($manager->userHasPermission(null, 'guest'));
-        $this->assertSame($manager, $returnedManager);
-    }
-
     public function dataProviderUserHasPermissionWithGuest(): array
     {
         return [
@@ -190,6 +162,69 @@ trait ManagerLogicTestTrait
                 ],
             ],
         ];
+    }
+
+    public function testUserHasPermissionWithGuestAndCustomRule(): void
+    {
+        $userId = 1;
+        $manager = $this->createFilledManager()
+            ->setGuestRoleName('guest')
+            ->addPermission(
+                (new Permission('viewIssue'))->withRuleName('easyTrue'),
+            )
+            ->addRole(new Role('guest'))
+            ->addChild('guest', 'viewIssue')
+            ->assign('guest', $userId);
+
+        $this->assertTrue($manager->userHasPermission(null, 'viewIssue'));
+        $this->assertTrue($manager->userHasPermission($userId, 'viewIssue'));
+    }
+
+    public function dataUserHasPermissionWithGuestAndCustomRuleWithParameters(): array
+    {
+        return [
+            [null, ['authorID' => null], false],
+            [null, ['authorID' => 1], false],
+            [1, ['authorID' => null], false],
+            [1, ['authorID' => 2], false],
+            [1, ['authorID' => 1], true],
+            [1, ['authorID' => '1'], true],
+            ['1', ['authorID' => 1], true],
+            ['1', ['authorID' => '1'], true],
+        ];
+    }
+
+    /**
+     * @dataProvider dataUserHasPermissionWithGuestAndCustomRuleWithParameters
+     */
+    public function testUserHasPermissionWithGuestAndCustomRuleWithParameters(
+        mixed $userId,
+        array $parameters,
+        bool $expectedUserHasPermission,
+    ): void
+    {
+        $manager = $this->createFilledManager()
+            ->setGuestRoleName('guest')
+            ->addPermission(
+                (new Permission('updateIssue'))->withRuleName('isAuthor'),
+            )
+            ->addRole(new Role('guest'))
+            ->addChild('guest', 'updateIssue')
+            ->assign('guest', userId: 1);
+
+        $this->assertSame($expectedUserHasPermission, $manager->userHasPermission($userId, 'updateIssue', $parameters));
+    }
+
+    public function testGuestRoleName(): void
+    {
+        $itemsStorage = $this->createItemsStorage();
+        $itemsStorage->add(new Role('guest'));
+
+        $manager = $this->createManager($itemsStorage);
+        $returnedManager = $manager->setGuestRoleName('guest');
+
+        $this->assertFalse($manager->userHasPermission(null, 'guest'));
+        $this->assertSame($manager, $returnedManager);
     }
 
     public function testUserHasPermissionWithNonExistGuestRole(): void

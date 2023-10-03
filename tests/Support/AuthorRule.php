@@ -14,6 +14,6 @@ final class AuthorRule implements RuleInterface
 {
     public function execute(?string $userId, Item $item, array $parameters = []): bool
     {
-        return isset($parameters['authorID']) && $parameters['authorID'] === $userId;
+        return isset($parameters['authorID']) && (string) $parameters['authorID'] === $userId;
     }
 }
