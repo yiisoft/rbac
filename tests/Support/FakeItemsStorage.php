@@ -19,7 +19,7 @@ final class FakeItemsStorage implements ItemsStorageInterface
         return $this->items;
     }
 
-    public function get(string $name): ?Item
+    public function get(string $name): Permission|Role|null
     {
         return $this->items[$name] ?? null;
     }
@@ -29,7 +29,12 @@ final class FakeItemsStorage implements ItemsStorageInterface
         return array_key_exists($name, $this->items);
     }
 
-    public function add(Item $item): void
+    public function roleExists(string $name): bool
+    {
+        return isset($this->getItemsByType(Item::TYPE_ROLE)[$name]);
+    }
+
+    public function add(Permission|Role $item): void
     {
         $this->items[$item->getName()] = $item;
     }
@@ -44,6 +49,14 @@ final class FakeItemsStorage implements ItemsStorageInterface
         return $this->getItemsByType(Item::TYPE_ROLE);
     }
 
+    public function getRolesByNames(array $names): array
+    {
+        return array_filter(
+            $this->getAll(),
+            static fn (Item $item): bool => $item->getType() === Item::TYPE_ROLE && in_array($item->getName(), $names),
+        );
+    }
+
     public function getPermission(string $name): ?Permission
     {
         return $this->getItemsByType(Item::TYPE_PERMISSION)[$name] ?? null;
@@ -54,6 +67,16 @@ final class FakeItemsStorage implements ItemsStorageInterface
         return $this->getItemsByType(Item::TYPE_PERMISSION);
     }
 
+    public function getPermissionsByNames(array $names): array
+    {
+        $permissionType = Item::TYPE_PERMISSION;
+
+        return array_filter(
+            $this->getAll(),
+            static fn (Item $item): bool => $item->getType() === $permissionType && in_array($item->getName(), $names),
+        );
+    }
+
     public function getParents(string $name): array
     {
         $result = [];
@@ -61,9 +84,33 @@ final class FakeItemsStorage implements ItemsStorageInterface
         return $result;
     }
 
-    public function getChildren(string $name): array
+    public function getDirectChildren(string $name): array
     {
         return $this->children[$name] ?? [];
+    }
+
+    public function getAllChildren(string $name): array
+    {
+        $result = [];
+        $this->fillChildrenRecursive($name, $result);
+
+        return $result;
+    }
+
+    public function getAllChildRoles(string $name): array
+    {
+        $result = [];
+        $this->fillChildrenRecursive($name, $result);
+
+        return $this->filterRoles($result);
+    }
+
+    public function getAllChildPermissions(string $name): array
+    {
+        $result = [];
+        $this->fillChildrenRecursive($name, $result);
+
+        return $this->filterPermissions($result);
     }
 
     public function addChild(string $parentName, string $childName): void
@@ -74,6 +121,31 @@ final class FakeItemsStorage implements ItemsStorageInterface
     public function hasChildren(string $name): bool
     {
         return isset($this->children[$name]);
+    }
+
+    public function hasChild(string $parentName, string $childName): bool
+    {
+        if ($parentName === $childName) {
+            return true;
+        }
+
+        $children = $this->getDirectChildren($parentName);
+        if (empty($children)) {
+            return false;
+        }
+
+        foreach ($children as $groupChild) {
+            if ($this->hasChild($groupChild->getName(), $childName)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function hasDirectChild(string $parentName, string $childName): bool
+    {
+        return isset($this->children[$parentName][$childName]);
     }
 
     public function removeChild(string $parentName, string $childName): void
@@ -92,7 +164,7 @@ final class FakeItemsStorage implements ItemsStorageInterface
         $this->removeItemByName($name);
     }
 
-    public function update(string $name, Item $item): void
+    public function update(string $name, Permission|Role $item): void
     {
         if ($item->getName() !== $name) {
             $this->updateItemName($name, $item);
@@ -110,12 +182,12 @@ final class FakeItemsStorage implements ItemsStorageInterface
 
     public function clearPermissions(): void
     {
-        $this->removeAllItems(Item::TYPE_PERMISSION);
+        $this->removeItemsByType(Item::TYPE_PERMISSION);
     }
 
     public function clearRoles(): void
     {
-        $this->removeAllItems(Item::TYPE_ROLE);
+        $this->removeItemsByType(Item::TYPE_ROLE);
     }
 
     private function updateItemName(string $name, Item $item): void
@@ -125,20 +197,13 @@ final class FakeItemsStorage implements ItemsStorageInterface
 
     private function getItemsByType(string $type): array
     {
-        return $this->filterItems(
-            fn (Item $item) => $item->getType() === $type
+        return array_filter(
+            $this->getAll(),
+            static fn (Item $item): bool => $item->getType() === $type,
         );
     }
 
-    /**
-     * @return array|Item[]
-     */
-    private function filterItems(callable $callback): array
-    {
-        return array_filter($this->getAll(), $callback);
-    }
-
-    private function removeAllItems(string $type): void
+    private function removeItemsByType(string $type): void
     {
         foreach ($this->getItemsByType($type) as $item) {
             $this->remove($item->getName());
@@ -147,9 +212,7 @@ final class FakeItemsStorage implements ItemsStorageInterface
 
     private function clearChildrenFromItem(string $itemName): void
     {
-        foreach ($this->children as &$children) {
-            unset($children[$itemName]);
-        }
+        unset($this->children[$itemName]);
     }
 
     private function updateChildrenForItemName(string $name, Item $item): void
@@ -175,12 +238,67 @@ final class FakeItemsStorage implements ItemsStorageInterface
     {
         foreach ($this->children as $parentName => $childItems) {
             foreach ($childItems as $childItem) {
-                if ($childItem->getName() === $name) {
-                    $result[$parentName] = $this->get($parentName);
-                    $this->fillParentsRecursive($parentName, $result);
-                    break;
+                if ($childItem->getName() !== $name) {
+                    continue;
                 }
+
+                $parent = $this->get($parentName);
+                if ($parent !== null) {
+                    $result[$parentName] = $parent;
+                }
+
+                $this->fillParentsRecursive($parentName, $result);
+
+                break;
             }
         }
+    }
+
+    private function fillChildrenRecursive(string $name, array &$result): void
+    {
+        $children = $this->children[$name] ?? [];
+        foreach ($children as $childName => $_childItem) {
+            $child = $this->get($childName);
+            if ($child !== null) {
+                $result[$childName] = $child;
+            }
+
+            $this->fillChildrenRecursive($childName, $result);
+        }
+    }
+
+    /**
+     * @param Item[] $array
+     * @psalm-param array<string, Item> $array
+     *
+     * @return Role[]
+     * @psalm-return array<string, Role>
+     */
+    private function filterRoles(array $array): array
+    {
+        return array_filter(
+            $this->getRoles(),
+            static fn (Role $roleItem): bool => array_key_exists($roleItem->getName(), $array),
+        );
+    }
+
+    /**
+     * @param Item[] $items
+     * @psalm-param array<string, Item> $items
+     *
+     * @return Permission[]
+     * @psalm-return array<string, Permission>
+     */
+    private function filterPermissions(array $items): array
+    {
+        $permissions = [];
+        foreach (array_keys($items) as $permissionName) {
+            $permission = $this->getPermission($permissionName);
+            if ($permission !== null) {
+                $permissions[$permissionName] = $permission;
+            }
+        }
+
+        return $permissions;
     }
 }

@@ -16,8 +16,8 @@ final class RuleInterfaceNotImplementedExceptionTest extends TestCase
         $exception = new RuleInterfaceNotImplementedException('MyRule');
 
         $this->assertSame(
-            'Rule "MyRule" should implement "' . RuleInterface::class . '".',
-            $exception->getMessage()
+            'Rule "MyRule" must implement "' . RuleInterface::class . '".',
+            $exception->getMessage(),
         );
         $this->assertSame(0, $exception->getCode());
         $this->assertNull($exception->getPrevious());

@@ -28,13 +28,13 @@ interface ItemsStorageInterface
      *
      * @param string $name The role or the permission name.
      *
-     * @return Item|null The role or the permission corresponding to the specified name. `null` is returned if no such
+     * @return Permission|Role|null The role or the permission corresponding to the specified name. `null` is returned if no such
      * item.
      */
-    public function get(string $name): ?Item;
+    public function get(string $name): Permission|Role|null;
 
     /**
-     * Returns whether named role or permission exists.
+     * Whether named role or permission exists.
      *
      * @param string $name The role or the permission name.
      *
@@ -43,19 +43,28 @@ interface ItemsStorageInterface
     public function exists(string $name): bool;
 
     /**
+     * Whether named role exists.
+     *
+     * @param string $name The role name.
+     *
+     * @return bool Whether named role exists.
+     */
+    public function roleExists(string $name): bool;
+
+    /**
      * Adds the role or the permission to RBAC system.
      *
-     * @param Item $item The role or the permission to add.
+     * @param Permission|Role $item The role or the permission to add.
      */
-    public function add(Item $item): void;
+    public function add(Permission|Role $item): void;
 
     /**
      * Updates the specified role or permission in the system.
      *
      * @param string $name The old name of the role or permission.
-     * @param Item $item Modified role or permission.
+     * @param Permission|Role $item Modified role or permission.
      */
-    public function update(string $name, Item $item): void;
+    public function update(string $name, Permission|Role $item): void;
 
     /**
      * Removes a role or permission from the RBAC system.
@@ -67,9 +76,20 @@ interface ItemsStorageInterface
     /**
      * Returns all roles in the system.
      *
-     * @return Role[] All roles in the system.
+     * @return Role[] Array of role instances indexed by role names.
+     * @psalm-return array<string, Role>
      */
     public function getRoles(): array;
+
+    /**
+     * Returns roles by the given names' list.
+     *
+     * @param string[] $names List of role names.
+     *
+     * @return Role[] Array of role instances indexed by role names.
+     * @psalm-return array<string, Role>
+     */
+    public function getRolesByNames(array $names): array;
 
     /**
      * Returns the named role.
@@ -89,17 +109,28 @@ interface ItemsStorageInterface
     /**
      * Returns all permissions in the system.
      *
-     * @return Permission[] All permissions in the system.
+     * @return Permission[] Array of permission instances indexed by permission names.
+     * @psalm-return array<string, Permission>
      */
     public function getPermissions(): array;
+
+    /**
+     * Returns permissions by the given names' list.
+     *
+     * @param string[] $names List of permission names.
+     *
+     * @return Permission[] Array of permission instances indexed by permission names.
+     * @psalm-return array<string, Permission>
+     */
+    public function getPermissionsByNames(array $names): array;
 
     /**
      * Returns the named permission.
      *
      * @param string $name The permission name.
      *
-     * @return Permission|null The permission corresponding to the specified name. `null` is returned if no such
-     * permission.
+     * @return Permission|null The permission corresponding to the specified name. `null` is returned if there is no
+     * such permission.
      */
     public function getPermission(string $name): ?Permission;
 
@@ -121,7 +152,7 @@ interface ItemsStorageInterface
     public function getParents(string $name): array;
 
     /**
-     * Returns the child permissions and/or roles.
+     * Returns direct child permissions and/or roles.
      *
      * @param string $name The parent name.
      *
@@ -129,7 +160,37 @@ interface ItemsStorageInterface
      *
      * @psalm-return ItemsIndexedByName
      */
-    public function getChildren(string $name): array;
+    public function getDirectChildren(string $name): array;
+
+    /**
+     * Returns all child permissions and/or roles.
+     *
+     * @param string $name The parent name.
+     *
+     * @return Item[] The child permissions and/or roles.
+     * @psalm-return array<string, Item>
+     */
+    public function getAllChildren(string $name): array;
+
+    /**
+     * Returns all child roles.
+     *
+     * @param string $name The parent name.
+     *
+     * @return Role[] The child roles.
+     * @psalm-return array<string, Role>
+     */
+    public function getAllChildRoles(string $name): array;
+
+    /**
+     * Returns all child permissions.
+     *
+     * @param string $name The parent name.
+     *
+     * @return Permission[] The child permissions.
+     * @psalm-return array<string, Permission>
+     */
+    public function getAllChildPermissions(string $name): array;
 
     /**
      * Returns whether named parent has children.
@@ -139,6 +200,26 @@ interface ItemsStorageInterface
      * @return bool Whether named parent has children.
      */
     public function hasChildren(string $name): bool;
+
+    /**
+     * Returns whether selected parent has a child with a given name.
+     *
+     * @param string $parentName The parent name.
+     * @param string $childName The child name.
+     *
+     * @return bool Whether selected parent has a child with a given name.
+     */
+    public function hasChild(string $parentName, string $childName): bool;
+
+    /**
+     * Returns whether selected parent has a direct child with a given name.
+     *
+     * @param string $parentName The parent name.
+     * @param string $childName The child name.
+     *
+     * @return bool Whether selected parent has a direct child with a given name.
+     */
+    public function hasDirectChild(string $parentName, string $childName): bool;
 
     /**
      * Adds a role or a permission as a child of another role or permission.
