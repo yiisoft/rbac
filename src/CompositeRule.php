@@ -13,10 +13,10 @@ use function in_array;
  *
  * ```php
  * // Fresh and owned
- * $compositeRule = new CompositeRule(CompositeRule::AND, ['fresh-rule', 'owned-rule']);
+ * $compositeRule = new CompositeRule(CompositeRule::AND, [FreshRule::class, OwnedRule::class]);
  *
  * // Fresh or owned
- * $compositeRule = new CompositeRule(CompositeRule::OR, ['fresh-rule', 'owned-rule']);
+ * $compositeRule = new CompositeRule(CompositeRule::OR, [FreshRule::class, OwnedRule::class]);
  * ```
  */
 final class CompositeRule implements RuleInterface
