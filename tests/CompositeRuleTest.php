@@ -8,8 +8,9 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Yiisoft\Rbac\CompositeRule;
 use Yiisoft\Rbac\Permission;
-use Yiisoft\Rbac\RuleInterface;
+use Yiisoft\Rbac\RuleContext;
 use Yiisoft\Rbac\Tests\Support\EasyRule;
+use Yiisoft\Rbac\Tests\Support\SimpleRuleFactory;
 
 final class CompositeRuleTest extends TestCase
 {
@@ -17,12 +18,12 @@ final class CompositeRuleTest extends TestCase
     {
         return [
             'AND empty' => [CompositeRule::AND, [], true],
-            'AND all true' => [CompositeRule::AND, [new EasyRule(true), new EasyRule(true)], true],
-            'AND last false' => [CompositeRule::AND, [new EasyRule(true), new EasyRule(false)], false],
+            'AND all true' => [CompositeRule::AND, ['easy_rule_true', 'easy_rule_true'], true],
+            'AND last false' => [CompositeRule::AND, ['easy_rule_true', 'easy_rule_false'], false],
 
             'OR empty' => [CompositeRule::OR, [], true],
-            'OR all false' => [CompositeRule::OR, [new EasyRule(false), new EasyRule(false)], false],
-            'OR last true' => [CompositeRule::OR, [new EasyRule(false), new EasyRule(true)], true],
+            'OR all false' => [CompositeRule::OR, ['easy_rule_false', 'easy_rule_false'], false],
+            'OR last true' => [CompositeRule::OR, ['easy_rule_false', 'easy_rule_true'], true],
         ];
     }
 
@@ -32,7 +33,11 @@ final class CompositeRuleTest extends TestCase
     public function testCompositeRule(string $operator, array $rules, bool $expected): void
     {
         $rule = new CompositeRule($operator, $rules);
-        $result = $rule->execute('user', new Permission('permission'), []);
+        $ruleFactory = new SimpleRuleFactory([
+            'easy_rule_false' => new EasyRule(false),
+            'easy_rule_true' => new EasyRule(true),
+        ]);
+        $result = $rule->execute('user', new Permission('permission'), new RuleContext($ruleFactory, []));
         $this->assertSame($expected, $result);
     }
 
@@ -47,12 +52,5 @@ final class CompositeRuleTest extends TestCase
             '::OR, "no_such_operation" given.'
         );
         new CompositeRule('no_such_operation', []);
-    }
-
-    public function testInvalidRule(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Each rule should be an instance of ' . RuleInterface::class . ', "string" given.');
-        new CompositeRule(CompositeRule::OR, ['invalid_rule']);
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac\Tests\Support;
 
 use Yiisoft\Rbac\Item;
+use Yiisoft\Rbac\RuleContext;
 use Yiisoft\Rbac\RuleInterface;
 
 /**
@@ -12,8 +13,8 @@ use Yiisoft\Rbac\RuleInterface;
  */
 final class AuthorRule implements RuleInterface
 {
-    public function execute(?string $userId, Item $item, array $parameters = []): bool
+    public function execute(?string $userId, Item $item, RuleContext $ruleContext): bool
     {
-        return isset($parameters['authorID']) && (string) $parameters['authorID'] === $userId;
+        return (string) $ruleContext->getParameterValue('authorID') === $userId;
     }
 }
