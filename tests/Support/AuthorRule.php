@@ -12,8 +12,8 @@ use Yiisoft\Rbac\RuleInterface;
  */
 final class AuthorRule implements RuleInterface
 {
-    public function execute(string $userId, Item $item, array $parameters = []): bool
+    public function execute(?string $userId, Item $item, array $parameters = []): bool
     {
-        return $parameters['authorID'] === $userId;
+        return isset($parameters['authorID']) && (string) $parameters['authorID'] === $userId;
     }
 }

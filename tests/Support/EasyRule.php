@@ -13,7 +13,7 @@ final class EasyRule implements RuleInterface
     {
     }
 
-    public function execute(string $userId, Item $item, array $parameters = []): bool
+    public function execute(?string $userId, Item $item, array $parameters = []): bool
     {
         return $this->expected;
     }

@@ -18,7 +18,7 @@ final class RuleWithRequiredName implements RuleInterface
         return $this->name;
     }
 
-    public function execute(string $userId, Item $item, array $parameters = []): bool
+    public function execute(?string $userId, Item $item, array $parameters = []): bool
     {
         return true;
     }
