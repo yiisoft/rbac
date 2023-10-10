@@ -37,7 +37,7 @@ final class CompositeRuleTest extends TestCase
             'easy_rule_false' => new EasyRule(false),
             'easy_rule_true' => new EasyRule(true),
         ]);
-        $result = $rule->execute('user', new Permission('permission'), new RuleContext($ruleFactory));
+        $result = $rule->execute('user', new Permission('permission'), new RuleContext($ruleFactory, []));
         $this->assertSame($expected, $result);
     }
 

@@ -15,6 +15,6 @@ final class AuthorRule implements RuleInterface
 {
     public function execute(?string $userId, Item $item, RuleContext $ruleContext): bool
     {
-        return $ruleContext->getParameterValue('authorID') === $userId;
+        return (string) $ruleContext->getParameterValue('authorID') === $userId;
     }
 }
