@@ -14,7 +14,7 @@ final class EasyRule implements RuleInterface
     {
     }
 
-    public function execute(string $userId, Item $item, RuleContext $ruleContext): bool
+    public function execute(?string $userId, Item $item, RuleContext $ruleContext): bool
     {
         return $this->expected;
     }
