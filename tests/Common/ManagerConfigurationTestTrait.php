@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac\Tests\Common;
 
-use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\AssignmentsStorageInterface;
 use Yiisoft\Rbac\ItemsStorageInterface;
 use Yiisoft\Rbac\Manager;
@@ -20,9 +19,6 @@ use Yiisoft\Rbac\Tests\Support\SimpleRuleFactory;
 
 trait ManagerConfigurationTestTrait
 {
-    protected ItemsStorageInterface $itemsStorage;
-    protected AssignmentsStorageInterface $assignmentsStorage;
-
     protected function createManager(
         ?ItemsStorageInterface $itemsStorage = null,
         ?AssignmentsStorageInterface $assignmentsStorage = null,
@@ -51,64 +47,43 @@ trait ManagerConfigurationTestTrait
         return new FakeAssignmentsStorage();
     }
 
-    protected function createFilledManager(bool $enableDirectPermissions = false): ManagerInterface
+    protected function createFilledManager(): ManagerInterface
     {
-        $this->itemsStorage = $this->createFilledItemsStorage();
-        $this->assignmentsStorage = $this->createFilledAssignmentsStorage();
-
-        $manager = $this->createManager(
-            $this->itemsStorage,
-            $this->assignmentsStorage,
-            new SimpleRuleFactory([
-                'isAuthor' => new AuthorRule(),
-                'easyTrue' => new EasyRule(true),
-                'easyFalse' => new EasyRule(false),
-            ]),
-            $enableDirectPermissions,
-        );
-        $manager->setDefaultRoleNames(['myDefaultRole']);
-
-        return $manager;
-    }
-
-    private function createFilledItemsStorage(): ItemsStorageInterface
-    {
-        $storage = $this->createItemsStorage();
-
-        $storage->add(new Permission('Fast Metabolism'));
-        $storage->add(new Permission('createPost'));
-        $storage->add(new Permission('publishPost'));
-        $storage->add(new Permission('readPost'));
-        $storage->add(new Permission('deletePost'));
-        $storage->add((new Permission('updatePost'))->withRuleName('isAuthor'));
-        $storage->add(new Permission('updateAnyPost'));
-        $storage->add(new Role('withoutChildren'));
-        $storage->add(new Role('reader'));
-        $storage->add(new Role('author'));
-        $storage->add(new Role('admin'));
-        $storage->add(new Role('myDefaultRole'));
-
-        $storage->addChild('reader', 'readPost');
-        $storage->addChild('author', 'createPost');
-        $storage->addChild('author', 'updatePost');
-        $storage->addChild('author', 'reader');
-        $storage->addChild('admin', 'author');
-        $storage->addChild('admin', 'updateAnyPost');
-
-        return $storage;
-    }
-
-    private function createFilledAssignmentsStorage(): AssignmentsStorageInterface
-    {
-        $storage = $this->createAssignmentsStorage();
-
-        $storage->add(new Assignment(userId: 'reader A', itemName: 'Fast Metabolism', createdAt: time()));
-        $storage->add(new Assignment(userId: 'reader A', itemName: 'reader', createdAt: time()));
-        $storage->add(new Assignment(userId: 'author B', itemName: 'author', createdAt: time()));
-        $storage->add(new Assignment(userId: 'author B', itemName: 'deletePost', createdAt: time()));
-        $storage->add(new Assignment(userId: 'author B', itemName: 'publishPost', createdAt: time()));
-        $storage->add(new Assignment(userId: 'admin C', itemName: 'admin', createdAt: time()));
-
-        return $storage;
+        return $this
+            ->createManager(
+                $this->createItemsStorage(),
+                $this->createAssignmentsStorage(),
+                new SimpleRuleFactory([
+                    'isAuthor' => new AuthorRule(),
+                    'easyTrue' => new EasyRule(true),
+                    'easyFalse' => new EasyRule(false),
+                ]),
+                enableDirectPermissions: true,
+            )
+            ->setDefaultRoleNames(['myDefaultRole'])
+            ->addPermission(new Permission('Fast Metabolism'))
+            ->addPermission(new Permission('createPost'))
+            ->addPermission(new Permission('publishPost'))
+            ->addPermission(new Permission('readPost'))
+            ->addPermission(new Permission('deletePost'))
+            ->addPermission((new Permission('updatePost'))->withRuleName('isAuthor'))
+            ->addPermission(new Permission('updateAnyPost'))
+            ->addRole(new Role('withoutChildren'))
+            ->addRole(new Role('reader'))
+            ->addRole(new Role('author'))
+            ->addRole(new Role('admin'))
+            ->addRole(new Role('myDefaultRole'))
+            ->addChild('reader', 'readPost')
+            ->addChild('author', 'createPost')
+            ->addChild('author', 'updatePost')
+            ->addChild('author', 'reader')
+            ->addChild('admin', 'author')
+            ->addChild('admin', 'updateAnyPost')
+            ->assign(itemName: 'Fast Metabolism', userId: 'reader A')
+            ->assign(itemName: 'reader', userId: 'reader A')
+            ->assign(itemName: 'author', userId: 'author B')
+            ->assign(itemName: 'deletePost', userId: 'author B')
+            ->assign(itemName: 'publishPost', userId: 'author B')
+            ->assign(itemName: 'admin', userId: 'admin C');
     }
 }
