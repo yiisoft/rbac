@@ -426,10 +426,7 @@ final class Manager implements ManagerInterface
      */
     private function getInheritedPermissionsByUser(array $userAssignments): array
     {
-        $result = [];
-
-
-        return $result;
+        return [];
     }
 
     private function removeItem(string $name): void

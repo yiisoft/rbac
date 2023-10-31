@@ -16,7 +16,6 @@ use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\Tests\Support\EasyRule;
 use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
-use Yiisoft\Rbac\Tests\Support\SubscriptionRule;
 
 trait ManagerLogicTestTrait
 {
@@ -237,8 +236,7 @@ trait ManagerLogicTestTrait
         string $permissionName,
         array $parameters,
         bool $expectedHasPermission,
-    ): void
-    {
+    ): void {
         // view ban warning - check if warning was already viewed
         // guests - restrict access in a certain period of time
 
