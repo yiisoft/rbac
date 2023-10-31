@@ -16,6 +16,7 @@ use Yiisoft\Rbac\Tests\Support\EasyRule;
 use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
 use Yiisoft\Rbac\Tests\Support\SimpleRuleFactory;
+use Yiisoft\Rbac\Tests\Support\SubscriptionRule;
 
 trait ManagerConfigurationTestTrait
 {
@@ -57,6 +58,7 @@ trait ManagerConfigurationTestTrait
                     'isAuthor' => new AuthorRule(),
                     'easyTrue' => new EasyRule(true),
                     'easyFalse' => new EasyRule(false),
+                    'subscription' => new SubscriptionRule(),
                 ]),
                 enableDirectPermissions: true,
             )

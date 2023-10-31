@@ -16,6 +16,7 @@ use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\Tests\Support\EasyRule;
 use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
+use Yiisoft\Rbac\Tests\Support\SubscriptionRule;
 
 trait ManagerLogicTestTrait
 {
@@ -169,9 +170,7 @@ trait ManagerLogicTestTrait
         $userId = 1;
         $manager = $this->createFilledManager()
             ->setGuestRoleName('guest')
-            ->addPermission(
-                (new Permission('viewIssue'))->withRuleName('easyTrue'),
-            )
+            ->addPermission((new Permission('viewIssue'))->withRuleName('easyTrue'))
             ->addRole(new Role('guest'))
             ->addChild('guest', 'viewIssue')
             ->assign('guest', $userId);
@@ -212,6 +211,67 @@ trait ManagerLogicTestTrait
             ->assign('guest', userId: 1);
 
         $this->assertSame($expectedUserHasPermission, $manager->userHasPermission($userId, 'updateIssue', $parameters));
+    }
+
+    public function dataUserHasPermissionExecuteParentPermissionRules(): array
+    {
+        $warnedUserId = 1;
+        $trialUserId = 2;
+        $activeSubscriptionUserId = 3;
+        $inActiveSubscriptionUserId = 4;
+
+        return [
+            [$activeSubscriptionUserId, 'view exclusive content', [], true],
+            [$inActiveSubscriptionUserId, 'view exclusive content', [], false],
+            [$activeSubscriptionUserId, 'view exclusive content', ['voidSubscription' => true], false],
+            [null, 'view ban warning', [], false],
+        ];
+    }
+
+    /**
+     * @link https://github.com/yiisoft/rbac/issues/193
+     * @dataProvider dataUserHasPermissionExecuteParentPermissionRules
+     */
+    public function testUserHasPermissionExecuteParentPermissionRules(
+        ?int $userId,
+        string $permissionName,
+        array $parameters,
+        bool $expectedHasPermission,
+    ): void
+    {
+        // view ban warning - check if warning was already viewed
+        // guests - restrict access in a certain period of time
+
+        $warnedUserId = 1;
+        $trialUserId = 2;
+        $activeSubscriptionUserId = 3;
+        $inActiveSubscriptionUserId = 4;
+        $manager = $this->createFilledManager()
+            ->setGuestRoleName('guest')
+            ->addRole(new Role('guest'))
+            ->addRole(new Role('warned user'))
+            ->addRole(new Role('trial user'))
+            ->addRole((new Role('subscribed user'))->withRuleName('subscription'))
+            ->addPermission(new Permission('view ads'))
+            ->addPermission(new Permission('view ban warning'))
+            ->addPermission(new Permission('view content'))
+            ->addPermission(new Permission('view regular content'))
+            ->addPermission(new Permission('view exclusive content'))
+            ->addChild('warned user', 'guest')
+            ->addChild('trial user', 'guest')
+            ->addChild('trial user', 'subscribed user')
+            ->addChild('view content', 'view regular content')
+            ->addChild('view content', 'view exclusive content')
+            ->addChild('guest', 'view ads')
+            ->addChild('guest', 'view regular content')
+            ->addChild('warned user', 'view ban warning')
+            ->addChild('subscribed user', 'view content')
+            ->assign('warned user', $warnedUserId)
+            ->assign('trial user', $trialUserId)
+            ->assign('subscribed user', $activeSubscriptionUserId)
+            ->assign('subscribed user', $inActiveSubscriptionUserId);
+
+        $this->assertSame($expectedHasPermission, $manager->userHasPermission($userId, $permissionName, $parameters));
     }
 
     public function testGuestRoleName(): void

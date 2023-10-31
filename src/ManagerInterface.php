@@ -114,8 +114,16 @@ interface ManagerInterface extends AccessCheckerInterface
     public function revokeAll(int|Stringable|string $userId): self;
 
     /**
+     * Returns the ite,s that are assigned to the user via {@see assign()}.
+     *
+     * @param int|string|Stringable $userId The user ID.
+     *
+     * @return Role[] All items directly assigned to the user. The array is indexed by the item names.
+     */
+    public function getItemsByUserId(int|Stringable|string $userId): array;
+
+    /**
      * Returns the roles that are assigned to the user via {@see assign()}.
-     * Note that child roles that are not assigned directly to the user will not be returned.
      *
      * @param int|string|Stringable $userId The user ID.
      *

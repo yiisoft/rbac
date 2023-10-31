@@ -70,6 +70,8 @@ interface AssignmentsStorageInterface
      */
     public function userHasItem(string $userId, array $itemNames): bool;
 
+    public function filterUserItemNames(string $userId, array $itemNames): array;
+
     /**
      * Adds assignment to the storage.
      *

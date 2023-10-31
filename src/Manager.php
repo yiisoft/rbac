@@ -52,23 +52,54 @@ final class Manager implements ManagerInterface
         }
 
         if ($userId === null) {
-            return $this->guestHasPermission($permission, $parameters);
+            if ($this->guestRoleName === null) {
+                return false;
+            }
+
+            if (!$this->itemsStorage->roleExists($this->guestRoleName)) {
+                return false;
+            }
+
+            return $this->itemsStorage->hasDirectChild($this->guestRoleName, $permission->getName());
         }
 
-        $permission = $this->itemsStorage->getPermission($permissionName);
-        if ($permission === null) {
+        /** @var Item[] $items */
+        $items = array_merge(
+            [$permission->getName() => $permission],
+            $this->itemsStorage->getParents($permission->getName()),
+        );
+
+        if ($userId !== null) {
+            $userId = (string) $userId;
+            $userItemNames = $this->assignmentsStorage->filterUserItemNames($userId, array_keys($items));
+        } else {
+            $userItemNames = [];
+            $hasPermission = false;
+            foreach ($items as $item) {
+                $userItemNames[] = $item->getName();
+
+                if ($item->getName() === $this->guestRoleName) {
+                    $hasPermission = true;
+                    break;
+                }
+            }
+
+            if (!$hasPermission) {
+                $userItemNames = [];
+            }
+        }
+
+        if (empty($userItemNames)) {
             return false;
         }
 
-        $userId = (string) $userId;
-        if (!$this->executeRule($userId, $permission, $parameters)) {
-            return false;
+        foreach ($userItemNames as $itemName) {
+            if (!$this->executeRule($userId, $items[$itemName], $parameters)) {
+                return false;
+            }
         }
 
-        $parentPermissions = $this->itemsStorage->getParents($permission->getName());
-        $permissionNames = [$permission->getName(), ...array_keys($parentPermissions)];
-
-        return $this->assignmentsStorage->userHasItem($userId, $permissionNames);
+        return true;
     }
 
     public function canAddChild(string $parentName, string $childName): bool
@@ -155,15 +186,34 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
+    public function getItemsByUserId(int|Stringable|string $userId): array
+    {
+        $userId = (string) $userId;
+        $assignments = $this->assignmentsStorage->getByUserId($userId);
+        $items = $this->getDefaultRoles();
+
+        foreach ($assignments as $assignment) {
+            $items = array_merge($items, $this->itemsStorage->getAllChildren($assignment->getItemName()));
+        }
+
+        return $items;
+    }
+
     public function getRolesByUserId(int|Stringable|string $userId): array
     {
         $userId = (string) $userId;
-
-        $defaultRoles = $this->getDefaultRoles();
         $assignments = $this->assignmentsStorage->getByUserId($userId);
-        $roles = $this->itemsStorage->getRolesByNames(array_keys($assignments));
+        $parentRoles = array_merge(
+            $this->getDefaultRoles(),
+            $this->itemsStorage->getRolesByNames(array_keys($assignments)),
+        );
+        $roles = $parentRoles;
 
-        return array_merge($defaultRoles, $roles);
+        foreach ($parentRoles as $role) {
+            $roles = array_merge($roles, $this->itemsStorage->getAllChildRoles($role->getName()));
+        }
+
+        return $roles;
     }
 
     public function getChildRoles(string $roleName): array
@@ -183,12 +233,18 @@ final class Manager implements ManagerInterface
     public function getPermissionsByUserId(int|Stringable|string $userId): array
     {
         $userId = (string) $userId;
-        $userAssignments = $this->assignmentsStorage->getByUserId($userId);
+        $assignments = $this->assignmentsStorage->getByUserId($userId);
+        $parentPermissions = $this->itemsStorage->getPermissionsByNames(array_keys($assignments));
+        $permissions = $parentPermissions;
 
-        return array_merge(
-            $this->getDirectPermissionsByUser($userAssignments),
-            $this->getInheritedPermissionsByUser($userAssignments),
-        );
+        foreach ($parentPermissions as $permission) {
+            $permissions = array_merge(
+                $permissions,
+                $this->itemsStorage->getAllChildPermissions($permission->getName()),
+            );
+        }
+
+        return $permissions;
     }
 
     public function getUserIdsByRoleName(string $roleName): array
@@ -371,9 +427,7 @@ final class Manager implements ManagerInterface
     private function getInheritedPermissionsByUser(array $userAssignments): array
     {
         $result = [];
-        foreach (array_keys($userAssignments) as $roleName) {
-            $result = array_merge($result, $this->itemsStorage->getAllChildPermissions($roleName));
-        }
+
 
         return $result;
     }
@@ -384,23 +438,6 @@ final class Manager implements ManagerInterface
             $this->itemsStorage->remove($name);
             $this->assignmentsStorage->removeByItemName($name);
         }
-    }
-
-    private function guestHasPermission(Permission $permission, array $parameters): bool
-    {
-        if ($this->guestRoleName === null) {
-            return false;
-        }
-
-        if (!$this->itemsStorage->roleExists($this->guestRoleName)) {
-            return false;
-        }
-
-        if (!$this->executeRule(null, $permission, $parameters)) {
-            return false;
-        }
-
-        return $this->itemsStorage->hasDirectChild($this->guestRoleName, $permission->getName());
     }
 
     /**
