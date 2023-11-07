@@ -62,7 +62,6 @@ trait ManagerConfigurationTestTrait
                 ]),
                 enableDirectPermissions: true,
             )
-            ->setDefaultRoleNames(['myDefaultRole'])
             ->addPermission(new Permission('Fast Metabolism'))
             ->addPermission(new Permission('createPost'))
             ->addPermission(new Permission('publishPost'))
@@ -75,6 +74,7 @@ trait ManagerConfigurationTestTrait
             ->addRole(new Role('author'))
             ->addRole(new Role('admin'))
             ->addRole(new Role('myDefaultRole'))
+            ->setDefaultRoleNames(['myDefaultRole'])
             ->addChild('reader', 'readPost')
             ->addChild('author', 'createPost')
             ->addChild('author', 'updatePost')

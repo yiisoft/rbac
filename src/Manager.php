@@ -59,8 +59,6 @@ final class Manager implements ManagerInterface
             if (!$this->itemsStorage->roleExists($this->guestRoleName)) {
                 return false;
             }
-
-            return $this->itemsStorage->hasDirectChild($this->guestRoleName, $permission->getName());
         }
 
         /** @var Item[] $items */
@@ -72,29 +70,36 @@ final class Manager implements ManagerInterface
         if ($userId !== null) {
             $userId = (string) $userId;
             $userItemNames = $this->assignmentsStorage->filterUserItemNames($userId, array_keys($items));
-        } else {
-            $userItemNames = [];
-            $hasPermission = false;
-            foreach ($items as $item) {
-                $userItemNames[] = $item->getName();
 
-                if ($item->getName() === $this->guestRoleName) {
-                    $hasPermission = true;
-                    break;
-                }
+            $userItems = [];
+            foreach ($userItemNames as $itemName) {
+                $userItems[$itemName] = $items[$itemName];
             }
 
-            if (!$hasPermission) {
-                $userItemNames = [];
+            foreach ($userItems as $userItem) {
+                foreach ($this->itemsStorage->getAllChildren($userItem->getName()) as $childItem) {
+                    if (array_key_exists($childItem->getName(), $items)) {
+                        $userItems[$childItem->getName()] = $childItem;
+                    }
+                }
+            }
+        } else {
+            $guestChildren = $this->itemsStorage->getAllChildren($this->guestRoleName);
+
+            $userItems = [];
+            foreach ($items as $itemName => $_item) {
+                if (array_key_exists($itemName, $guestChildren)) {
+                    $userItems[$itemName] = $items[$itemName];
+                }
             }
         }
 
-        if (empty($userItemNames)) {
+        if (empty($userItems)) {
             return false;
         }
 
-        foreach ($userItemNames as $itemName) {
-            if (!$this->executeRule($userId, $items[$itemName], $parameters)) {
+        foreach ($userItems as $item) {
+            if (!$this->executeRule($userId, $item, $parameters)) {
                 return false;
             }
         }
@@ -237,10 +242,10 @@ final class Manager implements ManagerInterface
         $parentPermissions = $this->itemsStorage->getPermissionsByNames(array_keys($assignments));
         $permissions = $parentPermissions;
 
-        foreach ($parentPermissions as $permission) {
+        foreach ($assignments as $assignment) {
             $permissions = array_merge(
                 $permissions,
-                $this->itemsStorage->getAllChildPermissions($permission->getName()),
+                $this->itemsStorage->getAllChildPermissions($assignment->getItemName()),
             );
         }
 
@@ -313,19 +318,24 @@ final class Manager implements ManagerInterface
 
     public function setDefaultRoleNames(Closure|array $roleNames): self
     {
-        if (is_array($roleNames)) {
-            $this->defaultRoleNames = $roleNames;
-
-            return $this;
+        if (!is_array($roleNames)) {
+            $roleNames = $roleNames();
+            if (!is_array($roleNames)) {
+                throw new RuntimeException('Default role names closure must return an array.');
+            }
         }
 
-        $defaultRoleNames = $roleNames();
-        if (!is_array($defaultRoleNames)) {
-            throw new RuntimeException('Default role names closure must return an array.');
+        foreach ($roleNames as $roleName) {
+            if (!is_string($roleName)) {
+                throw new RuntimeException('Each role name must be a string.');
+            }
         }
 
-        /** @var string[] $defaultRoleNames */
-        $this->defaultRoleNames = $defaultRoleNames;
+        if (!empty($roleNames)) {
+            $roleNames = array_keys($this->filterStoredRoles($roleNames));
+        }
+
+        $this->defaultRoleNames = $roleNames;
 
         return $this;
     }
@@ -337,19 +347,15 @@ final class Manager implements ManagerInterface
 
     public function getDefaultRoles(): array
     {
-        $roles = $this->itemsStorage->getRolesByNames($this->defaultRoleNames);
-        $missingRoles = array_diff($this->defaultRoleNames, array_keys($roles));
-        if (!empty($missingRoles)) {
-            $missingRolesStr = '"' . implode('", "', $missingRoles) . '"';
-
-            throw new DefaultRolesNotFoundException("The following default roles were not found: $missingRolesStr.");
-        }
-
-        return $roles;
+        return $this->filterStoredRoles($this->defaultRoleNames);
     }
 
     public function setGuestRoleName(?string $name): self
     {
+        if ($name !== null && !$this->itemsStorage->roleExists($name)) {
+            throw new RuntimeException("Role \"$name\" does not exist.");
+        }
+
         $this->guestRoleName = $name;
         return $this;
     }
@@ -389,6 +395,8 @@ final class Manager implements ManagerInterface
         if ($this->itemsStorage->exists($item->getName())) {
             throw new ItemAlreadyExistsException($item);
         }
+
+        // TODO: Check for non-existing rule
 
         $time = time();
         if (!$item->hasCreatedAt()) {
@@ -486,5 +494,18 @@ final class Manager implements ManagerInterface
             'Unable to change the role or the permission name. ' .
             "The name \"{$item->getName()}\" is already used by another role or permission.",
         );
+    }
+
+    private function filterStoredRoles(array $roleNames): array
+    {
+        $storedRoles = $this->itemsStorage->getRolesByNames($roleNames);
+        $missingRoles = array_diff($roleNames, array_keys($storedRoles));
+        if (!empty($missingRoles)) {
+            $missingRolesStr = '"' . implode('", "', $missingRoles) . '"';
+
+            throw new DefaultRolesNotFoundException("The following default roles were not found: $missingRolesStr.");
+        }
+
+        return $storedRoles;
     }
 }

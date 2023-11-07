@@ -36,24 +36,7 @@ trait ManagerLogicTestTrait
         }
     }
 
-    /**
-     * @dataProvider dataProviderUserHasPermission
-     */
-    public function testUserHasPermission($user, array $tests): void
-    {
-        $manager = $this->createFilledManager();
-        $params = ['authorID' => 'author B'];
-
-        foreach ($tests as $permission => $result) {
-            $this->assertEquals(
-                $result,
-                $manager->userHasPermission($user, $permission, $params),
-                "Checking \"$user\" can \"$permission\""
-            );
-        }
-    }
-
-    public function dataProviderUserHasPermission(): array
+    public function dataProviderUserHasPermission1(): array
     {
         return [
             [
@@ -127,14 +110,31 @@ trait ManagerLogicTestTrait
     }
 
     /**
+     * @dataProvider dataProviderUserHasPermission1
+     */
+    public function testUserHasPermission1($user, array $tests): void
+    {
+        $manager = $this->createFilledManager();
+        $params = ['authorID' => 'author B'];
+
+        foreach ($tests as $permission => $result) {
+            $this->assertEquals(
+                $result,
+                $manager->userHasPermission($user, $permission, $params),
+                "Checking \"$user\" can \"$permission\"",
+            );
+        }
+    }
+
+    /**
      * @dataProvider dataProviderUserHasPermissionWithGuest
      */
     public function testUserHasPermissionWithGuest($userId, array $tests): void
     {
         $manager = $this
             ->createFilledManager()
-            ->setGuestRoleName('guest')
             ->addRole(new Role('guest'))
+            ->setGuestRoleName('guest')
             ->addPermission(new Permission('signup'))
             ->addChild('guest', 'signup');
 
@@ -169,9 +169,9 @@ trait ManagerLogicTestTrait
     {
         $userId = 1;
         $manager = $this->createFilledManager()
+            ->addRole(new Role('guest'))
             ->setGuestRoleName('guest')
             ->addPermission((new Permission('viewIssue'))->withRuleName('easyTrue'))
-            ->addRole(new Role('guest'))
             ->addChild('guest', 'viewIssue')
             ->assign('guest', $userId);
 
@@ -202,18 +202,18 @@ trait ManagerLogicTestTrait
         bool $expectedUserHasPermission,
     ): void {
         $manager = $this->createFilledManager()
+            ->addRole(new Role('guest'))
             ->setGuestRoleName('guest')
             ->addPermission(
                 (new Permission('updateIssue'))->withRuleName('isAuthor'),
             )
-            ->addRole(new Role('guest'))
             ->addChild('guest', 'updateIssue')
             ->assign('guest', userId: 1);
 
         $this->assertSame($expectedUserHasPermission, $manager->userHasPermission($userId, 'updateIssue', $parameters));
     }
 
-    public function dataUserHasPermissionExecuteParentPermissionRules(): array
+    public function dataUserHasPermission(): array
     {
         $warnedUserId = 1;
         $trialUserId = 2;
@@ -221,18 +221,20 @@ trait ManagerLogicTestTrait
         $inActiveSubscriptionUserId = 4;
 
         return [
+            [null, 'guest', [], false],
             [$activeSubscriptionUserId, 'view exclusive content', [], true],
             [$inActiveSubscriptionUserId, 'view exclusive content', [], false],
             [$activeSubscriptionUserId, 'view exclusive content', ['voidSubscription' => true], false],
+            [null, 'view news', [], true],
             [null, 'view ban warning', [], false],
         ];
     }
 
     /**
      * @link https://github.com/yiisoft/rbac/issues/193
-     * @dataProvider dataUserHasPermissionExecuteParentPermissionRules
+     * @dataProvider dataUserHasPermission
      */
-    public function testUserHasPermissionExecuteParentPermissionRules(
+    public function testUserHasPermission(
         ?int $userId,
         string $permissionName,
         array $parameters,
@@ -247,8 +249,8 @@ trait ManagerLogicTestTrait
         $activeSubscriptionUserId = 3;
         $inActiveSubscriptionUserId = 4;
         $manager = $this->createFilledManager()
-            ->setGuestRoleName('guest')
             ->addRole(new Role('guest'))
+            ->setGuestRoleName('guest')
             ->addRole(new Role('warned user'))
             ->addRole(new Role('trial user'))
             ->addRole((new Role('subscribed user'))->withRuleName('subscription'))
@@ -256,12 +258,16 @@ trait ManagerLogicTestTrait
             ->addPermission(new Permission('view ban warning'))
             ->addPermission(new Permission('view content'))
             ->addPermission(new Permission('view regular content'))
+            ->addPermission(new Permission('view news'))
+            ->addPermission(new Permission('view wiki'))
             ->addPermission(new Permission('view exclusive content'))
             ->addChild('warned user', 'guest')
             ->addChild('trial user', 'guest')
             ->addChild('trial user', 'subscribed user')
             ->addChild('view content', 'view regular content')
             ->addChild('view content', 'view exclusive content')
+            ->addChild('view regular content', 'view news')
+            ->addChild('view regular content', 'view wiki')
             ->addChild('guest', 'view ads')
             ->addChild('guest', 'view regular content')
             ->addChild('warned user', 'view ban warning')
@@ -274,26 +280,15 @@ trait ManagerLogicTestTrait
         $this->assertSame($expectedHasPermission, $manager->userHasPermission($userId, $permissionName, $parameters));
     }
 
-    public function testGuestRoleName(): void
-    {
-        $itemsStorage = $this->createItemsStorage();
-        $itemsStorage->add(new Role('guest'));
-
-        $manager = $this->createManager($itemsStorage);
-        $returnedManager = $manager->setGuestRoleName('guest');
-
-        $this->assertFalse($manager->userHasPermission(null, 'guest'));
-        $this->assertSame($manager, $returnedManager);
-    }
-
     public function testUserHasPermissionWithNonExistGuestRole(): void
     {
-        $manager = $this->createFilledManager();
-        $manager->setGuestRoleName('non-exist-guest');
+        $manager = $this
+            ->createFilledManager()
+            ->addRole(new Role('non-existing-guest'))
+            ->setGuestRoleName('non-existing-guest')
+            ->removeRole('non-existing-guest');
 
-        $this->assertFalse(
-            $manager->userHasPermission(null, 'readPost')
-        );
+        $this->assertFalse($manager->userHasPermission(null, 'readPost'));
     }
 
     public function testUserHasPermissionReturnFalseForNonExistingUserAndNoDefaultRoles(): void
@@ -310,7 +305,8 @@ trait ManagerLogicTestTrait
             ->createFilledManager()
             ->addPermission((new Permission('test-permission'))->withRuleName('non-exist-rule'))
             ->addRole(new Role('test'))
-            ->addChild('test', 'test-permission');
+            ->addChild('test', 'test-permission')
+            ->assign('test-permission', 'reader A');
 
         $this->expectException(RuleNotFoundException::class);
         $this->expectExceptionMessage('Rule "non-exist-rule" not found.');
@@ -871,7 +867,10 @@ trait ManagerLogicTestTrait
 
     public function testDefaultRoleNames(): void
     {
-        $manager = $this->createManager();
+        $manager = $this
+            ->createManager()
+            ->addRole(new Role('a'))
+            ->addRole(new Role('b'));
         $returnedManager = $manager->setDefaultRoleNames(['a', 'b']);
 
         $this->assertSame(['a', 'b'], $manager->getDefaultRoleNames());
@@ -880,7 +879,7 @@ trait ManagerLogicTestTrait
 
     public function testDefaultRolesSetWithClosure(): void
     {
-        $manager = $this->createFilledManager();
+        $manager = $this->createFilledManager()->addRole(new Role('newDefaultRole'));
         $manager->setDefaultRoleNames(
             static function () {
                 return ['newDefaultRole'];
@@ -928,7 +927,16 @@ trait ManagerLogicTestTrait
     public function testGetDefaultNonExistingRoles(array $defaultRoleNames, string $expectedExceptionMessage): void
     {
         $manager = $this->createManager();
+
+        foreach ($defaultRoleNames as $roleName) {
+            $manager->addRole(new Role($roleName));
+        }
+
         $manager->setDefaultRoleNames($defaultRoleNames);
+
+        foreach ($defaultRoleNames as $roleName) {
+            $manager->removeRole($roleName);
+        }
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage($expectedExceptionMessage);
