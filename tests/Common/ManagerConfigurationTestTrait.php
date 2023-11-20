@@ -69,7 +69,6 @@ trait ManagerConfigurationTestTrait
             ->addPermission(new Permission('deletePost'))
             ->addPermission((new Permission('updatePost'))->withRuleName('isAuthor'))
             ->addPermission(new Permission('updateAnyPost'))
-            ->addRole(new Role('withoutChildren'))
             ->addRole(new Role('reader'))
             ->addRole(new Role('author'))
             ->addRole(new Role('admin'))

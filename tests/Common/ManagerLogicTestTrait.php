@@ -35,45 +35,6 @@ trait ManagerLogicTestTrait
         }
     }
 
-    /**
-     * @dataProvider dataProviderUserHasPermissionWithGuest
-     */
-    public function testUserHasPermissionWithGuest($userId, array $tests): void
-    {
-        $manager = $this
-            ->createFilledManager()
-            ->addRole(new Role('guest'))
-            ->setGuestRoleName('guest')
-            ->addPermission(new Permission('signup'))
-            ->addChild('guest', 'signup');
-
-        foreach ($tests as $permission => $result) {
-            $this->assertEquals(
-                $result,
-                $manager->userHasPermission($userId, $permission),
-                sprintf('Checking "%s" can "%s"', $userId, $permission)
-            );
-        }
-    }
-
-    public function dataProviderUserHasPermissionWithGuest(): array
-    {
-        return [
-            [
-                null,
-                [
-                    'createPost' => false,
-                    'readPost' => false,
-                    'updatePost' => false,
-                    'deletePost' => false,
-                    'updateAnyPost' => false,
-                    'signup' => true,
-                    null => false,
-                ],
-            ],
-        ];
-    }
-
     public function testUserHasPermissionWithGuestAndCustomRule(): void
     {
         $userId = 1;
@@ -170,11 +131,15 @@ trait ManagerLogicTestTrait
             [null, 'blablabla', ['authorID' => 'author B'], false],
 
             [null, 'guest', [], false],
+            [null, 'view ads', [], true],
+            [null, 'view regular content', [], true],
+            [null, 'view news', [], true],
+            [null, 'view exclusive content', [], false],
+            [null, 'view ban warning', [], false],
+
             [$activeSubscriptionUserId, 'view exclusive content', [], true],
             [$inActiveSubscriptionUserId, 'view exclusive content', [], false],
             [$activeSubscriptionUserId, 'view exclusive content', ['voidSubscription' => true], false],
-            [null, 'view news', [], true],
-            [null, 'view ban warning', [], false],
         ];
     }
 
