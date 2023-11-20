@@ -227,7 +227,7 @@ trait ManagerLogicTestTrait
         $this->assertSame($expectedHasPermission, $manager->userHasPermission($userId, $permissionName, $parameters));
     }
 
-    public function testUserHasPermissionWithNonExistGuestRole(): void
+    public function testUserHasPermissionWithImplicitGuestAndNonExistingGuestRole(): void
     {
         $manager = $this
             ->createFilledManager()
@@ -238,7 +238,7 @@ trait ManagerLogicTestTrait
         $this->assertFalse($manager->userHasPermission(null, 'readPost'));
     }
 
-    public function testUserHasPermissionReturnFalseForNonExistingUserAndNoDefaultRoles(): void
+    public function testUserHasPermissionWuithNonExistingUserAndNoDefaultRoles(): void
     {
         $manager = $this->createFilledManager();
         $manager->setDefaultRoleNames([]);
@@ -250,13 +250,13 @@ trait ManagerLogicTestTrait
     {
         $manager = $this
             ->createFilledManager()
-            ->addPermission((new Permission('test-permission'))->withRuleName('non-exist-rule'))
+            ->addPermission((new Permission('test-permission'))->withRuleName('non-existing-rule'))
             ->addRole(new Role('test'))
             ->addChild('test', 'test-permission')
             ->assign('test-permission', 'reader A');
 
         $this->expectException(RuleNotFoundException::class);
-        $this->expectExceptionMessage('Rule "non-exist-rule" not found.');
+        $this->expectExceptionMessage('Rule "non-existing-rule" not found.');
         $manager->userHasPermission('reader A', 'test-permission');
     }
 
