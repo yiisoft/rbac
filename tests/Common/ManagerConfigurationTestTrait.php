@@ -11,6 +11,7 @@ use Yiisoft\Rbac\ManagerInterface;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\RuleFactoryInterface;
+use Yiisoft\Rbac\Tests\Support\AdsRule;
 use Yiisoft\Rbac\Tests\Support\AuthorRule;
 use Yiisoft\Rbac\Tests\Support\EasyRule;
 use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
@@ -59,6 +60,7 @@ trait ManagerConfigurationTestTrait
                     'easyTrue' => new EasyRule(true),
                     'easyFalse' => new EasyRule(false),
                     'subscription' => new SubscriptionRule(),
+                    'ads' => new AdsRule(),
                 ]),
                 enableDirectPermissions: true,
             )

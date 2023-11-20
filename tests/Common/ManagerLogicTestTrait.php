@@ -35,20 +35,6 @@ trait ManagerLogicTestTrait
         }
     }
 
-    public function testUserHasPermissionWithGuestAndCustomRule(): void
-    {
-        $userId = 1;
-        $manager = $this->createFilledManager()
-            ->addRole(new Role('guest'))
-            ->setGuestRoleName('guest')
-            ->addPermission((new Permission('viewIssue'))->withRuleName('easyTrue'))
-            ->addChild('guest', 'viewIssue')
-            ->assign('guest', $userId);
-
-        $this->assertTrue($manager->userHasPermission(null, 'viewIssue'));
-        $this->assertTrue($manager->userHasPermission($userId, 'viewIssue'));
-    }
-
     public function dataUserHasPermissionWithGuestAndCustomRuleWithParameters(): array
     {
         return [
@@ -89,6 +75,7 @@ trait ManagerLogicTestTrait
         $trialUserId = 2;
         $activeSubscriptionUserId = 3;
         $inActiveSubscriptionUserId = 4;
+        $explicitGuestUserId = 5;
 
         return [
             ['reader A', 'createPost', ['authorID' => 'author B'], false],
@@ -137,6 +124,14 @@ trait ManagerLogicTestTrait
             [null, 'view exclusive content', [], false],
             [null, 'view ban warning', [], false],
 
+            // https://github.com/yiisoft/rbac/issues/172
+
+            [null, 'view ads', ['dayPeriod' => 'morning'], true],
+            [null, 'view ads', ['dayPeriod' => 'night'], false],
+            [$explicitGuestUserId, 'view ads', [], true],
+            [$explicitGuestUserId, 'view ads', ['dayPeriod' => 'morning'], true],
+            [$explicitGuestUserId, 'view ads', ['dayPeriod' => 'night'], false],
+
             [$activeSubscriptionUserId, 'view exclusive content', [], true],
             [$inActiveSubscriptionUserId, 'view exclusive content', [], false],
             [$activeSubscriptionUserId, 'view exclusive content', ['voidSubscription' => true], false],
@@ -160,13 +155,14 @@ trait ManagerLogicTestTrait
         $trialUserId = 2;
         $activeSubscriptionUserId = 3;
         $inActiveSubscriptionUserId = 4;
+        $explicitGuestUserId = 5;
         $manager = $this->createFilledManager()
             ->addRole(new Role('guest'))
             ->setGuestRoleName('guest')
             ->addRole(new Role('warned user'))
             ->addRole(new Role('trial user'))
             ->addRole((new Role('subscribed user'))->withRuleName('subscription'))
-            ->addPermission(new Permission('view ads'))
+            ->addPermission((new Permission('view ads'))->withRuleName('ads'))
             ->addPermission(new Permission('view ban warning'))
             ->addPermission(new Permission('view content'))
             ->addPermission(new Permission('view regular content'))
@@ -187,7 +183,8 @@ trait ManagerLogicTestTrait
             ->assign('warned user', $warnedUserId)
             ->assign('trial user', $trialUserId)
             ->assign('subscribed user', $activeSubscriptionUserId)
-            ->assign('subscribed user', $inActiveSubscriptionUserId);
+            ->assign('subscribed user', $inActiveSubscriptionUserId)
+            ->assign('guest', $explicitGuestUserId);
 
         $this->assertSame($expectedHasPermission, $manager->userHasPermission($userId, $permissionName, $parameters));
     }
