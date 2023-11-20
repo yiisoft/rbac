@@ -423,20 +423,6 @@ final class Manager implements ManagerInterface
         return $this->itemsStorage->getPermissionsByNames(array_keys($userAssignments));
     }
 
-    /**
-     * Returns all permissions that the user inherits from the roles assigned to him.
-     *
-     * @param array $userAssignments The user assignments.
-     * @psalm-param array<string, Assignment> $userAssignments
-     *
-     * @return Permission[] All inherited permissions that the user has. The array is indexed by the permission names.
-     * @psalm-return array<string, Permission>
-     */
-    private function getInheritedPermissionsByUser(array $userAssignments): array
-    {
-        return [];
-    }
-
     private function removeItem(string $name): void
     {
         if ($this->itemsStorage->exists($name)) {
