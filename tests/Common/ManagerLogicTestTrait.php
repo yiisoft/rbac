@@ -13,9 +13,13 @@ use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 use Yiisoft\Rbac\Exception\RuleNotFoundException;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
+use Yiisoft\Rbac\Tests\Support\AdsRule;
+use Yiisoft\Rbac\Tests\Support\AuthorRule;
 use Yiisoft\Rbac\Tests\Support\EasyRule;
 use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
+use Yiisoft\Rbac\Tests\Support\SimpleRuleFactory;
+use Yiisoft\Rbac\Tests\Support\SubscriptionRule;
 
 trait ManagerLogicTestTrait
 {
@@ -35,41 +39,66 @@ trait ManagerLogicTestTrait
         }
     }
 
-    public function dataUserHasPermissionWithGuestAndCustomRuleWithParameters(): array
+    public function dataUserHasPermissionGeneric(): array
     {
         return [
-            [null, ['authorID' => null], false],
-            [null, ['authorID' => 1], false],
-            [1, ['authorID' => null], false],
-            [1, ['authorID' => 2], false],
-            [1, ['authorID' => 1], true],
-            [1, ['authorID' => '1'], true],
-            ['1', ['authorID' => 1], true],
-            ['1', ['authorID' => '1'], true],
+            ['reader A', 'createPost', ['authorId' => 'author B'], false],
+            ['reader A', 'readPost', ['authorId' => 'author B'], true],
+            ['reader A', 'updatePost', ['authorId' => 'author B'], false],
+            ['reader A', 'updateAnyPost', ['authorId' => 'author B'], false],
+            ['reader A', 'reader', ['authorId' => 'author B'], false],
+
+            ['author B', 'createPost', ['authorId' => 'author B'], true],
+            ['author B', 'readPost', ['authorId' => 'author B'], true],
+            ['author B', 'updatePost', ['authorId' => 'author B'], true],
+            ['author B', 'deletePost', ['authorId' => 'author B'], true],
+            ['author B', 'updateAnyPost', ['authorId' => 'author B'], false],
+
+            ['admin C', 'createPost', ['authorId' => 'author B'], true],
+            ['admin C', 'readPost', ['authorId' => 'author B'], true],
+            ['admin C', 'updatePost', ['authorId' => 'author B'], false],
+            ['admin C', 'updateAnyPost', ['authorId' => 'author B'], true],
+            ['admin C', 'nonExistingPermission', ['authorId' => 'author B'], false],
+
+            ['guest', 'createPost', ['authorId' => 'author B'], false],
+            ['guest', 'readPost', ['authorId' => 'author B'], false],
+            ['guest', 'updatePost', ['authorId' => 'author B'], false],
+            ['guest', 'deletePost', ['authorId' => 'author B'], false],
+            ['guest', 'updateAnyPost', ['authorId' => 'author B'], false],
+            ['guest', 'blablabla', ['authorId' => 'author B'], false],
+
+            [12, 'createPost', ['authorId' => 'author B'], false],
+            [12, 'readPost', ['authorId' => 'author B'], false],
+            [12, 'updatePost', ['authorId' => 'author B'], false],
+            [12, 'deletePost', ['authorId' => 'author B'], false],
+            [12, 'updateAnyPost', ['authorId' => 'author B'], false],
+            [12, 'blablabla', ['authorId' => 'author B'], false],
+
+            [null, 'createPost', ['authorId' => 'author B'], false],
+            [null, 'readPost', ['authorId' => 'author B'], false],
+            [null, 'updatePost', ['authorId' => 'author B'], false],
+            [null, 'deletePost', ['authorId' => 'author B'], false],
+            [null, 'updateAnyPost', ['authorId' => 'author B'], false],
+            [null, 'blablabla', ['authorId' => 'author B'], false],
         ];
     }
 
     /**
-     * @dataProvider dataUserHasPermissionWithGuestAndCustomRuleWithParameters
+     * @dataProvider dataUserHasPermissionGeneric
      */
-    public function testUserHasPermissionWithGuestAndCustomRuleWithParameters(
-        mixed $userId,
+    public function testUserHasPermissionGeneric(
+        int|string|null $userId,
+        string $permissionName,
         array $parameters,
-        bool $expectedUserHasPermission,
+        bool $expectedHasPermission,
     ): void {
-        $manager = $this->createFilledManager()
-            ->addRole(new Role('guest'))
-            ->setGuestRoleName('guest')
-            ->addPermission(
-                (new Permission('updateIssue'))->withRuleName('isAuthor'),
-            )
-            ->addChild('guest', 'updateIssue')
-            ->assign('guest', userId: 1);
-
-        $this->assertSame($expectedUserHasPermission, $manager->userHasPermission($userId, 'updateIssue', $parameters));
+        $this->assertSame(
+            $expectedHasPermission,
+            $this->createFilledManager()->userHasPermission($userId, $permissionName, $parameters),
+        );
     }
 
-    public function dataUserHasPermission(): array
+    public function dataUserHasPermissionGuestOriented(): array
     {
         $warnedUserId = 1;
         $trialUserId = 2;
@@ -78,45 +107,6 @@ trait ManagerLogicTestTrait
         $explicitGuestUserId = 5;
 
         return [
-            ['reader A', 'createPost', ['authorID' => 'author B'], false],
-            ['reader A', 'readPost', ['authorID' => 'author B'], true],
-            ['reader A', 'updatePost', ['authorID' => 'author B'], false],
-            ['reader A', 'updateAnyPost', ['authorID' => 'author B'], false],
-            ['reader A', 'reader', ['authorID' => 'author B'], false],
-
-            ['author B', 'createPost', ['authorID' => 'author B'], true],
-            ['author B', 'readPost', ['authorID' => 'author B'], true],
-            ['author B', 'updatePost', ['authorID' => 'author B'], true],
-            ['author B', 'deletePost', ['authorID' => 'author B'], true],
-            ['author B', 'updateAnyPost', ['authorID' => 'author B'], false],
-
-            ['admin C', 'createPost', ['authorID' => 'author B'], true],
-            ['admin C', 'readPost', ['authorID' => 'author B'], true],
-            ['admin C', 'updatePost', ['authorID' => 'author B'], false],
-            ['admin C', 'updateAnyPost', ['authorID' => 'author B'], true],
-            ['admin C', 'nonExistingPermission', ['authorID' => 'author B'], false],
-
-            ['guest', 'createPost', ['authorID' => 'author B'], false],
-            ['guest', 'readPost', ['authorID' => 'author B'], false],
-            ['guest', 'updatePost', ['authorID' => 'author B'], false],
-            ['guest', 'deletePost', ['authorID' => 'author B'], false],
-            ['guest', 'updateAnyPost', ['authorID' => 'author B'], false],
-            ['guest', 'blablabla', ['authorID' => 'author B'], false],
-
-            [12, 'createPost', ['authorID' => 'author B'], false],
-            [12, 'readPost', ['authorID' => 'author B'], false],
-            [12, 'updatePost', ['authorID' => 'author B'], false],
-            [12, 'deletePost', ['authorID' => 'author B'], false],
-            [12, 'updateAnyPost', ['authorID' => 'author B'], false],
-            [12, 'blablabla', ['authorID' => 'author B'], false],
-
-            [null, 'createPost', ['authorID' => 'author B'], false],
-            [null, 'readPost', ['authorID' => 'author B'], false],
-            [null, 'updatePost', ['authorID' => 'author B'], false],
-            [null, 'deletePost', ['authorID' => 'author B'], false],
-            [null, 'updateAnyPost', ['authorID' => 'author B'], false],
-            [null, 'blablabla', ['authorID' => 'author B'], false],
-
             [null, 'guest', [], false],
             [null, 'view ads', [], true],
             [null, 'view regular content', [], true],
@@ -132,6 +122,15 @@ trait ManagerLogicTestTrait
             [$explicitGuestUserId, 'view ads', ['dayPeriod' => 'morning'], true],
             [$explicitGuestUserId, 'view ads', ['dayPeriod' => 'night'], false],
 
+            [null, 'edit news comment', ['authorId' => null], false],
+            [null, 'edit news comment', ['authorId' => $explicitGuestUserId], false],
+            [$explicitGuestUserId, 'edit news comment', ['authorId' => null], false],
+            [$explicitGuestUserId, 'edit news comment', ['authorId' => 55], false],
+            [$explicitGuestUserId, 'edit news comment', ['authorId' => $explicitGuestUserId], true],
+            [$explicitGuestUserId, 'edit news comment', ['authorId' => "$explicitGuestUserId"], true],
+            ["$explicitGuestUserId", 'edit news comment', ['authorId' => $explicitGuestUserId], true],
+            ["$explicitGuestUserId", 'edit news comment', ['authorId' => "$explicitGuestUserId"], true],
+
             [$activeSubscriptionUserId, 'view exclusive content', [], true],
             [$inActiveSubscriptionUserId, 'view exclusive content', [], false],
             [$activeSubscriptionUserId, 'view exclusive content', ['voidSubscription' => true], false],
@@ -139,10 +138,11 @@ trait ManagerLogicTestTrait
     }
 
     /**
+     * @link https://github.com/yiisoft/rbac/issues/172
      * @link https://github.com/yiisoft/rbac/issues/193
-     * @dataProvider dataUserHasPermission
+     * @dataProvider dataUserHasPermissionGuestOriented
      */
-    public function testUserHasPermission(
+    public function testUserHasPermissionGuestOriented(
         int|string|null $userId,
         string $permissionName,
         array $parameters,
@@ -156,9 +156,20 @@ trait ManagerLogicTestTrait
         $activeSubscriptionUserId = 3;
         $inActiveSubscriptionUserId = 4;
         $explicitGuestUserId = 5;
-        $manager = $this->createFilledManager()
+        $manager = $this
+            ->createManager(
+                $this->createItemsStorage(),
+                $this->createAssignmentsStorage(),
+                new SimpleRuleFactory([
+                    'subscription' => new SubscriptionRule(),
+                    'ads' => new AdsRule(),
+                    'author' => new AuthorRule(),
+                ]),
+                enableDirectPermissions: true,
+            )
             ->addRole(new Role('guest'))
             ->setGuestRoleName('guest')
+            ->addRole(new Role('news comment manager'))
             ->addRole(new Role('warned user'))
             ->addRole(new Role('trial user'))
             ->addRole((new Role('subscribed user'))->withRuleName('subscription'))
@@ -167,19 +178,29 @@ trait ManagerLogicTestTrait
             ->addPermission(new Permission('view content'))
             ->addPermission(new Permission('view regular content'))
             ->addPermission(new Permission('view news'))
+            ->addPermission(new Permission('add news comment'))
+            ->addPermission(new Permission('view news comment'))
+            ->addPermission((new Permission('edit news comment'))->withRuleName('author'))
+            ->addPermission((new Permission('remove news comment'))->withRuleName('author'))
             ->addPermission(new Permission('view wiki'))
             ->addPermission(new Permission('view exclusive content'))
-            ->addChild('warned user', 'guest')
-            ->addChild('trial user', 'guest')
-            ->addChild('trial user', 'subscribed user')
             ->addChild('view content', 'view regular content')
             ->addChild('view content', 'view exclusive content')
             ->addChild('view regular content', 'view news')
             ->addChild('view regular content', 'view wiki')
+            ->addChild('news comment manager', 'add news comment')
+            ->addChild('news comment manager', 'view news comment')
+            ->addChild('news comment manager', 'edit news comment')
+            ->addChild('news comment manager', 'remove news comment')
+            ->addChild('warned user', 'guest')
+            ->addChild('trial user', 'guest')
+            ->addChild('trial user', 'subscribed user')
             ->addChild('guest', 'view ads')
             ->addChild('guest', 'view regular content')
+            ->addChild('guest', 'news comment manager')
             ->addChild('warned user', 'view ban warning')
             ->addChild('subscribed user', 'view content')
+            ->addChild('subscribed user', 'news comment manager')
             ->assign('warned user', $warnedUserId)
             ->assign('trial user', $trialUserId)
             ->assign('subscribed user', $activeSubscriptionUserId)
@@ -708,8 +729,8 @@ trait ManagerLogicTestTrait
         $this->assertSame(1_642_026_149, $newPermission->getCreatedAt());
         $this->assertSame(1_642_026_150, $newPermission->getUpdatedAt());
         $this->assertSame($manager, $returnedManager);
-        $this->assertFalse($manager->userHasPermission('author B', 'updatePost', ['authorID' => 'author B']));
-        $this->assertTrue($manager->userHasPermission('author B', 'newUpdatePost', ['authorID' => 'author B']));
+        $this->assertFalse($manager->userHasPermission('author B', 'updatePost', ['authorId' => 'author B']));
+        $this->assertTrue($manager->userHasPermission('author B', 'newUpdatePost', ['authorId' => 'author B']));
     }
 
     public function testUpdateDirectPermission1(): void

@@ -9,12 +9,12 @@ use Yiisoft\Rbac\RuleContext;
 use Yiisoft\Rbac\RuleInterface;
 
 /**
- * Checks if user ID matches `authorID` passed via parameters.
+ * Checks if user ID matches `authorId` passed via parameters.
  */
 final class AuthorRule implements RuleInterface
 {
     public function execute(?string $userId, Item $item, RuleContext $ruleContext): bool
     {
-        return (string) $ruleContext->getParameterValue('authorID') === $userId;
+        return (string) $ruleContext->getParameterValue('authorId') === $userId;
     }
 }

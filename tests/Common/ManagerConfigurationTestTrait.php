@@ -59,8 +59,6 @@ trait ManagerConfigurationTestTrait
                     'isAuthor' => new AuthorRule(),
                     'easyTrue' => new EasyRule(true),
                     'easyFalse' => new EasyRule(false),
-                    'subscription' => new SubscriptionRule(),
-                    'ads' => new AdsRule(),
                 ]),
                 enableDirectPermissions: true,
             )
