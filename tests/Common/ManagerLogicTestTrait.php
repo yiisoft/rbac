@@ -35,96 +35,6 @@ trait ManagerLogicTestTrait
         }
     }
 
-    public function dataProviderUserHasPermission1(): array
-    {
-        return [
-            [
-                'reader A',
-                [
-                    'createPost' => false,
-                    'readPost' => true,
-                    'updatePost' => false,
-                    'updateAnyPost' => false,
-                    'reader' => false,
-                ],
-            ],
-            [
-                'author B',
-                [
-                    'createPost' => true,
-                    'readPost' => true,
-                    'updatePost' => true,
-                    'deletePost' => true,
-                    'updateAnyPost' => false,
-                ],
-            ],
-            [
-                'admin C',
-                [
-                    'createPost' => true,
-                    'readPost' => true,
-                    'updatePost' => false,
-                    'updateAnyPost' => true,
-                    'nonExistingPermission' => false,
-                    null => false,
-                ],
-            ],
-            [
-                'guest',
-                [
-                    'createPost' => false,
-                    'readPost' => false,
-                    'updatePost' => false,
-                    'deletePost' => false,
-                    'updateAnyPost' => false,
-                    'blablabla' => false,
-                    null => false,
-                ],
-            ],
-            [
-                12,
-                [
-                    'createPost' => false,
-                    'readPost' => false,
-                    'updatePost' => false,
-                    'deletePost' => false,
-                    'updateAnyPost' => false,
-                    'blablabla' => false,
-                    null => false,
-                ],
-            ],
-            [
-                null,
-                [
-                    'createPost' => false,
-                    'readPost' => false,
-                    'updatePost' => false,
-                    'deletePost' => false,
-                    'updateAnyPost' => false,
-                    'blablabla' => false,
-                    null => false,
-                ],
-            ],
-        ];
-    }
-
-    /**
-     * @dataProvider dataProviderUserHasPermission1
-     */
-    public function testUserHasPermission1($user, array $tests): void
-    {
-        $manager = $this->createFilledManager();
-        $params = ['authorID' => 'author B'];
-
-        foreach ($tests as $permission => $result) {
-            $this->assertEquals(
-                $result,
-                $manager->userHasPermission($user, $permission, $params),
-                "Checking \"$user\" can \"$permission\"",
-            );
-        }
-    }
-
     /**
      * @dataProvider dataProviderUserHasPermissionWithGuest
      */
@@ -220,6 +130,45 @@ trait ManagerLogicTestTrait
         $inActiveSubscriptionUserId = 4;
 
         return [
+            ['reader A', 'createPost', ['authorID' => 'author B'], false],
+            ['reader A', 'readPost', ['authorID' => 'author B'], true],
+            ['reader A', 'updatePost', ['authorID' => 'author B'], false],
+            ['reader A', 'updateAnyPost', ['authorID' => 'author B'], false],
+            ['reader A', 'reader', ['authorID' => 'author B'], false],
+
+            ['author B', 'createPost', ['authorID' => 'author B'], true],
+            ['author B', 'readPost', ['authorID' => 'author B'], true],
+            ['author B', 'updatePost', ['authorID' => 'author B'], true],
+            ['author B', 'deletePost', ['authorID' => 'author B'], true],
+            ['author B', 'updateAnyPost', ['authorID' => 'author B'], false],
+
+            ['admin C', 'createPost', ['authorID' => 'author B'], true],
+            ['admin C', 'readPost', ['authorID' => 'author B'], true],
+            ['admin C', 'updatePost', ['authorID' => 'author B'], false],
+            ['admin C', 'updateAnyPost', ['authorID' => 'author B'], true],
+            ['admin C', 'nonExistingPermission', ['authorID' => 'author B'], false],
+
+            ['guest', 'createPost', ['authorID' => 'author B'], false],
+            ['guest', 'readPost', ['authorID' => 'author B'], false],
+            ['guest', 'updatePost', ['authorID' => 'author B'], false],
+            ['guest', 'deletePost', ['authorID' => 'author B'], false],
+            ['guest', 'updateAnyPost', ['authorID' => 'author B'], false],
+            ['guest', 'blablabla', ['authorID' => 'author B'], false],
+
+            [12, 'createPost', ['authorID' => 'author B'], false],
+            [12, 'readPost', ['authorID' => 'author B'], false],
+            [12, 'updatePost', ['authorID' => 'author B'], false],
+            [12, 'deletePost', ['authorID' => 'author B'], false],
+            [12, 'updateAnyPost', ['authorID' => 'author B'], false],
+            [12, 'blablabla', ['authorID' => 'author B'], false],
+
+            [null, 'createPost', ['authorID' => 'author B'], false],
+            [null, 'readPost', ['authorID' => 'author B'], false],
+            [null, 'updatePost', ['authorID' => 'author B'], false],
+            [null, 'deletePost', ['authorID' => 'author B'], false],
+            [null, 'updateAnyPost', ['authorID' => 'author B'], false],
+            [null, 'blablabla', ['authorID' => 'author B'], false],
+
             [null, 'guest', [], false],
             [$activeSubscriptionUserId, 'view exclusive content', [], true],
             [$inActiveSubscriptionUserId, 'view exclusive content', [], false],
@@ -234,7 +183,7 @@ trait ManagerLogicTestTrait
      * @dataProvider dataUserHasPermission
      */
     public function testUserHasPermission(
-        ?int $userId,
+        int|string|null $userId,
         string $permissionName,
         array $parameters,
         bool $expectedHasPermission,
