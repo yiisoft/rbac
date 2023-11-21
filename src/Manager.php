@@ -315,12 +315,7 @@ final class Manager implements ManagerInterface
 
     public function setDefaultRoleNames(array|Closure $roleNames): self
     {
-        $this->assertDefaultRoleNamesForUpdate($roleNames);
-
-        if (!is_array($roleNames)) {
-            $roleNames = $roleNames();
-        }
-
+        $roleNames = $this->getDefaultRoleNamesForUpdate($roleNames);
         if (!empty($roleNames)) {
             $roleNames = array_keys($this->filterStoredRoles($roleNames));
         }
@@ -470,19 +465,35 @@ final class Manager implements ManagerInterface
     }
 
     /**
-     * @psalm-assert string[]|Closure():string[] $roleNames
+     * @return string[] $roleNames
      *
      * @throws InvalidArgumentException
      */
-    private function assertDefaultRoleNamesForUpdate(array|Closure $roleNames): void
+    private function getDefaultRoleNamesForUpdate(array|Closure $roleNames): array
     {
-        if (!is_array($roleNames)) {
-            $roleNames = $roleNames();
-            if (!is_array($roleNames)) {
-                throw new InvalidArgumentException('Default role names closure must return an array.');
-            }
+        if (is_array($roleNames)) {
+            $this->assertDefaultRoleNamesListForUpdate($roleNames);
+
+            return $roleNames;
         }
 
+        $roleNames = $roleNames();
+        if (!is_array($roleNames)) {
+            throw new InvalidArgumentException('Default role names closure must return an array.');
+        }
+
+        $this->assertDefaultRoleNamesListForUpdate($roleNames);
+
+        return $roleNames;
+    }
+
+    /**
+     * @psalm-assert string[] $roleNames
+     *
+     * @throws InvalidArgumentException
+     */
+    private function assertDefaultRoleNamesListForUpdate(array $roleNames): void
+    {
         foreach ($roleNames as $roleName) {
             if (!is_string($roleName)) {
                 throw new InvalidArgumentException('Each role name must be a string.');
