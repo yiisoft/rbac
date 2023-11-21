@@ -394,20 +394,6 @@ final class Manager implements ManagerInterface
         $this->itemsStorage->add($item);
     }
 
-    /**
-     * Returns all permissions that are directly assigned to user.
-     *
-     * @param array $userAssignments The user assignments.
-     * @psalm-param array<string, Assignment> $userAssignments
-     *
-     * @return Permission[] All direct permissions that the user has. The array is indexed by the permission names.
-     * @psalm-return array<string, Permission>
-     */
-    private function getDirectPermissionsByUser(array $userAssignments): array
-    {
-        return $this->itemsStorage->getPermissionsByNames(array_keys($userAssignments));
-    }
-
     private function removeItem(string $name): void
     {
         if ($this->itemsStorage->exists($name)) {
