@@ -70,6 +70,14 @@ interface AssignmentsStorageInterface
      */
     public function userHasItem(string $userId, array $itemNames): bool;
 
+    /**
+     * Filters item names leaving only the ones that are assigned to specific user.
+     *
+     * @param string $userId User id.
+     * @param string[] $itemNames List of item names.
+     *
+     * @return string[] Filtered item names.
+     */
     public function filterUserItemNames(string $userId, array $itemNames): array;
 
     /**

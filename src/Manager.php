@@ -51,17 +51,6 @@ final class Manager implements ManagerInterface
             return false;
         }
 
-        if ($userId === null) {
-            if ($this->guestRoleName === null) {
-                return false;
-            }
-
-            if (!$this->itemsStorage->roleExists($this->guestRoleName)) {
-                return false;
-            }
-        }
-
-        /** @var Item[] $items */
         $items = array_merge(
             [$permission->getName() => $permission],
             $this->itemsStorage->getParents($permission->getName()),
@@ -84,6 +73,14 @@ final class Manager implements ManagerInterface
                 }
             }
         } else {
+            if ($this->guestRoleName === null) {
+                return false;
+            }
+
+            if (!$this->itemsStorage->roleExists($this->guestRoleName)) {
+                return false;
+            }
+
             $guestChildren = $this->itemsStorage->getAllChildren($this->guestRoleName);
 
             $userItems = [];
@@ -275,7 +272,7 @@ final class Manager implements ManagerInterface
 
     public function updateRole(string $name, Role $role): self
     {
-        $this->checkItemNameForUpdate($role, $name);
+        $this->assertItemNameForUpdate($role, $name);
 
         $this->itemsStorage->update($name, $role);
         $this->assignmentsStorage->renameItem($name, $role->getName());
@@ -302,7 +299,7 @@ final class Manager implements ManagerInterface
 
     public function updatePermission(string $name, Permission $permission): self
     {
-        $this->checkItemNameForUpdate($permission, $name);
+        $this->assertItemNameForUpdate($permission, $name);
 
         $this->itemsStorage->update($name, $permission);
         $this->assignmentsStorage->renameItem($name, $permission->getName());
@@ -316,19 +313,12 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
-    public function setDefaultRoleNames(Closure|array $roleNames): self
+    public function setDefaultRoleNames(array|Closure $roleNames): self
     {
+        $this->assertDefaultRoleNamesForUpdate($roleNames);
+
         if (!is_array($roleNames)) {
             $roleNames = $roleNames();
-            if (!is_array($roleNames)) {
-                throw new RuntimeException('Default role names closure must return an array.');
-            }
-        }
-
-        foreach ($roleNames as $roleName) {
-            if (!is_string($roleName)) {
-                throw new RuntimeException('Each role name must be a string.');
-            }
         }
 
         if (!empty($roleNames)) {
@@ -467,7 +457,7 @@ final class Manager implements ManagerInterface
         }
     }
 
-    private function checkItemNameForUpdate(Item $item, string $name): void
+    private function assertItemNameForUpdate(Item $item, string $name): void
     {
         if ($item->getName() === $name || !$this->itemsStorage->exists($item->getName())) {
             return;
@@ -479,6 +469,34 @@ final class Manager implements ManagerInterface
         );
     }
 
+    /**
+     * @psalm-assert string[]|Closure():string[] $roleNames
+     *
+     * @throws InvalidArgumentException
+     */
+    private function assertDefaultRoleNamesForUpdate(array|Closure $roleNames): void
+    {
+        if (!is_array($roleNames)) {
+            $roleNames = $roleNames();
+            if (!is_array($roleNames)) {
+                throw new InvalidArgumentException('Default role names closure must return an array.');
+            }
+        }
+
+        foreach ($roleNames as $roleName) {
+            if (!is_string($roleName)) {
+                throw new InvalidArgumentException('Each role name must be a string.');
+            }
+        }
+    }
+
+    /**
+     * @param string[] $roleNames
+     *
+     * @return array<string, Role>
+     *
+     * @throws DefaultRolesNotFoundException
+     */
     private function filterStoredRoles(array $roleNames): array
     {
         $storedRoles = $this->itemsStorage->getRolesByNames($roleNames);

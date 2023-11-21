@@ -19,7 +19,8 @@ interface ItemsStorageInterface
     /**
      * Returns all roles and permissions in the system.
      *
-     * @return Item[] All roles and permissions in the system.
+     * @return array All roles and permissions in the system.
+     * @psalm-return ItemsIndexedByName
      */
     public function getAll(): array;
 
@@ -145,8 +146,7 @@ interface ItemsStorageInterface
      *
      * @param string $name The child name.
      *
-     * @return Item[] The parent permissions and/or roles.
-     *
+     * @return array The parent permissions and/or roles.
      * @psalm-return ItemsIndexedByName
      */
     public function getParents(string $name): array;
@@ -156,8 +156,7 @@ interface ItemsStorageInterface
      *
      * @param string $name The parent name.
      *
-     * @return Item[] The child permissions and/or roles.
-     *
+     * @return array The child permissions and/or roles.
      * @psalm-return ItemsIndexedByName
      */
     public function getDirectChildren(string $name): array;
@@ -167,8 +166,8 @@ interface ItemsStorageInterface
      *
      * @param string $name The parent name.
      *
-     * @return Item[] The child permissions and/or roles.
-     * @psalm-return array<string, Item>
+     * @return array The child permissions and/or roles.
+     * @psalm-return ItemsIndexedByName
      */
     public function getAllChildren(string $name): array;
 

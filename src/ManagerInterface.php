@@ -14,6 +14,8 @@ use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 
 /**
  * An interface for managing RBAC entities (items, assignments, rules) with possibility to check user permissions.
+ *
+ * @psalm-import-type ItemsIndexedByName from ItemsStorageInterface
  */
 interface ManagerInterface extends AccessCheckerInterface
 {
@@ -118,7 +120,8 @@ interface ManagerInterface extends AccessCheckerInterface
      *
      * @param int|string|Stringable $userId The user ID.
      *
-     * @return Role[] All items directly assigned to the user. The array is indexed by the item names.
+     * @return array All items directly assigned to the user. The array is indexed by the item names.
+     * @psalm-return ItemsIndexedByName
      */
     public function getItemsByUserId(int|Stringable|string $userId): array;
 
@@ -128,6 +131,7 @@ interface ManagerInterface extends AccessCheckerInterface
      * @param int|string|Stringable $userId The user ID.
      *
      * @return Role[] All roles directly assigned to the user. The array is indexed by the role names.
+     * @psalm-return array<string, Role>
      */
     public function getRolesByUserId(int|Stringable|string $userId): array;
 
@@ -159,6 +163,7 @@ interface ManagerInterface extends AccessCheckerInterface
      * @param int|string|Stringable $userId The user ID.
      *
      * @return Permission[] All permissions that the user has. The array is indexed by the permission names.
+     * @psalm-return array<string, Permission>
      */
     public function getPermissionsByUserId(int|Stringable|string $userId): array;
 
@@ -218,12 +223,12 @@ interface ManagerInterface extends AccessCheckerInterface
     /**
      * Set default role names.
      *
-     * @param Closure|string[] $roleNames Either array of role names or a closure returning it.
+     * @param array|Closure $roleNames Either array of role names or a closure returning it.
      *
-     * @throws InvalidArgumentException When `$roles` is neither array nor closure.
-     * @throws RuntimeException When callable returns not array.
+     * @throws InvalidArgumentException When role names is not a list of strings passed directly or resolved from a
+     * closure.
      */
-    public function setDefaultRoleNames(Closure|array $roleNames): self;
+    public function setDefaultRoleNames(array|Closure $roleNames): self;
 
     /**
      * Returns default role names.
@@ -236,6 +241,7 @@ interface ManagerInterface extends AccessCheckerInterface
      * Returns default roles.
      *
      * @return Role[] Default roles. The array is indexed by the role names.
+     * @psalm-return array<string, Role>
      */
     public function getDefaultRoles(): array;
 

@@ -823,14 +823,10 @@ trait ManagerLogicTestTrait
     {
         $manager = $this->createFilledManager();
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Default role names closure must return an array');
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Default role names closure must return an array.');
 
-        $manager->setDefaultRoleNames(
-            static function () {
-                return 'test';
-            }
-        );
+        $manager->setDefaultRoleNames(static fn (): string => 'test');
     }
 
     public function testGetDefaultRoles(): void
