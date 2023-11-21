@@ -504,9 +504,8 @@ final class Manager implements ManagerInterface
     /**
      * @param string[] $roleNames
      *
-     * @return array<string, Role>
-     *
      * @throws DefaultRolesNotFoundException
+     * @return array<string, Role>
      */
     private function filterStoredRoles(array $roleNames): array
     {
