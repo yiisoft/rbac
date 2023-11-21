@@ -192,14 +192,13 @@ final class Manager implements ManagerInterface
     {
         $userId = (string) $userId;
         $assignments = $this->assignmentsStorage->getByUserId($userId);
-        $parentItems = array_merge(
+        $items = array_merge(
             $this->getDefaultRoles(),
             $this->itemsStorage->getByNames(array_keys($assignments)),
         );
-        $items = $parentItems;
 
-        foreach ($parentItems as $item) {
-            $items = array_merge($items, $this->itemsStorage->getAllChildren($item->getName()));
+        foreach ($assignments as $assignment) {
+            $items = array_merge($items, $this->itemsStorage->getAllChildren($assignment->getItemName()));
         }
 
         return $items;
@@ -209,14 +208,13 @@ final class Manager implements ManagerInterface
     {
         $userId = (string) $userId;
         $assignments = $this->assignmentsStorage->getByUserId($userId);
-        $parentRoles = array_merge(
+        $roles = array_merge(
             $this->getDefaultRoles(),
             $this->itemsStorage->getRolesByNames(array_keys($assignments)),
         );
-        $roles = $parentRoles;
 
-        foreach ($parentRoles as $role) {
-            $roles = array_merge($roles, $this->itemsStorage->getAllChildRoles($role->getName()));
+        foreach ($assignments as $assignment) {
+            $roles = array_merge($roles, $this->itemsStorage->getAllChildRoles($assignment->getItemName()));
         }
 
         return $roles;
@@ -240,8 +238,7 @@ final class Manager implements ManagerInterface
     {
         $userId = (string) $userId;
         $assignments = $this->assignmentsStorage->getByUserId($userId);
-        $parentPermissions = $this->itemsStorage->getPermissionsByNames(array_keys($assignments));
-        $permissions = $parentPermissions;
+        $permissions = $this->itemsStorage->getPermissionsByNames(array_keys($assignments));
 
         foreach ($assignments as $assignment) {
             $permissions = array_merge(
