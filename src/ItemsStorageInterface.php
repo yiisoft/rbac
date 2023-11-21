@@ -25,12 +25,22 @@ interface ItemsStorageInterface
     public function getAll(): array;
 
     /**
+     * Returns roles and permission by the given names' list.
+     *
+     * @param string[] $names List of role and/or permission names.
+     *
+     * @return array Array of role and permission instances indexed by their corresponding names.
+     * @psalm-return ItemsIndexedByName
+     */
+    public function getByNames(array $names): array;
+
+    /**
      * Returns the named role or permission.
      *
      * @param string $name The role or the permission name.
      *
-     * @return Permission|Role|null The role or the permission corresponding to the specified name. `null` is returned if no such
-     * item.
+     * @return Permission|Role|null The role or the permission corresponding to the specified name. `null` is returned
+     * if there is no such item.
      */
     public function get(string $name): Permission|Role|null;
 

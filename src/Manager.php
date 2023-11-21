@@ -192,10 +192,14 @@ final class Manager implements ManagerInterface
     {
         $userId = (string) $userId;
         $assignments = $this->assignmentsStorage->getByUserId($userId);
-        $items = $this->getDefaultRoles();
+        $parentItems = array_merge(
+            $this->getDefaultRoles(),
+            $this->itemsStorage->getByNames(array_keys($assignments)),
+        );
+        $items = $parentItems;
 
-        foreach ($assignments as $assignment) {
-            $items = array_merge($items, $this->itemsStorage->getAllChildren($assignment->getItemName()));
+        foreach ($parentItems as $item) {
+            $items = array_merge($items, $this->itemsStorage->getAllChildren($item->getName()));
         }
 
         return $items;

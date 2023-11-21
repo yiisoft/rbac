@@ -19,6 +19,11 @@ final class FakeItemsStorage implements ItemsStorageInterface
         return $this->items;
     }
 
+    public function getByNames(array $names): array
+    {
+        return array_filter($this->getAll(), static fn (Item $item): bool => in_array($item->getName(), $names));
+    }
+
     public function get(string $name): Permission|Role|null
     {
         return $this->items[$name] ?? null;

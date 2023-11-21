@@ -509,23 +509,27 @@ trait ManagerLogicTestTrait
         $this->assertTrue($manager->userHasPermission('reader', 'updateAnyPost'));
     }
 
-    public function testGetRolesByUser(): void
+    public function testGetItemsByUserId(): void
     {
-        $manager = $this->createFilledManager();
+        $this->assertEqualsCanonicalizing(
+            ['myDefaultRole', 'reader', 'readPost', 'Fast Metabolism'],
+            array_keys($this->createFilledManager()->getItemsByUserId('reader A'))
+        );
+    }
 
-        $this->assertEquals(
+    public function testGetRolesByUserId(): void
+    {
+        $this->assertEqualsCanonicalizing(
             ['myDefaultRole', 'reader'],
-            array_keys($manager->getRolesByUserId('reader A'))
+            array_keys($this->createFilledManager()->getRolesByUserId('reader A'))
         );
     }
 
     public function testGetChildRoles(): void
     {
-        $manager = $this->createFilledManager();
-
         $this->assertEqualsCanonicalizing(
             ['reader', 'author'],
-            array_keys($manager->getChildRoles('admin'))
+            array_keys($this->createFilledManager()->getChildRoles('admin'))
         );
     }
 
@@ -551,13 +555,11 @@ trait ManagerLogicTestTrait
         $this->assertEmpty($manager->getPermissionsByRoleName('guest'));
     }
 
-    public function testGetPermissionsByUser(): void
+    public function testGetPermissionsByUserId(): void
     {
-        $manager = $this->createFilledManager();
-
         $this->assertEqualsCanonicalizing(
             ['deletePost', 'publishPost', 'createPost', 'updatePost', 'readPost'],
-            array_keys($manager->getPermissionsByUserId('author B'))
+            array_keys($this->createFilledManager()->getPermissionsByUserId('author B'))
         );
     }
 
