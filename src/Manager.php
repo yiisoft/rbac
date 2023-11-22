@@ -339,7 +339,7 @@ final class Manager implements ManagerInterface
     public function setGuestRoleName(?string $name): self
     {
         if ($name !== null && !$this->itemsStorage->roleExists($name)) {
-            throw new RuntimeException("Role \"$name\" does not exist.");
+            throw new InvalidArgumentException("Role \"$name\" does not exist.");
         }
 
         $this->guestRoleName = $name;

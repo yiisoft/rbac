@@ -931,4 +931,11 @@ trait ManagerLogicTestTrait
             $assignmentsStorage->getAll(),
         );
     }
+
+    public function testSetGuestRoleNameWithNonExistingRole(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Role "non-existing" does not exist.');
+        $this->createFilledManager()->setGuestRoleName('non-existing');
+    }
 }
