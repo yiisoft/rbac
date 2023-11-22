@@ -629,7 +629,7 @@ trait ManagerLogicTestTrait
         $this->assertSame($manager, $returnedManager);
     }
 
-    public function testAddAlreadyExistsItem(): void
+    public function testAddPermissionWithExistingRole(): void
     {
         $manager = $this->createManager();
         $manager->addRole(new Role('reader'));
@@ -821,14 +821,23 @@ trait ManagerLogicTestTrait
         $this->assertEquals(['newDefaultRole'], $manager->getDefaultRoleNames());
     }
 
-    public function testDefaultRolesWithClosureReturningNonArrayValue(): void
+    public function dataSetDefaultRolesNamesException(): array
     {
-        $manager = $this->createFilledManager();
+        return [
+            [['test1', 2, 'test3'], 'Each role name must be a string.'],
+            [static fn (): string => 'test', 'Default role names closure must return an array.'],
+            [static fn (): array => ['test1', 2, 'test3'], 'Each role name must be a string.'],
+        ];
+    }
 
+    /**
+     * @dataProvider dataSetDefaultRolesNamesException
+     */
+    public function testSetDefaultRolesNamesException(mixed $defaultRoleNames, string $expectedExceptionMessage): void
+    {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Default role names closure must return an array.');
-
-        $manager->setDefaultRoleNames(static fn (): string => 'test');
+        $this->expectExceptionMessage($expectedExceptionMessage);
+        $this->createFilledManager()->setDefaultRoleNames($defaultRoleNames);
     }
 
     public function testGetDefaultRoles(): void
