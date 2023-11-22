@@ -130,12 +130,12 @@ trait ManagerLogicTestTrait
      */
     public function testUserHasPermissionWithGuest($userId, array $tests): void
     {
-        $manager = $this->createFilledManager();
-        $manager->setGuestRoleName('guest');
-
-        $this->itemsStorage->add(new Role('guest'));
-        $this->itemsStorage->add(new Permission('signup'));
-        $this->itemsStorage->addChild('guest', 'signup');
+        $manager = $this
+            ->createFilledManager()
+            ->setGuestRoleName('guest')
+            ->addRole(new Role('guest'))
+            ->addPermission(new Permission('signup'))
+            ->addChild('guest', 'signup');
 
         foreach ($tests as $permission => $result) {
             $this->assertEquals(
@@ -246,13 +246,11 @@ trait ManagerLogicTestTrait
 
     public function testUserHasPermissionWithNonExistingRule(): void
     {
-        $manager = $this->createFilledManager();
-
-        $permission = (new Permission('test-permission'))->withRuleName('non-exist-rule');
-        $role = (new Role('test'));
-        $this->itemsStorage->add($role);
-        $this->itemsStorage->add($permission);
-        $this->itemsStorage->addChild('test', 'test-permission');
+        $manager = $this
+            ->createFilledManager()
+            ->addPermission((new Permission('test-permission'))->withRuleName('non-exist-rule'))
+            ->addRole(new Role('test'))
+            ->addChild('test', 'test-permission');
 
         $this->expectException(RuleNotFoundException::class);
         $this->expectExceptionMessage('Rule "non-exist-rule" not found.');
@@ -332,13 +330,8 @@ trait ManagerLogicTestTrait
         $manager = $this->createFilledManager();
         $returnedManager = $manager->addChild('reader', 'createPost');
 
-        $this->assertEqualsCanonicalizing(
-            [
-                'readPost',
-                'createPost',
-            ],
-            array_keys($this->itemsStorage->getDirectChildren('reader'))
-        );
+        $this->assertTrue($manager->hasChild('reader', 'createPost'));
+        $this->assertTrue($manager->hasChild('reader', 'readPost'));
         $this->assertSame($manager, $returnedManager);
     }
 
@@ -421,13 +414,9 @@ trait ManagerLogicTestTrait
         $manager = $this->createFilledManager();
         $returnedManager = $manager->removeChild('author', 'createPost');
 
-        $this->assertEqualsCanonicalizing(
-            [
-                'updatePost',
-                'reader',
-            ],
-            array_keys($this->itemsStorage->getDirectChildren('author'))
-        );
+        $this->assertFalse($manager->hasChild('author', 'createPost'));
+        $this->assertTrue($manager->hasChild('author', 'updatePost'));
+        $this->assertTrue($manager->hasChild('author', 'reader'));
         $this->assertSame($manager, $returnedManager);
     }
 
@@ -436,7 +425,7 @@ trait ManagerLogicTestTrait
         $manager = $this->createFilledManager();
         $returnedManager = $manager->removeChildren('author');
 
-        $this->assertFalse($this->itemsStorage->hasChildren('author'));
+        $this->assertFalse($manager->hasChildren('author'));
         $this->assertSame($manager, $returnedManager);
     }
 
@@ -529,11 +518,7 @@ trait ManagerLogicTestTrait
 
     public function testAssignPermissionDirectlyWhenItIsEnabled(): void
     {
-        $manager = $this->createFilledManager(true);
-        $manager->assign(
-            'updateAnyPost',
-            'reader'
-        );
+        $manager = $this->createFilledManager()->assign('updateAnyPost', 'reader');
 
         $this->assertTrue($manager->userHasPermission('reader', 'updateAnyPost'));
     }
@@ -636,7 +621,7 @@ trait ManagerLogicTestTrait
 
         $returnedManager = $manager->addRole($role);
 
-        $storedRole = $this->itemsStorage->getRole('new role');
+        $storedRole = $manager->getRole('new role');
 
         $this->assertNotNull($storedRole);
         $this->assertSame('new role description', $storedRole->getDescription());
@@ -673,7 +658,7 @@ trait ManagerLogicTestTrait
         $manager = $this->createFilledManager();
         $returnedManager = $manager->removeRole('reader');
 
-        $this->assertNull($this->itemsStorage->getRole('reader'));
+        $this->assertNull($manager->getRole('reader'));
         $this->assertSame($manager, $returnedManager);
         $this->assertFalse($manager->userHasPermission('reader A', 'readPost'));
     }
@@ -681,13 +666,13 @@ trait ManagerLogicTestTrait
     public function testUpdateRoleNameAndRule(): void
     {
         $manager = $this->createFilledManager();
-        $role = $this->itemsStorage
+        $role = $manager
             ->getRole('reader')
             ->withName('new reader');
         $returnedManager = $manager->updateRole('reader', $role);
 
-        $this->assertNull($this->itemsStorage->getRole('reader'));
-        $this->assertNotNull($this->itemsStorage->getRole('new reader'));
+        $this->assertNull($manager->getRole('reader'));
+        $this->assertNotNull($manager->getRole('new reader'));
         $this->assertSame($manager, $returnedManager);
         $this->assertTrue($manager->userHasPermission('reader A', 'readPost'));
     }
@@ -700,7 +685,7 @@ trait ManagerLogicTestTrait
             ->withCreatedAt(1_642_026_147)
             ->withUpdatedAt(1_642_026_148);
         $returnedManager = $manager->addPermission($permission);
-        $storedPermission = $this->itemsStorage->getPermission('edit post');
+        $storedPermission = $manager->getPermission('edit post');
 
         $this->assertNotNull($storedPermission);
         $this->assertSame('edit a post', $storedPermission->getDescription());
@@ -725,7 +710,7 @@ trait ManagerLogicTestTrait
         $manager = $this->createFilledManager();
         $permission = new Permission('test');
         $manager->addPermission($permission);
-        $storedPermission = $this->itemsStorage->getPermission('test');
+        $storedPermission = $manager->getPermission('test');
 
         $this->assertNotNull($storedPermission);
         $this->assertNotNull($storedPermission->getCreatedAt());
@@ -737,7 +722,7 @@ trait ManagerLogicTestTrait
         $manager = $this->createFilledManager();
         $returnedManager = $manager->removePermission('deletePost');
 
-        $this->assertNull($this->itemsStorage->getPermission('deletePost'));
+        $this->assertNull($manager->getPermission('deletePost'));
         $this->assertSame($manager, $returnedManager);
         $this->assertFalse($manager->userHasPermission('author B', 'deletePost'));
     }
@@ -745,15 +730,15 @@ trait ManagerLogicTestTrait
     public function testUpdatePermission(): void
     {
         $manager = $this->createFilledManager();
-        $permission = $this->itemsStorage
+        $permission = $manager
             ->getPermission('updatePost')
             ->withName('newUpdatePost')
             ->withCreatedAt(1_642_026_149)
             ->withUpdatedAt(1_642_026_150);
         $returnedManager = $manager->updatePermission('updatePost', $permission);
 
-        $this->assertNull($this->itemsStorage->getPermission('updatePost'));
-        $newPermission = $this->itemsStorage->getPermission('newUpdatePost');
+        $this->assertNull($manager->getPermission('updatePost'));
+        $newPermission = $manager->getPermission('newUpdatePost');
         $this->assertNotNull($newPermission);
         $this->assertSame(1_642_026_149, $newPermission->getCreatedAt());
         $this->assertSame(1_642_026_150, $newPermission->getUpdatedAt());
@@ -765,15 +750,15 @@ trait ManagerLogicTestTrait
     public function testUpdateDirectPermission1(): void
     {
         $manager = $this->createFilledManager();
-        $permission = $this->itemsStorage
+        $permission = $manager
             ->getPermission('deletePost')
             ->withName('newDeletePost')
             ->withCreatedAt(1_642_026_149)
             ->withUpdatedAt(1_642_026_150);
         $manager->updatePermission('deletePost', $permission);
-        $newPermission = $this->itemsStorage->getPermission('newDeletePost');
+        $newPermission = $manager->getPermission('newDeletePost');
 
-        $this->assertNull($this->itemsStorage->getPermission('deletePost'));
+        $this->assertNull($manager->getPermission('deletePost'));
         $this->assertNotNull($newPermission);
         $this->assertSame(1_642_026_149, $newPermission->getCreatedAt());
         $this->assertSame(1_642_026_150, $newPermission->getUpdatedAt());
@@ -784,9 +769,7 @@ trait ManagerLogicTestTrait
     public function testUpdatePermissionNameAlreadyUsed(): void
     {
         $manager = $this->createFilledManager();
-        $permission = $this->itemsStorage
-            ->getPermission('updatePost')
-            ->withName('createPost');
+        $permission = $manager->getPermission('updatePost')->withName('createPost');
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(
@@ -799,9 +782,7 @@ trait ManagerLogicTestTrait
     public function testUpdateRoleNameAlreadyUsed(): void
     {
         $manager = $this->createFilledManager();
-        $role = $this->itemsStorage
-            ->getRole('reader')
-            ->withName('author');
+        $role = $manager->getRole('reader')->withName('author');
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(
@@ -897,38 +878,29 @@ trait ManagerLogicTestTrait
     public function testRevokeRole(): void
     {
         $manager = $this->createFilledManager();
-        $returnedManager = $manager->revoke(
-            'reader',
-            'reader A'
-        );
+        $this->assertArrayHasKey('reader', $manager->getRolesByUserId('reader A'));
 
-        $this->assertSame(
-            ['Fast Metabolism'],
-            array_keys($this->assignmentsStorage->getByUserId('reader A'))
-        );
+        $returnedManager = $manager->revoke('reader', 'reader A');
+        $this->assertArrayNotHasKey('reader', $manager->getRolesByUserId('reader A'));
         $this->assertSame($manager, $returnedManager);
     }
 
     public function testRevokePermission(): void
     {
         $manager = $this->createFilledManager();
-        $manager->revoke(
-            'deletePost',
-            'author B'
-        );
+        $this->assertArrayHasKey('deletePost', $manager->getPermissionsByUserId('author B'));
 
-        $this->assertSame(
-            ['author', 'publishPost'],
-            array_keys($this->assignmentsStorage->getByUserId('author B'))
-        );
+        $manager->revoke('deletePost', 'author B');
+        $this->assertArrayNotHasKey('deletePost', $manager->getPermissionsByUserId('author B'));
     }
 
     public function testRevokeAll(): void
     {
         $manager = $this->createFilledManager();
-        $returnedManager = $manager->revokeAll('author B');
+        $this->assertNotEmpty($manager->getPermissionsByUserId('author B'));
 
-        $this->assertEmpty($this->assignmentsStorage->getByUserId('author B'));
+        $returnedManager = $manager->revokeAll('author B');
+        $this->assertEmpty($manager->getPermissionsByUserId('author B'));
         $this->assertSame($manager, $returnedManager);
     }
 

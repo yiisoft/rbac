@@ -30,6 +30,8 @@
 - Bug #172: Execute rule when checking permissions for guests (@arogachev)
 - Chg #172: Make `$userId` parameter `nullable` in `RuleInterface::execute()` (@arogachev)
 - Bug #175: Use rule factory for creating rule instances in `CompositeRule` (@arogachev)
+- Enh #202: Add `getRole()`, `getPermission()` and `hasChildren()` methods to `ManagerInterface` (@arogachev)
+- Chg #202: Rename `$permissionName` parameter to `$name` in `ManagerInterface::removePermission()` method (@arogachev)
 
 ## 1.0.2 April 20, 2023
 

@@ -109,6 +109,11 @@ final class Manager implements ManagerInterface
         return $this->itemsStorage->hasDirectChild($parentName, $childName);
     }
 
+    public function hasChildren(string $parentName): bool
+    {
+        return $this->itemsStorage->hasChildren($parentName);
+    }
+
     public function assign(string $itemName, int|Stringable|string $userId, ?int $createdAt = null): self
     {
         $userId = (string) $userId;
@@ -202,10 +207,9 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
-    public function removeRole(string $name): self
+    public function getRole(string $name): ?Role
     {
-        $this->removeItem($name);
-        return $this;
+        return $this->itemsStorage->getRole($name);
     }
 
     public function updateRole(string $name, Role $role): self
@@ -218,16 +222,21 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
+    public function removeRole(string $name): self
+    {
+        $this->removeItem($name);
+        return $this;
+    }
+
     public function addPermission(Permission $permission): self
     {
         $this->addItem($permission);
         return $this;
     }
 
-    public function removePermission(string $permissionName): self
+    public function getPermission(string $name): ?Permission
     {
-        $this->removeItem($permissionName);
-        return $this;
+        return $this->itemsStorage->getPermission($name);
     }
 
     public function updatePermission(string $name, Permission $permission): self
@@ -237,6 +246,12 @@ final class Manager implements ManagerInterface
         $this->itemsStorage->update($name, $permission);
         $this->assignmentsStorage->renameItem($name, $permission->getName());
 
+        return $this;
+    }
+
+    public function removePermission(string $name): self
+    {
+        $this->removeItem($name);
         return $this;
     }
 

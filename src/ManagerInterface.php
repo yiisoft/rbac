@@ -72,6 +72,15 @@ interface ManagerInterface extends AccessCheckerInterface
     public function hasChild(string $parentName, string $childName): bool;
 
     /**
+     * Returns whether named parent has children.
+     *
+     * @param string $parentName The parent name.
+     *
+     * @return bool Whether named parent has children.
+     */
+    public function hasChildren(string $parentName): bool;
+
+    /**
      * Assigns a role or permission to a user.
      *
      * @param string $itemName Name of the role or the permission to be assigned.
@@ -155,50 +164,46 @@ interface ManagerInterface extends AccessCheckerInterface
     public function getUserIdsByRoleName(string $roleName): array;
 
     /**
-     * @param Role $role
-     *
      * @throws ItemAlreadyExistsException
-     *
-     * @return self
      */
     public function addRole(Role $role): self;
 
     /**
      * @param string $name The role name.
-     *
-     * @return self
      */
-    public function removeRole(string $name): self;
+    public function getRole(string $name): ?Role;
 
     /**
      * @param string $name The role name.
-     * @param Role $role
-     *
-     * @return self
+     * @param Role $role Role instance with updated data.
      */
     public function updateRole(string $name, Role $role): self;
+
+    /**
+     * @param string $name The role name.
+     */
+    public function removeRole(string $name): self;
 
     /**
      * @param Permission $permission
      *
      * @throws ItemAlreadyExistsException
-     *
-     * @return self
      */
     public function addPermission(Permission $permission): self;
 
     /**
-     * @param string $permissionName The permission name.
-     *
-     * @return self
+     * @param string $name The permission name.
      */
-    public function removePermission(string $permissionName): self;
+    public function getPermission(string $name): ?Permission;
 
     /**
      * @param string $name The permission name.
-     * @param Permission $permission
-     *
-     * @return self
+     */
+    public function removePermission(string $name): self;
+
+    /**
+     * @param string $name The permission name.
+     * @param Permission $permission Permission instance with updated data.
      */
     public function updatePermission(string $name, Permission $permission): self;
 
