@@ -453,7 +453,7 @@ final class Manager implements ManagerInterface
 
     /**
      * @throws InvalidArgumentException
-     * @return string[] $roleNames
+     * @return string[]
      */
     private function getDefaultRoleNamesForUpdate(array|Closure $roleNames): array
     {
