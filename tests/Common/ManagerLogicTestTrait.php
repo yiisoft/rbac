@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac\Tests\Common;
 
+use Closure;
 use DateTime;
 use InvalidArgumentException;
 use RuntimeException;
 use SlopeIt\ClockMock\ClockMock;
 use Yiisoft\Rbac\Assignment;
+use Yiisoft\Rbac\Exception\DefaultRolesNotFoundException;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 use Yiisoft\Rbac\Exception\RuleNotFoundException;
 use Yiisoft\Rbac\Permission;
@@ -821,33 +823,73 @@ trait ManagerLogicTestTrait
         $this->assertEquals(['newDefaultRole'], $manager->getDefaultRoleNames());
     }
 
-    public function dataSetDefaultRolesNamesException(): array
+    public function dataSetDefaultRoleNamesException(): array
     {
         return [
-            [['test1', 2, 'test3'], 'Each role name must be a string.'],
-            [static fn (): string => 'test', 'Default role names closure must return an array.'],
-            [static fn (): array => ['test1', 2, 'test3'], 'Each role name must be a string.'],
+            [['test1', 2, 'test3'], InvalidArgumentException::class, 'Each role name must be a string.'],
+            [
+                static fn (): string => 'test',
+                InvalidArgumentException::class,
+                'Default role names closure must return an array.',
+            ],
+            [
+                static fn (): array => ['test1', 2, 'test3'],
+                InvalidArgumentException::class,
+                'Each role name must be a string.',
+            ],
+            [
+                ['non-existing'],
+                DefaultRolesNotFoundException::class,
+                'The following default roles were not found: "non-existing".',
+            ],
+            [
+                ['non-existing1', 'non-existing2'],
+                DefaultRolesNotFoundException::class,
+                'The following default roles were not found: "non-existing1", "non-existing2".',
+            ],
         ];
     }
 
     /**
-     * @dataProvider dataSetDefaultRolesNamesException
+     * @dataProvider dataSetDefaultRoleNamesException
      */
-    public function testSetDefaultRolesNamesException(mixed $defaultRoleNames, string $expectedExceptionMessage): void
+    public function testSetDefaultRoleNamesException(
+        mixed $defaultRoleNames,
+        string $expectedExceptionClass,
+        string $expectedExceptionMessage,
+    ): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException($expectedExceptionClass);
         $this->expectExceptionMessage($expectedExceptionMessage);
         $this->createFilledManager()->setDefaultRoleNames($defaultRoleNames);
     }
 
-    public function testGetDefaultRoles(): void
+    public function dataSetDefaultRoleNames(): array
     {
-        $manager = $this->createFilledManager();
-
-        $this->assertEquals(['myDefaultRole'], $manager->getDefaultRoleNames());
+        return [
+            [['defaultRole1'], ['defaultRole1']],
+            [['defaultRole1', 'defaultRole2'], ['defaultRole1', 'defaultRole2']],
+            [static fn (): array => ['defaultRole1'], ['defaultRole1']],
+            [static fn (): array => ['defaultRole1', 'defaultRole2'], ['defaultRole1', 'defaultRole2']],
+            [[], []],
+            [static fn (): array => [], []],
+        ];
     }
 
-    public function dataGetDefaultNonExistingRoles()
+    /**
+     * @dataProvider dataSetDefaultRoleNames
+     */
+    public function testSetDefaultRoleNames(array|Closure $defaultRoleNames, array $expectedRoleNames): void
+    {
+        $manager = $this
+            ->createFilledManager()
+            ->addRole(new Role('defaultRole1'))
+            ->addRole(new Role('defaultRole2'));
+        $manager->setDefaultRoleNames($defaultRoleNames);
+        $this->assertEqualsCanonicalizing($expectedRoleNames, $manager->getDefaultRoleNames());
+    }
+
+    public function dataGetDefaultRoleNamesWithNonExistingRoles(): array
     {
         return [
             [['bananaCollector'], 'The following default roles were not found: "bananaCollector".'],
@@ -859,9 +901,12 @@ trait ManagerLogicTestTrait
     }
 
     /**
-     * @dataProvider dataGetDefaultNonExistingRoles
+     * @dataProvider dataGetDefaultRoleNamesWithNonExistingRoles
      */
-    public function testGetDefaultNonExistingRoles(array $defaultRoleNames, string $expectedExceptionMessage): void
+    public function testGetDefaultRoleNamesWithNonExistingRoles(
+        array $defaultRoleNames,
+        string $expectedExceptionMessage,
+    ): void
     {
         $manager = $this->createManager();
 
@@ -878,6 +923,11 @@ trait ManagerLogicTestTrait
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage($expectedExceptionMessage);
         $manager->getDefaultRoles();
+    }
+
+    public function testGetDefaultRoleNames(): void
+    {
+        $this->assertEquals(['myDefaultRole'], $this->createFilledManager()->getDefaultRoleNames());
     }
 
     public function testRevokeRole(): void
