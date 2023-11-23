@@ -860,8 +860,7 @@ trait ManagerLogicTestTrait
         mixed $defaultRoleNames,
         string $expectedExceptionClass,
         string $expectedExceptionMessage,
-    ): void
-    {
+    ): void {
         $this->expectException($expectedExceptionClass);
         $this->expectExceptionMessage($expectedExceptionMessage);
         $this->createFilledManager()->setDefaultRoleNames($defaultRoleNames);
@@ -909,8 +908,7 @@ trait ManagerLogicTestTrait
     public function testGetDefaultRoleNamesWithNonExistingRoles(
         array $defaultRoleNames,
         string $expectedExceptionMessage,
-    ): void
-    {
+    ): void {
         $manager = $this->createManager();
 
         foreach ($defaultRoleNames as $roleName) {
