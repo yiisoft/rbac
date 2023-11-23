@@ -51,8 +51,7 @@ trait ManagerConfigurationTestTrait
         ?ItemsStorageInterface $itemsStorage = null,
         ?AssignmentsStorageInterface $assignmentsStorage = null,
         ?RuleFactoryInterface $ruleFactory = null,
-    ): ManagerInterface
-    {
+    ): ManagerInterface {
         return $this
             ->createManager(
                 $itemsStorage ?? $this->createItemsStorage(),
