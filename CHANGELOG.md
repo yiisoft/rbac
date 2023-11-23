@@ -35,6 +35,9 @@
 - Enh #203: Add `getByNames()` method to `ItemsStorageInterface` (@arogachev)
 - Enh #203: Add `filterUserItemNames()` method to `AssignmentsStorageInterface` (@arogachev)
 - Enh #203: Add `getItemsByUserId()` method to `ManagerInterface` (@arogachev)
+- Bug #203: Remove duplicated code for checking permission in `Manager::userHasPermission()` (@arogachev)
+- Bug #203: Execute rules for parent items and for guests in `Manager::userHasPermission()` (@arogachev)
+- Bug #203: Do not limit child items by only direct ones for guests in `Manager::userHasPermission()` (@arogachev)
 - Bug #203: Fix `Manager::getRolesByUserId()` to include child roles (@arogachev)
 - Chg #203: Verify that every passed role name is a string in `Manager::setDefaultRoleNames()` (@arogachev)
 - Chg #203: Throw `DefaultRolesNotFoundException` when passed role name does not exist in
