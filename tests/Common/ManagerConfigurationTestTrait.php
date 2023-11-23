@@ -47,13 +47,17 @@ trait ManagerConfigurationTestTrait
         return new FakeAssignmentsStorage();
     }
 
-    protected function createFilledManager(): ManagerInterface
+    protected function createFilledManager(
+        ?ItemsStorageInterface $itemsStorage = null,
+        ?AssignmentsStorageInterface $assignmentsStorage = null,
+        ?RuleFactoryInterface $ruleFactory = null,
+    ): ManagerInterface
     {
         return $this
             ->createManager(
-                $this->createItemsStorage(),
-                $this->createAssignmentsStorage(),
-                new SimpleRuleFactory([
+                $itemsStorage ?? $this->createItemsStorage(),
+                $assignmentsStorage ?? $this->createAssignmentsStorage(),
+                $ruleFactory ?? new SimpleRuleFactory([
                     'isAuthor' => new AuthorRule(),
                     'easyTrue' => new EasyRule(true),
                     'easyFalse' => new EasyRule(false),

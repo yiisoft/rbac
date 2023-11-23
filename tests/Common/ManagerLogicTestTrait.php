@@ -651,6 +651,7 @@ trait ManagerLogicTestTrait
         $this->assertNull($manager->getRole('reader'));
         $this->assertSame($manager, $returnedManager);
         $this->assertFalse($manager->userHasPermission('reader A', 'readPost'));
+        $this->assertEqualsCanonicalizing(['author B', 'admin C'], $manager->getUserIdsByRoleName('reader'));
     }
 
     public function testUpdateRoleNameAndRule(): void
@@ -709,12 +710,14 @@ trait ManagerLogicTestTrait
 
     public function testRemovePermission(): void
     {
-        $manager = $this->createFilledManager();
+        $assignmentsStorage = $this->createAssignmentsStorage();
+        $manager = $this->createFilledManager(assignmentsStorage: $assignmentsStorage);
         $returnedManager = $manager->removePermission('deletePost');
 
         $this->assertNull($manager->getPermission('deletePost'));
         $this->assertSame($manager, $returnedManager);
         $this->assertFalse($manager->userHasPermission('author B', 'deletePost'));
+        $this->assertEmpty($assignmentsStorage->getByItemNames(['deletePost']));
     }
 
     public function testUpdatePermission(): void
