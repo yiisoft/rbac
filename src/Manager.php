@@ -382,8 +382,6 @@ final class Manager implements ManagerInterface
             throw new ItemAlreadyExistsException($item);
         }
 
-        // TODO: Check for non-existing rule
-
         $time = time();
         if (!$item->hasCreatedAt()) {
             $item = $item->withCreatedAt($time);

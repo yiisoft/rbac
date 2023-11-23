@@ -32,8 +32,15 @@
 - Bug #175: Use rule factory for creating rule instances in `CompositeRule` (@arogachev)
 - Enh #202: Add `getRole()`, `getPermission()` and `hasChildren()` methods to `ManagerInterface` (@arogachev)
 - Chg #202: Rename `$permissionName` parameter to `$name` in `ManagerInterface::removePermission()` method (@arogachev)
-- Enh #202: Add `filterUserItemNames()` method to `AssignmentsStorageInterface` (@arogachev)
-- Enh #202: Add `getByNames()` method to `ItemsStorageInterface` (@arogachev)
+- Enh #203: Add `getByNames()` method to `ItemsStorageInterface` (@arogachev)
+- Enh #203: Add `filterUserItemNames()` method to `AssignmentsStorageInterface` (@arogachev)
+- Enh #203: Add `getItemsByUserId()` method to `ManagerInterface` (@arogachev)
+- Bug #203: Fix `Manager::getRolesByUserId()` to include child roles (@arogachev)
+- Chg #203: Verify that every passed role name is a string in `Manager::setDefaultRoleNames()` (@arogachev)
+- Chg #203: Throw `DefaultRolesNotFoundException` when passed role name does not exist in
+  `setDefaultRoleNames()` and `getDefaultRoleNames()` methods in `Manager` (@arogachev)
+- Chg #203: Throw `InvalidArgumentException` when passed role name does not exist in `Manager::setGuestRoleName()`
+  (@arogachev)
 
 ## 1.0.2 April 20, 2023
 
