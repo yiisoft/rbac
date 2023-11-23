@@ -82,10 +82,6 @@ final class Manager implements ManagerInterface
                 return false;
             }
 
-            if (!$this->itemsStorage->roleExists($this->guestRoleName)) {
-                return false;
-            }
-
             $guestChildren = $this->itemsStorage->getAllChildren($this->guestRoleName);
 
             $userItems = [];
