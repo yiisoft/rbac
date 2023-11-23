@@ -77,6 +77,11 @@ final class Manager implements ManagerInterface
                 return false;
             }
 
+            $guestRole = $this->getRole($this->guestRoleName);
+            if ($guestRole === null) {
+                return false;
+            }
+
             if (!$this->itemsStorage->roleExists($this->guestRoleName)) {
                 return false;
             }
@@ -88,6 +93,10 @@ final class Manager implements ManagerInterface
                 if (array_key_exists($itemName, $guestChildren)) {
                     $userItems[$itemName] = $items[$itemName];
                 }
+            }
+
+            if (!empty($userItems)) {
+                $userItems[$guestRole->getName()] = $guestRole;
             }
         }
 

@@ -16,7 +16,9 @@ use Yiisoft\Rbac\Exception\RuleNotFoundException;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\Tests\Support\AdsRule;
+use Yiisoft\Rbac\Tests\Support\GuestRule;
 use Yiisoft\Rbac\Tests\Support\AuthorRule;
+use Yiisoft\Rbac\Tests\Support\BanRule;
 use Yiisoft\Rbac\Tests\Support\EasyRule;
 use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
@@ -116,8 +118,6 @@ trait ManagerLogicTestTrait
             [null, 'view exclusive content', [], false],
             [null, 'view ban warning', [], false],
 
-            // https://github.com/yiisoft/rbac/issues/172
-
             [null, 'view ads', ['dayPeriod' => 'morning'], true],
             [null, 'view ads', ['dayPeriod' => 'night'], false],
             [$explicitGuestUserId, 'view ads', [], true],
@@ -132,6 +132,22 @@ trait ManagerLogicTestTrait
             [$explicitGuestUserId, 'edit news comment', ['authorId' => "$explicitGuestUserId"], true],
             ["$explicitGuestUserId", 'edit news comment', ['authorId' => $explicitGuestUserId], true],
             ["$explicitGuestUserId", 'edit news comment', ['authorId' => "$explicitGuestUserId"], true],
+
+            [null, 'view news', ['noGuestsModeOn' => true], false],
+            [
+                $explicitGuestUserId,
+                'edit news comment',
+                ['authorId' => $explicitGuestUserId, 'noGuestsModeOn' => true],
+                false,
+            ],
+
+            [$warnedUserId, 'view ban warning', [], true],
+            [$warnedUserId, 'view ban warning', ['viewed' => true], false],
+
+            [$trialUserId, 'view ads', [], true],
+            [$trialUserId, 'view ads', [], true],
+            [$activeSubscriptionUserId, 'view ads', [], false],
+            [$inActiveSubscriptionUserId, 'view ads', [], false],
 
             [$activeSubscriptionUserId, 'view exclusive content', [], true],
             [$inActiveSubscriptionUserId, 'view exclusive content', [], false],
@@ -150,9 +166,6 @@ trait ManagerLogicTestTrait
         array $parameters,
         bool $expectedHasPermission,
     ): void {
-        // view ban warning - check if warning was already viewed
-        // guests - restrict access in a certain period of time
-
         $warnedUserId = 1;
         $trialUserId = 2;
         $activeSubscriptionUserId = 3;
@@ -166,17 +179,19 @@ trait ManagerLogicTestTrait
                     'subscription' => new SubscriptionRule(),
                     'ads' => new AdsRule(),
                     'author' => new AuthorRule(),
+                    'ban' => new BanRule(),
+                    'guest' => new GuestRule(),
                 ]),
                 enableDirectPermissions: true,
             )
-            ->addRole(new Role('guest'))
+            ->addRole((new Role('guest'))->withRuleName('guest'))
             ->setGuestRoleName('guest')
             ->addRole(new Role('news comment manager'))
             ->addRole(new Role('warned user'))
             ->addRole(new Role('trial user'))
             ->addRole((new Role('subscribed user'))->withRuleName('subscription'))
             ->addPermission((new Permission('view ads'))->withRuleName('ads'))
-            ->addPermission(new Permission('view ban warning'))
+            ->addPermission((new Permission('view ban warning'))->withRuleName('ban'))
             ->addPermission(new Permission('view content'))
             ->addPermission(new Permission('view regular content'))
             ->addPermission(new Permission('view news'))
