@@ -32,6 +32,8 @@
 - Bug #175: Use rule factory for creating rule instances in `CompositeRule` (@arogachev)
 - Enh #202: Add `getRole()`, `getPermission()` and `hasChildren()` methods to `ManagerInterface` (@arogachev)
 - Chg #202: Rename `$permissionName` parameter to `$name` in `ManagerInterface::removePermission()` method (@arogachev)
+- Enh #202: Add `filterUserItemNames()` method to `AssignmentsStorageInterface` (@arogachev)
+- Enh #202: Add `getByNames()` method to `ItemsStorageInterface` (@arogachev)
 
 ## 1.0.2 April 20, 2023
 
