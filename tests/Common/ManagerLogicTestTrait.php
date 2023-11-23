@@ -522,8 +522,8 @@ trait ManagerLogicTestTrait
     public function testGetRolesByUserId(): void
     {
         $this->assertEqualsCanonicalizing(
-            ['myDefaultRole', 'reader'],
-            array_keys($this->createFilledManager()->getRolesByUserId('reader A'))
+            ['admin', 'author', 'myDefaultRole', 'reader'],
+            array_keys($this->createFilledManager()->getRolesByUserId('admin C')),
         );
     }
 
