@@ -129,9 +129,9 @@ trait ManagerLogicTestTrait
             [$explicitGuestUserId, 'edit news comment', ['authorId' => null], false],
             [$explicitGuestUserId, 'edit news comment', ['authorId' => 55], false],
             [$explicitGuestUserId, 'edit news comment', ['authorId' => $explicitGuestUserId], true],
-            [$explicitGuestUserId, 'edit news comment', ['authorId' => "$explicitGuestUserId"], true],
-            ["$explicitGuestUserId", 'edit news comment', ['authorId' => $explicitGuestUserId], true],
-            ["$explicitGuestUserId", 'edit news comment', ['authorId' => "$explicitGuestUserId"], true],
+            [$explicitGuestUserId, 'edit news comment', ['authorId' => (string) $explicitGuestUserId], true],
+            [(string) $explicitGuestUserId, 'edit news comment', ['authorId' => $explicitGuestUserId], true],
+            [(string) $explicitGuestUserId, 'edit news comment', ['authorId' => (string) $explicitGuestUserId], true],
 
             [null, 'view news', ['noGuestsModeOn' => true], false],
             [
@@ -519,7 +519,7 @@ trait ManagerLogicTestTrait
         $manager->assign('readPost', 'id7');
     }
 
-    public function testAssignPermissionDirectlyWhenItIsEnabled(): void
+    public function testAssignPermissionDirectlyWhenEnabled(): void
     {
         $manager = $this->createFilledManager()->assign('updateAnyPost', 'reader');
 
@@ -755,7 +755,7 @@ trait ManagerLogicTestTrait
         $this->assertTrue($manager->userHasPermission('author B', 'newUpdatePost', ['authorId' => 'author B']));
     }
 
-    public function testUpdateDirectPermission1(): void
+    public function testUpdateDirectPermission(): void
     {
         $manager = $this->createFilledManager();
         $permission = $manager

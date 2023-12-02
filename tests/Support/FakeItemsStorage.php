@@ -89,6 +89,14 @@ final class FakeItemsStorage implements ItemsStorageInterface
         return $result;
     }
 
+    public function getAccessTree(string $name): array
+    {
+        $result = [$name => ['item' => $this->items[$name], 'children' => []]];
+        $this->fillAccessTreeRecursive($name, $result);
+
+        return $result;
+    }
+
     public function getDirectChildren(string $name): array
     {
         return $this->children[$name] ?? [];
@@ -253,6 +261,29 @@ final class FakeItemsStorage implements ItemsStorageInterface
                 }
 
                 $this->fillParentsRecursive($parentName, $result);
+
+                break;
+            }
+        }
+    }
+
+    private function fillAccessTreeRecursive(string $name, array &$result, array $addedChildItems = []): void
+    {
+        foreach ($this->children as $parentName => $childItems) {
+            foreach ($childItems as $childItem) {
+                if ($childItem->getName() !== $name) {
+                    continue;
+                }
+
+                $parent = $this->get($parentName);
+                if ($parent !== null) {
+                    $result[$parentName]['item'] = $this->items[$parentName];
+
+                    $addedChildItems[$childItem->getName()] = $childItem;
+                    $result[$parentName]['children'] = $addedChildItems;
+                }
+
+                $this->fillAccessTreeRecursive($parentName, $result, $addedChildItems);
 
                 break;
             }

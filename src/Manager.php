@@ -51,27 +51,8 @@ final class Manager implements ManagerInterface
             return false;
         }
 
-        $items = array_merge(
-            [$permission->getName() => $permission],
-            $this->itemsStorage->getParents($permission->getName()),
-        );
-
         if ($userId !== null) {
-            $userId = (string) $userId;
-            $userItemNames = $this->assignmentsStorage->filterUserItemNames($userId, array_keys($items));
-
-            $userItems = [];
-            foreach ($userItemNames as $itemName) {
-                $userItems[$itemName] = $items[$itemName];
-            }
-
-            foreach ($userItems as $userItem) {
-                foreach ($this->itemsStorage->getAllChildren($userItem->getName()) as $childItem) {
-                    if (array_key_exists($childItem->getName(), $items)) {
-                        $userItems[$childItem->getName()] = $childItem;
-                    }
-                }
-            }
+            $guestRole = null;
         } else {
             if ($this->guestRoleName === null) {
                 return false;
@@ -81,27 +62,35 @@ final class Manager implements ManagerInterface
             if ($guestRole === null) {
                 return false;
             }
+        }
 
-            $guestChildren = $this->itemsStorage->getAllChildren($this->guestRoleName);
+        $accessTree = $this->itemsStorage->getAccessTree($permission->getName());
+        if ($guestRole !== null && !array_key_exists($guestRole->getName(), $accessTree)) {
+            $accessTree[$guestRole->getName()] = ['item' => $guestRole, 'children' => []];
+        }
 
-            $userItems = [];
-            foreach ($items as $itemName => $_item) {
-                if (array_key_exists($itemName, $guestChildren)) {
-                    $userItems[$itemName] = $items[$itemName];
-                }
-            }
+        $itemNames = array_map(static fn (array $treeItem): string => $treeItem['item']->getName(), $accessTree);
+        $userItemNames = $guestRole !== null
+            ? [$guestRole->getName()]
+            : $this->assignmentsStorage->filterUserItemNames((string) $userId, $itemNames);
 
-            if (!empty($userItems)) {
-                $userItems[$guestRole->getName()] = $guestRole;
+        $userItems = [];
+        foreach ($userItemNames as $itemName) {
+            $userItems[$itemName] = $accessTree[$itemName]['item'];
+            foreach ($accessTree[$itemName]['children'] ?? [] as $item) {
+                $userItems[$item->getName()] = $item;
             }
         }
 
-        if (empty($userItems)) {
+        if (
+            empty($userItems) ||
+            ($guestRole !== null && count($userItems) === 1 && array_key_exists('guest', $userItems))
+        ) {
             return false;
         }
 
         foreach ($userItems as $item) {
-            if (!$this->executeRule($userId, $item, $parameters)) {
+            if (!$this->executeRule($userId === null ? $userId : (string) $userId, $item, $parameters)) {
                 return false;
             }
         }
