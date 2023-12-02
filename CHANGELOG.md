@@ -44,6 +44,7 @@
   `setDefaultRoleNames()` and `getDefaultRoleNames()` methods in `Manager` (@arogachev)
 - Chg #203: Throw `InvalidArgumentException` when passed role name does not exist in `Manager::setGuestRoleName()`
   (@arogachev)
+- Enh #203: Add `getAccessTree()` method to `ItemsStorageInterface` (@arogachev)
 
 ## 1.0.2 April 20, 2023
 
