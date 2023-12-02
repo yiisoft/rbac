@@ -40,11 +40,10 @@
 - Bug #203: Do not limit child items by only direct ones for guests in `Manager::userHasPermission()` (@arogachev)
 - Bug #203: Fix `Manager::getRolesByUserId()` to include child roles (@arogachev)
 - Chg #203: Verify that every passed role name is a string in `Manager::setDefaultRoleNames()` (@arogachev)
-- Chg #203: Throw `DefaultRolesNotFoundException` when passed role name does not exist in
-  `setDefaultRoleNames()` and `getDefaultRoleNames()` methods in `Manager` (@arogachev)
-- Chg #203: Throw `InvalidArgumentException` when passed role name does not exist in `Manager::setGuestRoleName()`
-  (@arogachev)
 - Enh #203: Add `getAccessTree()` method to `ItemsStorageInterface` (@arogachev)
+- Enh #203: Add `getGuestRoleName()` and `getGuestRole()` methods to `Manager` (@arogachev)
+- Chg #203: Throw `RuntimeException` in the case with implicit guest and non-existing guest role in 
+`Manager::userHasPermission()` (@arogachev)
 
 ## 1.0.2 April 20, 2023
 

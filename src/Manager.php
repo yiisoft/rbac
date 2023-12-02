@@ -54,11 +54,7 @@ final class Manager implements ManagerInterface
         if ($userId !== null) {
             $guestRole = null;
         } else {
-            if ($this->guestRoleName === null) {
-                return false;
-            }
-
-            $guestRole = $this->getRole($this->guestRoleName);
+            $guestRole = $this->getGuestRole();
             if ($guestRole === null) {
                 return false;
             }
@@ -310,12 +306,7 @@ final class Manager implements ManagerInterface
 
     public function setDefaultRoleNames(array|Closure $roleNames): self
     {
-        $roleNames = $this->getDefaultRoleNamesForUpdate($roleNames);
-        if (!empty($roleNames)) {
-            $roleNames = array_keys($this->filterStoredRoles($roleNames));
-        }
-
-        $this->defaultRoleNames = $roleNames;
+        $this->defaultRoleNames = $this->getDefaultRoleNamesForUpdate($roleNames);
 
         return $this;
     }
@@ -332,12 +323,28 @@ final class Manager implements ManagerInterface
 
     public function setGuestRoleName(?string $name): self
     {
-        if ($name !== null && !$this->itemsStorage->roleExists($name)) {
-            throw new InvalidArgumentException("Role \"$name\" does not exist.");
+        $this->guestRoleName = $name;
+
+        return $this;
+    }
+
+    public function getGuestRoleName(): ?string
+    {
+        return $this->guestRoleName;
+    }
+
+    public function getGuestRole(): ?Role
+    {
+        if ($this->guestRoleName === null) {
+            return null;
         }
 
-        $this->guestRoleName = $name;
-        return $this;
+        $role = $this->getRole($this->guestRoleName);
+        if ($role === null) {
+            throw new RuntimeException("Guest role with name \"$this->guestRoleName\" does not exist.");
+        }
+
+        return $role;
     }
 
     /**

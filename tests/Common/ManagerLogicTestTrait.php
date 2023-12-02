@@ -235,6 +235,8 @@ trait ManagerLogicTestTrait
             ->setGuestRoleName('non-existing-guest')
             ->removeRole('non-existing-guest');
 
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Guest role with name "non-existing-guest" does not exist.');
         $this->assertFalse($manager->userHasPermission(null, 'readPost'));
     }
 
@@ -800,47 +802,6 @@ trait ManagerLogicTestTrait
         $manager->updateRole('reader', $role);
     }
 
-    public function testSeveralDefaultRoles(): void
-    {
-        $manager = $this->createManager();
-        $manager
-            ->addRole(new Role('a'))
-            ->addRole(new Role('b'))
-            ->addRole(new Role('c'))
-            ->setDefaultRoleNames(['a', 'b']);
-
-        $roles = $manager->getDefaultRoles();
-
-        $this->assertCount(2, $roles);
-        $this->assertEqualsCanonicalizing(['a', 'b'], array_keys($roles));
-        $this->assertSame('a', $roles['a']->getName());
-        $this->assertSame('b', $roles['b']->getName());
-    }
-
-    public function testDefaultRoleNames(): void
-    {
-        $manager = $this
-            ->createManager()
-            ->addRole(new Role('a'))
-            ->addRole(new Role('b'));
-        $returnedManager = $manager->setDefaultRoleNames(['a', 'b']);
-
-        $this->assertSame(['a', 'b'], $manager->getDefaultRoleNames());
-        $this->assertSame($manager, $returnedManager);
-    }
-
-    public function testDefaultRolesSetWithClosure(): void
-    {
-        $manager = $this->createFilledManager()->addRole(new Role('newDefaultRole'));
-        $manager->setDefaultRoleNames(
-            static function () {
-                return ['newDefaultRole'];
-            }
-        );
-
-        $this->assertEquals(['newDefaultRole'], $manager->getDefaultRoleNames());
-    }
-
     public function dataSetDefaultRoleNamesException(): array
     {
         return [
@@ -854,16 +815,6 @@ trait ManagerLogicTestTrait
                 static fn (): array => ['test1', 2, 'test3'],
                 InvalidArgumentException::class,
                 'Each role name must be a string.',
-            ],
-            [
-                ['non-existing'],
-                DefaultRolesNotFoundException::class,
-                'The following default roles were not found: "non-existing".',
-            ],
-            [
-                ['non-existing1', 'non-existing2'],
-                DefaultRolesNotFoundException::class,
-                'The following default roles were not found: "non-existing1", "non-existing2".',
             ],
         ];
     }
@@ -902,28 +853,37 @@ trait ManagerLogicTestTrait
             ->createFilledManager()
             ->addRole(new Role('defaultRole1'))
             ->addRole(new Role('defaultRole2'));
-        $manager->setDefaultRoleNames($defaultRoleNames);
+        $returnedManager = $manager->setDefaultRoleNames($defaultRoleNames);
+
         $this->assertEqualsCanonicalizing($expectedRoleNames, $manager->getDefaultRoleNames());
+        $this->assertSame($manager, $returnedManager);
     }
 
-    public function dataGetDefaultRoleNamesWithNonExistingRoles(): array
+    public function dataGetDefaultRolesException(): array
     {
         return [
-            [['bananaCollector'], 'The following default roles were not found: "bananaCollector".'],
             [
-                ['bananaCollector1', 'bananaCollector2'],
-                'The following default roles were not found: "bananaCollector1", "bananaCollector2"',
+                ['non-existing'],
+                DefaultRolesNotFoundException::class,
+                'The following default roles were not found: "non-existing".',
+            ],
+            [
+                ['non-existing1', 'non-existing2'],
+                DefaultRolesNotFoundException::class,
+                'The following default roles were not found: "non-existing1", "non-existing2".',
             ],
         ];
     }
 
     /**
-     * @dataProvider dataGetDefaultRoleNamesWithNonExistingRoles
+     * @dataProvider dataGetDefaultRolesException
      */
-    public function testGetDefaultRoleNamesWithNonExistingRoles(
+    public function testGetDefaultRolesException(
         array $defaultRoleNames,
+        string $expectedExceptionClass,
         string $expectedExceptionMessage,
-    ): void {
+    ): void
+    {
         $manager = $this->createManager();
 
         foreach ($defaultRoleNames as $roleName) {
@@ -936,14 +896,99 @@ trait ManagerLogicTestTrait
             $manager->removeRole($roleName);
         }
 
-        $this->expectException(RuntimeException::class);
+        $this->expectException($expectedExceptionClass);
         $this->expectExceptionMessage($expectedExceptionMessage);
         $manager->getDefaultRoles();
     }
 
-    public function testGetDefaultRoleNames(): void
+    public function dataGetDefaultRoles(): array
     {
-        $this->assertEquals(['myDefaultRole'], $this->createFilledManager()->getDefaultRoleNames());
+        return [
+            [[]],
+            [['a']],
+            [['a', 'b']],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetDefaultRoles
+     */
+    public function testGetDefaultRoles($defaultRoleNames): void
+    {
+        $manager = $this->createManager();
+        $manager
+            ->addRole(new Role('a'))
+            ->addRole(new Role('b'))
+            ->addRole(new Role('c'))
+            ->setDefaultRoleNames($defaultRoleNames);
+
+        $roles = $manager->getDefaultRoles();
+
+        $this->assertCount(count(($defaultRoleNames)), $roles);
+        $this->assertEqualsCanonicalizing($defaultRoleNames, array_keys($roles));
+
+        foreach ($defaultRoleNames as $name) {
+            $this->assertSame($name, $roles[$name]->getName());
+        }
+    }
+
+    public function testSetGuestRoleNameException(): void
+    {
+        $manager = $this->createFilledManager();
+        $manager->setGuestRoleName('non-existing');
+
+        $this->assertSame($manager->getGuestRoleName(), 'non-existing');
+    }
+
+    public function dataSetGuestRoleName(): array
+    {
+        return [
+            ['guest'],
+            [null],
+            ['non-existing'],
+        ];
+    }
+
+    /**
+     * @dataProvider dataSetGuestRoleName
+     */
+    public function testSetGuestRoleName(?string $guestRoleName): void
+    {
+        $manager = $this
+            ->createManager()
+            ->addRole(new Role('guest'));
+        $returnedManager = $manager->setGuestRoleName($guestRoleName);
+
+        $this->assertSame($guestRoleName, $manager->getGuestRoleName());
+        $this->assertSame($manager, $returnedManager);
+    }
+
+    public function testGetGuestRoleException(): void
+    {
+        $manager = $this->createFilledManager()->setGuestRoleName('non-existing');
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Guest role with name "non-existing" does not exist.');
+        $manager->getGuestRole();
+    }
+
+    public function dataGetGuestRole(): array
+    {
+        return [
+            ['guest', new Role('guest')],
+            [null, null],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetGuestRole
+     */
+    public function testGetGuestRole(?string $guestRoleName, ?Role $expectedGuestRole): void
+    {
+        $manager = $this
+            ->createManager()
+            ->addRole(new Role('guest'))
+            ->setGuestRoleName($guestRoleName);
+        $this->assertEquals($expectedGuestRole, $manager->getGuestRole());
     }
 
     public function testRevokeRole(): void
@@ -1005,12 +1050,5 @@ trait ManagerLogicTestTrait
             ],
             $assignmentsStorage->getAll(),
         );
-    }
-
-    public function testSetGuestRoleNameWithNonExistingRole(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Role "non-existing" does not exist.');
-        $this->createFilledManager()->setGuestRoleName('non-existing');
     }
 }

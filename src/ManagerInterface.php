@@ -10,6 +10,7 @@ use InvalidArgumentException;
 use RuntimeException;
 use Stringable;
 use Yiisoft\Access\AccessCheckerInterface;
+use Yiisoft\Rbac\Exception\DefaultRolesNotFoundException;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 
 /**
@@ -242,6 +243,8 @@ interface ManagerInterface extends AccessCheckerInterface
      *
      * @return Role[] Default roles. The array is indexed by the role names.
      * @psalm-return array<string, Role>
+     *
+     * @throws DefaultRolesNotFoundException When at least 1 of default roles was not found.
      */
     public function getDefaultRoles(): array;
 
@@ -251,4 +254,20 @@ interface ManagerInterface extends AccessCheckerInterface
      * @param string|null $name The guest role name.
      */
     public function setGuestRoleName(?string $name): self;
+
+    /**
+     * Get guest role name.
+     *
+     * @return string|null The guest role name or `null` if it was not set.
+     */
+    public function getGuestRoleName(): ?string;
+
+    /**
+     * Get guest role.
+     *
+     * @return Role|null Guest role or `null` if the name was not set.
+     *
+     * @throws InvalidArgumentException When role was not found.
+     */
+    public function getGuestRole(): ?Role;
 }
