@@ -882,8 +882,7 @@ trait ManagerLogicTestTrait
         array $defaultRoleNames,
         string $expectedExceptionClass,
         string $expectedExceptionMessage,
-    ): void
-    {
+    ): void {
         $manager = $this->createManager();
 
         foreach ($defaultRoleNames as $roleName) {
@@ -924,7 +923,7 @@ trait ManagerLogicTestTrait
 
         $roles = $manager->getDefaultRoles();
 
-        $this->assertCount(count(($defaultRoleNames)), $roles);
+        $this->assertCount(count($defaultRoleNames), $roles);
         $this->assertEqualsCanonicalizing($defaultRoleNames, array_keys($roles));
 
         foreach ($defaultRoleNames as $name) {
