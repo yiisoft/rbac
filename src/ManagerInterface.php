@@ -116,7 +116,7 @@ interface ManagerInterface extends AccessCheckerInterface
     public function revokeAll(int|Stringable|string $userId): self;
 
     /**
-     * Returns the ite,s that are assigned to the user via {@see assign()}.
+     * Returns the items that are assigned to the user via {@see assign()}.
      *
      * @param int|string|Stringable $userId The user ID.
      *
