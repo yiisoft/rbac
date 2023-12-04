@@ -241,10 +241,9 @@ interface ManagerInterface extends AccessCheckerInterface
     /**
      * Returns default roles.
      *
+     * @throws DefaultRolesNotFoundException When at least 1 of default roles was not found.
      * @return Role[] Default roles. The array is indexed by the role names.
      * @psalm-return array<string, Role>
-     *
-     * @throws DefaultRolesNotFoundException When at least 1 of default roles was not found.
      */
     public function getDefaultRoles(): array;
 
@@ -265,9 +264,8 @@ interface ManagerInterface extends AccessCheckerInterface
     /**
      * Get guest role.
      *
-     * @return Role|null Guest role or `null` if the name was not set.
-     *
      * @throws InvalidArgumentException When role was not found.
+     * @return Role|null Guest role or `null` if the name was not set.
      */
     public function getGuestRole(): ?Role;
 }
