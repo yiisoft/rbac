@@ -974,21 +974,21 @@ trait ManagerLogicTestTrait
     public function dataGetGuestRole(): array
     {
         return [
-            ['guest', new Role('guest')],
-            [null, null],
+            ['guest'],
+            [null],
         ];
     }
 
     /**
      * @dataProvider dataGetGuestRole
      */
-    public function testGetGuestRole(?string $guestRoleName, ?Role $expectedGuestRole): void
+    public function testGetGuestRole(?string $guestRoleName): void
     {
         $manager = $this
             ->createManager()
             ->addRole(new Role('guest'))
             ->setGuestRoleName($guestRoleName);
-        $this->assertEquals($expectedGuestRole, $manager->getGuestRole());
+        $this->assertEquals($guestRoleName, $manager->getGuestRole()?->getName());
     }
 
     public function testRevokeRole(): void
