@@ -47,20 +47,22 @@ trait ManagerConfigurationTestTrait
         return new FakeAssignmentsStorage();
     }
 
-    protected function createFilledManager(): ManagerInterface
-    {
+    protected function createFilledManager(
+        ?ItemsStorageInterface $itemsStorage = null,
+        ?AssignmentsStorageInterface $assignmentsStorage = null,
+        ?RuleFactoryInterface $ruleFactory = null,
+    ): ManagerInterface {
         return $this
             ->createManager(
-                $this->createItemsStorage(),
-                $this->createAssignmentsStorage(),
-                new SimpleRuleFactory([
+                $itemsStorage ?? $this->createItemsStorage(),
+                $assignmentsStorage ?? $this->createAssignmentsStorage(),
+                $ruleFactory ?? new SimpleRuleFactory([
                     'isAuthor' => new AuthorRule(),
                     'easyTrue' => new EasyRule(true),
                     'easyFalse' => new EasyRule(false),
                 ]),
                 enableDirectPermissions: true,
             )
-            ->setDefaultRoleNames(['myDefaultRole'])
             ->addPermission(new Permission('Fast Metabolism'))
             ->addPermission(new Permission('createPost'))
             ->addPermission(new Permission('publishPost'))
@@ -68,11 +70,11 @@ trait ManagerConfigurationTestTrait
             ->addPermission(new Permission('deletePost'))
             ->addPermission((new Permission('updatePost'))->withRuleName('isAuthor'))
             ->addPermission(new Permission('updateAnyPost'))
-            ->addRole(new Role('withoutChildren'))
             ->addRole(new Role('reader'))
             ->addRole(new Role('author'))
             ->addRole(new Role('admin'))
             ->addRole(new Role('myDefaultRole'))
+            ->setDefaultRoleNames(['myDefaultRole'])
             ->addChild('reader', 'readPost')
             ->addChild('author', 'createPost')
             ->addChild('author', 'updatePost')

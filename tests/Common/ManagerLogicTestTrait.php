@@ -4,18 +4,26 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac\Tests\Common;
 
+use Closure;
 use DateTime;
 use InvalidArgumentException;
 use RuntimeException;
 use SlopeIt\ClockMock\ClockMock;
 use Yiisoft\Rbac\Assignment;
+use Yiisoft\Rbac\Exception\DefaultRolesNotFoundException;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 use Yiisoft\Rbac\Exception\RuleNotFoundException;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
+use Yiisoft\Rbac\Tests\Support\AdsRule;
+use Yiisoft\Rbac\Tests\Support\GuestRule;
+use Yiisoft\Rbac\Tests\Support\AuthorRule;
+use Yiisoft\Rbac\Tests\Support\BanRule;
 use Yiisoft\Rbac\Tests\Support\EasyRule;
 use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
+use Yiisoft\Rbac\Tests\Support\SimpleRuleFactory;
+use Yiisoft\Rbac\Tests\Support\SubscriptionRule;
 
 trait ManagerLogicTestTrait
 {
@@ -35,208 +43,204 @@ trait ManagerLogicTestTrait
         }
     }
 
-    /**
-     * @dataProvider dataProviderUserHasPermission
-     */
-    public function testUserHasPermission($user, array $tests): void
-    {
-        $manager = $this->createFilledManager();
-        $params = ['authorID' => 'author B'];
-
-        foreach ($tests as $permission => $result) {
-            $this->assertEquals(
-                $result,
-                $manager->userHasPermission($user, $permission, $params),
-                "Checking \"$user\" can \"$permission\""
-            );
-        }
-    }
-
-    public function dataProviderUserHasPermission(): array
+    public function dataUserHasPermissionGeneric(): array
     {
         return [
-            [
-                'reader A',
-                [
-                    'createPost' => false,
-                    'readPost' => true,
-                    'updatePost' => false,
-                    'updateAnyPost' => false,
-                    'reader' => false,
-                ],
-            ],
-            [
-                'author B',
-                [
-                    'createPost' => true,
-                    'readPost' => true,
-                    'updatePost' => true,
-                    'deletePost' => true,
-                    'updateAnyPost' => false,
-                ],
-            ],
-            [
-                'admin C',
-                [
-                    'createPost' => true,
-                    'readPost' => true,
-                    'updatePost' => false,
-                    'updateAnyPost' => true,
-                    'nonExistingPermission' => false,
-                    null => false,
-                ],
-            ],
-            [
-                'guest',
-                [
-                    'createPost' => false,
-                    'readPost' => false,
-                    'updatePost' => false,
-                    'deletePost' => false,
-                    'updateAnyPost' => false,
-                    'blablabla' => false,
-                    null => false,
-                ],
-            ],
-            [
-                12,
-                [
-                    'createPost' => false,
-                    'readPost' => false,
-                    'updatePost' => false,
-                    'deletePost' => false,
-                    'updateAnyPost' => false,
-                    'blablabla' => false,
-                    null => false,
-                ],
-            ],
-            [
-                null,
-                [
-                    'createPost' => false,
-                    'readPost' => false,
-                    'updatePost' => false,
-                    'deletePost' => false,
-                    'updateAnyPost' => false,
-                    'blablabla' => false,
-                    null => false,
-                ],
-            ],
+            ['reader A', 'createPost', ['authorId' => 'author B'], false],
+            ['reader A', 'readPost', ['authorId' => 'author B'], true],
+            ['reader A', 'updatePost', ['authorId' => 'author B'], false],
+            ['reader A', 'updateAnyPost', ['authorId' => 'author B'], false],
+            ['reader A', 'reader', ['authorId' => 'author B'], false],
+
+            ['author B', 'createPost', ['authorId' => 'author B'], true],
+            ['author B', 'readPost', ['authorId' => 'author B'], true],
+            ['author B', 'updatePost', ['authorId' => 'author B'], true],
+            ['author B', 'deletePost', ['authorId' => 'author B'], true],
+            ['author B', 'updateAnyPost', ['authorId' => 'author B'], false],
+
+            ['admin C', 'createPost', ['authorId' => 'author B'], true],
+            ['admin C', 'readPost', ['authorId' => 'author B'], true],
+            ['admin C', 'updatePost', ['authorId' => 'author B'], false],
+            ['admin C', 'updateAnyPost', ['authorId' => 'author B'], true],
+            ['admin C', 'nonExistingPermission', ['authorId' => 'author B'], false],
+
+            ['guest', 'createPost', ['authorId' => 'author B'], false],
+            ['guest', 'readPost', ['authorId' => 'author B'], false],
+            ['guest', 'updatePost', ['authorId' => 'author B'], false],
+            ['guest', 'deletePost', ['authorId' => 'author B'], false],
+            ['guest', 'updateAnyPost', ['authorId' => 'author B'], false],
+            ['guest', 'blablabla', ['authorId' => 'author B'], false],
+
+            [12, 'createPost', ['authorId' => 'author B'], false],
+            [12, 'readPost', ['authorId' => 'author B'], false],
+            [12, 'updatePost', ['authorId' => 'author B'], false],
+            [12, 'deletePost', ['authorId' => 'author B'], false],
+            [12, 'updateAnyPost', ['authorId' => 'author B'], false],
+            [12, 'blablabla', ['authorId' => 'author B'], false],
+
+            [null, 'createPost', ['authorId' => 'author B'], false],
+            [null, 'readPost', ['authorId' => 'author B'], false],
+            [null, 'updatePost', ['authorId' => 'author B'], false],
+            [null, 'deletePost', ['authorId' => 'author B'], false],
+            [null, 'updateAnyPost', ['authorId' => 'author B'], false],
+            [null, 'blablabla', ['authorId' => 'author B'], false],
         ];
     }
 
     /**
-     * @dataProvider dataProviderUserHasPermissionWithGuest
+     * @dataProvider dataUserHasPermissionGeneric
      */
-    public function testUserHasPermissionWithGuest($userId, array $tests): void
-    {
-        $manager = $this
-            ->createFilledManager()
-            ->setGuestRoleName('guest')
-            ->addRole(new Role('guest'))
-            ->addPermission(new Permission('signup'))
-            ->addChild('guest', 'signup');
-
-        foreach ($tests as $permission => $result) {
-            $this->assertEquals(
-                $result,
-                $manager->userHasPermission($userId, $permission),
-                sprintf('Checking "%s" can "%s"', $userId, $permission)
-            );
-        }
-    }
-
-    public function dataProviderUserHasPermissionWithGuest(): array
-    {
-        return [
-            [
-                null,
-                [
-                    'createPost' => false,
-                    'readPost' => false,
-                    'updatePost' => false,
-                    'deletePost' => false,
-                    'updateAnyPost' => false,
-                    'signup' => true,
-                    null => false,
-                ],
-            ],
-        ];
-    }
-
-    public function testUserHasPermissionWithGuestAndCustomRule(): void
-    {
-        $userId = 1;
-        $manager = $this->createFilledManager()
-            ->setGuestRoleName('guest')
-            ->addPermission(
-                (new Permission('viewIssue'))->withRuleName('easyTrue'),
-            )
-            ->addRole(new Role('guest'))
-            ->addChild('guest', 'viewIssue')
-            ->assign('guest', $userId);
-
-        $this->assertTrue($manager->userHasPermission(null, 'viewIssue'));
-        $this->assertTrue($manager->userHasPermission($userId, 'viewIssue'));
-    }
-
-    public function dataUserHasPermissionWithGuestAndCustomRuleWithParameters(): array
-    {
-        return [
-            [null, ['authorID' => null], false],
-            [null, ['authorID' => 1], false],
-            [1, ['authorID' => null], false],
-            [1, ['authorID' => 2], false],
-            [1, ['authorID' => 1], true],
-            [1, ['authorID' => '1'], true],
-            ['1', ['authorID' => 1], true],
-            ['1', ['authorID' => '1'], true],
-        ];
-    }
-
-    /**
-     * @dataProvider dataUserHasPermissionWithGuestAndCustomRuleWithParameters
-     */
-    public function testUserHasPermissionWithGuestAndCustomRuleWithParameters(
-        mixed $userId,
+    public function testUserHasPermissionGeneric(
+        int|string|null $userId,
+        string $permissionName,
         array $parameters,
-        bool $expectedUserHasPermission,
+        bool $expectedHasPermission,
     ): void {
-        $manager = $this->createFilledManager()
-            ->setGuestRoleName('guest')
-            ->addPermission(
-                (new Permission('updateIssue'))->withRuleName('isAuthor'),
-            )
-            ->addRole(new Role('guest'))
-            ->addChild('guest', 'updateIssue')
-            ->assign('guest', userId: 1);
-
-        $this->assertSame($expectedUserHasPermission, $manager->userHasPermission($userId, 'updateIssue', $parameters));
-    }
-
-    public function testGuestRoleName(): void
-    {
-        $itemsStorage = $this->createItemsStorage();
-        $itemsStorage->add(new Role('guest'));
-
-        $manager = $this->createManager($itemsStorage);
-        $returnedManager = $manager->setGuestRoleName('guest');
-
-        $this->assertFalse($manager->userHasPermission(null, 'guest'));
-        $this->assertSame($manager, $returnedManager);
-    }
-
-    public function testUserHasPermissionWithNonExistGuestRole(): void
-    {
-        $manager = $this->createFilledManager();
-        $manager->setGuestRoleName('non-exist-guest');
-
-        $this->assertFalse(
-            $manager->userHasPermission(null, 'readPost')
+        $this->assertSame(
+            $expectedHasPermission,
+            $this->createFilledManager()->userHasPermission($userId, $permissionName, $parameters),
         );
     }
 
-    public function testUserHasPermissionReturnFalseForNonExistingUserAndNoDefaultRoles(): void
+    public function dataUserHasPermissionGuestOriented(): array
+    {
+        $warnedUserId = 1;
+        $trialUserId = 2;
+        $activeSubscriptionUserId = 3;
+        $inActiveSubscriptionUserId = 4;
+        $explicitGuestUserId = 5;
+
+        return [
+            [null, 'guest', [], false],
+            [null, 'view ads', [], true],
+            [null, 'view regular content', [], true],
+            [null, 'view news', [], true],
+            [null, 'view exclusive content', [], false],
+            [null, 'view ban warning', [], false],
+
+            [null, 'view ads', ['dayPeriod' => 'morning'], true],
+            [null, 'view ads', ['dayPeriod' => 'night'], false],
+            [$explicitGuestUserId, 'view ads', [], true],
+            [$explicitGuestUserId, 'view ads', ['dayPeriod' => 'morning'], true],
+            [$explicitGuestUserId, 'view ads', ['dayPeriod' => 'night'], false],
+
+            [null, 'edit news comment', ['authorId' => null], false],
+            [null, 'edit news comment', ['authorId' => $explicitGuestUserId], false],
+            [$explicitGuestUserId, 'edit news comment', ['authorId' => null], false],
+            [$explicitGuestUserId, 'edit news comment', ['authorId' => 55], false],
+            [$explicitGuestUserId, 'edit news comment', ['authorId' => $explicitGuestUserId], true],
+            [$explicitGuestUserId, 'edit news comment', ['authorId' => (string) $explicitGuestUserId], true],
+            [(string) $explicitGuestUserId, 'edit news comment', ['authorId' => $explicitGuestUserId], true],
+            [(string) $explicitGuestUserId, 'edit news comment', ['authorId' => (string) $explicitGuestUserId], true],
+
+            [null, 'view news', ['noGuestsModeOn' => true], false],
+            [
+                $explicitGuestUserId,
+                'edit news comment',
+                ['authorId' => $explicitGuestUserId, 'noGuestsModeOn' => true],
+                false,
+            ],
+
+            [$warnedUserId, 'view ban warning', [], true],
+            [$warnedUserId, 'view ban warning', ['viewed' => true], false],
+
+            [$trialUserId, 'view ads', [], true],
+            [$trialUserId, 'view ads', [], true],
+            [$activeSubscriptionUserId, 'view ads', [], false],
+            [$inActiveSubscriptionUserId, 'view ads', [], false],
+
+            [$activeSubscriptionUserId, 'view exclusive content', [], true],
+            [$inActiveSubscriptionUserId, 'view exclusive content', [], false],
+            [$activeSubscriptionUserId, 'view exclusive content', ['voidSubscription' => true], false],
+        ];
+    }
+
+    /**
+     * @link https://github.com/yiisoft/rbac/issues/172
+     * @link https://github.com/yiisoft/rbac/issues/193
+     * @dataProvider dataUserHasPermissionGuestOriented
+     */
+    public function testUserHasPermissionGuestOriented(
+        int|string|null $userId,
+        string $permissionName,
+        array $parameters,
+        bool $expectedHasPermission,
+    ): void {
+        $warnedUserId = 1;
+        $trialUserId = 2;
+        $activeSubscriptionUserId = 3;
+        $inActiveSubscriptionUserId = 4;
+        $explicitGuestUserId = 5;
+        $manager = $this
+            ->createManager(
+                $this->createItemsStorage(),
+                $this->createAssignmentsStorage(),
+                new SimpleRuleFactory([
+                    'subscription' => new SubscriptionRule(),
+                    'ads' => new AdsRule(),
+                    'author' => new AuthorRule(),
+                    'ban' => new BanRule(),
+                    'guest' => new GuestRule(),
+                ]),
+                enableDirectPermissions: true,
+            )
+            ->addRole((new Role('guest'))->withRuleName('guest'))
+            ->setGuestRoleName('guest')
+            ->addRole(new Role('news comment manager'))
+            ->addRole(new Role('warned user'))
+            ->addRole(new Role('trial user'))
+            ->addRole((new Role('subscribed user'))->withRuleName('subscription'))
+            ->addPermission((new Permission('view ads'))->withRuleName('ads'))
+            ->addPermission((new Permission('view ban warning'))->withRuleName('ban'))
+            ->addPermission(new Permission('view content'))
+            ->addPermission(new Permission('view regular content'))
+            ->addPermission(new Permission('view news'))
+            ->addPermission(new Permission('add news comment'))
+            ->addPermission(new Permission('view news comment'))
+            ->addPermission((new Permission('edit news comment'))->withRuleName('author'))
+            ->addPermission((new Permission('remove news comment'))->withRuleName('author'))
+            ->addPermission(new Permission('view wiki'))
+            ->addPermission(new Permission('view exclusive content'))
+            ->addChild('view content', 'view regular content')
+            ->addChild('view content', 'view exclusive content')
+            ->addChild('view regular content', 'view news')
+            ->addChild('view regular content', 'view wiki')
+            ->addChild('news comment manager', 'add news comment')
+            ->addChild('news comment manager', 'view news comment')
+            ->addChild('news comment manager', 'edit news comment')
+            ->addChild('news comment manager', 'remove news comment')
+            ->addChild('warned user', 'guest')
+            ->addChild('trial user', 'guest')
+            ->addChild('trial user', 'subscribed user')
+            ->addChild('guest', 'view ads')
+            ->addChild('guest', 'view regular content')
+            ->addChild('guest', 'news comment manager')
+            ->addChild('warned user', 'view ban warning')
+            ->addChild('subscribed user', 'view content')
+            ->addChild('subscribed user', 'news comment manager')
+            ->assign('warned user', $warnedUserId)
+            ->assign('trial user', $trialUserId)
+            ->assign('subscribed user', $activeSubscriptionUserId)
+            ->assign('subscribed user', $inActiveSubscriptionUserId)
+            ->assign('guest', $explicitGuestUserId);
+
+        $this->assertSame($expectedHasPermission, $manager->userHasPermission($userId, $permissionName, $parameters));
+    }
+
+    public function testUserHasPermissionWithImplicitGuestAndNonExistingGuestRole(): void
+    {
+        $manager = $this
+            ->createFilledManager()
+            ->addRole(new Role('non-existing-guest'))
+            ->setGuestRoleName('non-existing-guest')
+            ->removeRole('non-existing-guest');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Guest role with name "non-existing-guest" does not exist.');
+        $this->assertFalse($manager->userHasPermission(null, 'readPost'));
+    }
+
+    public function testUserHasPermissionWuithNonExistingUserAndNoDefaultRoles(): void
     {
         $manager = $this->createFilledManager();
         $manager->setDefaultRoleNames([]);
@@ -248,12 +252,13 @@ trait ManagerLogicTestTrait
     {
         $manager = $this
             ->createFilledManager()
-            ->addPermission((new Permission('test-permission'))->withRuleName('non-exist-rule'))
+            ->addPermission((new Permission('test-permission'))->withRuleName('non-existing-rule'))
             ->addRole(new Role('test'))
-            ->addChild('test', 'test-permission');
+            ->addChild('test', 'test-permission')
+            ->assign('test-permission', 'reader A');
 
         $this->expectException(RuleNotFoundException::class);
-        $this->expectExceptionMessage('Rule "non-exist-rule" not found.');
+        $this->expectExceptionMessage('Rule "non-existing-rule" not found.');
         $manager->userHasPermission('reader A', 'test-permission');
     }
 
@@ -516,30 +521,34 @@ trait ManagerLogicTestTrait
         $manager->assign('readPost', 'id7');
     }
 
-    public function testAssignPermissionDirectlyWhenItIsEnabled(): void
+    public function testAssignPermissionDirectlyWhenEnabled(): void
     {
         $manager = $this->createFilledManager()->assign('updateAnyPost', 'reader');
 
         $this->assertTrue($manager->userHasPermission('reader', 'updateAnyPost'));
     }
 
-    public function testGetRolesByUser(): void
+    public function testGetItemsByUserId(): void
     {
-        $manager = $this->createFilledManager();
+        $this->assertEqualsCanonicalizing(
+            ['myDefaultRole', 'reader', 'readPost', 'Fast Metabolism'],
+            array_keys($this->createFilledManager()->getItemsByUserId('reader A'))
+        );
+    }
 
-        $this->assertEquals(
-            ['myDefaultRole', 'reader'],
-            array_keys($manager->getRolesByUserId('reader A'))
+    public function testGetRolesByUserId(): void
+    {
+        $this->assertEqualsCanonicalizing(
+            ['admin', 'author', 'myDefaultRole', 'reader'],
+            array_keys($this->createFilledManager()->getRolesByUserId('admin C')),
         );
     }
 
     public function testGetChildRoles(): void
     {
-        $manager = $this->createFilledManager();
-
         $this->assertEqualsCanonicalizing(
             ['reader', 'author'],
-            array_keys($manager->getChildRoles('admin'))
+            array_keys($this->createFilledManager()->getChildRoles('admin'))
         );
     }
 
@@ -565,13 +574,11 @@ trait ManagerLogicTestTrait
         $this->assertEmpty($manager->getPermissionsByRoleName('guest'));
     }
 
-    public function testGetPermissionsByUser(): void
+    public function testGetPermissionsByUserId(): void
     {
-        $manager = $this->createFilledManager();
-
         $this->assertEqualsCanonicalizing(
             ['deletePost', 'publishPost', 'createPost', 'updatePost', 'readPost'],
-            array_keys($manager->getPermissionsByUserId('author B'))
+            array_keys($this->createFilledManager()->getPermissionsByUserId('author B'))
         );
     }
 
@@ -641,7 +648,7 @@ trait ManagerLogicTestTrait
         $this->assertSame($manager, $returnedManager);
     }
 
-    public function testAddAlreadyExistsItem(): void
+    public function testAddPermissionWithExistingRole(): void
     {
         $manager = $this->createManager();
         $manager->addRole(new Role('reader'));
@@ -661,6 +668,7 @@ trait ManagerLogicTestTrait
         $this->assertNull($manager->getRole('reader'));
         $this->assertSame($manager, $returnedManager);
         $this->assertFalse($manager->userHasPermission('reader A', 'readPost'));
+        $this->assertEqualsCanonicalizing(['author B', 'admin C'], $manager->getUserIdsByRoleName('reader'));
     }
 
     public function testUpdateRoleNameAndRule(): void
@@ -719,12 +727,14 @@ trait ManagerLogicTestTrait
 
     public function testRemovePermission(): void
     {
-        $manager = $this->createFilledManager();
+        $assignmentsStorage = $this->createAssignmentsStorage();
+        $manager = $this->createFilledManager(assignmentsStorage: $assignmentsStorage);
         $returnedManager = $manager->removePermission('deletePost');
 
         $this->assertNull($manager->getPermission('deletePost'));
         $this->assertSame($manager, $returnedManager);
         $this->assertFalse($manager->userHasPermission('author B', 'deletePost'));
+        $this->assertEmpty($assignmentsStorage->getByItemNames(['deletePost']));
     }
 
     public function testUpdatePermission(): void
@@ -743,11 +753,11 @@ trait ManagerLogicTestTrait
         $this->assertSame(1_642_026_149, $newPermission->getCreatedAt());
         $this->assertSame(1_642_026_150, $newPermission->getUpdatedAt());
         $this->assertSame($manager, $returnedManager);
-        $this->assertFalse($manager->userHasPermission('author B', 'updatePost', ['authorID' => 'author B']));
-        $this->assertTrue($manager->userHasPermission('author B', 'newUpdatePost', ['authorID' => 'author B']));
+        $this->assertFalse($manager->userHasPermission('author B', 'updatePost', ['authorId' => 'author B']));
+        $this->assertTrue($manager->userHasPermission('author B', 'newUpdatePost', ['authorId' => 'author B']));
     }
 
-    public function testUpdateDirectPermission1(): void
+    public function testUpdateDirectPermission(): void
     {
         $manager = $this->createFilledManager();
         $permission = $manager
@@ -792,87 +802,192 @@ trait ManagerLogicTestTrait
         $manager->updateRole('reader', $role);
     }
 
-    public function testSeveralDefaultRoles(): void
+    public function dataSetDefaultRoleNamesException(): array
+    {
+        return [
+            [['test1', 2, 'test3'], InvalidArgumentException::class, 'Each role name must be a string.'],
+            [
+                static fn (): string => 'test',
+                InvalidArgumentException::class,
+                'Default role names closure must return an array.',
+            ],
+            [
+                static fn (): array => ['test1', 2, 'test3'],
+                InvalidArgumentException::class,
+                'Each role name must be a string.',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider dataSetDefaultRoleNamesException
+     */
+    public function testSetDefaultRoleNamesException(
+        mixed $defaultRoleNames,
+        string $expectedExceptionClass,
+        string $expectedExceptionMessage,
+    ): void {
+        $this->expectException($expectedExceptionClass);
+        $this->expectExceptionMessage($expectedExceptionMessage);
+        $this->createFilledManager()->setDefaultRoleNames($defaultRoleNames);
+    }
+
+    public function dataSetDefaultRoleNames(): array
+    {
+        return [
+            [['defaultRole1'], ['defaultRole1']],
+            [['defaultRole1', 'defaultRole2'], ['defaultRole1', 'defaultRole2']],
+            [static fn (): array => ['defaultRole1'], ['defaultRole1']],
+            [static fn (): array => ['defaultRole1', 'defaultRole2'], ['defaultRole1', 'defaultRole2']],
+            [[], []],
+            [static fn (): array => [], []],
+        ];
+    }
+
+    /**
+     * @dataProvider dataSetDefaultRoleNames
+     */
+    public function testSetDefaultRoleNames(array|Closure $defaultRoleNames, array $expectedRoleNames): void
+    {
+        $manager = $this
+            ->createFilledManager()
+            ->addRole(new Role('defaultRole1'))
+            ->addRole(new Role('defaultRole2'));
+        $returnedManager = $manager->setDefaultRoleNames($defaultRoleNames);
+
+        $this->assertEqualsCanonicalizing($expectedRoleNames, $manager->getDefaultRoleNames());
+        $this->assertSame($manager, $returnedManager);
+    }
+
+    public function dataGetDefaultRolesException(): array
+    {
+        return [
+            [
+                ['non-existing'],
+                DefaultRolesNotFoundException::class,
+                'The following default roles were not found: "non-existing".',
+            ],
+            [
+                ['non-existing1', 'non-existing2'],
+                DefaultRolesNotFoundException::class,
+                'The following default roles were not found: "non-existing1", "non-existing2".',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetDefaultRolesException
+     */
+    public function testGetDefaultRolesException(
+        array $defaultRoleNames,
+        string $expectedExceptionClass,
+        string $expectedExceptionMessage,
+    ): void {
+        $manager = $this->createManager();
+
+        foreach ($defaultRoleNames as $roleName) {
+            $manager->addRole(new Role($roleName));
+        }
+
+        $manager->setDefaultRoleNames($defaultRoleNames);
+
+        foreach ($defaultRoleNames as $roleName) {
+            $manager->removeRole($roleName);
+        }
+
+        $this->expectException($expectedExceptionClass);
+        $this->expectExceptionMessage($expectedExceptionMessage);
+        $manager->getDefaultRoles();
+    }
+
+    public function dataGetDefaultRoles(): array
+    {
+        return [
+            [[]],
+            [['a']],
+            [['a', 'b']],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetDefaultRoles
+     */
+    public function testGetDefaultRoles($defaultRoleNames): void
     {
         $manager = $this->createManager();
         $manager
             ->addRole(new Role('a'))
             ->addRole(new Role('b'))
             ->addRole(new Role('c'))
-            ->setDefaultRoleNames(['a', 'b']);
+            ->setDefaultRoleNames($defaultRoleNames);
 
         $roles = $manager->getDefaultRoles();
 
-        $this->assertCount(2, $roles);
-        $this->assertEqualsCanonicalizing(['a', 'b'], array_keys($roles));
-        $this->assertSame('a', $roles['a']->getName());
-        $this->assertSame('b', $roles['b']->getName());
+        $this->assertCount(count($defaultRoleNames), $roles);
+        $this->assertEqualsCanonicalizing($defaultRoleNames, array_keys($roles));
+
+        foreach ($defaultRoleNames as $name) {
+            $this->assertSame($name, $roles[$name]->getName());
+        }
     }
 
-    public function testDefaultRoleNames(): void
-    {
-        $manager = $this->createManager();
-        $returnedManager = $manager->setDefaultRoleNames(['a', 'b']);
-
-        $this->assertSame(['a', 'b'], $manager->getDefaultRoleNames());
-        $this->assertSame($manager, $returnedManager);
-    }
-
-    public function testDefaultRolesSetWithClosure(): void
+    public function testSetGuestRoleNameException(): void
     {
         $manager = $this->createFilledManager();
-        $manager->setDefaultRoleNames(
-            static function () {
-                return ['newDefaultRole'];
-            }
-        );
+        $manager->setGuestRoleName('non-existing');
 
-        $this->assertEquals(['newDefaultRole'], $manager->getDefaultRoleNames());
+        $this->assertSame($manager->getGuestRoleName(), 'non-existing');
     }
 
-    public function testDefaultRolesWithClosureReturningNonArrayValue(): void
-    {
-        $manager = $this->createFilledManager();
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Default role names closure must return an array');
-
-        $manager->setDefaultRoleNames(
-            static function () {
-                return 'test';
-            }
-        );
-    }
-
-    public function testGetDefaultRoles(): void
-    {
-        $manager = $this->createFilledManager();
-
-        $this->assertEquals(['myDefaultRole'], $manager->getDefaultRoleNames());
-    }
-
-    public function dataGetDefaultNonExistingRoles()
+    public function dataSetGuestRoleName(): array
     {
         return [
-            [['bananaCollector'], 'The following default roles were not found: "bananaCollector".'],
-            [
-                ['bananaCollector1', 'bananaCollector2'],
-                'The following default roles were not found: "bananaCollector1", "bananaCollector2"',
-            ],
+            ['guest'],
+            [null],
+            ['non-existing'],
         ];
     }
 
     /**
-     * @dataProvider dataGetDefaultNonExistingRoles
+     * @dataProvider dataSetGuestRoleName
      */
-    public function testGetDefaultNonExistingRoles(array $defaultRoleNames, string $expectedExceptionMessage): void
+    public function testSetGuestRoleName(?string $guestRoleName): void
     {
-        $manager = $this->createManager();
-        $manager->setDefaultRoleNames($defaultRoleNames);
+        $manager = $this
+            ->createManager()
+            ->addRole(new Role('guest'));
+        $returnedManager = $manager->setGuestRoleName($guestRoleName);
 
+        $this->assertSame($guestRoleName, $manager->getGuestRoleName());
+        $this->assertSame($manager, $returnedManager);
+    }
+
+    public function testGetGuestRoleException(): void
+    {
+        $manager = $this->createFilledManager()->setGuestRoleName('non-existing');
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage($expectedExceptionMessage);
-        $manager->getDefaultRoles();
+        $this->expectExceptionMessage('Guest role with name "non-existing" does not exist.');
+        $manager->getGuestRole();
+    }
+
+    public function dataGetGuestRole(): array
+    {
+        return [
+            ['guest'],
+            [null],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetGuestRole
+     */
+    public function testGetGuestRole(?string $guestRoleName): void
+    {
+        $manager = $this
+            ->createManager()
+            ->addRole(new Role('guest'))
+            ->setGuestRoleName($guestRoleName);
+        $this->assertEquals($guestRoleName, $manager->getGuestRole()?->getName());
     }
 
     public function testRevokeRole(): void

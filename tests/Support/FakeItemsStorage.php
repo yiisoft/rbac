@@ -19,6 +19,11 @@ final class FakeItemsStorage implements ItemsStorageInterface
         return $this->items;
     }
 
+    public function getByNames(array $names): array
+    {
+        return array_filter($this->getAll(), static fn (Item $item): bool => in_array($item->getName(), $names));
+    }
+
     public function get(string $name): Permission|Role|null
     {
         return $this->items[$name] ?? null;
@@ -69,11 +74,11 @@ final class FakeItemsStorage implements ItemsStorageInterface
 
     public function getPermissionsByNames(array $names): array
     {
-        $permissionType = Item::TYPE_PERMISSION;
-
         return array_filter(
             $this->getAll(),
-            static fn (Item $item): bool => $item->getType() === $permissionType && in_array($item->getName(), $names),
+            static function (Item $item) use ($names): bool {
+                return $item->getType() === Item::TYPE_PERMISSION && in_array($item->getName(), $names);
+            },
         );
     }
 
@@ -81,6 +86,14 @@ final class FakeItemsStorage implements ItemsStorageInterface
     {
         $result = [];
         $this->fillParentsRecursive($name, $result);
+        return $result;
+    }
+
+    public function getAccessTree(string $name): array
+    {
+        $result = [$name => ['item' => $this->items[$name], 'children' => []]];
+        $this->fillAccessTreeRecursive($name, $result);
+
         return $result;
     }
 
@@ -248,6 +261,29 @@ final class FakeItemsStorage implements ItemsStorageInterface
                 }
 
                 $this->fillParentsRecursive($parentName, $result);
+
+                break;
+            }
+        }
+    }
+
+    private function fillAccessTreeRecursive(string $name, array &$result, array $addedChildItems = []): void
+    {
+        foreach ($this->children as $parentName => $childItems) {
+            foreach ($childItems as $childItem) {
+                if ($childItem->getName() !== $name) {
+                    continue;
+                }
+
+                $parent = $this->get($parentName);
+                if ($parent !== null) {
+                    $result[$parentName]['item'] = $this->items[$parentName];
+
+                    $addedChildItems[$childItem->getName()] = $childItem;
+                    $result[$parentName]['children'] = $addedChildItems;
+                }
+
+                $this->fillAccessTreeRecursive($parentName, $result, $addedChildItems);
 
                 break;
             }

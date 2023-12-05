@@ -210,6 +210,29 @@ trait AssignmentsStorageTestTrait
         $this->assertSame($expectedUserHasItem, $this->getAssignmentsStorage()->userHasItem($userId, $itemNames));
     }
 
+    public function dataFilterUserItemNames(): array
+    {
+        return [
+            ['john', ['Researcher', 'Accountant'], ['Researcher', 'Accountant']],
+            ['jeff', ['Researcher', 'Operator'], ['Operator']],
+            ['jeff', ['Researcher', 'non-existing'], []],
+            ['jeff', ['non-existing', 'Operator'], ['Operator']],
+            ['jeff', ['non-existing1', 'non-existing2'], []],
+            ['jeff', ['Researcher', 'Accountant'], []],
+        ];
+    }
+
+    /**
+     * @dataProvider dataFilterUserItemNames
+     */
+    public function testFilterUserItemNames(string $userId, array $itemNames, array $expectedUserItemNames): void
+    {
+        $this->assertEqualsCanonicalizing(
+            $expectedUserItemNames,
+            $this->getAssignmentsStorage()->filterUserItemNames($userId, $itemNames),
+        );
+    }
+
     public function testAdd(): void
     {
         $storage = $this->getAssignmentsStorage();

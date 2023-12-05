@@ -8,13 +8,10 @@ use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\RuleContext;
 use Yiisoft\Rbac\RuleInterface;
 
-/**
- * Checks if user ID matches `authorId` passed via parameters.
- */
-final class AuthorRule implements RuleInterface
+final class AdsRule implements RuleInterface
 {
     public function execute(?string $userId, Item $item, RuleContext $ruleContext): bool
     {
-        return (string) $ruleContext->getParameterValue('authorId') === $userId;
+        return $ruleContext->getParameterValue('dayPeriod') !== 'night';
     }
 }

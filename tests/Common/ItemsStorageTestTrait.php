@@ -411,6 +411,32 @@ trait ItemsStorageTestTrait
         $this->assertCount($this->getItemsCount(), $storage->getAll());
     }
 
+    public function dataGetByNames(): array
+    {
+        return [
+            [[], []],
+            [['posts.viewer', 'posts.redactor'], ['posts.viewer', 'posts.redactor']],
+            [['posts.create', 'posts.update'], ['posts.create', 'posts.update']],
+            [['posts.viewer', 'posts.view'], ['posts.viewer', 'posts.view']],
+            [['posts.viewer', 'posts.view', 'non-existing'], ['posts.viewer', 'posts.view']],
+            [['non-existing1', 'non-existing2'], []],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetByNames
+     */
+    public function testGetByNames(array $names, array $expectedItemNames): void
+    {
+        $items = $this->getItemsStorage()->getByNames($names);
+
+        $this->assertCount(count($expectedItemNames), $items);
+        foreach ($items as $itemName => $item) {
+            $this->assertContains($itemName, $expectedItemNames);
+            $this->assertSame($itemName, $item->getName());
+        }
+    }
+
     public function testHasChildren(): void
     {
         $storage = $this->getItemsStorage();

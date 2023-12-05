@@ -51,24 +51,47 @@ final class Manager implements ManagerInterface
             return false;
         }
 
-        if ($userId === null) {
-            return $this->guestHasPermission($permission, $parameters);
+        if ($userId !== null) {
+            $guestRole = null;
+        } else {
+            $guestRole = $this->getGuestRole();
+            if ($guestRole === null) {
+                return false;
+            }
         }
 
-        $permission = $this->itemsStorage->getPermission($permissionName);
-        if ($permission === null) {
+        $accessTree = $this->itemsStorage->getAccessTree($permission->getName());
+        if ($guestRole !== null && !array_key_exists($guestRole->getName(), $accessTree)) {
+            $accessTree[$guestRole->getName()] = ['item' => $guestRole, 'children' => []];
+        }
+
+        $itemNames = array_map(static fn (array $treeItem): string => $treeItem['item']->getName(), $accessTree);
+        $userItemNames = $guestRole !== null
+            ? [$guestRole->getName()]
+            : $this->assignmentsStorage->filterUserItemNames((string) $userId, $itemNames);
+
+        $userItems = [];
+        foreach ($userItemNames as $itemName) {
+            $userItems[$itemName] = $accessTree[$itemName]['item'];
+            foreach ($accessTree[$itemName]['children'] ?? [] as $item) {
+                $userItems[$item->getName()] = $item;
+            }
+        }
+
+        if (
+            empty($userItems) ||
+            ($guestRole !== null && count($userItems) === 1 && array_key_exists('guest', $userItems))
+        ) {
             return false;
         }
 
-        $userId = (string) $userId;
-        if (!$this->executeRule($userId, $permission, $parameters)) {
-            return false;
+        foreach ($userItems as $item) {
+            if (!$this->executeRule($userId === null ? $userId : (string) $userId, $item, $parameters)) {
+                return false;
+            }
         }
 
-        $parentPermissions = $this->itemsStorage->getParents($permission->getName());
-        $permissionNames = [$permission->getName(), ...array_keys($parentPermissions)];
-
-        return $this->assignmentsStorage->userHasItem($userId, $permissionNames);
+        return true;
     }
 
     public function canAddChild(string $parentName, string $childName): bool
@@ -155,15 +178,36 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
+    public function getItemsByUserId(int|Stringable|string $userId): array
+    {
+        $userId = (string) $userId;
+        $assignments = $this->assignmentsStorage->getByUserId($userId);
+        $items = array_merge(
+            $this->getDefaultRoles(),
+            $this->itemsStorage->getByNames(array_keys($assignments)),
+        );
+
+        foreach ($assignments as $assignment) {
+            $items = array_merge($items, $this->itemsStorage->getAllChildren($assignment->getItemName()));
+        }
+
+        return $items;
+    }
+
     public function getRolesByUserId(int|Stringable|string $userId): array
     {
         $userId = (string) $userId;
-
-        $defaultRoles = $this->getDefaultRoles();
         $assignments = $this->assignmentsStorage->getByUserId($userId);
-        $roles = $this->itemsStorage->getRolesByNames(array_keys($assignments));
+        $roles = array_merge(
+            $this->getDefaultRoles(),
+            $this->itemsStorage->getRolesByNames(array_keys($assignments)),
+        );
 
-        return array_merge($defaultRoles, $roles);
+        foreach ($assignments as $assignment) {
+            $roles = array_merge($roles, $this->itemsStorage->getAllChildRoles($assignment->getItemName()));
+        }
+
+        return $roles;
     }
 
     public function getChildRoles(string $roleName): array
@@ -183,12 +227,17 @@ final class Manager implements ManagerInterface
     public function getPermissionsByUserId(int|Stringable|string $userId): array
     {
         $userId = (string) $userId;
-        $userAssignments = $this->assignmentsStorage->getByUserId($userId);
+        $assignments = $this->assignmentsStorage->getByUserId($userId);
+        $permissions = $this->itemsStorage->getPermissionsByNames(array_keys($assignments));
 
-        return array_merge(
-            $this->getDirectPermissionsByUser($userAssignments),
-            $this->getInheritedPermissionsByUser($userAssignments),
-        );
+        foreach ($assignments as $assignment) {
+            $permissions = array_merge(
+                $permissions,
+                $this->itemsStorage->getAllChildPermissions($assignment->getItemName()),
+            );
+        }
+
+        return $permissions;
     }
 
     public function getUserIdsByRoleName(string $roleName): array
@@ -214,7 +263,7 @@ final class Manager implements ManagerInterface
 
     public function updateRole(string $name, Role $role): self
     {
-        $this->checkItemNameForUpdate($role, $name);
+        $this->assertItemNameForUpdate($role, $name);
 
         $this->itemsStorage->update($name, $role);
         $this->assignmentsStorage->renameItem($name, $role->getName());
@@ -241,7 +290,7 @@ final class Manager implements ManagerInterface
 
     public function updatePermission(string $name, Permission $permission): self
     {
-        $this->checkItemNameForUpdate($permission, $name);
+        $this->assertItemNameForUpdate($permission, $name);
 
         $this->itemsStorage->update($name, $permission);
         $this->assignmentsStorage->renameItem($name, $permission->getName());
@@ -255,21 +304,9 @@ final class Manager implements ManagerInterface
         return $this;
     }
 
-    public function setDefaultRoleNames(Closure|array $roleNames): self
+    public function setDefaultRoleNames(array|Closure $roleNames): self
     {
-        if (is_array($roleNames)) {
-            $this->defaultRoleNames = $roleNames;
-
-            return $this;
-        }
-
-        $defaultRoleNames = $roleNames();
-        if (!is_array($defaultRoleNames)) {
-            throw new RuntimeException('Default role names closure must return an array.');
-        }
-
-        /** @var string[] $defaultRoleNames */
-        $this->defaultRoleNames = $defaultRoleNames;
+        $this->defaultRoleNames = $this->getDefaultRoleNamesForUpdate($roleNames);
 
         return $this;
     }
@@ -281,21 +318,33 @@ final class Manager implements ManagerInterface
 
     public function getDefaultRoles(): array
     {
-        $roles = $this->itemsStorage->getRolesByNames($this->defaultRoleNames);
-        $missingRoles = array_diff($this->defaultRoleNames, array_keys($roles));
-        if (!empty($missingRoles)) {
-            $missingRolesStr = '"' . implode('", "', $missingRoles) . '"';
-
-            throw new DefaultRolesNotFoundException("The following default roles were not found: $missingRolesStr.");
-        }
-
-        return $roles;
+        return $this->filterStoredRoles($this->defaultRoleNames);
     }
 
     public function setGuestRoleName(?string $name): self
     {
         $this->guestRoleName = $name;
+
         return $this;
+    }
+
+    public function getGuestRoleName(): ?string
+    {
+        return $this->guestRoleName;
+    }
+
+    public function getGuestRole(): ?Role
+    {
+        if ($this->guestRoleName === null) {
+            return null;
+        }
+
+        $role = $this->getRole($this->guestRoleName);
+        if ($role === null) {
+            throw new RuntimeException("Guest role with name \"$this->guestRoleName\" does not exist.");
+        }
+
+        return $role;
     }
 
     /**
@@ -345,62 +394,12 @@ final class Manager implements ManagerInterface
         $this->itemsStorage->add($item);
     }
 
-    /**
-     * Returns all permissions that are directly assigned to user.
-     *
-     * @param array $userAssignments The user assignments.
-     * @psalm-param array<string, Assignment> $userAssignments
-     *
-     * @return Permission[] All direct permissions that the user has. The array is indexed by the permission names.
-     * @psalm-return array<string, Permission>
-     */
-    private function getDirectPermissionsByUser(array $userAssignments): array
-    {
-        return $this->itemsStorage->getPermissionsByNames(array_keys($userAssignments));
-    }
-
-    /**
-     * Returns all permissions that the user inherits from the roles assigned to him.
-     *
-     * @param array $userAssignments The user assignments.
-     * @psalm-param array<string, Assignment> $userAssignments
-     *
-     * @return Permission[] All inherited permissions that the user has. The array is indexed by the permission names.
-     * @psalm-return array<string, Permission>
-     */
-    private function getInheritedPermissionsByUser(array $userAssignments): array
-    {
-        $result = [];
-        foreach (array_keys($userAssignments) as $roleName) {
-            $result = array_merge($result, $this->itemsStorage->getAllChildPermissions($roleName));
-        }
-
-        return $result;
-    }
-
     private function removeItem(string $name): void
     {
         if ($this->itemsStorage->exists($name)) {
             $this->itemsStorage->remove($name);
             $this->assignmentsStorage->removeByItemName($name);
         }
-    }
-
-    private function guestHasPermission(Permission $permission, array $parameters): bool
-    {
-        if ($this->guestRoleName === null) {
-            return false;
-        }
-
-        if (!$this->itemsStorage->roleExists($this->guestRoleName)) {
-            return false;
-        }
-
-        if (!$this->executeRule(null, $permission, $parameters)) {
-            return false;
-        }
-
-        return $this->itemsStorage->hasDirectChild($this->guestRoleName, $permission->getName());
     }
 
     /**
@@ -439,7 +438,7 @@ final class Manager implements ManagerInterface
         }
     }
 
-    private function checkItemNameForUpdate(Item $item, string $name): void
+    private function assertItemNameForUpdate(Item $item, string $name): void
     {
         if ($item->getName() === $name || !$this->itemsStorage->exists($item->getName())) {
             return;
@@ -449,5 +448,60 @@ final class Manager implements ManagerInterface
             'Unable to change the role or the permission name. ' .
             "The name \"{$item->getName()}\" is already used by another role or permission.",
         );
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @return string[]
+     */
+    private function getDefaultRoleNamesForUpdate(array|Closure $roleNames): array
+    {
+        if (is_array($roleNames)) {
+            $this->assertDefaultRoleNamesListForUpdate($roleNames);
+
+            return $roleNames;
+        }
+
+        $roleNames = $roleNames();
+        if (!is_array($roleNames)) {
+            throw new InvalidArgumentException('Default role names closure must return an array.');
+        }
+
+        $this->assertDefaultRoleNamesListForUpdate($roleNames);
+
+        return $roleNames;
+    }
+
+    /**
+     * @psalm-assert string[] $roleNames
+     *
+     * @throws InvalidArgumentException
+     */
+    private function assertDefaultRoleNamesListForUpdate(array $roleNames): void
+    {
+        foreach ($roleNames as $roleName) {
+            if (!is_string($roleName)) {
+                throw new InvalidArgumentException('Each role name must be a string.');
+            }
+        }
+    }
+
+    /**
+     * @param string[] $roleNames
+     *
+     * @throws DefaultRolesNotFoundException
+     * @return array<string, Role>
+     */
+    private function filterStoredRoles(array $roleNames): array
+    {
+        $storedRoles = $this->itemsStorage->getRolesByNames($roleNames);
+        $missingRoles = array_diff($roleNames, array_keys($storedRoles));
+        if (!empty($missingRoles)) {
+            $missingRolesStr = '"' . implode('", "', $missingRoles) . '"';
+
+            throw new DefaultRolesNotFoundException("The following default roles were not found: $missingRolesStr.");
+        }
+
+        return $storedRoles;
     }
 }

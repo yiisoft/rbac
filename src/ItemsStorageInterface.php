@@ -8,6 +8,10 @@ namespace Yiisoft\Rbac;
  * A storage for RBAC roles and permissions used in {@see Manager}.
  *
  * @psalm-type ItemsIndexedByName = array<string, Permission|Role>
+ * @psalm-type PermissionTree = non-empty-array<non-empty-string, array{
+ *     item: Permission|Role,
+ *     children: array<non-empty-string, Permission|Role>
+ * }>
  */
 interface ItemsStorageInterface
 {
@@ -19,17 +23,28 @@ interface ItemsStorageInterface
     /**
      * Returns all roles and permissions in the system.
      *
-     * @return Item[] All roles and permissions in the system.
+     * @return array All roles and permissions in the system.
+     * @psalm-return ItemsIndexedByName
      */
     public function getAll(): array;
+
+    /**
+     * Returns roles and permission by the given names' list.
+     *
+     * @param string[] $names List of role and/or permission names.
+     *
+     * @return array Array of role and permission instances indexed by their corresponding names.
+     * @psalm-return ItemsIndexedByName
+     */
+    public function getByNames(array $names): array;
 
     /**
      * Returns the named role or permission.
      *
      * @param string $name The role or the permission name.
      *
-     * @return Permission|Role|null The role or the permission corresponding to the specified name. `null` is returned if no such
-     * item.
+     * @return Permission|Role|null The role or the permission corresponding to the specified name. `null` is returned
+     * if there is no such item.
      */
     public function get(string $name): Permission|Role|null;
 
@@ -145,19 +160,29 @@ interface ItemsStorageInterface
      *
      * @param string $name The child name.
      *
-     * @return Item[] The parent permissions and/or roles.
-     *
+     * @return array The parent permissions and/or roles.
      * @psalm-return ItemsIndexedByName
      */
     public function getParents(string $name): array;
+
+    /**
+     * Returns the parents tree for a single item which additionally contains children for each parent (only among the
+     * found items). The base item is included too, its children list is always empty.
+     *
+     * @param string $name The child name.
+     *
+     * @return array A mapping between parent names and according items with all their children (references to other
+     * parents found).
+     * @psalm-return PermissionTree
+     */
+    public function getAccessTree(string $name): array;
 
     /**
      * Returns direct child permissions and/or roles.
      *
      * @param string $name The parent name.
      *
-     * @return Item[] The child permissions and/or roles.
-     *
+     * @return array The child permissions and/or roles.
      * @psalm-return ItemsIndexedByName
      */
     public function getDirectChildren(string $name): array;
@@ -167,8 +192,8 @@ interface ItemsStorageInterface
      *
      * @param string $name The parent name.
      *
-     * @return Item[] The child permissions and/or roles.
-     * @psalm-return array<string, Item>
+     * @return array The child permissions and/or roles.
+     * @psalm-return ItemsIndexedByName
      */
     public function getAllChildren(string $name): array;
 
