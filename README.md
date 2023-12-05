@@ -76,12 +76,39 @@ It requires specifying the following dependencies:
 - Assignments storage where user IDs are mapped to roles.
 - Rule factory. Given a rule name stored in items storage it can create an instance of `Rule`.
 
-Here are a few tips for choosing storage backend:
+If you don't want to use [Rules Container](https://github.com/yiisoft/rbac-rules-container), here is an example of 
+simple self-contained rule factory:
+
+```php
+use Yiisoft\Rbac\Exception\RuleNotFoundException;
+use Yiisoft\Rbac\RuleFactoryInterface;
+use Yiisoft\Rbac\RuleInterface;
+
+use function array_key_exists;
+
+final class SimpleRuleFactory implements RuleFactoryInterface
+{    
+    public function __construct(private array $rules = [])
+    {
+    }
+
+    public function create(string $name): RuleInterface
+    {
+        if (!array_key_exists($name, $this->rules)) {
+            throw new RuleNotFoundException($name);
+        }
+
+        return $this->rules[$name];
+    }
+}
+```
+
+A few tips for choosing storage backend:
 
 - Roles and permissions could usually be considered "semi-static", as they only change when you update your application
   code, so it may make sense to use PHP storage for it. 
 - Assignments, on the other hand, could be considered "dynamic". They change more often: when creating a new user,
-  or when updating user role from within your application. It may make sense to use database storage for assignments.
+  or when updating user role from within your application. So it may make sense to use database storage for assignments.
 
 ### Managing RBAC hierarchy
 
