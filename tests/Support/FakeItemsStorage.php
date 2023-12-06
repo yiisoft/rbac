@@ -316,10 +316,7 @@ final class FakeItemsStorage implements ItemsStorageInterface
      */
     private function filterRoles(array $items): array
     {
-        return array_filter(
-            $this->getRoles(),
-            static fn (Role $item): bool => array_key_exists($item->getName(), $items),
-        );
+        return array_filter($items, static fn (Permission|Role $item): bool => $item instanceof Role);
     }
 
     /**
@@ -327,9 +324,6 @@ final class FakeItemsStorage implements ItemsStorageInterface
      */
     private function filterPermissions(array $items): array
     {
-        return array_filter(
-            $this->getPermissions(),
-            static fn (Permission $item): bool => array_key_exists($item->getName(), $items),
-        );
+        return array_filter($items, static fn (Permission|Role $item): bool => $item instanceof Permission);
     }
 }
