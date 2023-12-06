@@ -32,7 +32,7 @@
 - Bug #175: Use rule factory for creating rule instances in `CompositeRule` (@arogachev)
 - Enh #202: Add `getRole()`, `getPermission()` and `hasChildren()` methods to `ManagerInterface` (@arogachev)
 - Chg #202: Rename `$permissionName` parameter to `$name` in `ManagerInterface::removePermission()` method (@arogachev)
-- Enh #203: Add `getByNames()` method to `ItemsStorageInterface` (@arogachev)
+- Enh #203: Add `getByNames()` and `getAccessTree` methods to `ItemsStorageInterface` (@arogachev)
 - Enh #203: Add `filterUserItemNames()` method to `AssignmentsStorageInterface` (@arogachev)
 - Enh #203: Add `getItemsByUserId()` method to `ManagerInterface` (@arogachev)
 - Bug #203: Remove duplicated code for checking permission in `Manager::userHasPermission()` (@arogachev)
@@ -40,10 +40,9 @@
 - Bug #203: Do not limit child items by only direct ones for guests in `Manager::userHasPermission()` (@arogachev)
 - Bug #203: Fix `Manager::getRolesByUserId()` to include child roles (@arogachev)
 - Chg #203: Verify that every passed role name is a string in `Manager::setDefaultRoleNames()` (@arogachev)
-- Enh #203: Add `getAccessTree()` method to `ItemsStorageInterface` (@arogachev)
 - Enh #203: Add `getGuestRoleName()` and `getGuestRole()` methods to `Manager` (@arogachev)
-- Chg #203: Throw `RuntimeException` in the case with implicit guest and non-existing guest role in 
-`Manager::userHasPermission()` (@arogachev)
+- Chg #203: Throw `RuntimeException` in the case with implicit guest and non-existing guest role in
+  `Manager::userHasPermission()` (@arogachev)
 - Enh #206: Optimize calls for getting child items within the loops (@arogachev)
 - Chg #206: Rename `$name` argument to `$names` and allow array type for it in `getAllChildren()`, `getAllChildRoles()`,
   `getAllChildPermissions()` methods of `ItemsStorageInterface` (@arogachev)
