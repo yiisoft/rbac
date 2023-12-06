@@ -190,6 +190,11 @@ trait ItemsStorageTestTrait
                 'posts.admin',
                 ['posts.redactor', 'posts.viewer', 'posts.view', 'posts.create', 'posts.update', 'posts.delete'],
             ],
+            [['Parent 1', 'Parent 2'], ['Child 1', 'Child 2', 'Child 3']],
+            [
+                ['posts.viewer', 'posts.redactor', 'posts.admin'],
+                ['posts.redactor', 'posts.viewer', 'posts.view', 'posts.create', 'posts.update', 'posts.delete'],
+            ],
             ['non-existing', []],
         ];
     }
@@ -197,9 +202,9 @@ trait ItemsStorageTestTrait
     /**
      * @dataProvider dataGetAllChildren
      */
-    public function testGetAllChildren(string $parentName, array $expectedChildren): void
+    public function testGetAllChildren(string|array $parentNames, array $expectedChildren): void
     {
-        $children = $this->getItemsStorage()->getAllChildren($parentName);
+        $children = $this->getItemsStorage()->getAllChildren($parentNames);
         $this->assertChildren($children, $expectedChildren);
     }
 
@@ -215,6 +220,11 @@ trait ItemsStorageTestTrait
             ['posts.viewer', ['posts.view']],
             ['posts.redactor', ['posts.view', 'posts.create', 'posts.update']],
             ['posts.admin', ['posts.view', 'posts.create', 'posts.update', 'posts.delete']],
+            [['Parent 1', 'Parent 5'], ['Child 1', 'Child 5']],
+            [
+                ['posts.viewer', 'posts.redactor', 'posts.admin'],
+                ['posts.view', 'posts.create', 'posts.update', 'posts.delete'],
+            ],
             ['non-existing', []],
         ];
     }
@@ -222,9 +232,9 @@ trait ItemsStorageTestTrait
     /**
      * @dataProvider dataGetAllChildPermissions
      */
-    public function testGetAllChildPermissions(string $parentName, array $expectedChildren): void
+    public function testGetAllChildPermissions(string|array $parentNames, array $expectedChildren): void
     {
-        $children = $this->getItemsStorage()->getAllChildPermissions($parentName);
+        $children = $this->getItemsStorage()->getAllChildPermissions($parentNames);
         $this->assertChildren($children, $expectedChildren);
     }
 
@@ -240,6 +250,8 @@ trait ItemsStorageTestTrait
             ['posts.viewer', []],
             ['posts.redactor', ['posts.viewer']],
             ['posts.admin', ['posts.redactor', 'posts.viewer']],
+            [['Parent 2', 'Parent 4'], ['Child 2', 'Child 3', 'Child 4']],
+            [['posts.viewer', 'posts.redactor', 'posts.admin'], ['posts.redactor', 'posts.viewer']],
             ['non-existing', []],
         ];
     }
@@ -247,9 +259,9 @@ trait ItemsStorageTestTrait
     /**
      * @dataProvider dataGetAllChildRoles
      */
-    public function testGetAllChildRoles(string $parentName, array $expectedChildren): void
+    public function testGetAllChildRoles(string|array $parentNames, array $expectedChildren): void
     {
-        $children = $this->getItemsStorage()->getAllChildRoles($parentName);
+        $children = $this->getItemsStorage()->getAllChildRoles($parentNames);
         $this->assertChildren($children, $expectedChildren);
     }
 
