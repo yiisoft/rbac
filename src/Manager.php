@@ -182,32 +182,26 @@ final class Manager implements ManagerInterface
     {
         $userId = (string) $userId;
         $assignments = $this->assignmentsStorage->getByUserId($userId);
-        $items = array_merge(
+        $assignmentNames = array_keys($assignments);
+
+        return array_merge(
             $this->getDefaultRoles(),
-            $this->itemsStorage->getByNames(array_keys($assignments)),
+            $this->itemsStorage->getByNames($assignmentNames),
+            $this->itemsStorage->getAllChildren($assignmentNames),
         );
-
-        foreach ($assignments as $assignment) {
-            $items = array_merge($items, $this->itemsStorage->getAllChildren($assignment->getItemName()));
-        }
-
-        return $items;
     }
 
     public function getRolesByUserId(int|Stringable|string $userId): array
     {
         $userId = (string) $userId;
         $assignments = $this->assignmentsStorage->getByUserId($userId);
-        $roles = array_merge(
+        $assignmentNames = array_keys($assignments);
+
+        return array_merge(
             $this->getDefaultRoles(),
-            $this->itemsStorage->getRolesByNames(array_keys($assignments)),
+            $this->itemsStorage->getRolesByNames($assignmentNames),
+            $this->itemsStorage->getAllChildRoles($assignmentNames)
         );
-
-        foreach ($assignments as $assignment) {
-            $roles = array_merge($roles, $this->itemsStorage->getAllChildRoles($assignment->getItemName()));
-        }
-
-        return $roles;
     }
 
     public function getChildRoles(string $roleName): array
@@ -228,16 +222,12 @@ final class Manager implements ManagerInterface
     {
         $userId = (string) $userId;
         $assignments = $this->assignmentsStorage->getByUserId($userId);
-        $permissions = $this->itemsStorage->getPermissionsByNames(array_keys($assignments));
+        $assignmentNames = array_keys($assignments);
 
-        foreach ($assignments as $assignment) {
-            $permissions = array_merge(
-                $permissions,
-                $this->itemsStorage->getAllChildPermissions($assignment->getItemName()),
-            );
-        }
-
-        return $permissions;
+        return array_merge(
+            $this->itemsStorage->getPermissionsByNames($assignmentNames),
+            $this->itemsStorage->getAllChildPermissions($assignmentNames),
+        );
     }
 
     public function getUserIdsByRoleName(string $roleName): array
