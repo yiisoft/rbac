@@ -190,7 +190,7 @@ interface ItemsStorageInterface
     /**
      * Returns all child permissions and/or roles.
      *
-     * @param string|array $names The parent name / names.
+     * @param array|string $names The parent name / names.
      *
      * @return array The child permissions and/or roles.
      * @psalm-return ItemsIndexedByName
@@ -200,7 +200,7 @@ interface ItemsStorageInterface
     /**
      * Returns all child roles.
      *
-     * @param string|array $names The parent name / names.
+     * @param array|string $names The parent name / names.
      *
      * @return Role[] The child roles.
      * @psalm-return array<string, Role>
@@ -210,7 +210,7 @@ interface ItemsStorageInterface
     /**
      * Returns all child permissions.
      *
-     * @param string|array $name The parent name / names.
+     * @param array|string $name The parent name / names.
      *
      * @return Permission[] The child permissions.
      * @psalm-return array<string, Permission>
