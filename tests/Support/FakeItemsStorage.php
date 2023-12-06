@@ -102,26 +102,26 @@ final class FakeItemsStorage implements ItemsStorageInterface
         return $this->children[$name] ?? [];
     }
 
-    public function getAllChildren(string $name): array
+    public function getAllChildren(string|array $names): array
     {
         $result = [];
-        $this->fillChildrenRecursive($name, $result);
+        $this->getAllChildrenInternal($names, $result);
 
         return $result;
     }
 
-    public function getAllChildRoles(string $name): array
+    public function getAllChildRoles(string|array $names): array
     {
         $result = [];
-        $this->fillChildrenRecursive($name, $result);
+        $this->getAllChildrenInternal($names, $result);
 
         return $this->filterRoles($result);
     }
 
-    public function getAllChildPermissions(string $name): array
+    public function getAllChildPermissions(string|array $names): array
     {
         $result = [];
-        $this->fillChildrenRecursive($name, $result);
+        $this->getAllChildrenInternal($names, $result);
 
         return $this->filterPermissions($result);
     }
@@ -290,6 +290,14 @@ final class FakeItemsStorage implements ItemsStorageInterface
         }
     }
 
+    private function getAllChildrenInternal(string|array $names, array &$result): void
+    {
+        $names = (array) $names;
+        foreach ($names as $name) {
+            $this->fillChildrenRecursive($name, $result);
+        }
+    }
+
     private function fillChildrenRecursive(string $name, array &$result): void
     {
         $children = $this->children[$name] ?? [];
@@ -327,14 +335,9 @@ final class FakeItemsStorage implements ItemsStorageInterface
      */
     private function filterPermissions(array $items): array
     {
-        $permissions = [];
-        foreach (array_keys($items) as $permissionName) {
-            $permission = $this->getPermission($permissionName);
-            if ($permission !== null) {
-                $permissions[$permissionName] = $permission;
-            }
-        }
-
-        return $permissions;
+        return array_filter(
+            $this->getPermissions(),
+            static fn (Permission $permissionItem): bool => array_key_exists($permissionItem->getName(), $items),
+        );
     }
 }
