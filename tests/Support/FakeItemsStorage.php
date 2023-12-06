@@ -312,32 +312,24 @@ final class FakeItemsStorage implements ItemsStorageInterface
     }
 
     /**
-     * @param Item[] $array
-     * @psalm-param array<string, Item> $array
-     *
      * @return Role[]
-     * @psalm-return array<string, Role>
      */
-    private function filterRoles(array $array): array
+    private function filterRoles(array $items): array
     {
         return array_filter(
             $this->getRoles(),
-            static fn (Role $roleItem): bool => array_key_exists($roleItem->getName(), $array),
+            static fn (Role $item): bool => array_key_exists($item->getName(), $items),
         );
     }
 
     /**
-     * @param Item[] $items
-     * @psalm-param array<string, Item> $items
-     *
      * @return Permission[]
-     * @psalm-return array<string, Permission>
      */
     private function filterPermissions(array $items): array
     {
         return array_filter(
             $this->getPermissions(),
-            static fn (Permission $permissionItem): bool => array_key_exists($permissionItem->getName(), $items),
+            static fn (Permission $item): bool => array_key_exists($item->getName(), $items),
         );
     }
 }
