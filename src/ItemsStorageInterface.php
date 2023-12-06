@@ -210,12 +210,12 @@ interface ItemsStorageInterface
     /**
      * Returns all child permissions.
      *
-     * @param array|string $name The parent name / names.
+     * @param array|string $names The parent name / names.
      *
      * @return Permission[] The child permissions.
      * @psalm-return array<string, Permission>
      */
-    public function getAllChildPermissions(string $names): array;
+    public function getAllChildPermissions(string|array $names): array;
 
     /**
      * Returns whether named parent has children.
