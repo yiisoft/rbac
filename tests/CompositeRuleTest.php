@@ -14,7 +14,7 @@ use Yiisoft\Rbac\Tests\Support\SimpleRuleFactory;
 
 final class CompositeRuleTest extends TestCase
 {
-    public function compositeRuleDataProvider(): array
+    public static function dataCompositeRule(): array
     {
         return [
             'AND empty' => [CompositeRule::AND, [], true],
@@ -28,7 +28,7 @@ final class CompositeRuleTest extends TestCase
     }
 
     /**
-     * @dataProvider compositeRuleDataProvider
+     * @dataProvider dataCompositeRule
      */
     public function testCompositeRule(string $operator, array $rules, bool $expected): void
     {

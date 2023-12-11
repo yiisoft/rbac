@@ -22,7 +22,7 @@ trait AssignmentsStorageTestTrait
 
     protected function setUp(): void
     {
-        if ($this->getName() === 'testAdd') {
+        if ($this->name() === 'testAdd') {
             ClockMock::freeze(new DateTime('2023-05-10 08:24:39'));
         }
 
@@ -32,7 +32,7 @@ trait AssignmentsStorageTestTrait
 
     protected function tearDown(): void
     {
-        if ($this->getName() === 'testAdd') {
+        if ($this->name() === 'testAdd') {
             ClockMock::reset();
         }
 

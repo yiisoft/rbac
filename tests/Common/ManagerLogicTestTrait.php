@@ -31,14 +31,14 @@ trait ManagerLogicTestTrait
 
     protected function setUp(): void
     {
-        if (in_array($this->getName(), self::$frozenTimeTests, strict: true)) {
+        if (in_array($this->name(), self::$frozenTimeTests, strict: true)) {
             ClockMock::freeze(new DateTime('2023-05-10 08:24:39'));
         }
     }
 
     protected function tearDown(): void
     {
-        if (in_array($this->getName(), self::$frozenTimeTests, strict: true)) {
+        if (in_array($this->name(), self::$frozenTimeTests, strict: true)) {
             ClockMock::reset();
         }
     }

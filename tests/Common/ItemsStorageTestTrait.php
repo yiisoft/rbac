@@ -81,7 +81,7 @@ trait ItemsStorageTestTrait
         $this->assertNull($storage->get('Non-existing name'));
     }
 
-    public function existsProvider(): array
+    public static function dataExists(): array
     {
         return [
             ['Parent 1', true],
@@ -95,7 +95,7 @@ trait ItemsStorageTestTrait
     }
 
     /**
-     * @dataProvider existsProvider
+     * @dataProvider dataExists
      */
     public function testExists(string $name, bool $expectedExists): void
     {
@@ -345,7 +345,7 @@ trait ItemsStorageTestTrait
         $this->assertFalse($storage->hasChildren('Parent 2'));
     }
 
-    public function getParentsProvider(): array
+    public static function dataGetParents(): array
     {
         return [
             ['Child 1', ['Parent 1']],
@@ -362,7 +362,7 @@ trait ItemsStorageTestTrait
     }
 
     /**
-     * @dataProvider getParentsProvider
+     * @dataProvider dataGetParents
      */
     public function testGetParents(string $childName, array $expectedParents): void
     {
