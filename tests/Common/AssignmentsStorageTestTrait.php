@@ -92,7 +92,7 @@ trait AssignmentsStorageTestTrait
         }
     }
 
-    public function dataGetByItemNames(): array
+    public static function dataGetByItemNames(): array
     {
         return [
             [[], []],
@@ -171,7 +171,7 @@ trait AssignmentsStorageTestTrait
         $this->assertNull($this->getAssignmentsStorage()->get('Researcher', 'jeff'));
     }
 
-    public function dataExists(): array
+    public static function dataExists(): array
     {
         return [
             ['Manager', 'jack', true],
@@ -190,7 +190,7 @@ trait AssignmentsStorageTestTrait
         $this->assertSame($expectedExists, $this->getAssignmentsStorage()->exists($itemName, $userId));
     }
 
-    public function dataUserHasItem(): array
+    public static function dataUserHasItem(): array
     {
         return [
             ['user without assignments', ['Researcher', 'Accountant'], false],
@@ -211,7 +211,7 @@ trait AssignmentsStorageTestTrait
         $this->assertSame($expectedUserHasItem, $this->getAssignmentsStorage()->userHasItem($userId, $itemNames));
     }
 
-    public function dataFilterUserItemNames(): array
+    public static function dataFilterUserItemNames(): array
     {
         return [
             ['john', ['Researcher', 'Accountant'], ['Researcher', 'Accountant']],

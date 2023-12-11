@@ -30,7 +30,7 @@ trait ItemsStorageTestTrait
         $this->getItemsStorage()->clear();
     }
 
-    public function dataUpdate(): array
+    public static function dataUpdate(): array
     {
         return [
             'present as parent in items children' => ['Parent 1', 'Super Admin', true],
@@ -103,7 +103,7 @@ trait ItemsStorageTestTrait
         $this->assertSame($expectedExists, $storage->exists($name));
     }
 
-    public function dataRoleExists(): array
+    public static function dataRoleExists(): array
     {
         return [
             ['posts.viewer', true],
@@ -150,7 +150,7 @@ trait ItemsStorageTestTrait
         $this->assertEmpty($storage->getAll());
     }
 
-    public function dataGetDirectChildren(): array
+    public static function dataGetDirectChildren(): array
     {
         return [
             ['Parent 1', ['Child 1']],
@@ -175,7 +175,7 @@ trait ItemsStorageTestTrait
         $this->assertChildren($children, $expectedChildren);
     }
 
-    public function dataGetAllChildren(): array
+    public static function dataGetAllChildren(): array
     {
         return [
             ['Parent 1', ['Child 1']],
@@ -208,7 +208,7 @@ trait ItemsStorageTestTrait
         $this->assertChildren($children, $expectedChildren);
     }
 
-    public function dataGetAllChildPermissions(): array
+    public static function dataGetAllChildPermissions(): array
     {
         return [
             ['Parent 1', ['Child 1']],
@@ -238,7 +238,7 @@ trait ItemsStorageTestTrait
         $this->assertChildren($children, $expectedChildren);
     }
 
-    public function dataGetAllChildRoles(): array
+    public static function dataGetAllChildRoles(): array
     {
         return [
             ['Parent 1', []],
@@ -274,7 +274,7 @@ trait ItemsStorageTestTrait
         $this->assertContainsOnlyInstancesOf(Role::class, $roles);
     }
 
-    public function dataGetRolesByNames(): array
+    public static function dataGetRolesByNames(): array
     {
         return [
             [[], []],
@@ -309,7 +309,7 @@ trait ItemsStorageTestTrait
         $this->assertContainsOnlyInstancesOf(Permission::class, $permissions);
     }
 
-    public function dataGetPermissionsByNames(): array
+    public static function dataGetPermissionsByNames(): array
     {
         return [
             [[], []],
@@ -423,7 +423,7 @@ trait ItemsStorageTestTrait
         $this->assertCount($this->getItemsCount(), $storage->getAll());
     }
 
-    public function dataGetByNames(): array
+    public static function dataGetByNames(): array
     {
         return [
             [[], []],
@@ -457,7 +457,7 @@ trait ItemsStorageTestTrait
         $this->assertFalse($storage->hasChildren('Parent 3'));
     }
 
-    public function dataHasChild(): array
+    public static function dataHasChild(): array
     {
         return [
             ['posts.viewer', 'posts.view', true],
@@ -492,7 +492,7 @@ trait ItemsStorageTestTrait
         $this->assertSame($expectedHasChild, $this->getItemsStorage()->hasChild($parentName, $childName));
     }
 
-    public function dataHasDirectChild(): array
+    public static function dataHasDirectChild(): array
     {
         return [
             ['posts.viewer', 'posts.view', true],
