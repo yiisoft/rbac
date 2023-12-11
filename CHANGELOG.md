@@ -46,6 +46,7 @@
 - Enh #206: Optimize calls for getting child items within the loops (@arogachev)
 - Chg #206: Rename `$name` argument to `$names` and allow array type for it in `getAllChildren()`, `getAllChildRoles()`,
   `getAllChildPermissions()` methods of `ItemsStorageInterface` (@arogachev)
+- Enh #204: Add simple storages for items and assignments (@arogachev)
 
 ## 1.0.2 April 20, 2023
 
