@@ -225,6 +225,8 @@ abstract class SimpleItemsStorage implements ItemsStorageInterface
 
     /**
      * @psalm-param Item::TYPE_* $type
+     *
+     * @psalm-return ($type is Item::TYPE_PERMISSION ? array<string, Permission> : array<string, Role>)
      */
     private function getItemsByType(string $type): array
     {
@@ -282,6 +284,7 @@ abstract class SimpleItemsStorage implements ItemsStorageInterface
 
                 $parent = $this->get($parentName);
                 if ($parent !== null) {
+                    /** @psalm-var ItemsIndexedByName $result Imported type in `psalm-param-out` is not resolved. */
                     $result[$parentName] = $parent;
                 }
 
