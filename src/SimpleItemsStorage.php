@@ -289,8 +289,6 @@ abstract class SimpleItemsStorage implements ItemsStorageInterface
                 }
 
                 $this->fillParentsRecursive($parentName, $result);
-
-                break;
             }
         }
     }
@@ -319,8 +317,6 @@ abstract class SimpleItemsStorage implements ItemsStorageInterface
                 }
 
                 $this->fillAccessTreeRecursive($parentName, $result, $addedChildItems);
-
-                break;
             }
         }
     }
