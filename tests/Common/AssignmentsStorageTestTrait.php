@@ -193,6 +193,7 @@ trait AssignmentsStorageTestTrait
     public function dataUserHasItem(): array
     {
         return [
+            ['user without assignments', ['Researcher', 'Accountant'], false],
             ['john', ['Researcher', 'Accountant'], true],
             ['jeff', ['Researcher', 'Operator'], true],
             ['jeff', ['Researcher', 'non-existing'], false],
