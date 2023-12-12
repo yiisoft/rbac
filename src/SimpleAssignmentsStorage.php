@@ -11,7 +11,7 @@ abstract class SimpleAssignmentsStorage implements AssignmentsStorageInterface
     /**
      * @psalm-var array<string, array<string, Assignment>>
      */
-    private array $assignments = [];
+    protected array $assignments = [];
 
     public function getAll(): array
     {

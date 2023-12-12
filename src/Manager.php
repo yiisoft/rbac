@@ -411,7 +411,7 @@ final class Manager implements ManagerInterface
             throw new RuntimeException("Child \"$childName\" does not exist.");
         }
 
-        if ($parent->getType() === Item::TYPE_PERMISSION && $child->getType() === Item::TYPE_ROLE) {
+        if ($parent instanceof Permission && $child instanceof Role) {
             throw new RuntimeException(
                 "Can not add \"$childName\" role as a child of \"$parentName\" permission.",
             );
