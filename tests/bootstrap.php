@@ -8,5 +8,3 @@ declare(strict_types=1);
 if (function_exists('uopz_allow_exit')) {
     uopz_allow_exit(true);
 }
-
-require dirname(__DIR__) . '/vendor/autoload.php';
