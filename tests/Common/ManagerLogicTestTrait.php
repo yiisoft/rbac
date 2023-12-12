@@ -31,19 +31,19 @@ trait ManagerLogicTestTrait
 
     protected function setUp(): void
     {
-        if (in_array($this->getName(), self::$frozenTimeTests, strict: true)) {
+        if (in_array($this->name(), self::$frozenTimeTests, strict: true)) {
             ClockMock::freeze(new DateTime('2023-05-10 08:24:39'));
         }
     }
 
     protected function tearDown(): void
     {
-        if (in_array($this->getName(), self::$frozenTimeTests, strict: true)) {
+        if (in_array($this->name(), self::$frozenTimeTests, strict: true)) {
             ClockMock::reset();
         }
     }
 
-    public function dataUserHasPermissionGeneric(): array
+    public static function dataUserHasPermissionGeneric(): array
     {
         return [
             ['reader A', 'createPost', ['authorId' => 'author B'], false],
@@ -102,7 +102,7 @@ trait ManagerLogicTestTrait
         );
     }
 
-    public function dataUserHasPermissionGuestOriented(): array
+    public static function dataUserHasPermissionGuestOriented(): array
     {
         $warnedUserId = 1;
         $trialUserId = 2;
@@ -802,7 +802,7 @@ trait ManagerLogicTestTrait
         $manager->updateRole('reader', $role);
     }
 
-    public function dataSetDefaultRoleNamesException(): array
+    public static function dataSetDefaultRoleNamesException(): array
     {
         return [
             [['test1', 2, 'test3'], InvalidArgumentException::class, 'Each role name must be a string.'],
@@ -832,7 +832,7 @@ trait ManagerLogicTestTrait
         $this->createFilledManager()->setDefaultRoleNames($defaultRoleNames);
     }
 
-    public function dataSetDefaultRoleNames(): array
+    public static function dataSetDefaultRoleNames(): array
     {
         return [
             [['defaultRole1'], ['defaultRole1']],
@@ -859,7 +859,7 @@ trait ManagerLogicTestTrait
         $this->assertSame($manager, $returnedManager);
     }
 
-    public function dataGetDefaultRolesException(): array
+    public static function dataGetDefaultRolesException(): array
     {
         return [
             [
@@ -900,7 +900,7 @@ trait ManagerLogicTestTrait
         $manager->getDefaultRoles();
     }
 
-    public function dataGetDefaultRoles(): array
+    public static function dataGetDefaultRoles(): array
     {
         return [
             [[]],
@@ -939,7 +939,7 @@ trait ManagerLogicTestTrait
         $this->assertSame($manager->getGuestRoleName(), 'non-existing');
     }
 
-    public function dataSetGuestRoleName(): array
+    public static function dataSetGuestRoleName(): array
     {
         return [
             ['guest'],
@@ -970,7 +970,7 @@ trait ManagerLogicTestTrait
         $manager->getGuestRole();
     }
 
-    public function dataGetGuestRole(): array
+    public static function dataGetGuestRole(): array
     {
         return [
             ['guest'],
