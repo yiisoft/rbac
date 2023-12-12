@@ -6,7 +6,7 @@ namespace Yiisoft\Rbac;
 
 /**
  * @psalm-type RawItem = array{
- *      type: string,
+ *      type: Item::TYPE_*,
  *      name: string,
  *      description?: string,
  *      ruleName?: string,
@@ -21,12 +21,12 @@ abstract class SimpleItemsStorage implements ItemsStorageInterface
     /**
      * @psalm-var ItemsIndexedByName
      */
-    private array $items = [];
+    protected array $items = [];
 
     /**
      * @psalm-var array<string, ItemsIndexedByName>
      */
-    private array $children = [];
+    protected array $children = [];
 
     public function getAll(): array
     {
