@@ -193,7 +193,7 @@ trait ItemsStorageTestTrait
             [['Parent 1', 'Parent 2'], ['Child 1', 'Child 2', 'Child 3']],
             [
                 ['posts.viewer', 'posts.redactor', 'posts.admin'],
-                ['posts.redactor', 'posts.viewer', 'posts.view', 'posts.create', 'posts.update', 'posts.delete'],
+                ['posts.view', 'posts.create', 'posts.update', 'posts.delete'],
             ],
             ['non-existing', []],
         ];
@@ -251,7 +251,7 @@ trait ItemsStorageTestTrait
             ['posts.redactor', ['posts.viewer']],
             ['posts.admin', ['posts.redactor', 'posts.viewer']],
             [['Parent 2', 'Parent 4'], ['Child 2', 'Child 3', 'Child 4']],
-            [['posts.viewer', 'posts.redactor', 'posts.admin'], ['posts.redactor', 'posts.viewer']],
+            [['posts.viewer', 'posts.redactor', 'posts.admin'], []],
             ['non-existing', []],
         ];
     }
