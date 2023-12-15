@@ -339,11 +339,11 @@ abstract class SimpleItemsStorage implements ItemsStorageInterface
      * @psalm-param ItemsIndexedByName $result
      * @psalm-param-out ItemsIndexedByName $result
      */
-    private function fillChildrenRecursive(string $name, array &$result, array $names): void
+    private function fillChildrenRecursive(string $name, array &$result, array $startNames): void
     {
         $children = $this->children[$name] ?? [];
         foreach ($children as $childName => $_childItem) {
-            if (in_array($childName, $names, strict: true)) {
+            if (in_array($childName, $startNames, strict: true)) {
                 continue;
             }
 
@@ -353,7 +353,7 @@ abstract class SimpleItemsStorage implements ItemsStorageInterface
                 $result[$childName] = $child;
             }
 
-            $this->fillChildrenRecursive($childName, $result, $names);
+            $this->fillChildrenRecursive($childName, $result, $startNames);
         }
     }
 
