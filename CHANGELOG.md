@@ -48,6 +48,7 @@
   `getAllChildPermissions()` methods of `ItemsStorageInterface` (@arogachev)
 - Enh #204: Add simple storages for items and assignments (@arogachev)
 - Chg #217: Raise PHP version to 8.1 (@arogachev)
+- Bug #221: Exclude items with base names when getting children (@arogachev)
 
 ## 1.0.2 April 20, 2023
 
