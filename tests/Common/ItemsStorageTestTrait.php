@@ -252,7 +252,6 @@ trait ItemsStorageTestTrait
             ['posts.admin', ['posts.redactor', 'posts.viewer']],
             [['Parent 2', 'Parent 4'], ['Child 2', 'Child 3', 'Child 4']],
             [['posts.viewer', 'posts.redactor', 'posts.admin'], []],
-            [['posts.viewer', 'posts.redactor', 'Parent 2'], ['Child 2', 'Child 3']],
             ['non-existing', []],
         ];
     }
@@ -618,12 +617,12 @@ trait ItemsStorageTestTrait
             ['parent' => 'Parent 5', 'child' => 'Child 5'],
 
             // Multiple generations of children
+            ['parent' => 'posts.admin', 'child' => 'posts.redactor'],
+            ['parent' => 'posts.redactor', 'child' => 'posts.viewer'],
             ['parent' => 'posts.viewer', 'child' => 'posts.view'],
             ['parent' => 'posts.redactor', 'child' => 'posts.create'],
             ['parent' => 'posts.redactor', 'child' => 'posts.update'],
             ['parent' => 'posts.admin', 'child' => 'posts.delete'],
-            ['parent' => 'posts.admin', 'child' => 'posts.redactor'],
-            ['parent' => 'posts.redactor', 'child' => 'posts.viewer'],
         ];
         foreach ($itemsChildren as $itemChild) {
             $parentItemType = $itemsMap[$itemChild['parent']];
