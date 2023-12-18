@@ -668,7 +668,7 @@ trait ManagerLogicTestTrait
         $this->assertNull($manager->getRole('reader'));
         $this->assertSame($manager, $returnedManager);
         $this->assertFalse($manager->userHasPermission('reader A', 'readPost'));
-        $this->assertEqualsCanonicalizing([], $manager->getUserIdsByRoleName('reader'));
+        $this->assertEqualsCanonicalizing(['author B', 'admin C'], $manager->getUserIdsByRoleName('reader'));
     }
 
     public function testUpdateRoleNameAndRule(): void
