@@ -257,6 +257,7 @@ abstract class SimpleItemsStorage implements ItemsStorageInterface
             $this->children[$item->getName()] = $this->children[$name];
             unset($this->children[$name]);
         }
+
         foreach ($this->children as &$children) {
             if (isset($children[$name])) {
                 $children[$item->getName()] = $item;
@@ -268,6 +269,10 @@ abstract class SimpleItemsStorage implements ItemsStorageInterface
     private function removeItemByName(string $name): void
     {
         unset($this->items[$name]);
+
+        foreach ($this->children as &$children) {
+            unset($children[$name]);
+        }
     }
 
     /**
