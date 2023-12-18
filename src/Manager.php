@@ -222,10 +222,6 @@ final class Manager implements ManagerInterface
     {
         $userId = (string) $userId;
         $assignments = $this->assignmentsStorage->getByUserId($userId);
-        if (empty($assignments)) {
-            return [];
-        }
-
         $assignmentNames = array_keys($assignments);
 
         return array_merge(
