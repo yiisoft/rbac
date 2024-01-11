@@ -301,9 +301,7 @@ trait ManagerLogicTestTrait
     public function testCanAddChildToNonExistingItem(): void
     {
         $itemsStorage = $this->createItemsStorage();
-        $itemsStorage->add(new Role('author'));
-
-        $manager = $this->createManager($itemsStorage);
+        $manager = $this->createManager($itemsStorage)->addRole(new Role('author'));
 
         $this->assertFalse($manager->canAddChild('admin', 'author'));
     }
@@ -311,9 +309,7 @@ trait ManagerLogicTestTrait
     public function testCanAddNonExistingChild(): void
     {
         $itemsStorage = $this->createItemsStorage();
-        $itemsStorage->add(new Role('author'));
-
-        $manager = $this->createManager($itemsStorage);
+        $manager = $this->createManager($itemsStorage)->addRole(new Role('author'));
 
         $this->assertFalse($manager->canAddChild('author', 'reader'));
     }
@@ -449,21 +445,15 @@ trait ManagerLogicTestTrait
     public function testAssign(): void
     {
         $itemsStorage = $this->createItemsStorage();
-        $itemsStorage->add(new Role('author'));
-        $itemsStorage->add(new Role('reader'));
-        $itemsStorage->add(new Role('writer'));
-        $itemsStorage->add(new Role('default-role'));
-
         $assignmentsStorage = $this->createAssignmentsStorage();
-
-        $manager = $this->createManager($itemsStorage, $assignmentsStorage);
-        $manager->setDefaultRoleNames(['default-role']);
-
-        $manager->assign('reader', 'readingAuthor');
-        $readerAssignment = $assignmentsStorage->get('reader', 'readingAuthor');
-
-        $manager->assign('author', 'readingAuthor');
-        $authorAssignment = $assignmentsStorage->get('author', 'readingAuthor');
+        $manager = $this->createManager($itemsStorage, $assignmentsStorage)
+            ->addRole(new Role('author'))
+            ->addRole(new Role('reader'))
+            ->addRole(new Role('writer'))
+            ->addRole(new Role('default-role'))
+            ->setDefaultRoleNames(['default-role'])
+            ->assign('reader', 'readingAuthor')
+            ->assign('author', 'readingAuthor');
 
         $this->assertEqualsCanonicalizing(
             [
@@ -475,10 +465,13 @@ trait ManagerLogicTestTrait
         );
 
         $createdAt = 1_683_707_079;
+        $readerAssignment = $assignmentsStorage->get('reader', 'readingAuthor');
 
         $this->assertSame('readingAuthor', $readerAssignment->getUserId());
         $this->assertSame('reader', $readerAssignment->getItemName());
         $this->assertSame($createdAt, $readerAssignment->getCreatedAt());
+
+        $authorAssignment = $assignmentsStorage->get('author', 'readingAuthor');
 
         $this->assertSame('readingAuthor', $authorAssignment->getUserId());
         $this->assertSame('author', $authorAssignment->getItemName());
