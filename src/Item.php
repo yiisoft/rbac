@@ -139,10 +139,10 @@ abstract class Item
      * @psalm-return array{
      *     name:string,
      *     description:string,
-     *     ruleName:string|null,
+     *     rule_name:string|null,
      *     type:string,
-     *     updatedAt:int|null,
-     *     createdAt:int|null,
+     *     updated_at:int|null,
+     *     created_at:int|null,
      * }
      */
     final public function getAttributes(): array
