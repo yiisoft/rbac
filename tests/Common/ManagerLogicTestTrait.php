@@ -631,10 +631,10 @@ trait ManagerLogicTestTrait
             [
                 'name' => 'new role',
                 'description' => 'new role description',
-                'ruleName' => EasyRule::class,
+                'rule_name' => EasyRule::class,
                 'type' => 'role',
-                'updatedAt' => 1_642_026_148,
-                'createdAt' => 1_642_026_147,
+                'updated_at' => 1_642_026_148,
+                'created_at' => 1_642_026_147,
             ],
             $storedRole->getAttributes()
         );
@@ -696,10 +696,10 @@ trait ManagerLogicTestTrait
             [
                 'name' => 'edit post',
                 'description' => 'edit a post',
-                'ruleName' => null,
+                'rule_name' => null,
                 'type' => 'permission',
-                'updatedAt' => 1_642_026_148,
-                'createdAt' => 1_642_026_147,
+                'updated_at' => 1_642_026_148,
+                'created_at' => 1_642_026_147,
             ],
             $storedPermission->getAttributes()
         );

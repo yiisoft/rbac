@@ -139,10 +139,10 @@ abstract class Item
      * @psalm-return array{
      *     name:string,
      *     description:string,
-     *     ruleName:string|null,
+     *     rule_name:string|null,
      *     type:string,
-     *     updatedAt:int|null,
-     *     createdAt:int|null,
+     *     updated_at:int|null,
+     *     created_at:int|null,
      * }
      */
     final public function getAttributes(): array
@@ -150,10 +150,10 @@ abstract class Item
         return [
             'name' => $this->getName(),
             'description' => $this->getDescription(),
-            'ruleName' => $this->getRuleName(),
+            'rule_name' => $this->getRuleName(),
             'type' => $this->getType(),
-            'updatedAt' => $this->getUpdatedAt(),
-            'createdAt' => $this->getCreatedAt(),
+            'updated_at' => $this->getUpdatedAt(),
+            'created_at' => $this->getCreatedAt(),
         ];
     }
 }
