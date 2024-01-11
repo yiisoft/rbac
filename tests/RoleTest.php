@@ -33,10 +33,10 @@ final class RoleTest extends TestCase
         $this->assertSame([
             'name' => 'test',
             'description' => '',
-            'ruleName' => null,
+            'rule_name' => null,
             'type' => Item::TYPE_ROLE,
-            'updatedAt' => null,
-            'createdAt' => null,
+            'updated_at' => null,
+            'created_at' => null,
         ], $permission->getAttributes());
     }
 }

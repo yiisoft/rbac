@@ -270,25 +270,25 @@ trait AssignmentsStorageTestTrait
         ];
         $items = array_map(
             static function (array $item) use ($time): array {
-                $item['createdAt'] = $time;
-                $item['updatedAt'] = $time;
+                $item['created_at'] = $time;
+                $item['updated_at'] = $time;
 
                 return $item;
             },
             $items,
         );
         $assignments = [
-            ['itemName' => 'Researcher', 'userId' => 'john'],
-            ['itemName' => 'Accountant', 'userId' => 'john'],
-            ['itemName' => 'Quality control specialist', 'userId' => 'john'],
-            ['itemName' => 'Operator', 'userId' => 'jack'],
-            ['itemName' => 'Manager', 'userId' => 'jack'],
-            ['itemName' => 'Support specialist', 'userId' => 'jack'],
-            ['itemName' => 'Operator', 'userId' => 'jeff'],
+            ['item_name' => 'Researcher', 'user_id' => 'john'],
+            ['item_name' => 'Accountant', 'user_id' => 'john'],
+            ['item_name' => 'Quality control specialist', 'user_id' => 'john'],
+            ['item_name' => 'Operator', 'user_id' => 'jack'],
+            ['item_name' => 'Manager', 'user_id' => 'jack'],
+            ['item_name' => 'Support specialist', 'user_id' => 'jack'],
+            ['item_name' => 'Operator', 'user_id' => 'jeff'],
         ];
         $assignments = array_map(
             static function (array $item) use ($time): array {
-                $item['createdAt'] = $time;
+                $item['created_at'] = $time;
 
                 return $item;
             },
@@ -304,8 +304,8 @@ trait AssignmentsStorageTestTrait
             $name = $itemData['name'];
             $item = $itemData['type'] === Item::TYPE_PERMISSION ? new Permission($name) : new Role($name);
             $item = $item
-                ->withCreatedAt($itemData['createdAt'])
-                ->withUpdatedAt($itemData['updatedAt']);
+                ->withCreatedAt($itemData['created_at'])
+                ->withUpdatedAt($itemData['updated_at']);
             $this->getItemsStorage()->add($item);
         }
     }
@@ -315,8 +315,8 @@ trait AssignmentsStorageTestTrait
         foreach ($this->getFixtures()['assignments'] as $assignmentData) {
             $this->getAssignmentsStorage()->add(
                 new Assignment(
-                    userId: $assignmentData['userId'],
-                    itemName: $assignmentData['itemName'],
+                    userId: $assignmentData['user_id'],
+                    itemName: $assignmentData['item_name'],
                     createdAt: time(),
                 ),
             );

@@ -601,8 +601,8 @@ trait ItemsStorageTestTrait
             $items[] = [
                 'name' => $name,
                 'type' => $type,
-                'createdAt' => $time,
-                'updatedAt' => $time,
+                'created_at' => $time,
+                'updated_at' => $time,
             ];
             $type === Item::TYPE_ROLE ? $this->initialRolesCount++ : $this->initialPermissionsCount++;
         }
@@ -652,8 +652,8 @@ trait ItemsStorageTestTrait
             $name = $itemData['name'];
             $item = $itemData['type'] === Item::TYPE_PERMISSION ? new Permission($name) : new Role($name);
             $item = $item
-                ->withCreatedAt($itemData['createdAt'])
-                ->withUpdatedAt($itemData['updatedAt']);
+                ->withCreatedAt($itemData['created_at'])
+                ->withUpdatedAt($itemData['updated_at']);
             $storage->add($item);
         }
 

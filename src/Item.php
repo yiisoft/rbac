@@ -150,10 +150,10 @@ abstract class Item
         return [
             'name' => $this->getName(),
             'description' => $this->getDescription(),
-            'ruleName' => $this->getRuleName(),
+            'rule_name' => $this->getRuleName(),
             'type' => $this->getType(),
-            'updatedAt' => $this->getUpdatedAt(),
-            'createdAt' => $this->getCreatedAt(),
+            'updated_at' => $this->getUpdatedAt(),
+            'created_at' => $this->getCreatedAt(),
         ];
     }
 }
