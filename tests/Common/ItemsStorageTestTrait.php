@@ -397,8 +397,10 @@ trait ItemsStorageTestTrait
 
     public function testAdd(): void
     {
+        $time = time();
+        $newItem = (new Permission('Delete post'))->withCreatedAt($time)->withUpdatedAt($time);
+
         $storage = $this->getItemsStorage();
-        $newItem = new Permission('Delete post');
         $storage->add($newItem);
 
         $this->assertInstanceOf(Permission::class, $storage->get('Delete post'));
