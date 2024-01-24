@@ -12,6 +12,8 @@ use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
 
 trait ItemsStorageTestTrait
 {
+    protected static bool $reCreateItemsStorageAfterModifications = false;
+
     private int $initialRolesCount = 0;
     private int $initialPermissionsCount = 0;
     private int $initialBothRolesChildrenCount = 0;
@@ -53,6 +55,8 @@ trait ItemsStorageTestTrait
             ->withName('Super Admin')
             ->withRuleName('super admin');
         $storage->update($itemName, $item);
+
+        $storage = $this->getItemsStorageForModificationAssertions();
 
         $this->assertNull($storage->get($itemName));
 
@@ -134,6 +138,8 @@ trait ItemsStorageTestTrait
         $storage = $this->getItemsStorage();
         $storage->addChild('Parent 2', 'Child 1');
 
+        $storage = $this->getItemsStorageForModificationAssertions();
+
         $children = $storage->getAllChildren('Parent 2');
         $this->assertCount(3, $children);
 
@@ -147,6 +153,7 @@ trait ItemsStorageTestTrait
         $storage = $this->getItemsStorage();
         $storage->clear();
 
+        $storage = $this->getItemsStorageForModificationAssertions();
         $this->assertEmpty($storage->getAll());
     }
 
@@ -340,6 +347,7 @@ trait ItemsStorageTestTrait
         $storage = $this->getItemsStorage();
         $storage->remove('Parent 2');
 
+        $storage = $this->getItemsStorageForModificationAssertions();
         $this->assertNull($storage->get('Parent 2'));
         $this->assertNotEmpty($storage->getAll());
         $this->assertFalse($storage->hasChildren('Parent 2'));
@@ -381,6 +389,7 @@ trait ItemsStorageTestTrait
         $storage = $this->getItemsStorage();
         $storage->removeChildren('Parent 2');
 
+        $storage = $this->getItemsStorageForModificationAssertions();
         $this->assertFalse($storage->hasChildren('Parent 2'));
         $this->assertTrue($storage->hasChildren('Parent 1'));
     }
@@ -403,6 +412,7 @@ trait ItemsStorageTestTrait
         $storage = $this->getItemsStorage();
         $storage->add($newItem);
 
+        $storage = $this->getItemsStorageForModificationAssertions();
         $this->assertInstanceOf(Permission::class, $storage->get('Delete post'));
     }
 
@@ -411,6 +421,8 @@ trait ItemsStorageTestTrait
         $storage = $this->getItemsStorage();
         $storage->addChild('Parent 2', 'Child 1');
         $storage->removeChild('Parent 2', 'Child 1');
+
+        $storage = $this->getItemsStorageForModificationAssertions();
 
         $children = $storage->getAllChildren('Parent 2');
         $this->assertNotEmpty($children);
@@ -534,6 +546,7 @@ trait ItemsStorageTestTrait
         $storage = $this->getItemsStorage();
         $storage->clearPermissions();
 
+        $storage = $this->getItemsStorageForModificationAssertions();
         $all = $storage->getAll();
         $this->assertNotEmpty($all);
         $this->assertContainsOnlyInstancesOf(Role::class, $all);
@@ -543,6 +556,8 @@ trait ItemsStorageTestTrait
     {
         $storage = $this->getItemsStorage();
         $storage->clearRoles();
+
+        $storage = $this->getItemsStorageForModificationAssertions();
 
         $all = $storage->getAll();
         $this->assertNotEmpty($all);
@@ -563,6 +578,11 @@ trait ItemsStorageTestTrait
     protected function createItemsStorage(): ItemsStorageInterface
     {
         return new FakeItemsStorage();
+    }
+
+    protected function getItemsStorageForModificationAssertions(): ItemsStorageInterface
+    {
+        return static::$reCreateItemsStorageAfterModifications ? $this->createItemsStorage() : $this->getItemsStorage();
     }
 
     protected function getFixtures(): array
