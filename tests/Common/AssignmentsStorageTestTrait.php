@@ -362,8 +362,6 @@ trait AssignmentsStorageTestTrait
 
     protected function getAssignmentsStorageForModificationAssertions(): AssignmentsStorageInterface
     {
-        return static::$reCreateAssignmentsStorageAfterModifications
-            ? $this->createAssignmentsStorage()
-            : $this->getAssignmentsStorage();
+        return $this->getAssignmentsStorage();
     }
 }

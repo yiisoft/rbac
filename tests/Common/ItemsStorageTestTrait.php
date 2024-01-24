@@ -12,8 +12,6 @@ use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
 
 trait ItemsStorageTestTrait
 {
-    protected static bool $reCreateItemsStorageAfterModifications = false;
-
     private int $initialRolesCount = 0;
     private int $initialPermissionsCount = 0;
     private int $initialBothRolesChildrenCount = 0;
@@ -582,7 +580,7 @@ trait ItemsStorageTestTrait
 
     protected function getItemsStorageForModificationAssertions(): ItemsStorageInterface
     {
-        return static::$reCreateItemsStorageAfterModifications ? $this->createItemsStorage() : $this->getItemsStorage();
+        return $this->getItemsStorage();
     }
 
     protected function getFixtures(): array
