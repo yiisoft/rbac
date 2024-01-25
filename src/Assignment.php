@@ -48,7 +48,7 @@ final class Assignment
      *     created_at: int
      * }
      */
-    final public function getAttributes(): array
+    public function getAttributes(): array
     {
         return [
             'item_name' => $this->getItemName(),
