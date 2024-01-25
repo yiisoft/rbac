@@ -52,6 +52,7 @@
 - Bug #222: Adjust hierarchy when removing item (@arogachev)
 - Bug #223: Handle empty assignments in `Manager::getPermissionsByUserId()` (@arogachev)
 - Enh #227: Use snake case for item attribute names (ease migration from Yii 2) (@arogachev)
+- New #?: Add `Assignment::getAttributes()` method (@arogachev)
 
 ## 1.0.2 April 20, 2023
 
