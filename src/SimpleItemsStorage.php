@@ -14,11 +14,6 @@ namespace Yiisoft\Rbac;
  *      updatedAt?: int,
  *      children?: string[]
  *  }
- * @psalm-type  RawAssignment = array{
- *     item_name: string,
- *     user_id: string,
- *     created_at: int
-*   }
  *
  * @psalm-import-type ItemsIndexedByName from ItemsStorageInterface
  * @psalm-import-type AccessTree from ItemsStorageInterface

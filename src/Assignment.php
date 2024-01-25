@@ -6,6 +6,8 @@ namespace Yiisoft\Rbac;
 
 /**
  * `Assignment` represents an assignment of a role or a permission to a user.
+ *
+ * @psalm-import-type RawAssigment from SimpleAssignmentsStorage
  */
 final class Assignment
 {
