@@ -7,7 +7,7 @@ namespace Yiisoft\Rbac;
 use function array_key_exists;
 
 /**
- * @psalm-type  RawAssignment = array{
+ * @psalm-type RawAssignment = array{
  *     item_name: string,
  *     user_id: string,
  *     created_at: int
