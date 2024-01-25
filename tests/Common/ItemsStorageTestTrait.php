@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac\Tests\Common;
 
+use DateTime;
+use SlopeIt\ClockMock\ClockMock;
 use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\ItemsStorageInterface;
 use Yiisoft\Rbac\Permission;
@@ -22,11 +24,19 @@ trait ItemsStorageTestTrait
 
     protected function setUp(): void
     {
+        if ($this->name() === 'testAddWithCurrentTimestamps') {
+            ClockMock::freeze(new DateTime('2023-05-10 08:24:39'));
+        }
+
         $this->populateItemsStorage();
     }
 
     protected function tearDown(): void
     {
+        if ($this->name() === 'testAddWithCurrentTimestamps') {
+            ClockMock::reset();
+        }
+
         $this->getItemsStorage()->clear();
     }
 
@@ -402,7 +412,7 @@ trait ItemsStorageTestTrait
         $this->assertSame('Parent 1', $role->getName());
     }
 
-    public function testAdd(): void
+    public function testAddWithCurrentTimestamps(): void
     {
         $time = time();
         $newItem = (new Permission('Delete post'))->withCreatedAt($time)->withUpdatedAt($time);
@@ -411,7 +421,25 @@ trait ItemsStorageTestTrait
         $storage->add($newItem);
 
         $storage = $this->getItemsStorageForModificationAssertions();
-        $this->assertInstanceOf(Permission::class, $storage->get('Delete post'));
+        $this->assertEquals(
+            (new Permission('Delete post'))->withCreatedAt(1_683_707_079)->withUpdatedAt(1_683_707_079),
+            $storage->get('Delete post'),
+        );
+    }
+
+    public function testAddWithPastTimestamps(): void
+    {
+        $time = 1_694_508_008;
+        $newItem = (new Permission('Delete post'))->withCreatedAt($time)->withUpdatedAt($time);
+
+        $storage = $this->getItemsStorage();
+        $storage->add($newItem);
+
+        $storage = $this->getItemsStorageForModificationAssertions();
+        $this->assertEquals(
+            (new Permission('Delete post'))->withCreatedAt($time)->withUpdatedAt($time),
+            $storage->get('Delete post'),
+        );
     }
 
     public function testRemoveChild(): void
