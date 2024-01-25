@@ -37,7 +37,6 @@ enabled:
   - no_superfluous_elseif
   - no_unneeded_control_parentheses
   - no_unneeded_curly_braces
-  - no_unneeded_final_method
   - no_unset_cast
   - no_unused_imports
   - no_unused_lambda_imports

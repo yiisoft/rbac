@@ -6,6 +6,12 @@ namespace Yiisoft\Rbac;
 
 /**
  * `Assignment` represents an assignment of a role or a permission to a user.
+ *
+ * @psalm-type  RawAssignment = array{
+ *     item_name: string,
+ *     user_id: string,
+ *     created_at: int
+ *  }
  */
 final class Assignment
 {
@@ -42,13 +48,9 @@ final class Assignment
 
     /**
      * @return array Attribute values indexed by corresponding names.
-     * @psalm-return array{
-     *     item_name: string,
-     *     user_id: string,
-     *     created_at: int
-     * }
+     * @psalm-return RawAssignment
      */
-    public function getAttributes(): array
+    final public function getAttributes(): array
     {
         return [
             'item_name' => $this->getItemName(),
