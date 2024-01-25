@@ -9,7 +9,7 @@ namespace Yiisoft\Rbac;
  *      type: Item::TYPE_*,
  *      name: string,
  *      description?: string,
- *      ruleName?: string,
+ *      rule_name?: string,
  *      created_at?: int,
  *      updated_at?: int,
  *      children?: string[]
