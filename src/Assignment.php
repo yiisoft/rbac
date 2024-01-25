@@ -50,7 +50,7 @@ final class Assignment
      * @return array Attribute values indexed by corresponding names.
      * @psalm-return RawAssignment
      */
-    final public function getAttributes(): array
+    public function getAttributes(): array
     {
         return [
             'item_name' => $this->getItemName(),
