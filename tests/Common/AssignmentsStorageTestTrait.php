@@ -24,7 +24,7 @@ trait AssignmentsStorageTestTrait
 
     protected function setUp(): void
     {
-        if ($this->name() === 'testAdd') {
+        if ($this->name() === 'testAddWithCurrentTimestamp') {
             ClockMock::freeze(new DateTime('2023-05-10 08:24:39'));
         }
 
@@ -34,7 +34,7 @@ trait AssignmentsStorageTestTrait
 
     protected function tearDown(): void
     {
-        if ($this->name() === 'testAdd') {
+        if ($this->name() === 'testAddWithCurrentTimestamp') {
             ClockMock::reset();
         }
 
@@ -241,7 +241,7 @@ trait AssignmentsStorageTestTrait
         );
     }
 
-    public function testAdd(): void
+    public function testAddWithCurrentTimestamp(): void
     {
         $storage = $this->getAssignmentsStorage();
         $storage->add(new Assignment(userId: 'john', itemName: 'Operator', createdAt: time()));
@@ -253,7 +253,7 @@ trait AssignmentsStorageTestTrait
         );
     }
 
-    public function testAddWithCreatedAt(): void
+    public function testAddWithPastTimestamp(): void
     {
         $storage = $this->getAssignmentsStorage();
         $storage->add(new Assignment(userId: 'john', itemName: 'Operator', createdAt: 1_694_508_008));
