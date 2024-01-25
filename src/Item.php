@@ -134,15 +134,14 @@ abstract class Item
     }
 
     /**
-     * @return array Authorization item attribute values indexed by attribute names.
-     *
+     * @return array Attribute values indexed by corresponding names.
      * @psalm-return array{
-     *     name:string,
-     *     description:string,
-     *     rule_name:string|null,
-     *     type:string,
-     *     updated_at:int|null,
-     *     created_at:int|null,
+     *     name: string,
+     *     description: string,
+     *     rule_name: string|null,
+     *     type: string,
+     *     updated_at: int|null,
+     *     created_at: int|null,
      * }
      */
     final public function getAttributes(): array

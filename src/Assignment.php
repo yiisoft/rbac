@@ -39,4 +39,21 @@ final class Assignment
     {
         return $this->createdAt;
     }
+
+    /**
+     * @return array Attribute values indexed by corresponding names.
+     * @psalm-return array{
+     *     item_name: string,
+     *     user_id: string,
+     *     created_at: int
+     * }
+     */
+    public function getAttributes(): array
+    {
+        return [
+            'item_name' => $this->getItemName(),
+            'user_id' => $this->getUserId(),
+            'created_at' => $this->getCreatedAt(),
+        ];
+    }
 }
