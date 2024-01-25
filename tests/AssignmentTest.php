@@ -23,7 +23,7 @@ final class AssignmentTest extends TestCase
         $this->assertSame([
             'item_name' => 'test1',
             'user_id' => '42',
-            'created_at' => 1642029084,
+            'created_at' => 1_642_029_084,
         ], $assignment->getAttributes());
     }
 }
