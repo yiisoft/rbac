@@ -10,6 +10,8 @@ namespace Yiisoft\Rbac;
  *      name: string,
  *      description?: string,
  *      ruleName?: string,
+ *      createdAt?: int,
+ *      updatedAt?: int,
  *      children?: string[]
  *  }
  *

@@ -7,11 +7,7 @@ namespace Yiisoft\Rbac;
 /**
  * `Assignment` represents an assignment of a role or a permission to a user.
  *
- * @psalm-type  RawAssignment = array{
- *     item_name: string,
- *     user_id: string,
- *     created_at: int
- *  }
+ * @psalm-import-type RawAssignment from SimpleAssignmentsStorage
  */
 final class Assignment
 {
