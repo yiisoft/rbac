@@ -110,7 +110,7 @@ abstract class SimpleItemsStorage implements ItemsStorageInterface
 
     public function getAccessTree(string $name): array
     {
-        if (!array_key_exists($name, $this->items)) {
+        if (!$this->exists($name)) {
             throw new RuntimeException('Base item not found.');
         }
 

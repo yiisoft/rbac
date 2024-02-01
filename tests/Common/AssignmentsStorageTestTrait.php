@@ -51,12 +51,12 @@ trait AssignmentsStorageTestTrait
 
     public function testRenameItem(): void
     {
-        $storage = $this->getAssignmentsStorage();
-        $storage->renameItem('Accountant', 'Senior accountant');
+        $testStorage = $this->getAssignmentsStorageForModificationAssertions();
+        $actionStorage = $this->getAssignmentsStorage();
+        $actionStorage->renameItem('Accountant', 'Senior accountant');
 
-        $storage = $this->getAssignmentsStorageForModificationAssertions();
-        $this->assertFalse($storage->hasItem('Accountant'));
-        $this->assertTrue($storage->hasItem('Senior accountant'));
+        $this->assertFalse($testStorage->hasItem('Accountant'));
+        $this->assertTrue($testStorage->hasItem('Senior accountant'));
     }
 
     public function testGetAll(): void
@@ -75,13 +75,13 @@ trait AssignmentsStorageTestTrait
 
     public function testRemoveByItemName(): void
     {
-        $storage = $this->getAssignmentsStorage();
-        $storage->removeByItemName('Manager');
+        $testStorage = $this->getAssignmentsStorageForModificationAssertions();
+        $actionStorage = $this->getAssignmentsStorage();
+        $actionStorage->removeByItemName('Manager');
 
-        $storage = $this->getAssignmentsStorageForModificationAssertions();
-        $this->assertFalse($storage->hasItem('Manager'));
-        $this->assertCount(2, $storage->getByUserId('jack'));
-        $this->assertCount(3, $storage->getByUserId('john'));
+        $this->assertFalse($testStorage->hasItem('Manager'));
+        $this->assertCount(2, $testStorage->getByUserId('jack'));
+        $this->assertCount(3, $testStorage->getByUserId('john'));
     }
 
     public function testGetByUserId(): void
@@ -135,31 +135,31 @@ trait AssignmentsStorageTestTrait
 
     public function testRemoveByUserId(): void
     {
-        $storage = $this->getAssignmentsStorage();
-        $storage->removeByUserId('jack');
+        $testStorage = $this->getAssignmentsStorageForModificationAssertions();
+        $actionStorage = $this->getAssignmentsStorage();
+        $actionStorage->removeByUserId('jack');
 
-        $storage = $this->getAssignmentsStorageForModificationAssertions();
-        $this->assertEmpty($storage->getByUserId('jack'));
-        $this->assertNotEmpty($storage->getByUserId('john'));
+        $this->assertEmpty($testStorage->getByUserId('jack'));
+        $this->assertNotEmpty($testStorage->getByUserId('john'));
     }
 
     public function testRemove(): void
     {
-        $storage = $this->getAssignmentsStorage();
-        $storage->remove('Accountant', 'john');
+        $testStorage = $this->getAssignmentsStorageForModificationAssertions();
+        $actionStorage = $this->getAssignmentsStorage();
+        $actionStorage->remove('Accountant', 'john');
 
-        $storage = $this->getAssignmentsStorageForModificationAssertions();
-        $this->assertEmpty($storage->get('Accountant', 'john'));
-        $this->assertNotEmpty($storage->getByUserId('john'));
+        $this->assertEmpty($testStorage->get('Accountant', 'john'));
+        $this->assertNotEmpty($testStorage->getByUserId('john'));
     }
 
     public function testClear(): void
     {
-        $storage = $this->getAssignmentsStorage();
-        $storage->clear();
+        $testStorage = $this->getAssignmentsStorageForModificationAssertions();
+        $actionStorage = $this->getAssignmentsStorage();
+        $actionStorage->clear();
 
-        $storage = $this->getAssignmentsStorageForModificationAssertions();
-        $this->assertEmpty($storage->getAll());
+        $this->assertEmpty($testStorage->getAll());
     }
 
     public function testGet(): void
@@ -243,25 +243,25 @@ trait AssignmentsStorageTestTrait
 
     public function testAddWithCurrentTimestamp(): void
     {
-        $storage = $this->getAssignmentsStorage();
-        $storage->add(new Assignment(userId: 'john', itemName: 'Operator', createdAt: time()));
+        $testStorage = $this->getAssignmentsStorageForModificationAssertions();
+        $actionStorage = $this->getAssignmentsStorage();
+        $actionStorage->add(new Assignment(userId: 'john', itemName: 'Operator', createdAt: time()));
 
-        $storage = $this->getAssignmentsStorageForModificationAssertions();
         $this->assertEquals(
             new Assignment(userId: 'john', itemName: 'Operator', createdAt: 1_683_707_079),
-            $storage->get(itemName: 'Operator', userId: 'john'),
+            $testStorage->get(itemName: 'Operator', userId: 'john'),
         );
     }
 
     public function testAddWithPastTimestamp(): void
     {
-        $storage = $this->getAssignmentsStorage();
-        $storage->add(new Assignment(userId: 'john', itemName: 'Operator', createdAt: 1_694_508_008));
+        $testStorage = $this->getAssignmentsStorageForModificationAssertions();
+        $actionStorage = $this->getAssignmentsStorage();
+        $actionStorage->add(new Assignment(userId: 'john', itemName: 'Operator', createdAt: 1_694_508_008));
 
-        $storage = $this->getAssignmentsStorageForModificationAssertions();
         $this->assertEquals(
             new Assignment(userId: 'john', itemName: 'Operator', createdAt: 1_694_508_008),
-            $storage->get(itemName: 'Operator', userId: 'john'),
+            $testStorage->get(itemName: 'Operator', userId: 'john'),
         );
     }
 
