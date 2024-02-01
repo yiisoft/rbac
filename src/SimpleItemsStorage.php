@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac;
 
+use RuntimeException;
+
 /**
  * @psalm-type RawItem = array{
  *      type: Item::TYPE_*,
@@ -108,6 +110,10 @@ abstract class SimpleItemsStorage implements ItemsStorageInterface
 
     public function getAccessTree(string $name): array
     {
+        if (!array_key_exists($name, $this->items)) {
+            throw new RuntimeException('Base item not found.');
+        }
+
         $result = [$name => ['item' => $this->items[$name], 'children' => []]];
         $this->fillAccessTreeRecursive($name, $result);
 
