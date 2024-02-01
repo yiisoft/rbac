@@ -54,27 +54,26 @@ trait ItemsStorageTestTrait
      */
     public function testUpdate(string $itemName, string $parentNameForChildrenCheck, bool $expectedHasChildren): void
     {
-        $storage = $this->getItemsStorage();
+        $testStorage = $this->getItemsStorageForModificationAssertions();
+        $actionStorage = $this->getItemsStorage();
 
-        $item = $storage->get($itemName);
+        $item = $actionStorage->get($itemName);
         $this->assertNull($item->getRuleName());
 
         $item = $item
             ->withName('Super Admin')
             ->withRuleName('super admin');
-        $storage->update($itemName, $item);
+        $actionStorage->update($itemName, $item);
 
-        $storage = $this->getItemsStorageForModificationAssertions();
+        $this->assertNull($testStorage->get($itemName));
 
-        $this->assertNull($storage->get($itemName));
-
-        $item = $storage->get('Super Admin');
+        $item = $testStorage->get('Super Admin');
         $this->assertNotNull($item);
 
         $this->assertSame('Super Admin', $item->getName());
         $this->assertSame('super admin', $item->getRuleName());
 
-        $this->assertSame($expectedHasChildren, $storage->hasChildren($parentNameForChildrenCheck));
+        $this->assertSame($expectedHasChildren, $testStorage->hasChildren($parentNameForChildrenCheck));
     }
 
     public function testGet(): void
@@ -143,12 +142,11 @@ trait ItemsStorageTestTrait
 
     public function testAddChild(): void
     {
-        $storage = $this->getItemsStorage();
-        $storage->addChild('Parent 2', 'Child 1');
+        $testStorage = $this->getItemsStorageForModificationAssertions();
+        $actionStorage = $this->getItemsStorage();
+        $actionStorage->addChild('Parent 2', 'Child 1');
 
-        $storage = $this->getItemsStorageForModificationAssertions();
-
-        $children = $storage->getAllChildren('Parent 2');
+        $children = $testStorage->getAllChildren('Parent 2');
         $this->assertCount(3, $children);
 
         foreach ($children as $name => $item) {
@@ -158,11 +156,11 @@ trait ItemsStorageTestTrait
 
     public function testClear(): void
     {
-        $storage = $this->getItemsStorage();
-        $storage->clear();
+        $testStorage = $this->getItemsStorageForModificationAssertions();
+        $actionStorage = $this->getItemsStorage();
+        $actionStorage->clear();
 
-        $storage = $this->getItemsStorageForModificationAssertions();
-        $this->assertEmpty($storage->getAll());
+        $this->assertEmpty($testStorage->getAll());
     }
 
     public static function dataGetDirectChildren(): array
@@ -352,13 +350,13 @@ trait ItemsStorageTestTrait
 
     public function testRemove(): void
     {
-        $storage = $this->getItemsStorage();
-        $storage->remove('Parent 2');
+        $testStorage = $this->getItemsStorageForModificationAssertions();
+        $actionStorage = $this->getItemsStorage();
+        $actionStorage->remove('Parent 2');
 
-        $storage = $this->getItemsStorageForModificationAssertions();
-        $this->assertNull($storage->get('Parent 2'));
-        $this->assertNotEmpty($storage->getAll());
-        $this->assertFalse($storage->hasChildren('Parent 2'));
+        $this->assertNull($testStorage->get('Parent 2'));
+        $this->assertNotEmpty($testStorage->getAll());
+        $this->assertFalse($testStorage->hasChildren('Parent 2'));
     }
 
     public static function dataGetParents(): array
@@ -394,12 +392,12 @@ trait ItemsStorageTestTrait
 
     public function testRemoveChildren(): void
     {
-        $storage = $this->getItemsStorage();
-        $storage->removeChildren('Parent 2');
+        $testStorage = $this->getItemsStorageForModificationAssertions();
+        $actionStorage = $this->getItemsStorage();
+        $actionStorage->removeChildren('Parent 2');
 
-        $storage = $this->getItemsStorageForModificationAssertions();
-        $this->assertFalse($storage->hasChildren('Parent 2'));
-        $this->assertTrue($storage->hasChildren('Parent 1'));
+        $this->assertFalse($testStorage->hasChildren('Parent 2'));
+        $this->assertTrue($testStorage->hasChildren('Parent 1'));
     }
 
     public function testGetRole(): void
@@ -414,47 +412,47 @@ trait ItemsStorageTestTrait
 
     public function testAddWithCurrentTimestamps(): void
     {
+        $testStorage = $this->getItemsStorageForModificationAssertions();
+
         $time = time();
         $newItem = (new Permission('Delete post'))->withCreatedAt($time)->withUpdatedAt($time);
 
-        $storage = $this->getItemsStorage();
-        $storage->add($newItem);
+        $actionStorage = $this->getItemsStorage();
+        $actionStorage->add($newItem);
 
-        $storage = $this->getItemsStorageForModificationAssertions();
         $this->assertEquals(
             (new Permission('Delete post'))->withCreatedAt(1_683_707_079)->withUpdatedAt(1_683_707_079),
-            $storage->get('Delete post'),
+            $testStorage->get('Delete post'),
         );
     }
 
     public function testAddWithPastTimestamps(): void
     {
+        $testStorage = $this->getItemsStorageForModificationAssertions();
         $time = 1_694_508_008;
         $newItem = (new Permission('Delete post'))->withCreatedAt($time)->withUpdatedAt($time);
 
-        $storage = $this->getItemsStorage();
-        $storage->add($newItem);
+        $actionStorage = $this->getItemsStorage();
+        $actionStorage->add($newItem);
 
-        $storage = $this->getItemsStorageForModificationAssertions();
         $this->assertEquals(
             (new Permission('Delete post'))->withCreatedAt($time)->withUpdatedAt($time),
-            $storage->get('Delete post'),
+            $testStorage->get('Delete post'),
         );
     }
 
     public function testRemoveChild(): void
     {
-        $storage = $this->getItemsStorage();
-        $storage->addChild('Parent 2', 'Child 1');
-        $storage->removeChild('Parent 2', 'Child 1');
+        $testStorage = $this->getItemsStorageForModificationAssertions();
+        $actionStorage = $this->getItemsStorage();
+        $actionStorage->addChild('Parent 2', 'Child 1');
+        $actionStorage->removeChild('Parent 2', 'Child 1');
 
-        $storage = $this->getItemsStorageForModificationAssertions();
-
-        $children = $storage->getAllChildren('Parent 2');
+        $children = $testStorage->getAllChildren('Parent 2');
         $this->assertNotEmpty($children);
         $this->assertArrayNotHasKey('Child 1', $children);
 
-        $this->assertArrayHasKey('Child 1', $storage->getAllChildren('Parent 1'));
+        $this->assertArrayHasKey('Child 1', $testStorage->getAllChildren('Parent 1'));
     }
 
     public function testGetAll(): void
@@ -569,27 +567,26 @@ trait ItemsStorageTestTrait
 
     public function testClearPermissions(): void
     {
-        $storage = $this->getItemsStorage();
-        $storage->clearPermissions();
+        $testStorage = $this->getItemsStorageForModificationAssertions();
+        $actionStorage = $this->getItemsStorage();
+        $actionStorage->clearPermissions();
 
-        $storage = $this->getItemsStorageForModificationAssertions();
-        $all = $storage->getAll();
+        $all = $testStorage->getAll();
         $this->assertNotEmpty($all);
         $this->assertContainsOnlyInstancesOf(Role::class, $all);
     }
 
     public function testClearRoles(): void
     {
-        $storage = $this->getItemsStorage();
-        $storage->clearRoles();
+        $testStorage = $this->getItemsStorageForModificationAssertions();
+        $actionStorage = $this->getItemsStorage();
+        $actionStorage->clearRoles();
 
-        $storage = $this->getItemsStorageForModificationAssertions();
-
-        $all = $storage->getAll();
+        $all = $testStorage->getAll();
         $this->assertNotEmpty($all);
-        $this->assertContainsOnlyInstancesOf(Permission::class, $storage->getAll());
+        $this->assertContainsOnlyInstancesOf(Permission::class, $testStorage->getAll());
 
-        $this->assertTrue($storage->hasChildren('Parent 5'));
+        $this->assertTrue($testStorage->hasChildren('Parent 5'));
     }
 
     protected function getItemsStorage(): ItemsStorageInterface
