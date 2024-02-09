@@ -199,8 +199,6 @@ interface ManagerInterface extends AccessCheckerInterface
     public function removeRole(string $name): self;
 
     /**
-     * @param Permission $permission
-     *
      * @throws ItemAlreadyExistsException
      */
     public function addPermission(Permission $permission): self;
