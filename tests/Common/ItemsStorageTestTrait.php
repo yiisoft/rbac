@@ -453,6 +453,23 @@ trait ItemsStorageTestTrait
                     ],
                 ],
             ],
+            [
+                'posts.viewer',
+                [
+                    'posts.viewer' => ['item' => $postsViewerRole, 'children' => []],
+                    'posts.redactor' => [
+                        'item' => $postsRedactorRole,
+                        'children' => ['posts.viewer' => $postsViewerRole],
+                    ],
+                    'posts.admin' => [
+                        'item' => $postsAdminRole,
+                        'children' => [
+                            'posts.viewer' => $postsViewerRole,
+                            'posts.redactor' => $postsRedactorRole,
+                        ],
+                    ],
+                ],
+            ],
             ['non-existing', []],
         ];
     }
