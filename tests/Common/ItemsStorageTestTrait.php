@@ -28,12 +28,16 @@ trait ItemsStorageTestTrait
             ClockMock::freeze(new DateTime('2023-05-10 08:24:39'));
         }
 
+        if ($this->name() === 'testGetAccessTree') {
+            ClockMock::freeze(new DateTime('2023-12-24 17:51:18'));
+        }
+
         $this->populateItemsStorage();
     }
 
     protected function tearDown(): void
     {
-        if ($this->name() === 'testAddWithCurrentTimestamps') {
+        if (in_array($this->name(), ['testAddWithCurrentTimestamps', 'testGetAccessTree'], strict: true)) {
             ClockMock::reset();
         }
 
@@ -390,6 +394,94 @@ trait ItemsStorageTestTrait
         }
     }
 
+    public static function dataGetAccessTree(): array
+    {
+        $createdAt = (new DateTime('2023-12-24 17:51:18'))->getTimestamp();
+        $postsViewPermission = (new Permission('posts.view'))->withCreatedAt($createdAt)->withUpdatedAt($createdAt);
+        $postsCreatePermission = (new Permission('posts.create'))->withCreatedAt($createdAt)->withUpdatedAt($createdAt);
+        $postsDeletePermission = (new Permission('posts.delete'))->withCreatedAt($createdAt)->withUpdatedAt($createdAt);
+        $postsViewerRole = (new Role('posts.viewer'))->withCreatedAt($createdAt)->withUpdatedAt($createdAt);
+        $postsRedactorRole = (new Role('posts.redactor'))->withCreatedAt($createdAt)->withUpdatedAt($createdAt);
+        $postsAdminRole = (new Role('posts.admin'))->withCreatedAt($createdAt)->withUpdatedAt($createdAt);
+
+        return [
+            [
+                'posts.view',
+                [
+                    'posts.view' => ['item' => $postsViewPermission, 'children' => []],
+                    'posts.viewer' => ['item' => $postsViewerRole, 'children' => ['posts.view' => $postsViewPermission]],
+                    'posts.redactor' => [
+                        'item' => $postsRedactorRole,
+                        'children' => ['posts.view' => $postsViewPermission, 'posts.viewer' => $postsViewerRole],
+                    ],
+                    'posts.admin' => [
+                        'item' => $postsAdminRole,
+                        'children' => [
+                            'posts.view' => $postsViewPermission,
+                            'posts.viewer' => $postsViewerRole,
+                            'posts.redactor' => $postsRedactorRole,
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'posts.create',
+                [
+                    'posts.create' => ['item' => $postsCreatePermission, 'children' => []],
+                    'posts.redactor' => [
+                        'item' => $postsRedactorRole,
+                        'children' => ['posts.create' => $postsCreatePermission],
+                    ],
+                    'posts.admin' => [
+                        'item' => $postsAdminRole,
+                        'children' => [
+                            'posts.create' => $postsCreatePermission,
+                            'posts.redactor' => $postsRedactorRole,
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'posts.delete',
+                [
+                    'posts.delete' => ['item' => $postsDeletePermission, 'children' => []],
+                    'posts.admin' => [
+                        'item' => $postsAdminRole,
+                        'children' => [
+                            'posts.delete' => $postsDeletePermission,
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'posts.viewer',
+                [
+                    'posts.viewer' => ['item' => $postsViewerRole, 'children' => []],
+                    'posts.redactor' => [
+                        'item' => $postsRedactorRole,
+                        'children' => ['posts.viewer' => $postsViewerRole],
+                    ],
+                    'posts.admin' => [
+                        'item' => $postsAdminRole,
+                        'children' => [
+                            'posts.viewer' => $postsViewerRole,
+                            'posts.redactor' => $postsRedactorRole,
+                        ],
+                    ],
+                ],
+            ],
+            ['non-existing', []],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetAccessTree
+     */
+    public function testGetAccessTree(string $name, array $expectedAccessTree): void
+    {
+        $this->assertEquals($expectedAccessTree, $this->getItemsStorage()->getAccessTree($name));
+    }
+
     public function testRemoveChildren(): void
     {
         $testStorage = $this->getItemsStorageForModificationAssertions();
@@ -610,7 +702,6 @@ trait ItemsStorageTestTrait
 
     protected function getFixtures(): array
     {
-        $time = time();
         $itemsMap = [
             'Parent 1' => Item::TYPE_ROLE,
             'Parent 2' => Item::TYPE_ROLE,
@@ -638,6 +729,7 @@ trait ItemsStorageTestTrait
             'posts.update' => Item::TYPE_PERMISSION,
             'posts.delete' => Item::TYPE_PERMISSION,
         ];
+        $time = time();
 
         $items = [];
         foreach ($itemsMap as $name => $type) {

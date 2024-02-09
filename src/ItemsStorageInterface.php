@@ -8,7 +8,7 @@ namespace Yiisoft\Rbac;
  * A storage for RBAC roles and permissions used in {@see Manager}.
  *
  * @psalm-type ItemsIndexedByName = array<string, Permission|Role>
- * @psalm-type AccessTree = non-empty-array<string, array{
+ * @psalm-type AccessTree = array<string, array{
  *     item: Permission|Role,
  *     children: array<string, Permission|Role>
  * }>

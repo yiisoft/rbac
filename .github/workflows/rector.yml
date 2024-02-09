@@ -18,5 +18,5 @@ jobs:
       os: >-
         ['ubuntu-latest']
       php: >-
-        ['8.1']
+        ['8.3']
       extensions: uopz
