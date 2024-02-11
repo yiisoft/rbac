@@ -16,7 +16,11 @@ final class Assignment
      * @param string $itemName The role or permission name.
      * @param int $createdAt UNIX timestamp representing the assignment creation time.
      */
-    public function __construct(private string $userId, private string $itemName, private int $createdAt)
+    public function __construct(
+        private readonly string $userId,
+        private string $itemName,
+        private readonly int $createdAt
+    )
     {
     }
 

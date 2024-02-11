@@ -97,7 +97,7 @@ interface AssignmentsStorageInterface
     public function hasItem(string $name): bool;
 
     /**
-     * Change name of an item in assignments.
+     * Change the name of an item in assignments.
      *
      * @param string $oldName Old name of the role or the permission.
      * @param string $newName New name of the role or permission.

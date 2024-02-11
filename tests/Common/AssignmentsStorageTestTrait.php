@@ -17,8 +17,6 @@ use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
 
 trait AssignmentsStorageTestTrait
 {
-    protected static bool $reCreateAssignmentsStorageAfterModifications = false;
-
     private ?ItemsStorageInterface $itemsStorage = null;
     private ?AssignmentsStorageInterface $assignmentsStorage = null;
 

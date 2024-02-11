@@ -49,20 +49,20 @@ interface ItemsStorageInterface
     public function get(string $name): Permission|Role|null;
 
     /**
-     * Whether named role or permission exists.
+     * Whether a named role or permission exists.
      *
      * @param string $name The role or the permission name.
      *
-     * @return bool Whether named role or permission exists.
+     * @return bool Whether a named role or permission exists.
      */
     public function exists(string $name): bool;
 
     /**
-     * Whether named role exists.
+     * Whether a named role exists.
      *
      * @param string $name The role name.
      *
-     * @return bool Whether named role exists.
+     * @return bool Whether a named role exists.
      */
     public function roleExists(string $name): bool;
 
@@ -258,7 +258,7 @@ interface ItemsStorageInterface
      * Removes a child from its parent.
      * Note, the child role or permission is not deleted. Only the parent-child relationship is removed.
      *
-     * @param string $parentName Name of the parent to remove child from.
+     * @param string $parentName Name of the parent to remove the child from.
      * @param string $childName Name of the child to remove.
      */
     public function removeChild(string $parentName, string $childName): void;

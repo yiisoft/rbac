@@ -34,10 +34,10 @@ final class Manager implements ManagerInterface
      * roles only.
      */
     public function __construct(
-        private ItemsStorageInterface $itemsStorage,
-        private AssignmentsStorageInterface $assignmentsStorage,
-        private RuleFactoryInterface $ruleFactory,
-        private bool $enableDirectPermissions = false,
+        private readonly ItemsStorageInterface $itemsStorage,
+        private readonly AssignmentsStorageInterface $assignmentsStorage,
+        private readonly RuleFactoryInterface $ruleFactory,
+        private readonly bool $enableDirectPermissions = false,
     ) {
     }
 
@@ -347,7 +347,7 @@ final class Manager implements ManagerInterface
      * If the item does not specify a rule, this method will return `true`. Otherwise, it will
      * return the value of {@see RuleInterface::execute()}.
      *
-     * @param string $userId The user ID. This should be a string representing the unique identifier of a user. For
+     * @param string|null $userId The user ID. This should be a string representing the unique identifier of a user. For
      * guests the value is `null`.
      * @param Item $item The role or the permission that needs to execute its rule.
      * @param array $params Parameters passed to {@see AccessCheckerInterface::userHasPermission()} and will be passed
