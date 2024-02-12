@@ -54,6 +54,7 @@
 - Enh #227: Use snake case for item attribute names (ease migration from Yii 2) (@arogachev)
 - New #230: Add `Assignment::getAttributes()` method (@arogachev)
 - Bug #237: Handle not found base item in access tree (@arogachev)
+- Enh #245: Handle same names during renaming item in `AssignmentsStorage` (@arogachev)
 
 ## 1.0.2 April 20, 2023
 
