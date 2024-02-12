@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac;
 
 /**
- * The Rule represents a business constraint that may be associated with a role or a permission.
+ * The rule represents a business constraint that may be associated with a role or a permission.
  */
 interface RuleInterface
 {

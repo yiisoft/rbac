@@ -30,7 +30,7 @@ final class CompositeRule implements RuleInterface
      */
     public function __construct(
         private readonly string $operator,
-        private readonly array $ruleNames
+        private readonly array $ruleNames,
     ) {
         if (!in_array($operator, [self::AND, self::OR], true)) {
             throw new InvalidArgumentException(

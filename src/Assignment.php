@@ -19,7 +19,7 @@ final class Assignment
     public function __construct(
         private readonly string $userId,
         private string $itemName,
-        private readonly int $createdAt
+        private readonly int $createdAt,
     ) {
     }
 

@@ -118,8 +118,8 @@ commands or migrations. Hierarchy consists of permissions, roles, and rules:
 - Permissions are granules of access such as "create a post" or "read a post."
 - A role is what is assigned to the user. The Role is granted one or more permissions. Typical roles are "manager" or
   "admin."
-- Rule is a PHP class that has given some data answers a single question "given the data has the user the permission asked
-  for."
+- Rule is a PHP class that has given some data answers a single question "given the data has the user the permission 
+  asked for."
 
 To create a permission, use the following code:
 
