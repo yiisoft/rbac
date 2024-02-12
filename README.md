@@ -15,12 +15,12 @@
 [![static analysis](https://github.com/yiisoft/rbac/workflows/static%20analysis/badge.svg)](https://github.com/yiisoft/rbac/actions?query=workflow%3A%22static+analysis%22)
 [![type-coverage](https://shepherd.dev/github/yiisoft/rbac/coverage.svg)](https://shepherd.dev/github/yiisoft/rbac)
 
-This package provides [RBAC](https://en.wikipedia.org/wiki/Role-based_access_control) (Role-Based Access Control) 
+This package provides [RBAC](https://en.wikipedia.org/wiki/Role-based_access_control) (Role-Based Access Control)
 library. It is used in [Yii Framework](https://yiiframework.com) but is usable separately as well.
 
 ## Features
 
-- Flexible RBAC hierarchy with roles, permissions and rules.
+- Flexible RBAC hierarchy with roles, permissions, and rules.
 - Role inheritance.
 - Data could be passed to rules when checking access.
 - Multiple storage adapters.
@@ -29,7 +29,7 @@ library. It is used in [Yii Framework](https://yiiframework.com) but is usable s
 
 ## Requirements
 
-- PHP 8.0 or higher.
+- PHP 8.1 or higher.
 
 ## Installation
 
@@ -74,7 +74,7 @@ It requires specifying the following dependencies:
 
 - Items storage (hierarchy itself).
 - Assignments storage where user IDs are mapped to roles.
-- Rule factory. Given a rule name stored in items storage it can create an instance of `Rule`.
+- Rule factory. Given a rule name stored in item storage it can create an instance of `Rule`.
 
 If you don't want to use [Rules Container](https://github.com/yiisoft/rbac-rules-container), here is an example of 
 simple self-contained rule factory:
@@ -105,23 +105,23 @@ final class SimpleRuleFactory implements RuleFactoryInterface
 
 A few tips for choosing storage backend:
 
-- Roles and permissions could usually be considered "semi-static", as they only change when you update your application
+- Roles and permissions could usually be considered "semi-static," as they only change when you update your application
   code, so it may make sense to use PHP storage for it. 
-- Assignments, on the other hand, could be considered "dynamic". They change more often: when creating a new user,
-  or when updating user role from within your application. So it may make sense to use database storage for assignments.
+- Assignments, on the other hand, could be considered "dynamic." They change more often: when creating a new user,
+  or when updating a user role from within your application. So it may make sense to use database storage for assignments.
 
 ### Managing RBAC hierarchy
 
-Before being able to check for permissions, a RBAC hierarchy must be defined. Usually it is done via either console
-commands or migrations. Hierarchy consists of permissions, roles and rules:
+Before being able to check for permissions, an RBAC hierarchy must be defined. Usually it is done via either console
+commands or migrations. Hierarchy consists of permissions, roles, and rules:
 
-- Permissions are granules of access such as "create a post" or "read a post".
-- A role is what is assigned to the user. Role is granted one or more permissions. Typical roles are "manager" or
-  "admin".
-- Rule is a PHP class that given some data answers a single question "given the data, has the user the permission asked
-  for".
+- Permissions are granules of access such as "create a post" or "read a post."
+- A role is what is assigned to the user. The Role is granted one or more permissions. Typical roles are "manager" or
+  "admin."
+- Rule is a PHP class that has given some data answers a single question "given the data has the user the permission 
+  asked for."
 
-In order to create a permission, use the following code:
+To create a permission, use the following code:
 
 ```php
 use Yiisoft\Rbac\ManagerInterface;
@@ -225,7 +225,7 @@ $compositeRule = new CompositeRule(CompositeRule::OR, [FreshRule::class, OwnedRu
 
 ### Assigning roles to users
 
-In order to assign a certain role to a user with a given ID, use the following code:
+To assign a certain role to a user with a given ID, use the following code:
 
 ```php
 use Yiisoft\Rbac\ManagerInterface;
@@ -240,7 +240,7 @@ itself.
 
 ### Check for permission
 
-In order to check for permission, obtain an instance of `Yiisoft\Access\AccessCheckerInterface` and use it:
+To check for permission, obtain an instance of `Yiisoft\Access\AccessCheckerInterface` and use it:
 
 ```php
 use Psr\Http\Message\ResponseInterface; 

@@ -28,8 +28,10 @@ final class CompositeRule implements RuleInterface
      * @param string $operator Operator to be used. Could be `CompositeRule::AND` or `CompositeRule::OR`.
      * @param string[] $ruleNames Array of rule names.
      */
-    public function __construct(private string $operator, private array $ruleNames)
-    {
+    public function __construct(
+        private readonly string $operator,
+        private readonly array $ruleNames,
+    ) {
         if (!in_array($operator, [self::AND, self::OR], true)) {
             throw new InvalidArgumentException(
                 sprintf(

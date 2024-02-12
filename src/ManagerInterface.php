@@ -21,7 +21,7 @@ use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 interface ManagerInterface extends AccessCheckerInterface
 {
     /**
-     * Checks the possibility of adding a child to parent.
+     * Checks the possibility of adding a child to a parent.
      *
      * @param string $parentName The name of the parent item.
      * @param string $childName The name of the child item to be added to the hierarchy.
@@ -141,7 +141,7 @@ interface ManagerInterface extends AccessCheckerInterface
      *
      * @param string $roleName Name of the role to get child roles for.
      *
-     * @throws InvalidArgumentException If role was not found by `$roleName`.
+     * @throws InvalidArgumentException If the role was not found by `$roleName`.
      *
      * @return Role[] Child roles. The array is indexed by the role names.
      * @psalm-return array<string, Role>
@@ -239,7 +239,7 @@ interface ManagerInterface extends AccessCheckerInterface
     /**
      * Returns default roles.
      *
-     * @throws DefaultRolesNotFoundException When at least 1 of default roles was not found.
+     * @throws DefaultRolesNotFoundException When at least 1 of the default roles was not found.
      * @return Role[] Default roles. The array is indexed by the role names.
      * @psalm-return array<string, Role>
      */
@@ -260,9 +260,9 @@ interface ManagerInterface extends AccessCheckerInterface
     public function getGuestRoleName(): ?string;
 
     /**
-     * Get guest role.
+     * Get a guest role.
      *
-     * @throws InvalidArgumentException When role was not found.
+     * @throws InvalidArgumentException When a role was not found.
      * @return Role|null Guest role or `null` if the name was not set.
      */
     public function getGuestRole(): ?Role;

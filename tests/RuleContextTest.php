@@ -21,7 +21,7 @@ final class RuleContextTest extends TestCase
     {
         $context = new RuleContext(new SimpleRuleFactory(['easy' => new EasyRule()]), ['a' => 1, 'b' => 2]);
         $this->assertSame(1, $context->getParameterValue('a'));
-        $this->assertSame(null, $context->getParameterValue('c'));
+        $this->assertNull($context->getParameterValue('c'));
     }
 
     public function testHasParameter(): void

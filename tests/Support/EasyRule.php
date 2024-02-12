@@ -10,7 +10,7 @@ use Yiisoft\Rbac\RuleInterface;
 
 final class EasyRule implements RuleInterface
 {
-    public function __construct(private bool $expected = true)
+    public function __construct(private readonly bool $expected = true)
     {
     }
 
