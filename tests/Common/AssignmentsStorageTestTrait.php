@@ -156,10 +156,20 @@ trait AssignmentsStorageTestTrait
     {
         $testStorage = $this->getAssignmentsStorageForModificationAssertions();
         $actionStorage = $this->getAssignmentsStorage();
-        $actionStorage->remove('Accountant', 'john');
+        $actionStorage->remove(itemName: 'Accountant', userId: 'john');
 
-        $this->assertEmpty($testStorage->get('Accountant', 'john'));
+        $this->assertEmpty($testStorage->get(itemName: 'Accountant', userId: 'john'));
         $this->assertNotEmpty($testStorage->getByUserId('john'));
+    }
+
+    public function testRemoveNonExisting(): void
+    {
+        $testStorage = $this->getAssignmentsStorageForModificationAssertions();
+        $actionStorage = $this->getAssignmentsStorage();
+        $count = count($actionStorage->getByUserId('john'));
+        $actionStorage->remove(itemName: 'Operator', userId: 'john');
+
+        $this->assertCount($count, $testStorage->getByUserId('john'));
     }
 
     public function testClear(): void
