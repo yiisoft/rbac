@@ -59,6 +59,15 @@ trait AssignmentsStorageTestTrait
         $this->assertTrue($testStorage->hasItem('Senior accountant'));
     }
 
+    public function testRenameItemToSameName(): void
+    {
+        $testStorage = $this->getAssignmentsStorageForModificationAssertions();
+        $actionStorage = $this->getAssignmentsStorage();
+        $actionStorage->renameItem('Accountant', 'Accountant');
+
+        $this->assertTrue($testStorage->hasItem('Accountant'));
+    }
+
     public function testGetAll(): void
     {
         $storage = $this->getAssignmentsStorage();

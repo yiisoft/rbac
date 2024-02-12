@@ -352,15 +352,26 @@ trait ItemsStorageTestTrait
         }
     }
 
-    public function testRemove(): void
+    public static function dataRemove(): array
+    {
+        return [
+            ['Parent 2'],
+            ['non-existing'],
+        ];
+    }
+
+    /**
+     * @dataProvider dataRemove
+     */
+    public function testRemove(string $name): void
     {
         $testStorage = $this->getItemsStorageForModificationAssertions();
         $actionStorage = $this->getItemsStorage();
-        $actionStorage->remove('Parent 2');
+        $actionStorage->remove($name);
 
-        $this->assertNull($testStorage->get('Parent 2'));
+        $this->assertNull($testStorage->get($name));
         $this->assertNotEmpty($testStorage->getAll());
-        $this->assertFalse($testStorage->hasChildren('Parent 2'));
+        $this->assertFalse($testStorage->hasChildren($name));
     }
 
     public static function dataGetParents(): array
@@ -492,6 +503,16 @@ trait ItemsStorageTestTrait
         $this->assertTrue($testStorage->hasChildren('Parent 1'));
     }
 
+    public function testRemoveChildrenNonExisting(): void
+    {
+        $testStorage = $this->getItemsStorageForModificationAssertions();
+        $actionStorage = $this->getItemsStorage();
+        $count = count($actionStorage->getAll());
+        $actionStorage->removeChildren('non-existing');
+
+        $this->assertCount($count, $testStorage->getAll());
+    }
+
     public function testGetRole(): void
     {
         $storage = $this->getItemsStorage();
@@ -545,6 +566,17 @@ trait ItemsStorageTestTrait
         $this->assertArrayNotHasKey('Child 1', $children);
 
         $this->assertArrayHasKey('Child 1', $testStorage->getAllChildren('Parent 1'));
+    }
+
+    public function testRemoveChildNonExisting(): void
+    {
+        $testStorage = $this->getItemsStorageForModificationAssertions();
+        $actionStorage = $this->getItemsStorage();
+        $count = count($actionStorage->getAll());
+        $actionStorage->removeChild('posts.viewer', 'non-existing');
+
+        $this->assertSame(['posts.view'], array_keys($testStorage->getDirectChildren('posts.viewer')));
+        $this->assertCount($count, $testStorage->getAll());
     }
 
     public function testGetAll(): void
