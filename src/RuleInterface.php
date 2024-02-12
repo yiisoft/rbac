@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac;
 
 /**
- * Rule represents a business constraint that may be associated with a role or a permission.
+ * The Rule represents a business constraint that may be associated with a role or a permission.
  */
 interface RuleInterface
 {
@@ -17,7 +17,7 @@ interface RuleInterface
      * @param Item $item The role or permission that this rule is associated with.
      * @param RuleContext $ruleContext Rule context.
      *
-     * @return bool Whether the rule permits the auth item it is associated with.
+     * @return bool Whether the rule permits the auth item, it is associated with.
      */
     public function execute(?string $userId, Item $item, RuleContext $ruleContext): bool;
 }
