@@ -224,6 +224,7 @@ trait AssignmentsStorageTestTrait
             ['jeff', ['non-existing', 'Operator'], true],
             ['jeff', ['non-existing1', 'non-existing2'], false],
             ['jeff', ['Researcher', 'Accountant'], false],
+            ['jeff', [], false],
         ];
     }
 

@@ -28,7 +28,7 @@ trait ItemsStorageTestTrait
             ClockMock::freeze(new DateTime('2023-05-10 08:24:39'));
         }
 
-        if ($this->name() === 'testGetAccessTree') {
+        if ($this->name() === 'testGetHierarchy') {
             ClockMock::freeze(new DateTime('2023-12-24 17:51:18'));
         }
 
@@ -37,7 +37,7 @@ trait ItemsStorageTestTrait
 
     protected function tearDown(): void
     {
-        if (in_array($this->name(), ['testAddWithCurrentTimestamps', 'testGetAccessTree'], strict: true)) {
+        if (in_array($this->name(), ['testAddWithCurrentTimestamps', 'testGetHierarchy'], strict: true)) {
             ClockMock::reset();
         }
 
@@ -212,6 +212,7 @@ trait ItemsStorageTestTrait
                 ['posts.viewer', 'posts.redactor', 'posts.admin'],
                 ['posts.view', 'posts.create', 'posts.update', 'posts.delete'],
             ],
+            [[], []],
             ['non-existing', []],
         ];
     }
@@ -242,6 +243,7 @@ trait ItemsStorageTestTrait
                 ['posts.viewer', 'posts.redactor', 'posts.admin'],
                 ['posts.view', 'posts.create', 'posts.update', 'posts.delete'],
             ],
+            [[], []],
             ['non-existing', []],
         ];
     }
@@ -269,6 +271,7 @@ trait ItemsStorageTestTrait
             ['posts.admin', ['posts.redactor', 'posts.viewer']],
             [['Parent 2', 'Parent 4'], ['Child 2', 'Child 3', 'Child 4']],
             [['posts.viewer', 'posts.redactor', 'posts.admin'], []],
+            [[], []],
             ['non-existing', []],
         ];
     }
@@ -405,7 +408,7 @@ trait ItemsStorageTestTrait
         }
     }
 
-    public static function dataGetAccessTree(): array
+    public static function dataGetHierarchy(): array
     {
         $createdAt = (new DateTime('2023-12-24 17:51:18'))->getTimestamp();
         $postsViewPermission = (new Permission('posts.view'))->withCreatedAt($createdAt)->withUpdatedAt($createdAt);
@@ -486,11 +489,11 @@ trait ItemsStorageTestTrait
     }
 
     /**
-     * @dataProvider dataGetAccessTree
+     * @dataProvider dataGetHierarchy
      */
-    public function testGetAccessTree(string $name, array $expectedAccessTree): void
+    public function testGetHierarchy(string $name, array $expectedHierarchy): void
     {
-        $this->assertEquals($expectedAccessTree, $this->getItemsStorage()->getAccessTree($name));
+        $this->assertEquals($expectedHierarchy, $this->getItemsStorage()->getHierarchy($name));
     }
 
     public function testRemoveChildren(): void
