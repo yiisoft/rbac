@@ -28,7 +28,7 @@ trait ItemsStorageTestTrait
             ClockMock::freeze(new DateTime('2023-05-10 08:24:39'));
         }
 
-        if ($this->name() === 'testGetAccessTree') {
+        if ($this->name() === 'testGetHierarchy') {
             ClockMock::freeze(new DateTime('2023-12-24 17:51:18'));
         }
 
@@ -37,7 +37,7 @@ trait ItemsStorageTestTrait
 
     protected function tearDown(): void
     {
-        if (in_array($this->name(), ['testAddWithCurrentTimestamps', 'testGetAccessTree'], strict: true)) {
+        if (in_array($this->name(), ['testAddWithCurrentTimestamps', 'testGetHierarchy'], strict: true)) {
             ClockMock::reset();
         }
 
@@ -408,7 +408,7 @@ trait ItemsStorageTestTrait
         }
     }
 
-    public static function dataGetAccessTree(): array
+    public static function dataGetHierarchy(): array
     {
         $createdAt = (new DateTime('2023-12-24 17:51:18'))->getTimestamp();
         $postsViewPermission = (new Permission('posts.view'))->withCreatedAt($createdAt)->withUpdatedAt($createdAt);
@@ -489,11 +489,11 @@ trait ItemsStorageTestTrait
     }
 
     /**
-     * @dataProvider dataGetAccessTree
+     * @dataProvider dataGetHierarchy
      */
-    public function testGetAccessTree(string $name, array $expectedAccessTree): void
+    public function testGetHierarchy(string $name, array $expectedHierarchy): void
     {
-        $this->assertEquals($expectedAccessTree, $this->getItemsStorage()->getHierarchy($name));
+        $this->assertEquals($expectedHierarchy, $this->getItemsStorage()->getHierarchy($name));
     }
 
     public function testRemoveChildren(): void

@@ -16,7 +16,7 @@ namespace Yiisoft\Rbac;
  *  }
  *
  * @psalm-import-type ItemsIndexedByName from ItemsStorageInterface
- * @psalm-import-type AccessTree from ItemsStorageInterface
+ * @psalm-import-type Hierarchy from ItemsStorageInterface
  */
 abstract class SimpleItemsStorage implements ItemsStorageInterface
 {
@@ -118,7 +118,7 @@ abstract class SimpleItemsStorage implements ItemsStorageInterface
         }
 
         $result = [$name => ['item' => $this->items[$name], 'children' => []]];
-        $this->fillAccessTreeRecursive($name, $result);
+        $this->fillHierarchyRecursive($name, $result);
 
         return $result;
     }
@@ -310,12 +310,12 @@ abstract class SimpleItemsStorage implements ItemsStorageInterface
     }
 
     /**
-     * @psalm-param AccessTree $result
-     * @psalm-param-out AccessTree $result
+     * @psalm-param Hierarchy $result
+     * @psalm-param-out Hierarchy $result
      *
      * @psalm-param ItemsIndexedByName $addedChildItems
      */
-    private function fillAccessTreeRecursive(string $name, array &$result, array $addedChildItems = []): void
+    private function fillHierarchyRecursive(string $name, array &$result, array $addedChildItems = []): void
     {
         foreach ($this->children as $parentName => $childItems) {
             foreach ($childItems as $childItem) {
@@ -325,14 +325,14 @@ abstract class SimpleItemsStorage implements ItemsStorageInterface
 
                 $parent = $this->get($parentName);
                 if ($parent !== null) {
-                    /** @psalm-var AccessTree $result Imported type in `psalm-param-out` is not resolved. */
+                    /** @psalm-var Hierarchy $result Imported type in `psalm-param-out` is not resolved. */
                     $result[$parentName]['item'] = $this->items[$parentName];
 
                     $addedChildItems[$childItem->getName()] = $childItem;
                     $result[$parentName]['children'] = $addedChildItems;
                 }
 
-                $this->fillAccessTreeRecursive($parentName, $result, $addedChildItems);
+                $this->fillHierarchyRecursive($parentName, $result, $addedChildItems);
             }
         }
     }

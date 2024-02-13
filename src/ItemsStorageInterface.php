@@ -8,7 +8,7 @@ namespace Yiisoft\Rbac;
  * A storage for RBAC roles and permissions used in {@see Manager}.
  *
  * @psalm-type ItemsIndexedByName = array<string, Permission|Role>
- * @psalm-type AccessTree = array<string, array{
+ * @psalm-type Hierarchy = array<string, array{
  *     item: Permission|Role,
  *     children: array<string, Permission|Role>
  * }>
@@ -173,7 +173,7 @@ interface ItemsStorageInterface
      *
      * @return array A mapping between parent names and according items with all their children (references to other
      * parents found).
-     * @psalm-return AccessTree
+     * @psalm-return Hierarchy
      */
     public function getHierarchy(string $name): array;
 
