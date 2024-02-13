@@ -2,11 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Rbac\Tests\Support;
+namespace Yiisoft\Rbac;
 
 use Yiisoft\Rbac\Exception\RuleNotFoundException;
-use Yiisoft\Rbac\RuleFactoryInterface;
-use Yiisoft\Rbac\RuleInterface;
 
 use function array_key_exists;
 

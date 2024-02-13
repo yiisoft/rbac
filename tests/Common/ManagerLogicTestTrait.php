@@ -15,14 +15,14 @@ use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 use Yiisoft\Rbac\Exception\RuleNotFoundException;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
+use Yiisoft\Rbac\SimpleRuleFactory;
 use Yiisoft\Rbac\Tests\Support\AdsRule;
-use Yiisoft\Rbac\Tests\Support\GuestRule;
 use Yiisoft\Rbac\Tests\Support\AuthorRule;
 use Yiisoft\Rbac\Tests\Support\BanRule;
 use Yiisoft\Rbac\Tests\Support\EasyRule;
 use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
-use Yiisoft\Rbac\Tests\Support\SimpleRuleFactory;
+use Yiisoft\Rbac\Tests\Support\GuestRule;
 use Yiisoft\Rbac\Tests\Support\SubscriptionRule;
 
 trait ManagerLogicTestTrait

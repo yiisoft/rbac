@@ -9,8 +9,8 @@ use PHPUnit\Framework\TestCase;
 use Yiisoft\Rbac\CompositeRule;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\RuleContext;
+use Yiisoft\Rbac\SimpleRuleFactory;
 use Yiisoft\Rbac\Tests\Support\EasyRule;
-use Yiisoft\Rbac\Tests\Support\SimpleRuleFactory;
 
 final class CompositeRuleTest extends TestCase
 {
