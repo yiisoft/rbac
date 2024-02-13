@@ -32,12 +32,15 @@ final class Manager implements ManagerInterface
      * @param RuleFactoryInterface $ruleFactory Rule factory.
      * @param bool $enableDirectPermissions Whether to enable assigning permissions directly to user. Prefer assigning
      * roles only.
+     * @param bool $useOnlyPermissionsInAccessChecks Whether to use only permissions during access checks in
+     * {@see Manager::userHasPermission()}. `false` allows using roles as well.
      */
     public function __construct(
         private readonly ItemsStorageInterface $itemsStorage,
         private readonly AssignmentsStorageInterface $assignmentsStorage,
         private readonly RuleFactoryInterface $ruleFactory,
         private readonly bool $enableDirectPermissions = false,
+        private readonly bool $useOnlyPermissionsInAccessChecks = false,
     ) {
     }
 
@@ -46,8 +49,12 @@ final class Manager implements ManagerInterface
         string $permissionName,
         array $parameters = [],
     ): bool {
-        $permission = $this->itemsStorage->getPermission($permissionName);
-        if ($permission === null) {
+        $item = $this->itemsStorage->get($permissionName);
+        if ($item === null) {
+            return false;
+        }
+
+        if ($this->useOnlyPermissionsInAccessChecks && $item->getType() !== Item::TYPE_PERMISSION) {
             return false;
         }
 
@@ -60,7 +67,7 @@ final class Manager implements ManagerInterface
             }
         }
 
-        $hierarchy = $this->itemsStorage->getHierarchy($permission->getName());
+        $hierarchy = $this->itemsStorage->getHierarchy($item->getName());
         if ($guestRole !== null && !array_key_exists($guestRole->getName(), $hierarchy)) {
             $hierarchy[$guestRole->getName()] = ['item' => $guestRole, 'children' => []];
         }

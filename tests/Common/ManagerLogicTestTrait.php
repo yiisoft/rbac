@@ -262,6 +262,12 @@ trait ManagerLogicTestTrait
         $manager->userHasPermission('reader A', 'test-permission');
     }
 
+    public function testUserHasPermissionWithRoleNotAllowed(): void
+    {
+        $manager = $this->createFilledManager(useOnlyPermissionsInAccessChecks: true);
+        $this->assertFalse($manager->userHasPermission(userId: 'admin C', permissionName: 'reader'));
+    }
+
     public function testCanAddExistingChild(): void
     {
         $manager = $this->createFilledManager();
@@ -506,7 +512,7 @@ trait ManagerLogicTestTrait
 
     public function testAssignPermissionDirectlyWhenItIsDisabled(): void
     {
-        $manager = $this->createManager(null, null, null, null);
+        $manager = $this->createManager();
         $manager->addPermission(new Permission('readPost'));
 
         $this->expectException(InvalidArgumentException::class);

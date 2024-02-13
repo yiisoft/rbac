@@ -23,18 +23,16 @@ trait ManagerConfigurationTestTrait
         ?ItemsStorageInterface $itemsStorage = null,
         ?AssignmentsStorageInterface $assignmentsStorage = null,
         ?RuleFactoryInterface $ruleFactory = null,
-        ?bool $enableDirectPermissions = false
+        bool $enableDirectPermissions = false,
+        bool $useOnlyPermissionsInAccessChecks = false,
     ): ManagerInterface {
-        $arguments = [
+        return new Manager(...[
             $itemsStorage ?? $this->createItemsStorage(),
             $assignmentsStorage ?? $this->createAssignmentsStorage(),
             $ruleFactory ?? new SimpleRuleFactory(),
-        ];
-        if ($enableDirectPermissions !== null) {
-            $arguments[] = $enableDirectPermissions;
-        }
-
-        return new Manager(...$arguments);
+            $enableDirectPermissions,
+            $useOnlyPermissionsInAccessChecks,
+        ]);
     }
 
     protected function createItemsStorage(): ItemsStorageInterface
@@ -51,6 +49,9 @@ trait ManagerConfigurationTestTrait
         ?ItemsStorageInterface $itemsStorage = null,
         ?AssignmentsStorageInterface $assignmentsStorage = null,
         ?RuleFactoryInterface $ruleFactory = null,
+        bool $enableDirectPermissions = true,
+        bool $useOnlyPermissionsInAccessChecks = false,
+
     ): ManagerInterface {
         return $this
             ->createManager(
@@ -61,7 +62,8 @@ trait ManagerConfigurationTestTrait
                     'easyTrue' => new EasyRule(true),
                     'easyFalse' => new EasyRule(false),
                 ]),
-                enableDirectPermissions: true,
+                $enableDirectPermissions,
+                $useOnlyPermissionsInAccessChecks,
             )
             ->addPermission(new Permission('Fast Metabolism'))
             ->addPermission(new Permission('createPost'))
