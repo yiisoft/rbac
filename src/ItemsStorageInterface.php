@@ -175,7 +175,7 @@ interface ItemsStorageInterface
      * parents found).
      * @psalm-return AccessTree
      */
-    public function getAccessTree(string $name): array;
+    public function getHierarchy(string $name): array;
 
     /**
      * Returns direct child permissions and/or roles.

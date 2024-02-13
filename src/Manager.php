@@ -60,20 +60,20 @@ final class Manager implements ManagerInterface
             }
         }
 
-        $accessTree = $this->itemsStorage->getAccessTree($permission->getName());
-        if ($guestRole !== null && !array_key_exists($guestRole->getName(), $accessTree)) {
-            $accessTree[$guestRole->getName()] = ['item' => $guestRole, 'children' => []];
+        $hierarchy = $this->itemsStorage->getHierarchy($permission->getName());
+        if ($guestRole !== null && !array_key_exists($guestRole->getName(), $hierarchy)) {
+            $hierarchy[$guestRole->getName()] = ['item' => $guestRole, 'children' => []];
         }
 
-        $itemNames = array_map(static fn (array $treeItem): string => $treeItem['item']->getName(), $accessTree);
+        $itemNames = array_map(static fn (array $treeItem): string => $treeItem['item']->getName(), $hierarchy);
         $userItemNames = $guestRole !== null
             ? [$guestRole->getName()]
             : $this->assignmentsStorage->filterUserItemNames((string) $userId, $itemNames);
 
         $userItems = [];
         foreach ($userItemNames as $itemName) {
-            $userItems[$itemName] = $accessTree[$itemName]['item'];
-            foreach ($accessTree[$itemName]['children'] ?? [] as $item) {
+            $userItems[$itemName] = $hierarchy[$itemName]['item'];
+            foreach ($hierarchy[$itemName]['children'] ?? [] as $item) {
                 $userItems[$item->getName()] = $item;
             }
         }

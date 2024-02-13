@@ -55,6 +55,7 @@
 - New #230: Add `Assignment::getAttributes()` method (@arogachev)
 - Bug #237: Handle not found base item in access tree (@arogachev)
 - Enh #245: Handle same names during renaming item in `AssignmentsStorage` (@arogachev)
+- Chg #208: Rename `getAccessTree()` to `getHierarchy()` in `ItemsStorageInterface` (@arogachev)
 
 ## 1.0.2 April 20, 2023
 

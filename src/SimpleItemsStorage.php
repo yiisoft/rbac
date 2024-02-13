@@ -111,7 +111,7 @@ abstract class SimpleItemsStorage implements ItemsStorageInterface
         return $result;
     }
 
-    public function getAccessTree(string $name): array
+    public function getHierarchy(string $name): array
     {
         if (!array_key_exists($name, $this->items)) {
             return [];

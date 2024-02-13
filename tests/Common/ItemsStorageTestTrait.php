@@ -212,6 +212,7 @@ trait ItemsStorageTestTrait
                 ['posts.viewer', 'posts.redactor', 'posts.admin'],
                 ['posts.view', 'posts.create', 'posts.update', 'posts.delete'],
             ],
+            [[], []],
             ['non-existing', []],
         ];
     }
@@ -242,6 +243,7 @@ trait ItemsStorageTestTrait
                 ['posts.viewer', 'posts.redactor', 'posts.admin'],
                 ['posts.view', 'posts.create', 'posts.update', 'posts.delete'],
             ],
+            [[], []],
             ['non-existing', []],
         ];
     }
@@ -269,6 +271,7 @@ trait ItemsStorageTestTrait
             ['posts.admin', ['posts.redactor', 'posts.viewer']],
             [['Parent 2', 'Parent 4'], ['Child 2', 'Child 3', 'Child 4']],
             [['posts.viewer', 'posts.redactor', 'posts.admin'], []],
+            [[], []],
             ['non-existing', []],
         ];
     }
@@ -490,7 +493,7 @@ trait ItemsStorageTestTrait
      */
     public function testGetAccessTree(string $name, array $expectedAccessTree): void
     {
-        $this->assertEquals($expectedAccessTree, $this->getItemsStorage()->getAccessTree($name));
+        $this->assertEquals($expectedAccessTree, $this->getItemsStorage()->getHierarchy($name));
     }
 
     public function testRemoveChildren(): void
