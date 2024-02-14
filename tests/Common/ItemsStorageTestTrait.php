@@ -11,6 +11,7 @@ use Yiisoft\Rbac\ItemsStorageInterface;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
+use Yiisoft\Rbac\Tests\Support\TrueRule;
 
 trait ItemsStorageTestTrait
 {
@@ -66,7 +67,7 @@ trait ItemsStorageTestTrait
 
         $item = $item
             ->withName('Super Admin')
-            ->withRuleName('super admin');
+            ->withRuleName(TrueRule::class);
         $actionStorage->update($itemName, $item);
 
         $this->assertNull($testStorage->get($itemName));
@@ -75,7 +76,7 @@ trait ItemsStorageTestTrait
         $this->assertNotNull($item);
 
         $this->assertSame('Super Admin', $item->getName());
-        $this->assertSame('super admin', $item->getRuleName());
+        $this->assertSame(TrueRule::class, $item->getRuleName());
 
         $this->assertSame($expectedHasChildren, $testStorage->hasChildren($parentNameForChildrenCheck));
     }

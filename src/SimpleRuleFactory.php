@@ -15,11 +15,10 @@ final class SimpleRuleFactory implements RuleFactoryInterface
             throw new RuleNotFoundException($name);
         }
 
-        $instance = new $name;
-        if (!$instance instanceof RuleInterface) {
+        if (!is_a($name, RuleInterface::class, allow_string: true)) {
             throw new RuleInterfaceNotImplementedException($name);
         }
 
-        return $instance;
+        return new $name;
     }
 }

@@ -175,13 +175,13 @@ use Yiisoft\Rbac\Permission;
 
 /** @var ManagerInterface $manager */
 $manager->addPermission( 
-    (new Permission('viewList'))->withRuleName('action_rule'),
+    (new Permission('viewList'))->withRuleName(ActionRule::class),
 );
 
 // or
 
 $manager->addRole(
-    (new Role('NewYearMaintainer'))->withRuleName('new_year_only_rule')
+    (new Role('NewYearMaintainer'))->withRuleName(NewYearOnlyRule::class)
 );
 ```
 

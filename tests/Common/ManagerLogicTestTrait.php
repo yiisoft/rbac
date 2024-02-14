@@ -12,9 +12,11 @@ use SlopeIt\ClockMock\ClockMock;
 use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\Exception\DefaultRolesNotFoundException;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
+use Yiisoft\Rbac\Exception\RuleInterfaceNotImplementedException;
 use Yiisoft\Rbac\Exception\RuleNotFoundException;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
+use Yiisoft\Rbac\RuleInterface;
 use Yiisoft\Rbac\Tests\Support\AdsRule;
 use Yiisoft\Rbac\Tests\Support\AuthorRule;
 use Yiisoft\Rbac\Tests\Support\BanRule;
@@ -23,6 +25,7 @@ use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
 use Yiisoft\Rbac\Tests\Support\GuestRule;
 use Yiisoft\Rbac\Tests\Support\SubscriptionRule;
 use Yiisoft\Rbac\Tests\Support\TrueRule;
+use Yiisoft\Rbac\Tests\Support\WannabeRule;
 
 trait ManagerLogicTestTrait
 {
@@ -251,6 +254,22 @@ trait ManagerLogicTestTrait
 
         $this->expectException(RuleNotFoundException::class);
         $this->expectExceptionMessage('Rule "non-existing-rule" not found.');
+        $manager->userHasPermission('reader A', 'test-permission');
+    }
+
+    public function testUserHasPermissionWithRuleMissingImplements(): void
+    {
+        $className = WannabeRule::class;
+        $interfaceName = RuleInterface::class;
+        $manager = $this
+            ->createFilledManager()
+            ->addPermission((new Permission('test-permission'))->withRuleName($className))
+            ->addRole(new Role('test'))
+            ->addChild('test', 'test-permission')
+            ->assign('test-permission', 'reader A');
+
+        $this->expectException(RuleInterfaceNotImplementedException::class);
+        $this->expectExceptionMessage("Rule \"$className\" must implement \"$interfaceName\".");
         $manager->userHasPermission('reader A', 'test-permission');
     }
 
