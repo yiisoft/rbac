@@ -51,7 +51,6 @@ trait ManagerConfigurationTestTrait
         ?RuleFactoryInterface $ruleFactory = null,
         bool $enableDirectPermissions = true,
         bool $includeRolesInAccessChecks = false,
-
     ): ManagerInterface {
         return $this
             ->createManager(
