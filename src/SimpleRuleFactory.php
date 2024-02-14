@@ -15,7 +15,7 @@ final class SimpleRuleFactory implements RuleFactoryInterface
             throw new RuleNotFoundException($name);
         }
 
-        $instance = new $name;
+        $instance = new $name();
         if (!$instance instanceof RuleInterface) {
             throw new RuleInterfaceNotImplementedException($name);
         }
