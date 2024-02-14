@@ -19,6 +19,6 @@ final class SimpleRuleFactory implements RuleFactoryInterface
             throw new RuleInterfaceNotImplementedException($name);
         }
 
-        return new $name;
+        return new $name();
     }
 }
