@@ -32,15 +32,15 @@ final class Manager implements ManagerInterface
      * @param RuleFactoryInterface $ruleFactory Rule factory.
      * @param bool $enableDirectPermissions Whether to enable assigning permissions directly to user. Prefer assigning
      * roles only.
-     * @param bool $useOnlyPermissionsInAccessChecks Whether to use only permissions during access checks in
-     * {@see Manager::userHasPermission()}. `false` allows using roles as well.
+     * @param bool $includeRolesInAccessChecks Whether to include roles (in addition to permissions) during access
+     * checks in {@see Manager::userHasPermission()}.
      */
     public function __construct(
         private readonly ItemsStorageInterface $itemsStorage,
         private readonly AssignmentsStorageInterface $assignmentsStorage,
         private readonly RuleFactoryInterface $ruleFactory,
         private readonly bool $enableDirectPermissions = false,
-        private readonly bool $useOnlyPermissionsInAccessChecks = false,
+        private readonly bool $includeRolesInAccessChecks = false,
     ) {
     }
 
@@ -54,7 +54,7 @@ final class Manager implements ManagerInterface
             return false;
         }
 
-        if ($this->useOnlyPermissionsInAccessChecks && $item->getType() !== Item::TYPE_PERMISSION) {
+        if (!$this->includeRolesInAccessChecks && $item->getType() === Item::TYPE_ROLE) {
             return false;
         }
 
