@@ -23,16 +23,23 @@ trait ManagerConfigurationTestTrait
         ?ItemsStorageInterface $itemsStorage = null,
         ?AssignmentsStorageInterface $assignmentsStorage = null,
         ?RuleFactoryInterface $ruleFactory = null,
-        bool $enableDirectPermissions = false,
-        bool $includeRolesInAccessChecks = false,
+        ?bool $enableDirectPermissions = null,
+        ?bool $includeRolesInAccessChecks = null,
     ): ManagerInterface {
-        return new Manager(...[
+        $arguments = [
             $itemsStorage ?? $this->createItemsStorage(),
             $assignmentsStorage ?? $this->createAssignmentsStorage(),
             $ruleFactory ?? new SimpleRuleFactory(),
-            $enableDirectPermissions,
-            $includeRolesInAccessChecks,
-        ]);
+        ];
+        if ($enableDirectPermissions !== null) {
+            $arguments[] = $enableDirectPermissions;
+        }
+
+        if ($includeRolesInAccessChecks !== null) {
+            $arguments[] = $includeRolesInAccessChecks;
+        }
+
+        return new Manager(...$arguments);
     }
 
     protected function createItemsStorage(): ItemsStorageInterface
@@ -49,22 +56,24 @@ trait ManagerConfigurationTestTrait
         ?ItemsStorageInterface $itemsStorage = null,
         ?AssignmentsStorageInterface $assignmentsStorage = null,
         ?RuleFactoryInterface $ruleFactory = null,
-        bool $enableDirectPermissions = true,
-        bool $includeRolesInAccessChecks = false,
-
+        ?bool $includeRolesInAccessChecks = null,
     ): ManagerInterface {
+        $arguments = [
+            $itemsStorage ?? $this->createItemsStorage(),
+            $assignmentsStorage ?? $this->createAssignmentsStorage(),
+            $ruleFactory ?? new SimpleRuleFactory([
+                'isAuthor' => new AuthorRule(),
+                'easyTrue' => new EasyRule(true),
+                'easyFalse' => new EasyRule(false),
+            ]),
+            true,
+        ];
+        if ($includeRolesInAccessChecks !== null) {
+            $arguments[] = $includeRolesInAccessChecks;
+        }
+
         return $this
-            ->createManager(
-                $itemsStorage ?? $this->createItemsStorage(),
-                $assignmentsStorage ?? $this->createAssignmentsStorage(),
-                $ruleFactory ?? new SimpleRuleFactory([
-                    'isAuthor' => new AuthorRule(),
-                    'easyTrue' => new EasyRule(true),
-                    'easyFalse' => new EasyRule(false),
-                ]),
-                $enableDirectPermissions,
-                $includeRolesInAccessChecks,
-            )
+            ->createManager(...$arguments)
             ->addPermission(new Permission('Fast Metabolism'))
             ->addPermission(new Permission('createPost'))
             ->addPermission(new Permission('publishPost'))
