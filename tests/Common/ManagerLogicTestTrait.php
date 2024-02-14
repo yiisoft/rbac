@@ -279,8 +279,7 @@ trait ManagerLogicTestTrait
         string $userId,
         string $permissionName,
         bool $expectedHasPermission,
-    ): void
-    {
+    ): void {
         $this->assertSame(
             $expectedHasPermission,
             $this->createFilledManager(includeRolesInAccessChecks: true)->userHasPermission($userId, $permissionName),
