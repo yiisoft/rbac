@@ -509,23 +509,13 @@ trait ManagerLogicTestTrait
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('There is no item named "nonExistRole".');
 
-        $manager->assign(
-            'nonExistRole',
-            'reader'
-        );
+        $manager->assign(itemName: 'nonExistRole', userId: 'reader');
     }
 
     public function testAssignAlreadyAssignedItem(): void
     {
         $manager = $this->createFilledManager();
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('"reader" role has already been assigned to user reader A.');
-
-        $manager->assign(
-            'reader',
-            'reader A'
-        );
+        $this->assertSame($manager, $manager->assign(itemName: 'reader', userId: 'reader A'));
     }
 
     public function testAssignPermissionDirectlyWhenItIsDisabled(): void
@@ -535,7 +525,7 @@ trait ManagerLogicTestTrait
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Assigning permissions directly is disabled. Prefer assigning roles only.');
-        $manager->assign('readPost', 'id7');
+        $manager->assign(itemName: 'readPost', userId: 'id7');
     }
 
     public function testAssignPermissionDirectlyWhenEnabled(): void
@@ -1045,8 +1035,8 @@ trait ManagerLogicTestTrait
             ->addRole((new Role('role1'))->withCreatedAt(1_694_502_936)->withUpdatedAt(1_694_502_936))
             ->addRole((new Role('role2'))->withCreatedAt(1_694_502_976)->withUpdatedAt(1_694_502_976))
             ->addChild('role1', 'role2');
-        $manager->assign('role1', 1);
-        $manager->assign('role2', 2);
+        $manager->assign(itemName: 'role1', userId: 1);
+        $manager->assign(itemName: 'role2', userId: 2);
 
         $this->assertEquals(
             [
