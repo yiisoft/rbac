@@ -9,8 +9,8 @@ use PHPUnit\Framework\TestCase;
 use Yiisoft\Rbac\CompositeRule;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\RuleContext;
-use Yiisoft\Rbac\SimpleRuleFactory;
-use Yiisoft\Rbac\Tests\Support\EasyRule;
+use Yiisoft\Rbac\Tests\Support\FalseRule;
+use Yiisoft\Rbac\Tests\Support\TrueRule;
 
 final class CompositeRuleTest extends TestCase
 {
@@ -18,12 +18,12 @@ final class CompositeRuleTest extends TestCase
     {
         return [
             'AND empty' => [CompositeRule::AND, [], true],
-            'AND all true' => [CompositeRule::AND, ['easy_rule_true', 'easy_rule_true'], true],
-            'AND last false' => [CompositeRule::AND, ['easy_rule_true', 'easy_rule_false'], false],
+            'AND all true' => [CompositeRule::AND, [TrueRule::class, TrueRule::class], true],
+            'AND last false' => [CompositeRule::AND, [TrueRule::class, FalseRule::class], false],
 
             'OR empty' => [CompositeRule::OR, [], true],
-            'OR all false' => [CompositeRule::OR, ['easy_rule_false', 'easy_rule_false'], false],
-            'OR last true' => [CompositeRule::OR, ['easy_rule_false', 'easy_rule_true'], true],
+            'OR all false' => [CompositeRule::OR, [FalseRule::class, FalseRule::class], false],
+            'OR last true' => [CompositeRule::OR, [FalseRule::class, TrueRule::class], true],
         ];
     }
 
@@ -33,11 +33,7 @@ final class CompositeRuleTest extends TestCase
     public function testCompositeRule(string $operator, array $rules, bool $expected): void
     {
         $rule = new CompositeRule($operator, $rules);
-        $ruleFactory = new SimpleRuleFactory([
-            'easy_rule_false' => new EasyRule(false),
-            'easy_rule_true' => new EasyRule(true),
-        ]);
-        $result = $rule->execute('user', new Permission('permission'), new RuleContext($ruleFactory, []));
+        $result = $rule->execute('user', new Permission('permission'), new RuleContext());
         $this->assertSame($expected, $result);
     }
 

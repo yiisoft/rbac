@@ -10,10 +10,7 @@ use Yiisoft\Rbac\Manager;
 use Yiisoft\Rbac\ManagerInterface;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
-use Yiisoft\Rbac\RuleFactoryInterface;
-use Yiisoft\Rbac\SimpleRuleFactory;
 use Yiisoft\Rbac\Tests\Support\AuthorRule;
-use Yiisoft\Rbac\Tests\Support\EasyRule;
 use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
 
@@ -22,16 +19,14 @@ trait ManagerConfigurationTestTrait
     protected function createManager(
         ?ItemsStorageInterface $itemsStorage = null,
         ?AssignmentsStorageInterface $assignmentsStorage = null,
-        ?RuleFactoryInterface $ruleFactory = null,
-        ?bool $enableDirectPermissions = false
+        ?bool $enableDirectPermissions = false,
     ): ManagerInterface {
         $arguments = [
-            $itemsStorage ?? $this->createItemsStorage(),
-            $assignmentsStorage ?? $this->createAssignmentsStorage(),
-            $ruleFactory ?? new SimpleRuleFactory(),
+            'itemsStorage' => $itemsStorage ?? $this->createItemsStorage(),
+            'assignmentsStorage' => $assignmentsStorage ?? $this->createAssignmentsStorage(),
         ];
         if ($enableDirectPermissions !== null) {
-            $arguments[] = $enableDirectPermissions;
+            $arguments['enableDirectPermissions'] = $enableDirectPermissions;
         }
 
         return new Manager(...$arguments);
@@ -50,17 +45,11 @@ trait ManagerConfigurationTestTrait
     protected function createFilledManager(
         ?ItemsStorageInterface $itemsStorage = null,
         ?AssignmentsStorageInterface $assignmentsStorage = null,
-        ?RuleFactoryInterface $ruleFactory = null,
     ): ManagerInterface {
         return $this
             ->createManager(
                 $itemsStorage ?? $this->createItemsStorage(),
                 $assignmentsStorage ?? $this->createAssignmentsStorage(),
-                $ruleFactory ?? new SimpleRuleFactory([
-                    'isAuthor' => new AuthorRule(),
-                    'easyTrue' => new EasyRule(true),
-                    'easyFalse' => new EasyRule(false),
-                ]),
                 enableDirectPermissions: true,
             )
             ->addPermission(new Permission('Fast Metabolism'))
@@ -68,7 +57,7 @@ trait ManagerConfigurationTestTrait
             ->addPermission(new Permission('publishPost'))
             ->addPermission(new Permission('readPost'))
             ->addPermission(new Permission('deletePost'))
-            ->addPermission((new Permission('updatePost'))->withRuleName('isAuthor'))
+            ->addPermission((new Permission('updatePost'))->withRuleName(AuthorRule::class))
             ->addPermission(new Permission('updateAnyPost'))
             ->addRole(new Role('reader'))
             ->addRole(new Role('author'))

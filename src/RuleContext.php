@@ -6,10 +6,13 @@ namespace Yiisoft\Rbac;
 
 final class RuleContext
 {
+    private readonly RuleFactoryInterface $ruleFactory;
+
     public function __construct(
-        private readonly RuleFactoryInterface $ruleFactory,
-        private readonly array $parameters,
+        ?RuleFactoryInterface $ruleFactory = null,
+        private readonly array $parameters = [],
     ) {
+        $this->ruleFactory = $ruleFactory ?? new SimpleRuleFactory();
     }
 
     public function getParameters(): array
