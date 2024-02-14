@@ -153,9 +153,7 @@ final class Manager implements ManagerInterface
         }
 
         if ($this->assignmentsStorage->exists($itemName, $userId)) {
-            throw new InvalidArgumentException(
-                "\"$itemName\" {$item->getType()} has already been assigned to user $userId.",
-            );
+            return $this;
         }
 
         $assignment = new Assignment($userId, $itemName, $createdAt ?? time());
