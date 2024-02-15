@@ -9,6 +9,7 @@ use PHPUnit\Framework\TestCase;
 use Yiisoft\Rbac\CompositeRule;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\RuleContext;
+use Yiisoft\Rbac\SimpleRuleFactory;
 use Yiisoft\Rbac\Tests\Support\FalseRule;
 use Yiisoft\Rbac\Tests\Support\TrueRule;
 
@@ -33,7 +34,7 @@ final class CompositeRuleTest extends TestCase
     public function testCompositeRule(string $operator, array $rules, bool $expected): void
     {
         $rule = new CompositeRule($operator, $rules);
-        $result = $rule->execute('user', new Permission('permission'), new RuleContext());
+        $result = $rule->execute('user', new Permission('permission'), new RuleContext(new SimpleRuleFactory()));
         $this->assertSame($expected, $result);
     }
 
