@@ -8,7 +8,7 @@ final class RuleContext
 {
     public function __construct(
         private readonly RuleFactoryInterface $ruleFactory,
-        private readonly array $parameters = [],
+        private readonly array $parameters,
     ) {
     }
 

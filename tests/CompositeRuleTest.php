@@ -34,7 +34,7 @@ final class CompositeRuleTest extends TestCase
     public function testCompositeRule(string $operator, array $rules, bool $expected): void
     {
         $rule = new CompositeRule($operator, $rules);
-        $result = $rule->execute('user', new Permission('permission'), new RuleContext(new SimpleRuleFactory()));
+        $result = $rule->execute('user', new Permission('permission'), new RuleContext(new SimpleRuleFactory(), []));
         $this->assertSame($expected, $result);
     }
 
