@@ -19,6 +19,7 @@ use function is_array;
  */
 final class Manager implements ManagerInterface
 {
+    private readonly RuleFactoryInterface $ruleFactory;
     /**
      * @var string[] A list of role names that are assigned to every user automatically without calling {@see assign()}.
      * Note that these roles are applied to users, regardless of their state of authentication.
@@ -36,9 +37,10 @@ final class Manager implements ManagerInterface
     public function __construct(
         private readonly ItemsStorageInterface $itemsStorage,
         private readonly AssignmentsStorageInterface $assignmentsStorage,
-        private readonly RuleFactoryInterface $ruleFactory,
+        ?RuleFactoryInterface $ruleFactory = null,
         private readonly bool $enableDirectPermissions = false,
     ) {
+        $this->ruleFactory = $ruleFactory ?? new SimpleRuleFactory();
     }
 
     public function userHasPermission(

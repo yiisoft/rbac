@@ -70,38 +70,15 @@ use Yiisoft\Rbac\RuleFactoryInterface;
 $manager = new Manager($itemsStorage, $assignmentsStorage, $ruleFactory);
 ```
 
-It requires specifying the following dependencies:
+It requires the following dependencies:
 
 - Items storage (hierarchy itself).
 - Assignments storage where user IDs are mapped to roles.
-- Rule factory. Given a rule name stored in item storage it can create an instance of `Rule`.
+- Rule factory. Creates a rule instance by a given name.
 
-If you don't want to use [Rules Container](https://github.com/yiisoft/rbac-rules-container), here is an example of 
-simple self-contained rule factory:
-
-```php
-use Yiisoft\Rbac\Exception\RuleNotFoundException;
-use Yiisoft\Rbac\RuleFactoryInterface;
-use Yiisoft\Rbac\RuleInterface;
-
-use function array_key_exists;
-
-final class SimpleRuleFactory implements RuleFactoryInterface
-{    
-    public function __construct(private array $rules = [])
-    {
-    }
-
-    public function create(string $name): RuleInterface
-    {
-        if (!array_key_exists($name, $this->rules)) {
-            throw new RuleNotFoundException($name);
-        }
-
-        return $this->rules[$name];
-    }
-}
-```
+While storages are required, rule factory is optional and, when omitted, `SimpleRuleFactory` will be used. For more 
+advanced usage, such as resolving rules by aliases and passing arguments in rules constructor, install 
+[Rules Container](https://github.com/yiisoft/rbac-rules-container) additionally or write your own implementation.
 
 A few tips for choosing storage backend:
 
@@ -198,13 +175,13 @@ use Yiisoft\Rbac\Permission;
 
 /** @var ManagerInterface $manager */
 $manager->addPermission( 
-    (new Permission('viewList'))->withRuleName('action_rule'),
+    (new Permission('viewList'))->withRuleName(ActionRule::class),
 );
 
 // or
 
 $manager->addRole(
-    (new Role('NewYearMaintainer'))->withRuleName('new_year_only_rule')
+    (new Role('NewYearMaintainer'))->withRuleName(NewYearOnlyRule::class)
 );
 ```
 

@@ -8,19 +8,10 @@ use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\RuleContext;
 use Yiisoft\Rbac\RuleInterface;
 
-final class EasyRule implements RuleInterface
+final class FalseRule implements RuleInterface
 {
-    public function __construct(private readonly bool $expected = true)
-    {
-    }
-
     public function execute(?string $userId, Item $item, RuleContext $ruleContext): bool
     {
-        return $this->expected;
-    }
-
-    public function getName(): string
-    {
-        return self::class;
+        return false;
     }
 }
