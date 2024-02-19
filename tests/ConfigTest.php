@@ -12,8 +12,6 @@ use Yiisoft\Rbac\AssignmentsStorageInterface;
 use Yiisoft\Rbac\ItemsStorageInterface;
 use Yiisoft\Rbac\Manager;
 use Yiisoft\Rbac\ManagerInterface;
-use Yiisoft\Rbac\RuleFactoryInterface;
-use Yiisoft\Rbac\SimpleRuleFactory;
 use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
 
