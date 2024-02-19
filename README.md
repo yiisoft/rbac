@@ -41,7 +41,7 @@ composer require yiisoft/rbac
 One of the following storages could be installed as well:
 
 - [PHP storage](https://github.com/yiisoft/rbac-php) - PHP file storage;
-- [DB storage](https://github.com/yiisoft/rbac) - database storage based on [Yii DB](https://github.com/yiisoft/db);
+- [DB storage](https://github.com/yiisoft/rbac-db) - database storage based on [Yii DB](https://github.com/yiisoft/db);
 - [Cycle DB storage](https://github.com/yiisoft/rbac-cycle-db) - database storage based on 
   [Cycle DBAL](https://github.com/cycle/database).
 
