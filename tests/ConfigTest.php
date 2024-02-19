@@ -33,7 +33,6 @@ final class ConfigTest extends TestCase
         $definitions = array_merge($definitions, [
             ItemsStorageInterface::class => FakeItemsStorage::class,
             AssignmentsStorageInterface::class => FakeAssignmentsStorage::class,
-            RuleFactoryInterface::class => SimpleRuleFactory::class,
         ]);
         $config = ContainerConfig::create()->withDefinitions($definitions);
 

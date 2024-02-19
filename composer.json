@@ -59,6 +59,14 @@
         },
         "files": ["tests/bootstrap.php"]
     },
+    "extra": {
+        "config-plugin-options": {
+            "source-directory": "config"
+        },
+        "config-plugin": {
+            "di": "di.php"
+        }
+    },
     "config": {
         "sort-packages": true,
         "allow-plugins": {
