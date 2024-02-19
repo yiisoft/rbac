@@ -9,8 +9,7 @@
 [![Latest Stable Version](https://poser.pugx.org/yiisoft/rbac/v/stable.png)](https://packagist.org/packages/yiisoft/rbac)
 [![Total Downloads](https://poser.pugx.org/yiisoft/rbac/downloads.png)](https://packagist.org/packages/yiisoft/rbac)
 [![Build status](https://github.com/yiisoft/rbac/workflows/build/badge.svg)](https://github.com/yiisoft/rbac/actions?query=workflow%3Abuild)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/yiisoft/rbac/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/yiisoft/rbac/?branch=master)
-[![Code Coverage](https://scrutinizer-ci.com/g/yiisoft/rbac/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/yiisoft/rbac/?branch=master)
+[![codecov](https://codecov.io/gh/yiisoft/rbac/graph/badge.svg?token=95SVWYEXO1)](https://codecov.io/gh/yiisoft/rbac)
 [![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fyiisoft%2Frbac%2Fmaster)](https://dashboard.stryker-mutator.io/reports/github.com/yiisoft/rbac/master)
 [![static analysis](https://github.com/yiisoft/rbac/workflows/static%20analysis/badge.svg)](https://github.com/yiisoft/rbac/actions?query=workflow%3A%22static+analysis%22)
 [![type-coverage](https://shepherd.dev/github/yiisoft/rbac/coverage.svg)](https://shepherd.dev/github/yiisoft/rbac)
@@ -42,7 +41,7 @@ composer require yiisoft/rbac
 One of the following storages could be installed as well:
 
 - [PHP storage](https://github.com/yiisoft/rbac-php) - PHP file storage;
-- [DB storage](https://github.com/yiisoft/rbac-db) - database storage based on [Yii DB](https://github.com/yiisoft/db);
+- [DB storage](https://github.com/yiisoft/rbac) - database storage based on [Yii DB](https://github.com/yiisoft/db);
 - [Cycle DB storage](https://github.com/yiisoft/rbac-cycle-db) - database storage based on 
   [Cycle DBAL](https://github.com/cycle/database).
 
