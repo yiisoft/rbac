@@ -12,18 +12,20 @@ use SlopeIt\ClockMock\ClockMock;
 use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\Exception\DefaultRolesNotFoundException;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
+use Yiisoft\Rbac\Exception\RuleInterfaceNotImplementedException;
 use Yiisoft\Rbac\Exception\RuleNotFoundException;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
+use Yiisoft\Rbac\RuleInterface;
 use Yiisoft\Rbac\Tests\Support\AdsRule;
-use Yiisoft\Rbac\Tests\Support\GuestRule;
 use Yiisoft\Rbac\Tests\Support\AuthorRule;
 use Yiisoft\Rbac\Tests\Support\BanRule;
-use Yiisoft\Rbac\Tests\Support\EasyRule;
 use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
-use Yiisoft\Rbac\Tests\Support\SimpleRuleFactory;
+use Yiisoft\Rbac\Tests\Support\GuestRule;
 use Yiisoft\Rbac\Tests\Support\SubscriptionRule;
+use Yiisoft\Rbac\Tests\Support\TrueRule;
+use Yiisoft\Rbac\Tests\Support\WannabeRule;
 
 trait ManagerLogicTestTrait
 {
@@ -175,30 +177,23 @@ trait ManagerLogicTestTrait
             ->createManager(
                 $this->createItemsStorage(),
                 $this->createAssignmentsStorage(),
-                new SimpleRuleFactory([
-                    'subscription' => new SubscriptionRule(),
-                    'ads' => new AdsRule(),
-                    'author' => new AuthorRule(),
-                    'ban' => new BanRule(),
-                    'guest' => new GuestRule(),
-                ]),
                 enableDirectPermissions: true,
             )
-            ->addRole((new Role('guest'))->withRuleName('guest'))
+            ->addRole((new Role('guest'))->withRuleName(GuestRule::class))
             ->setGuestRoleName('guest')
             ->addRole(new Role('news comment manager'))
             ->addRole(new Role('warned user'))
             ->addRole(new Role('trial user'))
-            ->addRole((new Role('subscribed user'))->withRuleName('subscription'))
-            ->addPermission((new Permission('view ads'))->withRuleName('ads'))
-            ->addPermission((new Permission('view ban warning'))->withRuleName('ban'))
+            ->addRole((new Role('subscribed user'))->withRuleName(SubscriptionRule::class))
+            ->addPermission((new Permission('view ads'))->withRuleName(AdsRule::class))
+            ->addPermission((new Permission('view ban warning'))->withRuleName(BanRule::class))
             ->addPermission(new Permission('view content'))
             ->addPermission(new Permission('view regular content'))
             ->addPermission(new Permission('view news'))
             ->addPermission(new Permission('add news comment'))
             ->addPermission(new Permission('view news comment'))
-            ->addPermission((new Permission('edit news comment'))->withRuleName('author'))
-            ->addPermission((new Permission('remove news comment'))->withRuleName('author'))
+            ->addPermission((new Permission('edit news comment'))->withRuleName(AuthorRule::class))
+            ->addPermission((new Permission('remove news comment'))->withRuleName(AuthorRule::class))
             ->addPermission(new Permission('view wiki'))
             ->addPermission(new Permission('view exclusive content'))
             ->addChild('view content', 'view regular content')
@@ -259,6 +254,22 @@ trait ManagerLogicTestTrait
 
         $this->expectException(RuleNotFoundException::class);
         $this->expectExceptionMessage('Rule "non-existing-rule" not found.');
+        $manager->userHasPermission('reader A', 'test-permission');
+    }
+
+    public function testUserHasPermissionWithRuleMissingImplements(): void
+    {
+        $className = WannabeRule::class;
+        $interfaceName = RuleInterface::class;
+        $manager = $this
+            ->createFilledManager()
+            ->addPermission((new Permission('test-permission'))->withRuleName($className))
+            ->addRole(new Role('test'))
+            ->addChild('test', 'test-permission')
+            ->assign('test-permission', 'reader A');
+
+        $this->expectException(RuleInterfaceNotImplementedException::class);
+        $this->expectExceptionMessage("Rule \"$className\" must implement \"$interfaceName\".");
         $manager->userHasPermission('reader A', 'test-permission');
     }
 
@@ -625,11 +636,11 @@ trait ManagerLogicTestTrait
     {
         $manager = $this->createFilledManager();
 
-        $rule = new EasyRule();
+        $rule = new TrueRule();
 
         $role = (new Role('new role'))
             ->withDescription('new role description')
-            ->withRuleName($rule->getName())
+            ->withRuleName(TrueRule::class)
             ->withCreatedAt(1_642_026_147)
             ->withUpdatedAt(1_642_026_148);
 
@@ -645,7 +656,7 @@ trait ManagerLogicTestTrait
             [
                 'name' => 'new role',
                 'description' => 'new role description',
-                'rule_name' => EasyRule::class,
+                'rule_name' => TrueRule::class,
                 'type' => 'role',
                 'updated_at' => 1_642_026_148,
                 'created_at' => 1_642_026_147,

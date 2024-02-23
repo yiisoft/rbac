@@ -12,10 +12,8 @@ use Yiisoft\Rbac\AssignmentsStorageInterface;
 use Yiisoft\Rbac\ItemsStorageInterface;
 use Yiisoft\Rbac\Manager;
 use Yiisoft\Rbac\ManagerInterface;
-use Yiisoft\Rbac\RuleFactoryInterface;
 use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
-use Yiisoft\Rbac\Tests\Support\SimpleRuleFactory;
 
 final class ConfigTest extends TestCase
 {
@@ -33,7 +31,6 @@ final class ConfigTest extends TestCase
         $definitions = array_merge($definitions, [
             ItemsStorageInterface::class => FakeItemsStorage::class,
             AssignmentsStorageInterface::class => FakeAssignmentsStorage::class,
-            RuleFactoryInterface::class => SimpleRuleFactory::class,
         ]);
         $config = ContainerConfig::create()->withDefinitions($definitions);
 

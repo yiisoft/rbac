@@ -7,6 +7,7 @@ namespace Yiisoft\Rbac\Tests;
 use PHPUnit\Framework\TestCase;
 use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\Permission;
+use Yiisoft\Rbac\Tests\Support\TrueRule;
 
 final class PermissionTest extends TestCase
 {
@@ -17,7 +18,7 @@ final class PermissionTest extends TestCase
         $new2 = $original->withDescription('new description');
         $new3 = $original->withUpdatedAt(1_642_029_084);
         $new4 = $original->withCreatedAt(1_642_029_084);
-        $new5 = $original->withRuleName('test');
+        $new5 = $original->withRuleName(TrueRule::class);
 
         $this->assertNotSame($original, $new1);
         $this->assertNotSame($original, $new2);
