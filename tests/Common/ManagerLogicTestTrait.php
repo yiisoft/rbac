@@ -48,44 +48,44 @@ trait ManagerLogicTestTrait
     public static function dataUserHasPermissionGeneric(): array
     {
         return [
-            ['reader A', 'createPost', ['authorId' => 'author B'], false],
-            ['reader A', 'readPost', ['authorId' => 'author B'], true],
+            ['reader A', 'createPost', [], false],
+            ['reader A', 'readPost', [], true],
             ['reader A', 'updatePost', ['authorId' => 'author B'], false],
-            ['reader A', 'updateAnyPost', ['authorId' => 'author B'], false],
-            ['reader A', 'reader', ['authorId' => 'author B'], false],
+            ['reader A', 'updateAnyPost', [], false],
+            ['reader A', 'reader', [], false],
 
-            ['author B', 'createPost', ['authorId' => 'author B'], true],
-            ['author B', 'readPost', ['authorId' => 'author B'], true],
+            ['author B', 'createPost', [], true],
+            ['author B', 'readPost', [], true],
             ['author B', 'updatePost', ['authorId' => 'author B'], true],
-            ['author B', 'deletePost', ['authorId' => 'author B'], true],
-            ['author B', 'updateAnyPost', ['authorId' => 'author B'], false],
+            ['author B', 'deletePost', [], true],
+            ['author B', 'updateAnyPost', [], false],
 
-            ['admin C', 'createPost', ['authorId' => 'author B'], true],
-            ['admin C', 'readPost', ['authorId' => 'author B'], true],
+            ['admin C', 'createPost', [], true],
+            ['admin C', 'readPost', [], true],
             ['admin C', 'updatePost', ['authorId' => 'author B'], false],
-            ['admin C', 'updateAnyPost', ['authorId' => 'author B'], true],
-            ['admin C', 'nonExistingPermission', ['authorId' => 'author B'], false],
+            ['admin C', 'updateAnyPost', [], true],
+            ['admin C', 'nonExistingPermission', [], false],
 
-            ['guest', 'createPost', ['authorId' => 'author B'], false],
-            ['guest', 'readPost', ['authorId' => 'author B'], false],
+            ['guest', 'createPost', [], false],
+            ['guest', 'readPost', [], false],
             ['guest', 'updatePost', ['authorId' => 'author B'], false],
-            ['guest', 'deletePost', ['authorId' => 'author B'], false],
-            ['guest', 'updateAnyPost', ['authorId' => 'author B'], false],
-            ['guest', 'blablabla', ['authorId' => 'author B'], false],
+            ['guest', 'deletePost', [], false],
+            ['guest', 'updateAnyPost', [], false],
+            ['guest', 'blablabla', [], false],
 
-            [12, 'createPost', ['authorId' => 'author B'], false],
-            [12, 'readPost', ['authorId' => 'author B'], false],
+            [12, 'createPost', [], false],
+            [12, 'readPost', [], false],
             [12, 'updatePost', ['authorId' => 'author B'], false],
-            [12, 'deletePost', ['authorId' => 'author B'], false],
-            [12, 'updateAnyPost', ['authorId' => 'author B'], false],
-            [12, 'blablabla', ['authorId' => 'author B'], false],
+            [12, 'deletePost', [], false],
+            [12, 'updateAnyPost', [], false],
+            [12, 'blablabla', [], false],
 
-            [null, 'createPost', ['authorId' => 'author B'], false],
-            [null, 'readPost', ['authorId' => 'author B'], false],
+            [null, 'createPost', [], false],
+            [null, 'readPost', [], false],
             [null, 'updatePost', ['authorId' => 'author B'], false],
-            [null, 'deletePost', ['authorId' => 'author B'], false],
-            [null, 'updateAnyPost', ['authorId' => 'author B'], false],
-            [null, 'blablabla', ['authorId' => 'author B'], false],
+            [null, 'deletePost', [], false],
+            [null, 'updateAnyPost', [], false],
+            [null, 'blablabla', [], false],
         ];
     }
 
@@ -271,6 +271,30 @@ trait ManagerLogicTestTrait
         $this->expectException(RuleInterfaceNotImplementedException::class);
         $this->expectExceptionMessage("Rule \"$className\" must implement \"$interfaceName\".");
         $manager->userHasPermission('reader A', 'test-permission');
+    }
+
+    public static function dataUserHasPermissionWithRolesAllowed(): array
+    {
+        return [
+            ['reader A', 'reader', true],
+            ['reader A', 'admin', false],
+            ['reader A', 'non-existing', false],
+            ['admin C', 'reader', true],
+        ];
+    }
+
+    /**
+     * @dataProvider dataUserHasPermissionWithRolesAllowed
+     */
+    public function testUserHasPermissionWithRolesAllowed(
+        string $userId,
+        string $permissionName,
+        bool $expectedHasPermission,
+    ): void {
+        $this->assertSame(
+            $expectedHasPermission,
+            $this->createFilledManager(includeRolesInAccessChecks: true)->userHasPermission($userId, $permissionName),
+        );
     }
 
     public function testCanAddExistingChild(): void
@@ -507,7 +531,7 @@ trait ManagerLogicTestTrait
 
     public function testAssignPermissionDirectlyWhenItIsDisabled(): void
     {
-        $manager = $this->createManager(null, null, null, null);
+        $manager = $this->createManager();
         $manager->addPermission(new Permission('readPost'));
 
         $this->expectException(InvalidArgumentException::class);

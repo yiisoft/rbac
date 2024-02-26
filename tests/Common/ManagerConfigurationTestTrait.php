@@ -19,7 +19,8 @@ trait ManagerConfigurationTestTrait
     protected function createManager(
         ?ItemsStorageInterface $itemsStorage = null,
         ?AssignmentsStorageInterface $assignmentsStorage = null,
-        ?bool $enableDirectPermissions = false,
+        ?bool $enableDirectPermissions = null,
+        ?bool $includeRolesInAccessChecks = null,
     ): ManagerInterface {
         $arguments = [
             'itemsStorage' => $itemsStorage ?? $this->createItemsStorage(),
@@ -27,6 +28,10 @@ trait ManagerConfigurationTestTrait
         ];
         if ($enableDirectPermissions !== null) {
             $arguments['enableDirectPermissions'] = $enableDirectPermissions;
+        }
+
+        if ($includeRolesInAccessChecks !== null) {
+            $arguments['includeRolesInAccessChecks'] = $includeRolesInAccessChecks;
         }
 
         return new Manager(...$arguments);
@@ -45,13 +50,19 @@ trait ManagerConfigurationTestTrait
     protected function createFilledManager(
         ?ItemsStorageInterface $itemsStorage = null,
         ?AssignmentsStorageInterface $assignmentsStorage = null,
+        ?bool $includeRolesInAccessChecks = null,
     ): ManagerInterface {
+        $arguments = [
+            $itemsStorage ?? $this->createItemsStorage(),
+            $assignmentsStorage ?? $this->createAssignmentsStorage(),
+            true,
+        ];
+        if ($includeRolesInAccessChecks !== null) {
+            $arguments[] = $includeRolesInAccessChecks;
+        }
+
         return $this
-            ->createManager(
-                $itemsStorage ?? $this->createItemsStorage(),
-                $assignmentsStorage ?? $this->createAssignmentsStorage(),
-                enableDirectPermissions: true,
-            )
+            ->createManager(...$arguments)
             ->addPermission(new Permission('Fast Metabolism'))
             ->addPermission(new Permission('createPost'))
             ->addPermission(new Permission('publishPost'))
