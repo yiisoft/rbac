@@ -153,9 +153,9 @@ use Yiisoft\Rbac\RuleInterface;
 
 class ActionRule implements RuleInterface
 {
-    public function execute(?string $userId, Item $item, RuleContext $ruleContext): bool;
+    public function execute(?string $userId, Item $item, RuleContext $context): bool;
     {
-        return $ruleContext->getParameterValue('action') === 'home';
+        return $context->getParameterValue('action') === 'home';
     }
 }
 ```
@@ -166,7 +166,7 @@ The parameters are:
 
 - `$userId` is user id to check permission against;
 - `$item` is RBAC hierarchy item that rule is attached to;
-- `$ruleContext` is a rule context providing access to parameters.
+- `$context` is a rule context providing access to parameters.
 
 To use rules with `Manager`, specify their names with added permissions or roles:
 

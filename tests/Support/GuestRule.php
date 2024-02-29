@@ -10,8 +10,8 @@ use Yiisoft\Rbac\RuleInterface;
 
 final class GuestRule implements RuleInterface
 {
-    public function execute(?string $userId, Item $item, RuleContext $ruleContext): bool
+    public function execute(?string $userId, Item $item, RuleContext $context): bool
     {
-        return $ruleContext->getParameterValue('noGuestsModeOn') !== true;
+        return $context->getParameterValue('noGuestsModeOn') !== true;
     }
 }
