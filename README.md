@@ -147,13 +147,15 @@ Sometimes, basic permissions are not enough. In this case, rules are helpful. Ru
 added to permissions and roles:
 
 ```php
+use Yiisoft\Rbac\Item;
+use Yiisoft\Rbac\RuleContext;
 use Yiisoft\Rbac\RuleInterface;
 
 class ActionRule implements RuleInterface
 {
-    public function execute(string $userId, Item $item, array $parameters = []): bool
+    public function execute(?string $userId, Item $item, RuleContext $context): bool;
     {
-        return isset($parameters['action']) && $parameters['action'] === 'home';
+        return $context->getParameterValue('action') === 'home';
     }
 }
 ```
@@ -164,7 +166,7 @@ The parameters are:
 
 - `$userId` is user id to check permission against;
 - `$item` is RBAC hierarchy item that rule is attached to;
-- `$parameters` is extra data supplied when checking for permission.
+- `$context` is a rule context providing access to parameters.
 
 To use rules with `Manager`, specify their names with added permissions or roles:
 

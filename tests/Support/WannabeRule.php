@@ -9,7 +9,7 @@ use Yiisoft\Rbac\RuleContext;
 
 final class WannabeRule
 {
-    public function execute(?string $userId, Item $item, RuleContext $ruleContext): bool
+    public function execute(?string $userId, Item $item, RuleContext $context): bool
     {
         return true;
     }

@@ -15,9 +15,9 @@ final class SubscriptionRule implements RuleInterface
         '4' => false,
     ];
 
-    public function execute(?string $userId, Item $item, RuleContext $ruleContext): bool
+    public function execute(?string $userId, Item $item, RuleContext $context): bool
     {
-        if ($userId === null || $ruleContext->getParameterValue('voidSubscription') === true) {
+        if ($userId === null || $context->getParameterValue('voidSubscription') === true) {
             return false;
         }
 

@@ -10,8 +10,8 @@ use Yiisoft\Rbac\RuleInterface;
 
 final class AdsRule implements RuleInterface
 {
-    public function execute(?string $userId, Item $item, RuleContext $ruleContext): bool
+    public function execute(?string $userId, Item $item, RuleContext $context): bool
     {
-        return $ruleContext->getParameterValue('dayPeriod') !== 'night';
+        return $context->getParameterValue('dayPeriod') !== 'night';
     }
 }

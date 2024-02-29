@@ -13,8 +13,8 @@ use Yiisoft\Rbac\RuleInterface;
  */
 final class AuthorRule implements RuleInterface
 {
-    public function execute(?string $userId, Item $item, RuleContext $ruleContext): bool
+    public function execute(?string $userId, Item $item, RuleContext $context): bool
     {
-        return (string) $ruleContext->getParameterValue('authorId') === $userId;
+        return (string) $context->getParameterValue('authorId') === $userId;
     }
 }
