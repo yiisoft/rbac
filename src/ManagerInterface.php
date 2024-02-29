@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac;
 
 use Closure;
-use Exception;
 use InvalidArgumentException;
 use RuntimeException;
 use Stringable;
@@ -91,7 +90,9 @@ interface ManagerInterface extends AccessCheckerInterface
      * @param int|null $createdAt UNIX timestamp representing assignment creation time. When `null`, current time is
      * used.
      *
-     * @throws Exception If the role or permission has already been assigned to the user.
+     * @throws InvalidArgumentException
+     * - If an item with the given name is not found.
+     * - During the attempt of assigning permissions directly when it's disabled.
      *
      * @return self
      */
