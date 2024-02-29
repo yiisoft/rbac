@@ -59,6 +59,7 @@
 - Enh #252: Return `$this` instead of throwing "already assigned" exception in `Manager::assign()` (@arogachev)
 - Enh #248: Add `SimpleRuleFactory` (@arogachev)
 - Enh #251: Allow checking for user's roles in `ManagerInterface::userHasPermission()` (@arogachev)
+- Chg #259: Rename `$ruleContext` argument to `$context` in `RuleInterface::execute()` (@arogachev) 
 
 ## 1.0.2 April 20, 2023
 
