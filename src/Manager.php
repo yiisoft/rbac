@@ -79,28 +79,29 @@ final class Manager implements ManagerInterface
             ? [$guestRole->getName()]
             : $this->assignmentsStorage->filterUserItemNames((string) $userId, $itemNames);
 
-        $userItems = [];
-        foreach ($userItemNames as $itemName) {
-            $userItems[$itemName] = $hierarchy[$itemName]['item'];
-            foreach ($hierarchy[$itemName]['children'] ?? [] as $item) {
-                $userItems[$item->getName()] = $item;
+        foreach ($hierarchy as $data) {
+            if (
+                !in_array($data['item']->getName(), $userItemNames, strict: true) ||
+                !$this->executeRule($userId === null ? $userId : (string) $userId, $data['item'], $parameters)
+            ) {
+                continue;
+            }
+
+            $hasPermission = true;
+            foreach ($data['children'] as $childItem) {
+                if (!$this->executeRule($userId === null ? $userId : (string) $userId, $childItem, $parameters)) {
+                    $hasPermission = false;
+
+                    break;
+                }
+            }
+
+            if ($hasPermission) {
+                return true;
             }
         }
 
-        if (
-            empty($userItems) ||
-            ($guestRole !== null && count($userItems) === 1 && array_key_exists('guest', $userItems))
-        ) {
-            return false;
-        }
-
-        foreach ($userItems as $item) {
-            if (!$this->executeRule($userId === null ? $userId : (string) $userId, $item, $parameters)) {
-                return false;
-            }
-        }
-
-        return true;
+        return false;
     }
 
     public function canAddChild(string $parentName, string $childName): bool

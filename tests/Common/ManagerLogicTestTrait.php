@@ -310,7 +310,7 @@ trait ManagerLogicTestTrait
             ->assign(itemName: 'Role 1', userId: 'User')
             ->assign(itemName: 'Role 2', userId: 'User');
 
-        $this->assertFalse($manager->userHasPermission('User', 'Permission'));
+        $this->assertTrue($manager->userHasPermission('User', 'Permission'));
     }
 
     public function testCanAddExistingChild(): void
