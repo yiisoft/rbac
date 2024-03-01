@@ -22,6 +22,7 @@ use Yiisoft\Rbac\Tests\Support\AuthorRule;
 use Yiisoft\Rbac\Tests\Support\BanRule;
 use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
+use Yiisoft\Rbac\Tests\Support\FalseRule;
 use Yiisoft\Rbac\Tests\Support\GuestRule;
 use Yiisoft\Rbac\Tests\Support\SubscriptionRule;
 use Yiisoft\Rbac\Tests\Support\TrueRule;
@@ -295,6 +296,21 @@ trait ManagerLogicTestTrait
             $expectedHasPermission,
             $this->createFilledManager(includeRolesInAccessChecks: true)->userHasPermission($userId, $permissionName),
         );
+    }
+
+    public function testUserHasPermissionTemp(): void
+    {
+        $manager = $this
+            ->createFilledManager()
+            ->addPermission(new Permission('Permission'))
+            ->addRole(new Role('Role 1'))
+            ->addRole((new Role('Role 2'))->withRuleName(FalseRule::class))
+            ->addChild('Role 1', 'Permission')
+            ->addChild('Role 2', 'Permission')
+            ->assign(itemName: 'Role 1', userId: 'User')
+            ->assign(itemName: 'Role 2', userId: 'User');
+
+        $this->assertFalse($manager->userHasPermission('User', 'Permission'));
     }
 
     public function testCanAddExistingChild(): void
