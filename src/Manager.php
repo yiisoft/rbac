@@ -74,10 +74,14 @@ final class Manager implements ManagerInterface
         $userItemNames = $guestRole !== null
             ? [$guestRole->getName()]
             : $this->assignmentsStorage->filterUserItemNames((string) $userId, $itemNames);
+        $userItemNamesMap = [];
+        foreach ($userItemNames as $userItemName) {
+            $userItemNamesMap[$userItemName] = null;
+        }
 
         foreach ($hierarchy as $data) {
             if (
-                !in_array($data['item']->getName(), $userItemNames, strict: true) ||
+                !array_key_exists($data['item']->getName(), $userItemNamesMap) ||
                 !$this->executeRule($userId === null ? $userId : (string) $userId, $data['item'], $parameters)
             ) {
                 continue;
@@ -88,6 +92,12 @@ final class Manager implements ManagerInterface
                 if (!$this->executeRule($userId === null ? $userId : (string) $userId, $childItem, $parameters)) {
                     $hasPermission = false;
 
+                    /**
+                     * @infection-ignore-all Break_
+                     * Replacing with `continue` works as well, but there is no point in further checks, because at
+                     * least one failed rule execution means access is not granted via current iterated hierarchy
+                     * branch.
+                     */
                     break;
                 }
             }
