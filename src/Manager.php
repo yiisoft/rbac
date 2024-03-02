@@ -70,10 +70,6 @@ final class Manager implements ManagerInterface
         }
 
         $hierarchy = $this->itemsStorage->getHierarchy($item->getName());
-        if ($guestRole !== null && !array_key_exists($guestRole->getName(), $hierarchy)) {
-            $hierarchy[$guestRole->getName()] = ['item' => $guestRole, 'children' => []];
-        }
-
         $itemNames = array_map(static fn (array $treeItem): string => $treeItem['item']->getName(), $hierarchy);
         $userItemNames = $guestRole !== null
             ? [$guestRole->getName()]

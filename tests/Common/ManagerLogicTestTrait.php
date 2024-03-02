@@ -298,7 +298,7 @@ trait ManagerLogicTestTrait
         );
     }
 
-    public function testUserHasPermissionTemp(): void
+    public function testUserHasPermissionWithOneHierarchyBranch(): void
     {
         $manager = $this
             ->createFilledManager()
