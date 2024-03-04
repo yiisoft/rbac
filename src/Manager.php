@@ -70,37 +70,44 @@ final class Manager implements ManagerInterface
         }
 
         $hierarchy = $this->itemsStorage->getHierarchy($item->getName());
-        if ($guestRole !== null && !array_key_exists($guestRole->getName(), $hierarchy)) {
-            $hierarchy[$guestRole->getName()] = ['item' => $guestRole, 'children' => []];
-        }
-
         $itemNames = array_map(static fn (array $treeItem): string => $treeItem['item']->getName(), $hierarchy);
         $userItemNames = $guestRole !== null
             ? [$guestRole->getName()]
             : $this->assignmentsStorage->filterUserItemNames((string) $userId, $itemNames);
+        $userItemNamesMap = [];
+        foreach ($userItemNames as $userItemName) {
+            $userItemNamesMap[$userItemName] = null;
+        }
 
-        $userItems = [];
-        foreach ($userItemNames as $itemName) {
-            $userItems[$itemName] = $hierarchy[$itemName]['item'];
-            foreach ($hierarchy[$itemName]['children'] ?? [] as $item) {
-                $userItems[$item->getName()] = $item;
+        foreach ($hierarchy as $data) {
+            if (
+                !array_key_exists($data['item']->getName(), $userItemNamesMap) ||
+                !$this->executeRule($userId === null ? $userId : (string) $userId, $data['item'], $parameters)
+            ) {
+                continue;
+            }
+
+            $hasPermission = true;
+            foreach ($data['children'] as $childItem) {
+                if (!$this->executeRule($userId === null ? $userId : (string) $userId, $childItem, $parameters)) {
+                    $hasPermission = false;
+
+                    /**
+                     * @infection-ignore-all Break_
+                     * Replacing with `continue` works as well, but there is no point in further checks, because at
+                     * least one failed rule execution means access is not granted via current iterated hierarchy
+                     * branch.
+                     */
+                    break;
+                }
+            }
+
+            if ($hasPermission) {
+                return true;
             }
         }
 
-        if (
-            empty($userItems) ||
-            ($guestRole !== null && count($userItems) === 1 && array_key_exists('guest', $userItems))
-        ) {
-            return false;
-        }
-
-        foreach ($userItems as $item) {
-            if (!$this->executeRule($userId === null ? $userId : (string) $userId, $item, $parameters)) {
-                return false;
-            }
-        }
-
-        return true;
+        return false;
     }
 
     public function canAddChild(string $parentName, string $childName): bool
