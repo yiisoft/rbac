@@ -10,47 +10,26 @@
 - Chg #134: Add `$createdAt` parameter to `ManagerInterface::assign()` (@arogachev)
 - Chg #134: Replace all parameters with single `$assignment` parameter in `AssignmentsStorageInterface::add()` 
   (@arogachev)
-- Enh #165, #206: Improve performance:
-  - Optimize calls for getting child items within the loops.
+- Enh #165, #206: Improve performance, including optimization of calls for getting child items within the loops
   (@arogachev)
 - Enh #165: Rename `getChildren` method to `getDirectAchildren()` in `ItemsStorageInterface` (@arogachev)
-- Enh #165, #203, #206, #208, #237: Add methods to `ItemsStorageInterface`:
-    - `roleExists()`;
-    - `getRolesByNames()`;
-    - `getPermissionsByNames()`;
-    - `getAllChildren()`;
-    - `getAllChildRoles()`;
-    - `getAllChildPermissions()`;
-    - `hasChild()`;
-    - `hasDirectChild()`;
-    - `getByNames()`;
-    - `getHierarchy()`.
-      (@arogachev)
-- Enh #165, #203: Add methods to `AssignmentsStorageInterface`:
-  - `getByItemNames()`;
-  - `exists()`;
-  - `userHasItem()`;
-  - `filterUserItemNames()`.
-    (@arogachev)
+- Enh #165, #203, #206, #208, #237: Add methods to `ItemsStorageInterface`: `roleExists()`, `getRolesByNames()`,
+  `getPermissionsByNames()`, `getAllChildren()`, `getAllChildRoles()`, `getAllChildPermissions()`, `hasChild()`,
+  `hasDirectChild()`, `getByNames()`, `getHierarchy()` (@arogachev)
+- Enh #165, #203: Add methods to `AssignmentsStorageInterface`: `getByItemNames()`, `exists()`, `userHasItem()`, 
+  `filterUserItemNames()` (@arogachev)
 - Enh #165: Rename `DefaultRoleNotFoundException` to `DefaultRolesNotFoundException` and finalize it (@arogachev)
 - Bug #172: Execute rule when checking permissions for guests (@arogachev)
 - Chg #172: Make `$userId` parameter `nullable` in `RuleInterface::execute()` (@arogachev)
 - Bug #175: Use rule factory for creating rule instances in `CompositeRule` (@arogachev)
-- Enh #202, #203: Add methods to `ManagerInterface`:
-  - `getRole()`;
-  - `getPermission()`;
-  - `hasChildren()`;
-  - `getItemsByUserId()`.
-    (@arogachev)
+- Enh #202, #203: Add methods to `ManagerInterface`: `getRole()`, `getPermission()`, `hasChildren()`, 
+  `getItemsByUserId()` (@arogachev)
 - Chg #202: Rename `$permissionName` parameter to `$name` in `ManagerInterface::removePermission()` method (@arogachev)
 - Bug #203: Execute rules for parent items and for guests in `Manager::userHasPermission()` (@arogachev)
 - Bug #203: Do not limit child items by only direct ones for guests in `Manager::userHasPermission()` (@arogachev)
 - Bug #203: Fix `Manager::getRolesByUserId()` to include child roles (@arogachev)
 - Chg #203: Verify that every passed role name is a string in `Manager::setDefaultRoleNames()` (@arogachev)
-- Enh #203: Add methods to `Manager`:
-  - `getGuestRoleName()`;
-  - `getGuestRole()`.
-  (@arogachev)
+- Enh #203: Add methods to `Manager`: `getGuestRoleName()`, `getGuestRole()` (@arogachev)
 - Chg #203: Throw `RuntimeException` in the case with implicit guest and non-existing guest role in
   `Manager::userHasPermission()` (@arogachev)
 - Enh #204: Add simple storages for items and assignments (@arogachev)
