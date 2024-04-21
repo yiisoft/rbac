@@ -73,7 +73,7 @@ final class Manager implements ManagerInterface
         $itemNames = array_map(static fn (array $treeItem): string => $treeItem['item']->getName(), $hierarchy);
         $userItemNames = $guestRole !== null
             ? [$guestRole->getName()]
-            : $this->assignmentsStorage->filterUserItemNames((string) $userId, $itemNames);
+            : $this->filterUserItemNames((string) $userId, $itemNames);
         $userItemNamesMap = [];
         foreach ($userItemNames as $userItemName) {
             $userItemNamesMap[$userItemName] = null;
@@ -108,6 +108,18 @@ final class Manager implements ManagerInterface
         }
 
         return false;
+    }
+
+    public function filterUserItemNames(string $userId, array $itemNames): array
+    {
+
+        $userItemNames = $this->assignmentsStorage->filterUserItemNames($userId, $itemNames);
+        foreach ($this->defaultRoleNames as $roleName) {
+            if(in_array($roleName, $itemNames)) {
+                $userItemNames[] = $roleName;
+            }
+        }
+        return $userItemNames;
     }
 
     public function canAddChild(string $parentName, string $childName): bool
