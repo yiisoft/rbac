@@ -20,6 +20,16 @@ use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 interface ManagerInterface extends AccessCheckerInterface
 {
     /**
+     * Filters item names leaving only the ones that are assigned to specific user or assigned by default.
+     *
+     * @param string $userId User id.
+     * @param string[] $itemNames List of item names.
+     *
+     * @return string[] Filtered item names.
+     */
+    public function filterUserItemNames(string $userId, array $itemNames): array;
+
+    /**
      * Checks the possibility of adding a child to a parent.
      *
      * @param string $parentName The name of the parent item.
