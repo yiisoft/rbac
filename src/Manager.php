@@ -112,10 +112,9 @@ final class Manager implements ManagerInterface
 
     public function filterUserItemNames(string $userId, array $itemNames): array
     {
-
         $userItemNames = $this->assignmentsStorage->filterUserItemNames($userId, $itemNames);
         foreach ($this->defaultRoleNames as $roleName) {
-            if(in_array($roleName, $itemNames)) {
+            if (in_array($roleName, $itemNames)) {
                 $userItemNames[] = $roleName;
             }
         }
