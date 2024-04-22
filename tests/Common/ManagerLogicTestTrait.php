@@ -313,6 +313,54 @@ trait ManagerLogicTestTrait
         $this->assertTrue($manager->userHasPermission('User', 'Permission'));
     }
 
+    public static function dataUserHasPermissionWithDefaultRoles(): array
+    {
+        return [
+            'child permission of default role' => [null, 'User', 'Permission 1', true],
+            'nested child permission of default role' => [null, 'User', 'Permission 2.1.1', true],
+            'nested child permission of default role, other nodes' => [null, 'User', 'Permission 2.2.1', true],
+            'default role with children' => [null, 'User', 'Role 1', false],
+            'default role without children' => [null, 'User', 'Role 3', false],
+            'default role with children, roles are allowed in access checks' => [true, 'User', 'Role 1', true],
+            'default role with nested children, roles are allowed in access checks' => [true, 'User', 'Role 2', true],
+            'default role without children, roles are allowed in access checks' => [true, 'User', 'Role 3', true],
+        ];
+    }
+
+    /**
+     * @dataProvider dataUserHasPermissionWithDefaultRoles
+     */
+    public function testUserHasPermissionWithDefaultRoles(
+        ?bool $includeRolesInAccessChecks,
+        string $userId,
+        string $permissionName,
+        bool $expectedUserHasPermission,
+    ): void
+    {
+        $manager = $this
+            ->createManager(enableDirectPermissions: true, includeRolesInAccessChecks: $includeRolesInAccessChecks)
+            ->addRole(new Role('Role 1'))
+            ->addRole(new Role('Role 2'))
+            ->addRole(new Role('Role 3'))
+            ->setDefaultRoleNames(['Role 1', 'Role 2', 'Role 3'])
+            ->addPermission(new Permission('Permission 1'))
+            ->addPermission(new Permission('Permission 2.1'))
+            ->addPermission(new Permission('Permission 2.1.1'))
+            ->addPermission(new Permission('Permission 2.1.2'))
+            ->addPermission(new Permission('Permission 2.2'))
+            ->addPermission(new Permission('Permission 2.2.1'))
+            ->addPermission(new Permission('Permission 2.2.2'))
+            ->addChild('Role 1', 'Permission 1')
+            ->addChild('Role 2', 'Permission 2.1')
+            ->addChild('Role 2', 'Permission 2.2')
+            ->addChild('Permission 2.1', 'Permission 2.1.1')
+            ->addChild('Permission 2.1', 'Permission 2.1.2')
+            ->addChild('Permission 2.2', 'Permission 2.2.1')
+            ->addChild('Permission 2.2', 'Permission 2.2.2')
+            ->assign(itemName: 'Role 2', userId: 'User');
+        $this->assertSame($expectedUserHasPermission, $manager->userHasPermission($userId, $permissionName));
+    }
+
     public function testCanAddExistingChild(): void
     {
         $manager = $this->createFilledManager();
