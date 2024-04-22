@@ -335,8 +335,7 @@ trait ManagerLogicTestTrait
         string $userId,
         string $permissionName,
         bool $expectedUserHasPermission,
-    ): void
-    {
+    ): void {
         $manager = $this
             ->createManager(enableDirectPermissions: true, includeRolesInAccessChecks: $includeRolesInAccessChecks)
             ->addRole(new Role('Role 1'))
