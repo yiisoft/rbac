@@ -324,6 +324,7 @@ trait ManagerLogicTestTrait
             'default role with children, roles are allowed in access checks' => [true, 'User', 'Role 1', true],
             'default role with nested children, roles are allowed in access checks' => [true, 'User', 'Role 2', true],
             'default role without children, roles are allowed in access checks' => [true, 'User', 'Role 3', true],
+            'multple nested permissions, additionally assigned manually' => [false, 'User', 'Permission 4.1.1', true],
         ];
     }
 
@@ -342,7 +343,8 @@ trait ManagerLogicTestTrait
             ->addRole(new Role('Role 1'))
             ->addRole(new Role('Role 2'))
             ->addRole(new Role('Role 3'))
-            ->setDefaultRoleNames(['Role 1', 'Role 2', 'Role 3'])
+            ->addRole(new Role('Role 4'))
+            ->setDefaultRoleNames(['Role 1', 'Role 2', 'Role 3', 'Role 4'])
             ->addPermission(new Permission('Permission 1'))
             ->addPermission(new Permission('Permission 2.1'))
             ->addPermission(new Permission('Permission 2.1.1'))
@@ -350,6 +352,8 @@ trait ManagerLogicTestTrait
             ->addPermission(new Permission('Permission 2.2'))
             ->addPermission(new Permission('Permission 2.2.1'))
             ->addPermission(new Permission('Permission 2.2.2'))
+            ->addPermission(new Permission('Permission 4.1'))
+            ->addPermission(new Permission('Permission 4.1.1'))
             ->addChild('Role 1', 'Permission 1')
             ->addChild('Role 2', 'Permission 2.1')
             ->addChild('Role 2', 'Permission 2.2')
@@ -357,7 +361,10 @@ trait ManagerLogicTestTrait
             ->addChild('Permission 2.1', 'Permission 2.1.2')
             ->addChild('Permission 2.2', 'Permission 2.2.1')
             ->addChild('Permission 2.2', 'Permission 2.2.2')
-            ->assign(itemName: 'Role 2', userId: 'User');
+            ->addChild('Role 4', 'Permission 4.1')
+            ->addChild('Permission 4.1', 'Permission 4.1.1')
+            ->assign(itemName: 'Permission 4.1', userId: 'User')
+            ->assign(itemName: 'Permission 4.1.1', userId: 'User');
         $this->assertSame($expectedUserHasPermission, $manager->userHasPermission($userId, $permissionName));
     }
 

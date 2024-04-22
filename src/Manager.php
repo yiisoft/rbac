@@ -110,25 +110,6 @@ final class Manager implements ManagerInterface
         return false;
     }
 
-    /**
-     * Filters item names leaving only the ones that are assigned to specific user or assigned by default.
-     *
-     * @param string $userId User id.
-     * @param string[] $itemNames List of item names.
-     *
-     * @return string[] Filtered item names.
-     */
-    private function filterUserItemNames(string $userId, array $itemNames): array
-    {
-        $userItemNames = $this->assignmentsStorage->filterUserItemNames($userId, $itemNames);
-        foreach ($this->defaultRoleNames as $roleName) {
-            if (in_array($roleName, $itemNames)) {
-                $userItemNames[] = $roleName;
-            }
-        }
-        return $userItemNames;
-    }
-
     public function canAddChild(string $parentName, string $childName): bool
     {
         try {
@@ -530,5 +511,21 @@ final class Manager implements ManagerInterface
         }
 
         return $storedRoles;
+    }
+
+    /**
+     * Filters item names leaving only the ones that are assigned to specific user or assigned by default.
+     *
+     * @param string $userId User id.
+     * @param string[] $itemNames List of item names.
+     *
+     * @return string[] Filtered item names.
+     */
+    private function filterUserItemNames(string $userId, array $itemNames): array
+    {
+        return array_merge(
+            $this->assignmentsStorage->filterUserItemNames($userId, $itemNames),
+            $this->defaultRoleNames,
+        );
     }
 }

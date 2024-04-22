@@ -2,7 +2,7 @@
 
 ## 2.0.1 under development
 
-- no changes in this release.
+Bug #264: Fix bug when default roles were not checked in `Manager::userHasPermission()` (@KovYu, @arogachev) 
 
 ## 2.0.0 March 07, 2024
 
