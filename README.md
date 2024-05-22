@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://github.com/yiisoft" target="_blank">
-        <img src="https://yiisoft.github.io/docs/images/yii_logo.svg" height="100px">
+        <img src="https://yiisoft.github.io/docs/images/yii_logo.svg" height="100px" alt="Yii">
     </a>
     <h1 align="center">Yii Role-Based Access Control</h1>
     <br>
@@ -42,10 +42,10 @@ One of the following storages could be installed as well:
 
 - [PHP storage](https://github.com/yiisoft/rbac-php) - PHP file storage;
 - [DB storage](https://github.com/yiisoft/rbac-db) - database storage based on [Yii DB](https://github.com/yiisoft/db);
-- [Cycle DB storage](https://github.com/yiisoft/rbac-cycle-db) - database storage based on 
+- [Cycle DB storage](https://github.com/yiisoft/rbac-cycle-db) - database storage based on
   [Cycle DBAL](https://github.com/cycle/database).
 
-Also, there is a rule factory implementation - [Rules Container](https://github.com/yiisoft/rbac-rules-container) (based 
+Also, there is a rule factory implementation - [Rules Container](https://github.com/yiisoft/rbac-rules-container) (based
 on [Yii Factory](https://github.com/yiisoft/factory)).
 
 All these can be replaced with custom implementations.
@@ -75,14 +75,14 @@ It requires the following dependencies:
 - Assignments storage where user IDs are mapped to roles.
 - Rule factory. Creates a rule instance by a given name.
 
-While storages are required, rule factory is optional and, when omitted, `SimpleRuleFactory` will be used. For more 
-advanced usage, such as resolving rules by aliases and passing arguments in rules constructor, install 
+While storages are required, rule factory is optional and, when omitted, `SimpleRuleFactory` will be used. For more
+advanced usage, such as resolving rules by aliases and passing arguments in rules constructor, install
 [Rules Container](https://github.com/yiisoft/rbac-rules-container) additionally or write your own implementation.
 
 A few tips for choosing storage backend:
 
 - Roles and permissions could usually be considered "semi-static," as they only change when you update your application
-  code, so it may make sense to use PHP storage for it. 
+  code, so it may make sense to use PHP storage for it.
 - Assignments, on the other hand, could be considered "dynamic." They change more often: when creating a new user,
   or when updating a user role from within your application. So it may make sense to use database storage for assignments.
 
@@ -94,7 +94,7 @@ commands or migrations. Hierarchy consists of permissions, roles, and rules:
 - Permissions are granules of access such as "create a post" or "read a post."
 - A role is what is assigned to the user. The Role is granted one or more permissions. Typical roles are "manager" or
   "admin."
-- Rule is a PHP class that has given some data answers a single question "given the data has the user the permission 
+- Rule is a PHP class that has given some data answers a single question "given the data has the user the permission
   asked for."
 
 To create a permission, use the following code:
@@ -213,7 +213,7 @@ $userId = 100;
 $manager->assign('author', $userId);
 ```
 
-It could be done in an admin panel, via console command, or it could be built into the application business logic 
+It could be done in an admin panel, via console command, or it could be built into the application business logic
 itself.
 
 ### Check for permission
@@ -234,7 +234,7 @@ public function actionCreate(AccessCheckerInterface $accessChecker): ResponseInt
 }
 ```
 
-Sometimes you need to add guest-only permission, which is not assigned to any user ID. In this case, you can specify a 
+Sometimes you need to add guest-only permission, which is not assigned to any user ID. In this case, you can specify a
 role which is assigned to guest user:
 
 ```php
