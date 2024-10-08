@@ -14,6 +14,7 @@ use Yiisoft\Rbac\Exception\DefaultRolesNotFoundException;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 use Yiisoft\Rbac\Exception\RuleInterfaceNotImplementedException;
 use Yiisoft\Rbac\Exception\RuleNotFoundException;
+use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\Permission;
 use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\RuleInterface;
@@ -727,7 +728,7 @@ trait ManagerLogicTestTrait
                 'name' => 'new role',
                 'description' => 'new role description',
                 'rule_name' => TrueRule::class,
-                'type' => 'role',
+                'type' => Item::TYPE_ROLE,
                 'updated_at' => 1_642_026_148,
                 'created_at' => 1_642_026_147,
             ],
@@ -792,7 +793,7 @@ trait ManagerLogicTestTrait
                 'name' => 'edit post',
                 'description' => 'edit a post',
                 'rule_name' => null,
-                'type' => 'permission',
+                'type' => Item::TYPE_PERMISSION,
                 'updated_at' => 1_642_026_148,
                 'created_at' => 1_642_026_147,
             ],
