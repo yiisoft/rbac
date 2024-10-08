@@ -239,7 +239,7 @@ abstract class SimpleItemsStorage implements ItemsStorageInterface
      *
      * @psalm-return ($type is Item::TYPE_PERMISSION ? array<string, Permission> : array<string, Role>)
      */
-    private function getItemsByType(string $type): array
+    private function getItemsByType(int $type): array
     {
         return array_filter(
             $this->getAll(),
@@ -250,7 +250,7 @@ abstract class SimpleItemsStorage implements ItemsStorageInterface
     /**
      * @psalm-param Item::TYPE_* $type
      */
-    private function removeItemsByType(string $type): void
+    private function removeItemsByType(int $type): void
     {
         foreach ($this->getItemsByType($type) as $item) {
             $this->remove($item->getName());

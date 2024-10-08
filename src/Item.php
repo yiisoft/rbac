@@ -10,8 +10,8 @@ namespace Yiisoft\Rbac;
  */
 abstract class Item
 {
-    public const TYPE_ROLE = 'role';
-    public const TYPE_PERMISSION = 'permission';
+    public const TYPE_ROLE = 1;
+    public const TYPE_PERMISSION = 2;
 
     /**
      * @var string The item description.
@@ -41,9 +41,10 @@ abstract class Item
     }
 
     /**
-     * @return string Type of the item.
+     * @return int Type of the item.
+     * @psalm-return Item::TYPE_*
      */
-    abstract public function getType(): string;
+    abstract public function getType(): int;
 
     /**
      * @return string Authorization item name.
@@ -139,7 +140,7 @@ abstract class Item
      *     name: string,
      *     description: string,
      *     rule_name: string|null,
-     *     type: string,
+     *     type: Item::TYPE_*,
      *     updated_at: int|null,
      *     created_at: int|null,
      * }
