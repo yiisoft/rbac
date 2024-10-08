@@ -42,6 +42,7 @@ abstract class Item
 
     /**
      * @return int Type of the item.
+     * @psalm-return Item::TYPE_*
      */
     abstract public function getType(): int;
 
@@ -139,7 +140,7 @@ abstract class Item
      *     name: string,
      *     description: string,
      *     rule_name: string|null,
-     *     type: string,
+     *     type: Item::TYPE_*,
      *     updated_at: int|null,
      *     created_at: int|null,
      * }
