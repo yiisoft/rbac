@@ -10,7 +10,14 @@ namespace Yiisoft\Rbac;
  */
 abstract class Item
 {
+    /**
+     * @psalm-suppress MissingClassConstType It needs for PHP <= 8.2
+     */
     public const TYPE_ROLE = 'role';
+
+    /**
+     * @psalm-suppress MissingClassConstType It needs for PHP <= 8.2
+     */
     public const TYPE_PERMISSION = 'permission';
 
     /**

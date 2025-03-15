@@ -39,7 +39,7 @@
         "roave/infection-static-analysis-plugin": "^1.18",
         "slope-it/clock-mock": "^0.4.0",
         "spatie/phpunit-watcher": "^1.23",
-        "vimeo/psalm": "^4.30|^5.3",
+        "vimeo/psalm": "^5.26.1",
         "yiisoft/di": "^1.2"
     },
     "suggest": {
