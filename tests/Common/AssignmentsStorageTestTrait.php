@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac\Tests\Common;
 
-use DateTime;
-use SlopeIt\ClockMock\ClockMock;
 use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\AssignmentsStorageInterface;
 use Yiisoft\Rbac\Item;
@@ -22,20 +20,12 @@ trait AssignmentsStorageTestTrait
 
     protected function setUp(): void
     {
-        if ($this->name() === 'testAddWithCurrentTimestamp') {
-            ClockMock::freeze(new DateTime('2023-05-10 08:24:39'));
-        }
-
         $this->populateItemsStorage();
         $this->populateAssignmentsStorage();
     }
 
     protected function tearDown(): void
     {
-        if ($this->name() === 'testAddWithCurrentTimestamp') {
-            ClockMock::reset();
-        }
-
         $this->getItemsStorage()->clear();
         $this->getAssignmentsStorage()->clear();
     }
@@ -263,7 +253,7 @@ trait AssignmentsStorageTestTrait
     {
         $testStorage = $this->getAssignmentsStorageForModificationAssertions();
         $actionStorage = $this->getAssignmentsStorage();
-        $actionStorage->add(new Assignment(userId: 'john', itemName: 'Operator', createdAt: time()));
+        $actionStorage->add(new Assignment(userId: 'john', itemName: 'Operator', createdAt: 1_683_707_079));
 
         $this->assertEquals(
             new Assignment(userId: 'john', itemName: 'Operator', createdAt: 1_683_707_079),

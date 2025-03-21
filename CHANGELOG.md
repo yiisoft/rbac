@@ -2,7 +2,8 @@
 
 ## 2.0.1 under development
 
-Bug #264: Fix bug when default roles were not checked in `Manager::userHasPermission()` (@KovYu, @arogachev) 
+- Bug #264: Fix bug when default roles were not checked in `Manager::userHasPermission()` (@KovYu, @arogachev)
+- New #275: Add optional `$clock` parameter to `Manager` constructor to get current time (@vjik)
 
 ## 2.0.0 March 07, 2024
 
