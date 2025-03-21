@@ -30,7 +30,7 @@ trait ManagerConfigurationTestTrait
             'assignmentsStorage' => $assignmentsStorage ?? $this->createAssignmentsStorage(),
             'clock' => $currentDateTime === null
                 ? null
-                : new class($currentDateTime) implements ClockInterface {
+                : new class ($currentDateTime) implements ClockInterface {
                     public function __construct(private readonly DateTimeImmutable $dateTime)
                     {
                     }
@@ -39,7 +39,7 @@ trait ManagerConfigurationTestTrait
                     {
                         return $this->dateTime;
                     }
-                }
+                },
         ];
         if ($enableDirectPermissions !== null) {
             $arguments['enableDirectPermissions'] = $enableDirectPermissions;
