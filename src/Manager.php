@@ -6,6 +6,7 @@ namespace Yiisoft\Rbac;
 
 use Closure;
 use InvalidArgumentException;
+use Psr\Clock\ClockInterface;
 use RuntimeException;
 use Stringable;
 use Yiisoft\Access\AccessCheckerInterface;
@@ -30,11 +31,13 @@ final class Manager implements ManagerInterface
     /**
      * @param ItemsStorageInterface $itemsStorage Items storage.
      * @param AssignmentsStorageInterface $assignmentsStorage Assignments storage.
-     * @param RuleFactoryInterface $ruleFactory Rule factory.
+     * @param RuleFactoryInterface|null $ruleFactory Rule factory.
      * @param bool $enableDirectPermissions Whether to enable assigning permissions directly to user. Prefer assigning
      * roles only.
      * @param bool $includeRolesInAccessChecks Whether to include roles (in addition to permissions) during access
      * checks in {@see Manager::userHasPermission()}.
+     * @param ClockInterface|null $clock Instance of `ClockInterface` implementation to be used for getting current
+     * time.
      */
     public function __construct(
         private readonly ItemsStorageInterface $itemsStorage,
@@ -42,6 +45,7 @@ final class Manager implements ManagerInterface
         ?RuleFactoryInterface $ruleFactory = null,
         private readonly bool $enableDirectPermissions = false,
         private readonly bool $includeRolesInAccessChecks = false,
+        private readonly ?ClockInterface $clock = null,
     ) {
         $this->ruleFactory = $ruleFactory ?? new SimpleRuleFactory();
     }
@@ -70,7 +74,7 @@ final class Manager implements ManagerInterface
         }
 
         $hierarchy = $this->itemsStorage->getHierarchy($item->getName());
-        $itemNames = array_map(static fn (array $treeItem): string => $treeItem['item']->getName(), $hierarchy);
+        $itemNames = array_map(static fn(array $treeItem): string => $treeItem['item']->getName(), $hierarchy);
         $userItemNames = $guestRole !== null
             ? [$guestRole->getName()]
             : $this->filterUserItemNames((string) $userId, $itemNames);
@@ -172,7 +176,7 @@ final class Manager implements ManagerInterface
             return $this;
         }
 
-        $assignment = new Assignment($userId, $itemName, $createdAt ?? time());
+        $assignment = new Assignment($userId, $itemName, $createdAt ?? $this->getCurrentTimestamp());
         $this->assignmentsStorage->add($assignment);
 
         return $this;
@@ -391,7 +395,7 @@ final class Manager implements ManagerInterface
             throw new ItemAlreadyExistsException($item);
         }
 
-        $time = time();
+        $time = $this->getCurrentTimestamp();
         if (!$item->hasCreatedAt()) {
             $item = $item->withCreatedAt($time);
         }
@@ -527,5 +531,12 @@ final class Manager implements ManagerInterface
             $this->assignmentsStorage->filterUserItemNames($userId, $itemNames),
             $this->defaultRoleNames,
         );
+    }
+
+    private function getCurrentTimestamp(): int
+    {
+        return $this->clock === null
+            ? time()
+            : $this->clock->now()->getTimestamp();
     }
 }

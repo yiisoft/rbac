@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac\Tests\Common;
 
 use DateTime;
-use SlopeIt\ClockMock\ClockMock;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Yiisoft\Rbac\Item;
 use Yiisoft\Rbac\ItemsStorageInterface;
 use Yiisoft\Rbac\Permission;
@@ -25,23 +25,11 @@ trait ItemsStorageTestTrait
 
     protected function setUp(): void
     {
-        if ($this->name() === 'testAddWithCurrentTimestamps') {
-            ClockMock::freeze(new DateTime('2023-05-10 08:24:39'));
-        }
-
-        if ($this->name() === 'testGetHierarchy') {
-            ClockMock::freeze(new DateTime('2023-12-24 17:51:18'));
-        }
-
         $this->populateItemsStorage();
     }
 
     protected function tearDown(): void
     {
-        if (in_array($this->name(), ['testAddWithCurrentTimestamps', 'testGetHierarchy'], strict: true)) {
-            ClockMock::reset();
-        }
-
         $this->getItemsStorage()->clear();
     }
 
@@ -489,9 +477,7 @@ trait ItemsStorageTestTrait
         ];
     }
 
-    /**
-     * @dataProvider dataGetHierarchy
-     */
+    #[DataProvider('dataGetHierarchy')]
     public function testGetHierarchy(string $name, array $expectedHierarchy): void
     {
         $this->assertEquals($expectedHierarchy, $this->getItemsStorage()->getHierarchy($name));
@@ -531,7 +517,7 @@ trait ItemsStorageTestTrait
     {
         $testStorage = $this->getItemsStorageForModificationAssertions();
 
-        $time = time();
+        $time = 1_683_707_079;
         $newItem = (new Permission('Delete post'))->withCreatedAt($time)->withUpdatedAt($time);
 
         $actionStorage = $this->getItemsStorage();
@@ -765,7 +751,7 @@ trait ItemsStorageTestTrait
             'posts.update' => Item::TYPE_PERMISSION,
             'posts.delete' => Item::TYPE_PERMISSION,
         ];
-        $time = time();
+        $time = 1703440278;
 
         $items = [];
         foreach ($itemsMap as $name => $type) {

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac\Tests\Common;
 
+use DateTimeImmutable;
+use Psr\Clock\ClockInterface;
 use Yiisoft\Rbac\AssignmentsStorageInterface;
 use Yiisoft\Rbac\ItemsStorageInterface;
 use Yiisoft\Rbac\Manager;
@@ -21,10 +23,23 @@ trait ManagerConfigurationTestTrait
         ?AssignmentsStorageInterface $assignmentsStorage = null,
         ?bool $enableDirectPermissions = null,
         ?bool $includeRolesInAccessChecks = null,
+        ?DateTimeImmutable $currentDateTime = null,
     ): ManagerInterface {
         $arguments = [
             'itemsStorage' => $itemsStorage ?? $this->createItemsStorage(),
             'assignmentsStorage' => $assignmentsStorage ?? $this->createAssignmentsStorage(),
+            'clock' => $currentDateTime === null
+                ? null
+                : new class ($currentDateTime) implements ClockInterface {
+                    public function __construct(private readonly DateTimeImmutable $dateTime)
+                    {
+                    }
+
+                    public function now(): DateTimeImmutable
+                    {
+                        return $this->dateTime;
+                    }
+                },
         ];
         if ($enableDirectPermissions !== null) {
             $arguments['enableDirectPermissions'] = $enableDirectPermissions;

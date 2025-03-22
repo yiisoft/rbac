@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace Yiisoft\Rbac\Tests\Common;
 
 use Closure;
-use DateTime;
+use DateTimeImmutable;
 use InvalidArgumentException;
 use RuntimeException;
-use SlopeIt\ClockMock\ClockMock;
 use Yiisoft\Rbac\Assignment;
 use Yiisoft\Rbac\Exception\DefaultRolesNotFoundException;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
@@ -30,22 +29,6 @@ use Yiisoft\Rbac\Tests\Support\WannabeRule;
 
 trait ManagerLogicTestTrait
 {
-    private static array $frozenTimeTests = ['testAssign', 'testDataPersistency'];
-
-    protected function setUp(): void
-    {
-        if (in_array($this->name(), self::$frozenTimeTests, strict: true)) {
-            ClockMock::freeze(new DateTime('2023-05-10 08:24:39'));
-        }
-    }
-
-    protected function tearDown(): void
-    {
-        if (in_array($this->name(), self::$frozenTimeTests, strict: true)) {
-            ClockMock::reset();
-        }
-    }
-
     public static function dataUserHasPermissionGeneric(): array
     {
         return [
@@ -543,15 +526,15 @@ trait ManagerLogicTestTrait
         $this->assertFalse($manager->hasChild('reader', 'createPost'));
     }
 
-    /**
-     * Relies on {@see ClockMock} for testing timestamp. When using with other PHPUnit classes / traits, make sure to
-     * call {@see setUp} and {@see tearDown} methods explicitly.
-     */
     public function testAssign(): void
     {
         $itemsStorage = $this->createItemsStorage();
         $assignmentsStorage = $this->createAssignmentsStorage();
-        $manager = $this->createManager($itemsStorage, $assignmentsStorage)
+        $manager = $this->createManager(
+            $itemsStorage,
+            $assignmentsStorage,
+            currentDateTime: new DateTimeImmutable('2023-05-10 08:24:39')
+        )
             ->addRole(new Role('author'))
             ->addRole(new Role('reader'))
             ->addRole(new Role('writer'))
@@ -895,12 +878,12 @@ trait ManagerLogicTestTrait
         return [
             [['test1', 2, 'test3'], InvalidArgumentException::class, 'Each role name must be a string.'],
             [
-                static fn (): string => 'test',
+                static fn(): string => 'test',
                 InvalidArgumentException::class,
                 'Default role names closure must return an array.',
             ],
             [
-                static fn (): array => ['test1', 2, 'test3'],
+                static fn(): array => ['test1', 2, 'test3'],
                 InvalidArgumentException::class,
                 'Each role name must be a string.',
             ],
@@ -925,10 +908,10 @@ trait ManagerLogicTestTrait
         return [
             [['defaultRole1'], ['defaultRole1']],
             [['defaultRole1', 'defaultRole2'], ['defaultRole1', 'defaultRole2']],
-            [static fn (): array => ['defaultRole1'], ['defaultRole1']],
-            [static fn (): array => ['defaultRole1', 'defaultRole2'], ['defaultRole1', 'defaultRole2']],
+            [static fn(): array => ['defaultRole1'], ['defaultRole1']],
+            [static fn(): array => ['defaultRole1', 'defaultRole2'], ['defaultRole1', 'defaultRole2']],
             [[], []],
-            [static fn (): array => [], []],
+            [static fn(): array => [], []],
         ];
     }
 
@@ -1111,7 +1094,11 @@ trait ManagerLogicTestTrait
     {
         $itemsStorage = new FakeItemsStorage();
         $assignmentsStorage = new FakeAssignmentsStorage();
-        $manager = $this->createManager($itemsStorage, $assignmentsStorage);
+        $manager = $this->createManager(
+            $itemsStorage,
+            $assignmentsStorage,
+            currentDateTime: new DateTimeImmutable('2023-05-10 08:24:39'),
+        );
         $manager
             ->addRole((new Role('role1'))->withCreatedAt(1_694_502_936)->withUpdatedAt(1_694_502_936))
             ->addRole((new Role('role2'))->withCreatedAt(1_694_502_976)->withUpdatedAt(1_694_502_976))
