@@ -4,6 +4,7 @@
 
 - Bug #264: Fix bug when default roles were not checked in `Manager::userHasPermission()` (@KovYu, @arogachev)
 - New #275: Add optional `$clock` parameter to `Manager` constructor to get current time (@vjik)
+- Chg #276: Change PHP constraint in `composer.json` to `8.1 - 8.4` (@vjik)
 
 ## 2.0.0 March 07, 2024
 
