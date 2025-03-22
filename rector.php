@@ -22,5 +22,5 @@ return RectorConfig::configure()
         ClosureToArrowFunctionRector::class,
         ReadOnlyPropertyRector::class,
         NullToStrictStringFuncCallArgRector::class,
-        NewInInitializerRector::class
+        NewInInitializerRector::class,
     ]);
