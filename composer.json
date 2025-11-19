@@ -56,10 +56,7 @@
     "autoload-dev": {
         "psr-4": {
             "Yiisoft\\Rbac\\Tests\\": "tests"
-        },
-        "files": [
-            "tests/bootstrap.php"
-        ]
+        }
     },
     "extra": {
         "config-plugin-options": {
