@@ -31,9 +31,7 @@ trait ManagerConfigurationTestTrait
             'clock' => $currentDateTime === null
                 ? null
                 : new class ($currentDateTime) implements ClockInterface {
-                    public function __construct(private readonly DateTimeImmutable $dateTime)
-                    {
-                    }
+                    public function __construct(private readonly DateTimeImmutable $dateTime) {}
 
                     public function now(): DateTimeImmutable
                     {

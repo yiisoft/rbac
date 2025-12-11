@@ -6,6 +6,4 @@ namespace Yiisoft\Rbac\Tests\Support;
 
 use Yiisoft\Rbac\SimpleAssignmentsStorage;
 
-class FakeAssignmentsStorage extends SimpleAssignmentsStorage
-{
-}
+class FakeAssignmentsStorage extends SimpleAssignmentsStorage {}

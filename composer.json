@@ -32,6 +32,7 @@
         "yiisoft/friendly-exception": "^1.1"
     },
     "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.91",
         "maglnet/composer-require-checker": "^4.7.1",
         "phpunit/phpunit": "^10.5.45",
         "psr/clock": "^1.0",
@@ -74,6 +75,7 @@
         }
     },
     "scripts": {
+        "cs-fix": "php-cs-fixer fix",
         "test": "phpunit --testdox --no-interaction",
         "test-watch": "phpunit-watcher watch"
     }

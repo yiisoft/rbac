@@ -85,8 +85,8 @@ final class Manager implements ManagerInterface
 
         foreach ($hierarchy as $data) {
             if (
-                !array_key_exists($data['item']->getName(), $userItemNamesMap) ||
-                !$this->executeRule($userId === null ? $userId : (string) $userId, $data['item'], $parameters)
+                !array_key_exists($data['item']->getName(), $userItemNamesMap)
+                || !$this->executeRule($userId === null ? $userId : (string) $userId, $data['item'], $parameters)
             ) {
                 continue;
             }
@@ -168,7 +168,7 @@ final class Manager implements ManagerInterface
 
         if (!$this->enableDirectPermissions && $item->getType() === Item::TYPE_PERMISSION) {
             throw new InvalidArgumentException(
-                'Assigning permissions directly is disabled. Prefer assigning roles only.'
+                'Assigning permissions directly is disabled. Prefer assigning roles only.',
             );
         }
 
@@ -218,7 +218,7 @@ final class Manager implements ManagerInterface
         return array_merge(
             $this->getDefaultRoles(),
             $this->itemsStorage->getRolesByNames($assignmentNames),
-            $this->itemsStorage->getAllChildRoles($assignmentNames)
+            $this->itemsStorage->getAllChildRoles($assignmentNames),
         );
     }
 
@@ -457,8 +457,8 @@ final class Manager implements ManagerInterface
         }
 
         throw new InvalidArgumentException(
-            'Unable to change the role or the permission name. ' .
-            "The name \"{$item->getName()}\" is already used by another role or permission.",
+            'Unable to change the role or the permission name. '
+            . "The name \"{$item->getName()}\" is already used by another role or permission.",
         );
     }
 

@@ -433,7 +433,7 @@ trait ManagerLogicTestTrait
 
         $manager->addChild(
             'new reader',
-            'createPost'
+            'createPost',
         );
     }
 
@@ -446,7 +446,7 @@ trait ManagerLogicTestTrait
 
         $manager->addChild(
             'createPost',
-            'createPost'
+            'createPost',
         );
     }
 
@@ -459,7 +459,7 @@ trait ManagerLogicTestTrait
 
         $manager->addChild(
             'createPost',
-            'reader'
+            'reader',
         );
     }
 
@@ -472,7 +472,7 @@ trait ManagerLogicTestTrait
 
         $manager->addChild(
             'reader',
-            'readPost'
+            'readPost',
         );
     }
 
@@ -533,7 +533,7 @@ trait ManagerLogicTestTrait
         $manager = $this->createManager(
             $itemsStorage,
             $assignmentsStorage,
-            currentDateTime: new DateTimeImmutable('2023-05-10 08:24:39')
+            currentDateTime: new DateTimeImmutable('2023-05-10 08:24:39'),
         )
             ->addRole(new Role('author'))
             ->addRole(new Role('reader'))
@@ -549,7 +549,7 @@ trait ManagerLogicTestTrait
                 'reader',
                 'author',
             ],
-            array_keys($manager->getRolesByUserId('readingAuthor'))
+            array_keys($manager->getRolesByUserId('readingAuthor')),
         );
 
         $createdAt = 1_683_707_079;
@@ -603,7 +603,7 @@ trait ManagerLogicTestTrait
     {
         $this->assertEqualsCanonicalizing(
             ['myDefaultRole', 'reader', 'readPost', 'Fast Metabolism'],
-            array_keys($this->createFilledManager()->getItemsByUserId('reader A'))
+            array_keys($this->createFilledManager()->getItemsByUserId('reader A')),
         );
     }
 
@@ -619,7 +619,7 @@ trait ManagerLogicTestTrait
     {
         $this->assertEqualsCanonicalizing(
             ['reader', 'author'],
-            array_keys($this->createFilledManager()->getChildRoles('admin'))
+            array_keys($this->createFilledManager()->getChildRoles('admin')),
         );
     }
 
@@ -639,7 +639,7 @@ trait ManagerLogicTestTrait
 
         $this->assertEqualsCanonicalizing(
             ['createPost', 'updatePost', 'readPost', 'updateAnyPost'],
-            array_keys($manager->getPermissionsByRoleName('admin'))
+            array_keys($manager->getPermissionsByRoleName('admin')),
         );
 
         $this->assertEmpty($manager->getPermissionsByRoleName('guest'));
@@ -649,7 +649,7 @@ trait ManagerLogicTestTrait
     {
         $this->assertEqualsCanonicalizing(
             ['deletePost', 'publishPost', 'createPost', 'updatePost', 'readPost'],
-            array_keys($this->createFilledManager()->getPermissionsByUserId('author B'))
+            array_keys($this->createFilledManager()->getPermissionsByUserId('author B')),
         );
     }
 
@@ -659,7 +659,7 @@ trait ManagerLogicTestTrait
 
         $this->assertSame(
             [],
-            array_keys($manager->getPermissionsByUserId('guest'))
+            array_keys($manager->getPermissionsByUserId('guest')),
         );
     }
 
@@ -673,14 +673,14 @@ trait ManagerLogicTestTrait
                 'author B',
                 'admin C',
             ],
-            $manager->getUserIdsByRoleName('reader')
+            $manager->getUserIdsByRoleName('reader'),
         );
         $this->assertEqualsCanonicalizing(
             [
                 'author B',
                 'admin C',
             ],
-            $manager->getUserIdsByRoleName('author')
+            $manager->getUserIdsByRoleName('author'),
         );
         $this->assertEquals(['admin C'], $manager->getUserIdsByRoleName('admin'));
     }
@@ -714,7 +714,7 @@ trait ManagerLogicTestTrait
                 'updated_at' => 1_642_026_148,
                 'created_at' => 1_642_026_147,
             ],
-            $storedRole->getAttributes()
+            $storedRole->getAttributes(),
         );
         $this->assertSame($manager, $returnedManager);
     }
@@ -779,7 +779,7 @@ trait ManagerLogicTestTrait
                 'updated_at' => 1_642_026_148,
                 'created_at' => 1_642_026_147,
             ],
-            $storedPermission->getAttributes()
+            $storedPermission->getAttributes(),
         );
         $this->assertSame($manager, $returnedManager);
     }
@@ -854,8 +854,8 @@ trait ManagerLogicTestTrait
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(
-            'Unable to change the role or the permission name. ' .
-            'The name "createPost" is already used by another role or permission.'
+            'Unable to change the role or the permission name. '
+            . 'The name "createPost" is already used by another role or permission.',
         );
         $manager->updatePermission('updatePost', $permission);
     }
@@ -867,8 +867,8 @@ trait ManagerLogicTestTrait
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(
-            'Unable to change the role or the permission name. ' .
-            'The name "author" is already used by another role or permission.'
+            'Unable to change the role or the permission name. '
+            . 'The name "author" is already used by another role or permission.',
         );
         $manager->updateRole('reader', $role);
     }

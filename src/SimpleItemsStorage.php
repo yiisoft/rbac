@@ -39,7 +39,7 @@ abstract class SimpleItemsStorage implements ItemsStorageInterface
     {
         return array_filter(
             $this->getAll(),
-            static fn (Item $item): bool => in_array($item->getName(), $names, strict: true),
+            static fn(Item $item): bool => in_array($item->getName(), $names, strict: true),
         );
     }
 
@@ -243,7 +243,7 @@ abstract class SimpleItemsStorage implements ItemsStorageInterface
     {
         return array_filter(
             $this->getAll(),
-            static fn (Permission|Role $item): bool => $item->getType() === $type,
+            static fn(Permission|Role $item): bool => $item->getType() === $type,
         );
     }
 
@@ -381,7 +381,7 @@ abstract class SimpleItemsStorage implements ItemsStorageInterface
      */
     private function filterRoles(array $items): array
     {
-        return array_filter($items, static fn (Permission|Role $item): bool => $item instanceof Role);
+        return array_filter($items, static fn(Permission|Role $item): bool => $item instanceof Role);
     }
 
     /**
@@ -392,6 +392,6 @@ abstract class SimpleItemsStorage implements ItemsStorageInterface
      */
     private function filterPermissions(array $items): array
     {
-        return array_filter($items, static fn (Permission|Role $item): bool => $item instanceof Permission);
+        return array_filter($items, static fn(Permission|Role $item): bool => $item instanceof Permission);
     }
 }
