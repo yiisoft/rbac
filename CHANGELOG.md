@@ -1,6 +1,6 @@
 # Yii Role-Based Access Control Change Log
 
-## 2.1.1 under development
+## 2.1.1 December 11, 2025
 
 - Enh #282: Add PHP 8.5 support (@vjik)
 
