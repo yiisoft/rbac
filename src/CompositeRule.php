@@ -37,8 +37,8 @@ final class CompositeRule implements RuleInterface
                 sprintf(
                     'Operator could be either %1$s::AND or %1$s::OR, "%2$s" given.',
                     self::class,
-                    $operator
-                )
+                    $operator,
+                ),
             );
         }
     }

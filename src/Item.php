@@ -43,9 +43,7 @@ abstract class Item
     /**
      * @param string $name The name of the item. This must be globally unique.
      */
-    final public function __construct(private string $name)
-    {
-    }
+    final public function __construct(private string $name) {}
 
     /**
      * @return string Type of the item.

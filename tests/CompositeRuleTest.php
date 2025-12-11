@@ -42,11 +42,11 @@ final class CompositeRuleTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(
-            'Operator could be either ' .
-            CompositeRule::class .
-            '::AND or ' .
-            CompositeRule::class .
-            '::OR, "no_such_operation" given.'
+            'Operator could be either '
+            . CompositeRule::class
+            . '::AND or '
+            . CompositeRule::class
+            . '::OR, "no_such_operation" given.',
         );
         new CompositeRule('no_such_operation', []);
     }

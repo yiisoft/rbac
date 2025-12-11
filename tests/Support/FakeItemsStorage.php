@@ -6,6 +6,4 @@ namespace Yiisoft\Rbac\Tests\Support;
 
 use Yiisoft\Rbac\SimpleItemsStorage;
 
-final class FakeItemsStorage extends SimpleItemsStorage
-{
-}
+final class FakeItemsStorage extends SimpleItemsStorage {}

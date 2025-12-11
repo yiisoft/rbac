@@ -117,8 +117,8 @@ trait AssignmentsStorageTestTrait
         foreach ($assignments as $assignment) {
             foreach ($expectedAssignments as $expectedAssignment) {
                 if (
-                    $assignment->getItemName() === $expectedAssignment[0] &&
-                    $assignment->getUserId() === $expectedAssignment[1]
+                    $assignment->getItemName() === $expectedAssignment[0]
+                    && $assignment->getUserId() === $expectedAssignment[1]
                 ) {
                     $assignmentFound = true;
                 }

@@ -17,7 +17,7 @@ final class RuleInterfaceNotImplementedException extends Exception
         parent::__construct(
             "Rule \"$name\" must implement \"$interfaceName\".",
             $code,
-            $previous
+            $previous,
         );
     }
 }

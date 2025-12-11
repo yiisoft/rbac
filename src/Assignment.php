@@ -20,8 +20,7 @@ final class Assignment
         private readonly string $userId,
         private string $itemName,
         private readonly int $createdAt,
-    ) {
-    }
+    ) {}
 
     public function getUserId(): string
     {
