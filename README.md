@@ -28,7 +28,7 @@ library. It is used in [Yii Framework](https://yiiframework.com) but is usable s
 
 ## Requirements
 
-- PHP 8.1 or higher.
+- PHP 8.1 - 8.5.
 
 ## Installation
 
