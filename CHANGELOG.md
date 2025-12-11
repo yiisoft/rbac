@@ -7,7 +7,7 @@
 ## 2.1.0 April 04, 2025
 
 - New #275: Add optional `$clock` parameter to `Manager` constructor to get current time (@vjik)
-- Chg #276: Change PHP constraint in `composer.json` to `8.1 - 8.4` (@vjik)
+- Chg #276, #282: Change PHP constraint in `composer.json` to `8.1 - 8.5` (@vjik)
 - Bug #264: Fix bug when default roles were not checked in `Manager::userHasPermission()` (@KovYu, @arogachev)
 
 ## 2.0.0 March 07, 2024
