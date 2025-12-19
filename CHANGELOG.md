@@ -2,7 +2,7 @@
 
 ## 2.1.2 under development
 
-- Enh #283: Allow using `yiisoft/access` version `^2.0` (@vjik)
+- Enh #284: Allow using `yiisoft/access` version `^2.0` (@vjik)
 
 ## 2.1.1 December 11, 2025
 
