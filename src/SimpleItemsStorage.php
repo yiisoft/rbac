@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac;
 
+use function array_key_exists;
+use function in_array;
+
 /**
  * @psalm-type RawItem = array{
  *      type: Item::TYPE_*,

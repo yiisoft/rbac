@@ -13,6 +13,8 @@ use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
 use Yiisoft\Rbac\Tests\Support\TrueRule;
 
+use function count;
+
 trait ItemsStorageTestTrait
 {
     private int $initialRolesCount = 0;

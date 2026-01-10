@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Yiisoft\Rbac;
 
+use function array_key_exists;
+
 final class RuleContext
 {
     public function __construct(

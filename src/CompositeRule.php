@@ -7,6 +7,7 @@ namespace Yiisoft\Rbac;
 use InvalidArgumentException;
 
 use function in_array;
+use function sprintf;
 
 /**
  * Composite rule allows combining multiple rules.
