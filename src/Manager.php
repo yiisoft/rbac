@@ -14,6 +14,8 @@ use Yiisoft\Rbac\Exception\DefaultRolesNotFoundException;
 use Yiisoft\Rbac\Exception\ItemAlreadyExistsException;
 
 use function is_array;
+use function array_key_exists;
+use function is_string;
 
 /**
  * Helps to manage RBAC hierarchy and check for permissions.

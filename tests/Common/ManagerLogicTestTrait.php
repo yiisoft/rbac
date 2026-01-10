@@ -27,6 +27,8 @@ use Yiisoft\Rbac\Tests\Support\SubscriptionRule;
 use Yiisoft\Rbac\Tests\Support\TrueRule;
 use Yiisoft\Rbac\Tests\Support\WannabeRule;
 
+use function count;
+
 trait ManagerLogicTestTrait
 {
     public static function dataUserHasPermissionGeneric(): array

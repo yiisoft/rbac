@@ -13,6 +13,8 @@ use Yiisoft\Rbac\Role;
 use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
 
+use function count;
+
 trait AssignmentsStorageTestTrait
 {
     private ?ItemsStorageInterface $itemsStorage = null;

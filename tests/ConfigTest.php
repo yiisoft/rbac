@@ -15,6 +15,8 @@ use Yiisoft\Rbac\ManagerInterface;
 use Yiisoft\Rbac\Tests\Support\FakeAssignmentsStorage;
 use Yiisoft\Rbac\Tests\Support\FakeItemsStorage;
 
+use function dirname;
+
 final class ConfigTest extends TestCase
 {
     public function testBase(): void
