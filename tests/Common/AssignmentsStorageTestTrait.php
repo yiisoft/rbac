@@ -344,18 +344,14 @@ trait AssignmentsStorageTestTrait
 
     protected function getItemsStorage(): ItemsStorageInterface
     {
-        if ($this->itemsStorage === null) {
-            $this->itemsStorage = $this->createItemsStorage();
-        }
+        $this->itemsStorage ??= $this->createItemsStorage();
 
         return $this->itemsStorage;
     }
 
     protected function getAssignmentsStorage(): AssignmentsStorageInterface
     {
-        if ($this->assignmentsStorage === null) {
-            $this->assignmentsStorage = $this->createAssignmentsStorage();
-        }
+        $this->assignmentsStorage ??= $this->createAssignmentsStorage();
 
         return $this->assignmentsStorage;
     }

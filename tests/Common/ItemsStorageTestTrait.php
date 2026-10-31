@@ -707,9 +707,7 @@ trait ItemsStorageTestTrait
 
     protected function getItemsStorage(): ItemsStorageInterface
     {
-        if ($this->itemsStorage === null) {
-            $this->itemsStorage = $this->createItemsStorage();
-        }
+        $this->itemsStorage ??= $this->createItemsStorage();
 
         return $this->itemsStorage;
     }

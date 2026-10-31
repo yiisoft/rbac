@@ -537,8 +537,6 @@ final class Manager implements ManagerInterface
 
     private function getCurrentTimestamp(): int
     {
-        return $this->clock === null
-            ? time()
-            : $this->clock->now()->getTimestamp();
+        return $this->clock?->now()->getTimestamp() ?? time();
     }
 }
